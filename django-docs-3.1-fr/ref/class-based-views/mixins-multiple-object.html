@@ -1,0 +1,340 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Classes mixins pour objets multiples &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Classes mixins d’édition" href="mixins-editing.html" />
+    <link rel="prev" title="Classes mixins pour objet unique" href="mixins-single-object.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="mixins-single-object.html" title="Classes mixins pour objet unique">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="mixins-editing.html" title="Classes mixins d’édition">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-class-based-views-mixins-multiple-object">
+            
+  <div class="section" id="s-multiple-object-mixins">
+<span id="multiple-object-mixins"></span><h1>Classes mixins pour objets multiples<a class="headerlink" href="#multiple-object-mixins" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-multipleobjectmixin">
+<span id="multipleobjectmixin"></span><h2><code class="docutils literal notranslate"><span class="pre">MultipleObjectMixin</span></code><a class="headerlink" href="#multipleobjectmixin" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.views.generic.list.MultipleObjectMixin">
+<em class="property">class </em><code class="descclassname">django.views.generic.list.</code><code class="descname">MultipleObjectMixin</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin pouvant être utilisée pour afficher une liste d’objets.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">paginate_by</span></code> est indiqué, Django pagine les résultats renvoyés par la vue. Il est possible d’indiquer le numéro de page dans l’URL de deux manières différentes&nbsp;:</p>
+<ul>
+<li><p class="first">En utilisant le paramètre <code class="docutils literal notranslate"><span class="pre">page</span></code> dans la configuration d’URL. Par exemple, voici à quoi pourrait ressembler la configuration d’URL&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">path</span><span class="p">(</span><span class="s1">&#39;objects/page&lt;int:page&gt;/&#39;</span><span class="p">,</span> <span class="n">PaginatedView</span><span class="o">.</span><span class="n">as_view</span><span class="p">()),</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">En passant le numéro de page comme paramètre dans la chaîne de requête de l’URL. Par exemple, une URL pourrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/objects/?page=3
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Ces listes et valeurs sont indexées à partir de 1, et non 0, ce qui fait que la première page est représentée par la page <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>Pour plus de détails sur la pagination, lisez la <a class="reference internal" href="../../topics/pagination.html"><span class="doc">documentation sur la pagination</span></a>.</p>
+<p>Comme cas particulier, il est aussi permis d’utiliser <code class="docutils literal notranslate"><span class="pre">last</span></code> (dernier) comme valeur pour la variable <code class="docutils literal notranslate"><span class="pre">page</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/objects/?page=last
+</pre></div>
+</div>
+<p>Cela permet d’accéder à la dernière page des résultats sans devoir d’abord déterminer le nombre total de pages.</p>
+<p>Notez que <code class="docutils literal notranslate"><span class="pre">page</span></code> <em>doit</em> contenir un numéro de page valide ou la valeur <code class="docutils literal notranslate"><span class="pre">last</span></code>; toute autre valeur transmise à <code class="docutils literal notranslate"><span class="pre">page</span></code> produit une erreur 404.</p>
+<p><strong>Étend</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="mixins-simple.html#django.views.generic.base.ContextMixin" title="django.views.generic.base.ContextMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.base.ContextMixin</span></code></a></li>
+</ul>
+<p><strong>Méthodes et attributs</strong></p>
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.allow_empty">
+<code class="descname">allow_empty</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.allow_empty" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une valeur booléenne indiquant s’il faut afficher la page quand aucun objet n’est disponible. Si définie à <code class="docutils literal notranslate"><span class="pre">False</span></code> et qu’aucun objet n’est disponible, la vue génère une erreur 404 au lieu d’afficher une page vide. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.model">
+<code class="descname">model</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.model" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le modèle pour lequel cette vue va afficher des données. Indiquer <code class="docutils literal notranslate"><span class="pre">model</span> <span class="pre">=</span> <span class="pre">Foo</span></code> revient au même que de définir <code class="docutils literal notranslate"><span class="pre">queryset</span> <span class="pre">=</span> <span class="pre">Foo.objects.all()</span></code>, où <code class="docutils literal notranslate"><span class="pre">objects</span></code> correspond au <a class="reference internal" href="../../topics/db/managers.html#default-managers"><span class="std std-ref">gestionnaire par défaut</span></a> de <code class="docutils literal notranslate"><span class="pre">Foo</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.queryset">
+<code class="descname">queryset</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.queryset" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> représentant les objets. Lorsqu’elle est renseignée, la valeur de <code class="docutils literal notranslate"><span class="pre">queryset</span></code> écrase la valeur fournie pour <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.model" title="django.views.generic.list.MultipleObjectMixin.model"><code class="xref py py-attr docutils literal notranslate"><span class="pre">model</span></code></a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">queryset</span></code> est un attribut de classe avec une valeur <em>modifiable</em>, il faut donc être très prudent lorsqu’on l’utilise directement. Avant de l’utiliser, appelez sa méthode <a class="reference internal" href="../models/querysets.html#django.db.models.query.QuerySet.all" title="django.db.models.query.QuerySet.all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">all()</span></code></a> ou obtenez-la avec <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.get_queryset" title="django.views.generic.list.MultipleObjectMixin.get_queryset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_queryset()</span></code></a> qui se charge du clonage en arrière-plan.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.ordering">
+<code class="descname">ordering</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.ordering" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une chaîne ou une liste de chaînes indiquant l’ordre de tri à appliquer à <code class="docutils literal notranslate"><span class="pre">queryset</span></code>. Les valeurs possibles sont les mêmes que pour <a class="reference internal" href="../models/querysets.html#django.db.models.query.QuerySet.order_by" title="django.db.models.query.QuerySet.order_by"><code class="xref py py-meth docutils literal notranslate"><span class="pre">order_by()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.paginate_by">
+<code class="descname">paginate_by</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.paginate_by" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un nombre entier indiquant combien d’objets doivent être affichés par page. Lorsque cette valeur est présente, la vue pagine les objets avec <code class="docutils literal notranslate"><span class="pre">paginate_by</span></code> objets par page. La vue s’attend soit à ce que la chaîne de requête de l’URL contienne un paramètre <code class="docutils literal notranslate"><span class="pre">page</span></code> (par <code class="docutils literal notranslate"><span class="pre">request.GET</span></code>) ou qu’une variable <code class="docutils literal notranslate"><span class="pre">page</span></code> ait été définie dans la configuration d’URL.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.paginate_orphans">
+<code class="descname">paginate_orphans</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.paginate_orphans" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un nombre entier indiquant le nombre d’objets surnuméraires que la dernière page peut contenir. Cette valeur s’ajoute au nombre <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.paginate_by" title="django.views.generic.list.MultipleObjectMixin.paginate_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">paginate_by</span></code></a> pour la dernière page, afin d’éviter que la dernière page contienne un très petit nombre d’objets.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.page_kwarg">
+<code class="descname">page_kwarg</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.page_kwarg" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une chaîne indiquant le nom à utiliser pour le paramètre de page. La vue s’attend à la présence de ce paramètre soit comme paramètre de la chaîne de requête de l’URL (via <code class="docutils literal notranslate"><span class="pre">request.GET</span></code>) ou comme variable nommée présente dans la configuration d’URL. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">page</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.paginator_class">
+<code class="descname">paginator_class</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.paginator_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La classe de pagination à utiliser pour effectuer la pagination. Par défaut, c’est <a class="reference internal" href="../paginator.html#django.core.paginator.Paginator" title="django.core.paginator.Paginator"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.paginator.Paginator</span></code></a> qui est utilisée. Si la classe de pagination personnalisée ne possède pas la même interface de constructeur que <a class="reference internal" href="../paginator.html#django.core.paginator.Paginator" title="django.core.paginator.Paginator"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.paginator.Paginator</span></code></a>, vous devrez également fournir une implémentation pour <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.get_paginator" title="django.views.generic.list.MultipleObjectMixin.get_paginator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_paginator()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectMixin.context_object_name">
+<code class="descname">context_object_name</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.context_object_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Désigne le nom de la variable à utiliser dans le contexte.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_queryset">
+<code class="descname">get_queryset</code>()<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_queryset" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Obtient la liste des éléments de la vue. Ce résultat doit être itérable et peut contenir un jeu de requête (pour lequel le comportement spécifique des jeux de requête est activé).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_ordering">
+<code class="descname">get_ordering</code>()<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_ordering" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une chaîne (ou une liste de chaînes) définissant le tri qui sera appliqué à <code class="docutils literal notranslate"><span class="pre">queryset</span></code>.</p>
+<p>Renvoie <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.ordering" title="django.views.generic.list.MultipleObjectMixin.ordering"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ordering</span></code></a> par défaut.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.paginate_queryset">
+<code class="descname">paginate_queryset</code>(<em>queryset</em>, <em>page_size</em>)<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.paginate_queryset" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un tuple à 4 éléments contenant (<code class="docutils literal notranslate"><span class="pre">paginator</span></code>, <code class="docutils literal notranslate"><span class="pre">page</span></code>, <code class="docutils literal notranslate"><span class="pre">object_list</span></code>, <code class="docutils literal notranslate"><span class="pre">is_paginated</span></code>).</p>
+<p>Construit en paginant <code class="docutils literal notranslate"><span class="pre">queryset</span></code> en pages de taille <code class="docutils literal notranslate"><span class="pre">page_size</span></code>. Si la requête contient un paramètre <code class="docutils literal notranslate"><span class="pre">page</span></code>, soit comme paramètre capturé dans l’URL ou sous forme de paramètre GET, <code class="docutils literal notranslate"><span class="pre">object_list</span></code> correspondra aux objets de cette page.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_paginate_by">
+<code class="descname">get_paginate_by</code>(<em>queryset</em>)<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_paginate_by" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nombre d’éléments sur lequel baser la pagination, ou <code class="docutils literal notranslate"><span class="pre">None</span></code> pour éviter la pagination. Par défaut, cela renvoie la valeur de <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.paginate_by" title="django.views.generic.list.MultipleObjectMixin.paginate_by"><code class="xref py py-attr docutils literal notranslate"><span class="pre">paginate_by</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_paginator">
+<code class="descname">get_paginator</code>(<em>queryset</em>, <em>per_page</em>, <em>orphans=0</em>, <em>allow_empty_first_page=True</em>)<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_paginator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance de la classe de pagination à utiliser pour cette vue. Par défaut, une instance de <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.paginator_class" title="django.views.generic.list.MultipleObjectMixin.paginator_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">paginator_class</span></code></a> est renvoyée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_paginate_orphans">
+<code class="descname">get_paginate_orphans</code>()<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_paginate_orphans" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un nombre entier indiquant le nombre d’objets surnuméraires que la dernière page peut contenir. Par défaut, c’est la valeur de <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.paginate_orphans" title="django.views.generic.list.MultipleObjectMixin.paginate_orphans"><code class="xref py py-attr docutils literal notranslate"><span class="pre">paginate_orphans</span></code></a> qui est renvoyée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_allow_empty">
+<code class="descname">get_allow_empty</code>()<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_allow_empty" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une valeur booléenne indiquant s’il faut afficher la page quand aucun objet n’est disponible. Si cette méthode renvoie <code class="docutils literal notranslate"><span class="pre">False</span></code> et qu’aucun objet n’est disponible, la vue produit une erreur 404 au lieu d’afficher une page vide. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_context_object_name">
+<code class="descname">get_context_object_name</code>(<em>object_list</em>)<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_context_object_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nom de la variable de contexte utilisée pour contenir la liste des données que cette vue manipule. Si <code class="docutils literal notranslate"><span class="pre">object_list</span></code> est un jeu de requête d’objets Django et que <a class="reference internal" href="#django.views.generic.list.MultipleObjectMixin.context_object_name" title="django.views.generic.list.MultipleObjectMixin.context_object_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">context_object_name</span></code></a> n’est pas défini, le nom du contexte correspondra au nom de modèle des objets contenus dans le jeu de requête, ajouté du suffixe  <code class="docutils literal notranslate"><span class="pre">'_list'</span></code>. Par exemple, pour le modèle <code class="docutils literal notranslate"><span class="pre">Article</span></code>, la variable de contexte sera nommée par défaut <code class="docutils literal notranslate"><span class="pre">article_list</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectMixin.get_context_data">
+<code class="descname">get_context_data</code>(<em>**kwargs</em>)<a class="headerlink" href="#django.views.generic.list.MultipleObjectMixin.get_context_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie les données du contexte pour afficher la liste des objets.</p>
+</dd></dl>
+
+<p><strong>Contexte</strong></p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">object_list</span></code>: la liste des objets que cette vue va afficher. Si <code class="docutils literal notranslate"><span class="pre">context_object_name</span></code> est renseigné, cette variable sera également définie dans le contexte, avec le même contenu que <code class="docutils literal notranslate"><span class="pre">object_list</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">is_paginated</span></code>: une valeur booléenne indiquant si les résultats sont paginés. Plus particulièrement, <code class="docutils literal notranslate"><span class="pre">False</span></code> est renvoyé si aucune taille de page n’a été indiquée ou si les objets disponibles ne remplissent qu’une seule page.</li>
+<li><code class="docutils literal notranslate"><span class="pre">paginator</span></code>: une instance de <a class="reference internal" href="../paginator.html#django.core.paginator.Paginator" title="django.core.paginator.Paginator"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.paginator.Paginator</span></code></a>. Si les objets ne sont pas paginés, cette variable de contexte vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">page_obj</span></code>: une instance de <a class="reference internal" href="../paginator.html#django.core.paginator.Page" title="django.core.paginator.Page"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.paginator.Page</span></code></a>. Si les objets ne sont pas paginés, cette variable de contexte vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>.</li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="s-multipleobjecttemplateresponsemixin">
+<span id="multipleobjecttemplateresponsemixin"></span><h2><code class="docutils literal notranslate"><span class="pre">MultipleObjectTemplateResponseMixin</span></code><a class="headerlink" href="#multipleobjecttemplateresponsemixin" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.views.generic.list.MultipleObjectTemplateResponseMixin">
+<em class="property">class </em><code class="descclassname">django.views.generic.list.</code><code class="descname">MultipleObjectTemplateResponseMixin</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectTemplateResponseMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin produisant une réponse basée sur un gabarit pour les vues opérant sur une liste d’instances d’objets. Exige que la vue dans laquelle elle est intégrée fournisse <code class="docutils literal notranslate"><span class="pre">self.object_list</span></code>, la liste des instances d’objets sur lesquelles la vue opère. <code class="docutils literal notranslate"><span class="pre">self.object_list</span></code> peut être un objet <a class="reference internal" href="../models/querysets.html#django.db.models.query.QuerySet" title="django.db.models.query.QuerySet"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuerySet</span></code></a>, mais ce n’est pas obligatoire.</p>
+<p><strong>Étend</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="mixins-simple.html#django.views.generic.base.TemplateResponseMixin" title="django.views.generic.base.TemplateResponseMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponseMixin</span></code></a></li>
+</ul>
+<p><strong>Méthodes et attributs</strong></p>
+<dl class="attribute">
+<dt id="django.views.generic.list.MultipleObjectTemplateResponseMixin.template_name_suffix">
+<code class="descname">template_name_suffix</code><a class="headerlink" href="#django.views.generic.list.MultipleObjectTemplateResponseMixin.template_name_suffix" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le suffixe à ajouter au nom de gabarit auto-généré. Le suffixe par défaut est <code class="docutils literal notranslate"><span class="pre">_list</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.list.MultipleObjectTemplateResponseMixin.get_template_names">
+<code class="descname">get_template_names</code>()<a class="headerlink" href="#django.views.generic.list.MultipleObjectTemplateResponseMixin.get_template_names" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une liste de noms de gabarits potentiels. Cette liste contient&nbsp;:</p>
+<ul class="simple">
+<li>la valeur de <code class="docutils literal notranslate"><span class="pre">template_name</span></code> de la vue (s’il est défini)</li>
+<li><code class="docutils literal notranslate"><span class="pre">&lt;nom_app&gt;/&lt;nom_modèle&gt;&lt;suffixe_gabarit&gt;.html</span></code></li>
+</ul>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Classes mixins pour objets multiples</a><ul>
+<li><a class="reference internal" href="#multipleobjectmixin"><code class="docutils literal notranslate"><span class="pre">MultipleObjectMixin</span></code></a></li>
+<li><a class="reference internal" href="#multipleobjecttemplateresponsemixin"><code class="docutils literal notranslate"><span class="pre">MultipleObjectTemplateResponseMixin</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="mixins-single-object.html"
+                        title="Chapitre précédent">Classes mixins pour objet unique</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="mixins-editing.html"
+                        title="Chapitre suivant">Classes mixins d’édition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/class-based-views/mixins-multiple-object.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="mixins-single-object.html" title="Classes mixins pour objet unique">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="mixins-editing.html" title="Classes mixins d’édition">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

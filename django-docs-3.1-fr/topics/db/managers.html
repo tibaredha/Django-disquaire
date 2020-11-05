@@ -1,0 +1,481 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Gestionnaires &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Lancement de requêtes SQL brutes" href="sql.html" />
+    <link rel="prev" title="Recherche" href="search.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="search.html" title="Recherche">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="sql.html" title="Lancement de requêtes SQL brutes">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-db-managers">
+            
+  <div class="section" id="s-managers">
+<span id="managers"></span><h1>Gestionnaires<a class="headerlink" href="#managers" title="Lien permanent vers ce titre">¶</a></h1>
+<dl class="class">
+<dt id="django.db.models.Manager">
+<em class="property">class </em><code class="descname">Manager</code><a class="headerlink" href="#django.db.models.Manager" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Un gestionnaire (objet <code class="docutils literal notranslate"><span class="pre">Manager</span></code>) est l’interface par laquelle les opérations de requêtes de base de données sont mises à disposition des modèles Django. Il existe au moins un <code class="docutils literal notranslate"><span class="pre">Manager</span></code> pour chaque modèle d’une application Django.</p>
+<p>Le fonctionnement des classes <code class="docutils literal notranslate"><span class="pre">Manager</span></code> est documenté dans <a class="reference internal" href="queries.html"><span class="doc">Création de requêtes</span></a>; ce document aborde spécifiquement les options de modèles qui personnalisent le comportement des gestionnaires.</p>
+<div class="section" id="s-manager-names">
+<span id="s-id1"></span><span id="manager-names"></span><span id="id1"></span><h2>Noms des gestionnaires<a class="headerlink" href="#manager-names" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Par défaut, Django ajoute un gestionnaire nommé <code class="docutils literal notranslate"><span class="pre">objects</span></code> à chaque classe de modèle Django. Cependant, si vous aimeriez utiliser <code class="docutils literal notranslate"><span class="pre">objects</span></code> comme nom de champ ou que vous aimeriez nommer le gestionnaire autrement que <code class="docutils literal notranslate"><span class="pre">objects</span></code>, vous pouvez le renommer au niveau du modèle. Pour renommer le gestionnaire d’une classe donnée, définissez un attribut de classe de type <code class="docutils literal notranslate"><span class="pre">models.Manager()</span></code> dans le modèle. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="c1">#...</span>
+    <span class="n">people</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>En utilisant cet exemple de modèle, <code class="docutils literal notranslate"><span class="pre">Person.objects</span></code> générera une exception <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>, mais <code class="docutils literal notranslate"><span class="pre">Person.people.all()</span></code> fournira effectivement la liste de tous les objets <code class="docutils literal notranslate"><span class="pre">Person</span></code>.</p>
+</div>
+<div class="section" id="s-custom-managers">
+<span id="s-id2"></span><span id="custom-managers"></span><span id="id2"></span><h2>Gestionnaires personnalisés<a class="headerlink" href="#custom-managers" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Vous pouvez utiliser un gestionnaire personnalisé dans un modèle particulier en étendant la classe <code class="docutils literal notranslate"><span class="pre">Manager</span></code> de base et en créant votre propre instance de <code class="docutils literal notranslate"><span class="pre">Manager</span></code> dans votre modèle.</p>
+<p>Il y a deux raisons de vouloir personnaliser un gestionnaire&nbsp;: pour lui ajouter des méthodes supplémentaires ou pour modifier l’objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> initial que le gestionnaire renvoie.</p>
+<div class="section" id="s-adding-extra-manager-methods">
+<span id="adding-extra-manager-methods"></span><h3>Ajout de méthodes de gestionnaire supplémentaires<a class="headerlink" href="#adding-extra-manager-methods" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’ajout de méthodes de gestionnaire supplémentaires est la façon privilégiée d’ajouter des fonctionnalités au «&nbsp;niveau table&nbsp;» à des modèles (pour les fonctionnalités au «&nbsp;niveau ligne&nbsp;», c’est-à-dire les fonctions qui agissent sur une seule instance d’un objet de modèle, utilisez les <a class="reference internal" href="models.html#model-methods"><span class="std std-ref">méthodes de modèles</span></a> et non pas des méthodes de gestionnaire personnalisées).</p>
+<p>Une méthode de gestionnaire personnalisée peut renvoyer tout ce qu’on veut, elle n’est pas tenue de renvoyer un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>.</p>
+<p>Par exemple, cette méthode de gestionnaire personnalisée offre une méthode <code class="docutils literal notranslate"><span class="pre">with_counts()</span></code> qui renvoie une liste de tous les objets <code class="docutils literal notranslate"><span class="pre">OpinionPoll</span></code>, chacun recevant un attribut supplémentaire <code class="docutils literal notranslate"><span class="pre">num_responses</span></code> qui est le résultat d’une requête d’agrégation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">PollManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">with_counts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">connection</span>
+        <span class="k">with</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span> <span class="k">as</span> <span class="n">cursor</span><span class="p">:</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                SELECT p.id, p.question, p.poll_date, COUNT(*)</span>
+<span class="s2">                FROM polls_opinionpoll p, polls_response r</span>
+<span class="s2">                WHERE p.id = r.poll_id</span>
+<span class="s2">                GROUP BY p.id, p.question, p.poll_date</span>
+<span class="s2">                ORDER BY p.poll_date DESC&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">question</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">poll_date</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">num_responses</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result_list</span>
+
+<span class="k">class</span> <span class="nc">OpinionPoll</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">question</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">poll_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">()</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">PollManager</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Response</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">poll</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">OpinionPoll</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">person_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Avec cet exemple, vous écririez <code class="docutils literal notranslate"><span class="pre">OpinionPoll.objects.with_counts()</span></code> pour obtenir la liste des objets <code class="docutils literal notranslate"><span class="pre">OpinionPoll</span></code> comportant l’attribut <code class="docutils literal notranslate"><span class="pre">num_responses</span></code>.</p>
+<p>Une autre chose à relever au sujet de cet exemple est que les méthodes de gestionnaire ont accès à <code class="docutils literal notranslate"><span class="pre">self.model</span></code> pour obtenir la classe de modèle à laquelle elles sont liées.</p>
+</div>
+<div class="section" id="s-modifying-a-manager-s-initial-queryset">
+<span id="modifying-a-manager-s-initial-queryset"></span><h3>Modification des <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> initiaux des gestionnaires<a class="headerlink" href="#modifying-a-manager-s-initial-queryset" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> de base d’un gestionnaire renvoie tous les objets du système. Par exemple, en utilisant ce modèle&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>…l’instruction <code class="docutils literal notranslate"><span class="pre">Book.objects.all()</span></code> renvoie tous les livres de la base de données.</p>
+<p>Vous pouvez surcharger le <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> de base d’un gestionnaire en surchargeant la méthode <code class="docutils literal notranslate"><span class="pre">Manager.get_queryset()</span></code>. <code class="docutils literal notranslate"><span class="pre">get_queryset()</span></code> doit renvoyer un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> doté des propriétés nécessaires.</p>
+<p>Par exemple, le modèle suivant possède <em>deux</em> gestionnaires, un qui renvoie tous les objets et un autre qui ne renvoie que les livres de Roald Dahl&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># First, define the Manager subclass.</span>
+<span class="k">class</span> <span class="nc">DahlBookManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">author</span><span class="o">=</span><span class="s1">&#39;Roald Dahl&#39;</span><span class="p">)</span>
+
+<span class="c1"># Then hook it into the Book model explicitly.</span>
+<span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span> <span class="c1"># The default manager.</span>
+    <span class="n">dahl_objects</span> <span class="o">=</span> <span class="n">DahlBookManager</span><span class="p">()</span> <span class="c1"># The Dahl-specific manager.</span>
+</pre></div>
+</div>
+<p>Avec cet exemple de modèle, <code class="docutils literal notranslate"><span class="pre">Book.objects.all()</span></code> renvoie tous les livres de la base de données, mais <code class="docutils literal notranslate"><span class="pre">Book.dahl_objects.all()</span></code> ne retourne que ceux qui ont été écrits par Roald Dahl.</p>
+<p>Comme <code class="docutils literal notranslate"><span class="pre">get_queryset()</span></code> renvoie un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>, vous pouvez appliquer <code class="docutils literal notranslate"><span class="pre">filter()</span></code>, <code class="docutils literal notranslate"><span class="pre">exclude()</span></code> et toutes les autres méthodes de <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>. Ainsi, ces instructions sont toutes valables&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Book</span><span class="o">.</span><span class="n">dahl_objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+<span class="n">Book</span><span class="o">.</span><span class="n">dahl_objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Matilda&#39;</span><span class="p">)</span>
+<span class="n">Book</span><span class="o">.</span><span class="n">dahl_objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Cet exemple a aussi mis en évidence une autre technique intéressante&nbsp;: l’emploi de plusieurs gestionnaires dans un même modèle. Vous pouvez lier autant d’instances de gestionnaires que vous voulez à un modèle. C’est une manière non répétitive de définir des «&nbsp;filtres&nbsp;» fréquemment utilisés dans des modèles.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">AuthorManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">EditorManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">first_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">last_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">role</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Author&#39;</span><span class="p">)),</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Editor&#39;</span><span class="p">))])</span>
+    <span class="n">people</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="n">AuthorManager</span><span class="p">()</span>
+    <span class="n">editors</span> <span class="o">=</span> <span class="n">EditorManager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Cet exemple permet d’effectuer les requêtes <code class="docutils literal notranslate"><span class="pre">Person.authors.all()</span></code>, <code class="docutils literal notranslate"><span class="pre">Person.editors.all()</span></code> et <code class="docutils literal notranslate"><span class="pre">Person.people.all()</span></code> en sachant à quoi vous attendre au niveau des résultats.</p>
+</div>
+<div class="section" id="s-default-managers">
+<span id="s-id3"></span><span id="default-managers"></span><span id="id3"></span><h3>Gestionnaires par défaut<a class="headerlink" href="#default-managers" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.db.models.Model._default_manager">
+<code class="descclassname">Model.</code><code class="descname">_default_manager</code><a class="headerlink" href="#django.db.models.Model._default_manager" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si vous utilisez des objets <code class="docutils literal notranslate"><span class="pre">Manager</span></code> personnalisés, sachez que le premier <code class="docutils literal notranslate"><span class="pre">Manager</span></code> que Django rencontre (dans l’ordre où ils ont été définis dans le modèle) reçoit un statut spécial. Django interprète le premier gestionnaire défini dans une classe comme le gestionnaire par défaut, et plusieurs parties de Django (y compris <a class="reference internal" href="../../ref/django-admin.html#django-admin-dumpdata"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">dumpdata</span></code></a>) utilisent exclusivement ce gestionnaire pour le modèle en question. En conséquence, il est conseillé de choisir avec prudence le gestionnaire par défaut afin d’éviter une situation où la surcharge de <code class="docutils literal notranslate"><span class="pre">get_queryset()</span></code> aboutit à l’incapacité de récupérer des objets avec lesquels vous avez besoin de travailler.</p>
+<p>Vous pouvez définir un gestionnaire par défaut personnalisé en utilisant <a class="reference internal" href="../../ref/models/options.html#django.db.models.Options.default_manager_name" title="django.db.models.Options.default_manager_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Meta.default_manager_name</span></code></a>.</p>
+<p>Si par exemple vous écrivez du code qui doit gérer un modèle inconnu dans une application tierce qui implémente une vue générique, utilisez ce gestionnaire (ou <a class="reference internal" href="#django.db.models.Model._base_manager" title="django.db.models.Model._base_manager"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_base_manager</span></code></a>) plutôt que de supposer que le modèle possède un gestionnaire <code class="docutils literal notranslate"><span class="pre">objects</span></code>.</p>
+</div>
+<div class="section" id="s-base-managers">
+<span id="base-managers"></span><h3>Gestionnaires de base<a class="headerlink" href="#base-managers" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.db.models.Model._base_manager">
+<code class="descclassname">Model.</code><code class="descname">_base_manager</code><a class="headerlink" href="#django.db.models.Model._base_manager" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="section" id="s-using-managers-for-related-object-access">
+<span id="s-managers-for-related-objects"></span><span id="using-managers-for-related-object-access"></span><span id="managers-for-related-objects"></span><h4>Utilisation de gestionnaires pour accéder aux objets liés<a class="headerlink" href="#using-managers-for-related-object-access" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Par défaut, Django utilise une instance de classe de gestionnaire  <code class="docutils literal notranslate"><span class="pre">Model._base_manager</span></code> pour accéder aux objets liés (par ex. <code class="docutils literal notranslate"><span class="pre">choice.question</span></code>), et non pas le gestionnaire <code class="docutils literal notranslate"><span class="pre">_default_manager</span></code> de l’objet lié. Ceci parce que Django doit absolument être capable de récupérer l’objet lié, même dans les cas où il serait filtré (et donc inaccessible) par son gestionnaire par défaut.</p>
+<p>Si la classe de gestionnaire de base (<a class="reference internal" href="#django.db.models.Manager" title="django.db.models.Manager"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.db.models.Manager</span></code></a>) ne convient pas dans un cas particulier, vous pouvez dire à Django quelle classe utiliser en définissant <a class="reference internal" href="../../ref/models/options.html#django.db.models.Options.base_manager_name" title="django.db.models.Options.base_manager_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Meta.base_manager_name</span></code></a>.</p>
+<p>Les gestionnaires de base ne sont pas utilisés lors de requêtes à partir de modèles liés ou lors d’accès aux <a class="reference internal" href="queries.html#backwards-related-objects"><span class="std std-ref">relations un-à-un ou plusieurs-à-plusieurs</span></a>. Par exemple, si le modèle <code class="docutils literal notranslate"><span class="pre">Question</span></code> <a class="reference internal" href="../../intro/tutorial02.html#creating-models"><span class="std std-ref">du tutoriel</span></a> avait un champ <code class="docutils literal notranslate"><span class="pre">deleted</span></code> et un gestionnaire de base qui excluait les instances ayant <code class="docutils literal notranslate"><span class="pre">deleted=True</span></code>, une requête telle que <code class="docutils literal notranslate"><span class="pre">Choice.objects.filter(question__name__startswith='What')</span></code> inclurait aussi les choix liés aux questions supprimées.</p>
+</div>
+<div class="section" id="s-don-t-filter-away-any-results-in-this-type-of-manager-subclass">
+<span id="don-t-filter-away-any-results-in-this-type-of-manager-subclass"></span><h4>Ne jamais filtrer les résultats dans ce type de sous-classe de gestionnaire<a class="headerlink" href="#don-t-filter-away-any-results-in-this-type-of-manager-subclass" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Ce gestionnaire est utilisé pour accéder aux objets liés à partir d’un autre modèle. Dans ces situations, Django doit être capable de voir tous les objets du modèle qu’il récupère, afin que <em>tout</em> ce qui est référencé puisse être récupéré.</p>
+<p>Pour cette raison, vous ne devez pas surcharger <code class="docutils literal notranslate"><span class="pre">get_queryset()</span></code> pour exclure certaines lignes. Si vous le faites, Django renverra des résultats incomplets.</p>
+</div>
+</div>
+<div class="section" id="s-calling-custom-queryset-methods-from-the-manager">
+<span id="s-calling-custom-queryset-methods-from-manager"></span><span id="calling-custom-queryset-methods-from-the-manager"></span><span id="calling-custom-queryset-methods-from-manager"></span><h3>Appel personnalisé de méthodes <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> depuis le gestionnaire<a class="headerlink" href="#calling-custom-queryset-methods-from-the-manager" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Alors que la plupart des méthodes d’un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> standard sont directement accessibles à partir d’un <code class="docutils literal notranslate"><span class="pre">Manager</span></code>, ce n’est le cas pour les méthodes supplémentaires définies sur un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> personnalisé que si vous les implémentez également sur le <code class="docutils literal notranslate"><span class="pre">Manager</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PersonQuerySet</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">QuerySet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">authors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">editors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PersonManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PersonQuerySet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">using</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_db</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">authors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span><span class="o">.</span><span class="n">authors</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">editors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span><span class="o">.</span><span class="n">editors</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">first_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">last_name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">role</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Author&#39;</span><span class="p">)),</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Editor&#39;</span><span class="p">))])</span>
+    <span class="n">people</span> <span class="o">=</span> <span class="n">PersonManager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Cet exemple permet d’appeler <code class="docutils literal notranslate"><span class="pre">authors()</span></code> et <code class="docutils literal notranslate"><span class="pre">editors()</span></code> directement depuis le gestionnaire <code class="docutils literal notranslate"><span class="pre">Person.people</span></code>.</p>
+</div>
+<div class="section" id="s-creating-a-manager-with-queryset-methods">
+<span id="s-create-manager-with-queryset-methods"></span><span id="creating-a-manager-with-queryset-methods"></span><span id="create-manager-with-queryset-methods"></span><h3>Création d’objet <code class="docutils literal notranslate"><span class="pre">Manager</span></code> avec des méthodes de <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code><a class="headerlink" href="#creating-a-manager-with-queryset-methods" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En lieu et place de l’approche ci-dessus qui nécessite de dupliquer les méthodes à la fois sur les objets <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> et <code class="docutils literal notranslate"><span class="pre">Manager</span></code>,  <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet.as_manager" title="django.db.models.query.QuerySet.as_manager"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuerySet.as_manager()</span></code></a> peut être utilisé pour créer une instance de <code class="docutils literal notranslate"><span class="pre">Manager</span></code> avec une copie des méthodes d’un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> personnalisé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="n">people</span> <span class="o">=</span> <span class="n">PersonQuerySet</span><span class="o">.</span><span class="n">as_manager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>L’instance de <code class="docutils literal notranslate"><span class="pre">Manager</span></code> créée par <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet.as_manager" title="django.db.models.query.QuerySet.as_manager"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuerySet.as_manager()</span></code></a> sera pratiquement identique au <code class="docutils literal notranslate"><span class="pre">PersonManager</span></code> de l’exemple précédent.</p>
+<p>Toutes les méthodes <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> n’ont pas forcément de sens au niveau <code class="docutils literal notranslate"><span class="pre">Manager</span></code>; par exemple, nous empêchons volontairement la méthode <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet.delete" title="django.db.models.query.QuerySet.delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuerySet.delete()</span></code></a> d’être copiée vers la classe <code class="docutils literal notranslate"><span class="pre">Manager</span></code>.</p>
+<p>Les méthodes sont copiées selon les règles suivantes&nbsp;:</p>
+<ul class="simple">
+<li>Les méthodes publiques sont copiées par défaut.</li>
+<li>Les méthodes privées (commençant par un soulignement) ne sont pas copiées par défaut.</li>
+<li>Les méthodes avec un attribut <code class="docutils literal notranslate"><span class="pre">queryset_only</span></code> à <code class="docutils literal notranslate"><span class="pre">False</span></code> sont toujours copiées.</li>
+<li>Les méthodes avec un attribut <code class="docutils literal notranslate"><span class="pre">queryset_only</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> ne sont jamais copiées.</li>
+</ul>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomQuerySet</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">QuerySet</span><span class="p">):</span>
+    <span class="c1"># Available on both Manager and QuerySet.</span>
+    <span class="k">def</span> <span class="nf">public_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Available only on QuerySet.</span>
+    <span class="k">def</span> <span class="nf">_private_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Available only on QuerySet.</span>
+    <span class="k">def</span> <span class="nf">opted_out_public_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">opted_out_public_method</span><span class="o">.</span><span class="n">queryset_only</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Available on both Manager and QuerySet.</span>
+    <span class="k">def</span> <span class="nf">_opted_in_private_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="n">_opted_in_private_method</span><span class="o">.</span><span class="n">queryset_only</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<div class="section" id="s-from-queryset">
+<span id="from-queryset"></span><h4><code class="docutils literal notranslate"><span class="pre">from_queryset()</span></code><a class="headerlink" href="#from-queryset" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="classmethod">
+<dt id="django.db.models.from_queryset">
+<em class="property">classmethod </em><code class="descname">from_queryset</code>(<em>queryset_class</em>)<a class="headerlink" href="#django.db.models.from_queryset" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Pour une utilisation plus avancée, il peut être souhaitable d’avoir à la fois un <code class="docutils literal notranslate"><span class="pre">Manager</span></code> personnalisé et un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> personnalisé. Vous pouvez le faire en appelant <code class="docutils literal notranslate"><span class="pre">Manager.from_queryset()</span></code> qui renvoie une <em>sous-classe</em> du <code class="docutils literal notranslate"><span class="pre">Manager</span></code> de base avec une copie des méthodes <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> personnalisées&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">manager_only_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+
+<span class="k">class</span> <span class="nc">CustomQuerySet</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">QuerySet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">manager_and_queryset_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">CustomManager</span><span class="o">.</span><span class="n">from_queryset</span><span class="p">(</span><span class="n">CustomQuerySet</span><span class="p">)()</span>
+</pre></div>
+</div>
+<p>Vous pouvez également stocker la classe générée dans une variable&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MyManager</span> <span class="o">=</span> <span class="n">CustomManager</span><span class="o">.</span><span class="n">from_queryset</span><span class="p">(</span><span class="n">CustomQuerySet</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">MyManager</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-custom-managers-and-model-inheritance">
+<span id="s-custom-managers-and-inheritance"></span><span id="custom-managers-and-model-inheritance"></span><span id="custom-managers-and-inheritance"></span><h3>Gestionnaires personnalisés et héritage de modèle<a class="headerlink" href="#custom-managers-and-model-inheritance" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Voici comment Django gère les gestionnaires personnalisés dans le contexte <a class="reference internal" href="models.html#model-inheritance"><span class="std std-ref">d’héritage des modèles</span></a>:</p>
+<ol class="arabic simple">
+<li>Les gestionnaires des classes de base sont toujours hérités par les classes enfants, par le moyen Python habituel de l’ordre de résolution de nom (les noms des classes enfants surchargent ceux de leurs parents).</li>
+<li>Si aucun gestionnaire n’est déclaré dans un modèle ou dans ses parents, Django crée automatiquement le gestionnaire <code class="docutils literal notranslate"><span class="pre">objects</span></code>.</li>
+<li>Le gestionnaire par défaut d’une classe est soit celui qui est choisi par <a class="reference internal" href="../../ref/models/options.html#django.db.models.Options.default_manager_name" title="django.db.models.Options.default_manager_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Meta.default_manager_name</span></code></a>, soit le premier gestionnaire déclaré dans le modèle, soit le gestionnaire par défaut du premier modèle parent.</li>
+</ol>
+<p>Ces règles assurent la souplesse nécessaire permettant d’installer un ensemble de gestionnaires personnalisés sur un groupe de modèles via une classe de base abstraite, tout en personnalisant aussi le gestionnaire par défaut. Prenons l’exemple de cette classe de base&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">AbstractBase</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">CustomManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>Si vous l’utilisez directement dans une sous-classe, <code class="docutils literal notranslate"><span class="pre">objects</span></code> sera le gestionnaire par défaut si aucun gestionnaire n’est déclaré dans la classe de base&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChildA</span><span class="p">(</span><span class="n">AbstractBase</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="c1"># This class has CustomManager as the default manager.</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Si vous voulez hériter de <code class="docutils literal notranslate"><span class="pre">AbstractBase</span></code>, mais avec un autre gestionnaire par défaut, vous pouvez définir le gestionnaire par défaut dans la classe enfant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChildB</span><span class="p">(</span><span class="n">AbstractBase</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="c1"># An explicit default manager.</span>
+    <span class="n">default_manager</span> <span class="o">=</span> <span class="n">OtherManager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Ici, <code class="docutils literal notranslate"><span class="pre">default_manager</span></code> est le gestionnaire par défaut. Le gestionnaire <code class="docutils literal notranslate"><span class="pre">objects</span></code> est toujours disponible, puisqu’il est hérité, mais il n’est plus le gestionnaire par défaut.</p>
+<p>Pour terminer avec cet exemple, supposons que vous vouliez ajouter des gestionnaires supplémentaires dans la classe enfant tout en conservant le gestionnaire par défaut de <code class="docutils literal notranslate"><span class="pre">AbstractBase</span></code>. Vous ne pouvez pas ajouter directement le nouveau gestionnaire dans la classe enfant, car cela surchargerait le gestionnaire par défaut et vous devriez aussi inclure explicitement tous les gestionnaires de la classe de base abstraite. La solution est de placer les gestionnaires supplémentaires dans une autre classe de base et introduire celle-ci dans la hiérarchie d’héritage <em>après</em> ceux par défaut&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ExtraManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">extra_manager</span> <span class="o">=</span> <span class="n">OtherManager</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">class</span> <span class="nc">ChildC</span><span class="p">(</span><span class="n">AbstractBase</span><span class="p">,</span> <span class="n">ExtraManager</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="c1"># Default manager is CustomManager, but OtherManager is</span>
+    <span class="c1"># also available via the &quot;extra_manager&quot; attribute.</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>Notez que même si vous pouvez <em>définir</em> un gestionnaire personnalisé dans le modèle abstrait, vous ne pouvez <em>appeler</em> aucune de ses méthodes au travers du modèle abstrait. C’est-à-dire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ClassA</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>est légal, mais&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AbstractBase</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>générera une exception. C’est parce que les gestionnaires sont censés intégrer la logique de gestion d’ensembles d’objets. Comme il n’est pas possible d’avoir un ensemble d’objets abstraits, leur gestion n’a pas de sens. Si vous gérez des fonctionnalités s’appliquant au modèle abstrait, vous devriez les placer dans une méthode <code class="docutils literal notranslate"><span class="pre">staticmethod</span></code> ou <code class="docutils literal notranslate"><span class="pre">classmethod</span></code> du modèle abstrait.</p>
+</div>
+<div class="section" id="s-implementation-concerns">
+<span id="implementation-concerns"></span><h3>Détails d’implémentation<a class="headerlink" href="#implementation-concerns" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Quelles que soient les fonctionnalités ajoutées à un gestionnaire personnalisé, il doit toujours être possible de faire une copie légère («&nbsp;shallow&nbsp;») d’une de ses instances&nbsp;; c’est-à-dire que le code suivant doit fonctionner&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">manager</span> <span class="o">=</span> <span class="n">MyManager</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">manager</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Django effectue des copies légères des objets de gestionnaire durant certaines requêtes&nbsp;; si votre gestionnaire ne peut pas être copié, ces requêtes échoueront.</p>
+<p>Ce ne sera pas un problème pour la plupart des gestionnaires personnalisés. Si vous ne faites qu’ajouter des méthodes simples à votre classe <code class="docutils literal notranslate"><span class="pre">Manager</span></code>, il est improbable que vous empêchiez la copie de votre gestionnaire sans le vouloir. Cependant, si vous surchargez <code class="docutils literal notranslate"><span class="pre">__getattr__</span></code> ou d’autres méthodes privées de l’objet <code class="docutils literal notranslate"><span class="pre">Manager</span></code> qui contrôlent l’état de l’objet, il faut vous assurer que vous n’altériez pas la capacité de votre gestionnaire d’être copié.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Gestionnaires</a><ul>
+<li><a class="reference internal" href="#manager-names">Noms des gestionnaires</a></li>
+<li><a class="reference internal" href="#custom-managers">Gestionnaires personnalisés</a><ul>
+<li><a class="reference internal" href="#adding-extra-manager-methods">Ajout de méthodes de gestionnaire supplémentaires</a></li>
+<li><a class="reference internal" href="#modifying-a-manager-s-initial-queryset">Modification des <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> initiaux des gestionnaires</a></li>
+<li><a class="reference internal" href="#default-managers">Gestionnaires par défaut</a></li>
+<li><a class="reference internal" href="#base-managers">Gestionnaires de base</a><ul>
+<li><a class="reference internal" href="#using-managers-for-related-object-access">Utilisation de gestionnaires pour accéder aux objets liés</a></li>
+<li><a class="reference internal" href="#don-t-filter-away-any-results-in-this-type-of-manager-subclass">Ne jamais filtrer les résultats dans ce type de sous-classe de gestionnaire</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#calling-custom-queryset-methods-from-the-manager">Appel personnalisé de méthodes <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> depuis le gestionnaire</a></li>
+<li><a class="reference internal" href="#creating-a-manager-with-queryset-methods">Création d’objet <code class="docutils literal notranslate"><span class="pre">Manager</span></code> avec des méthodes de <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code></a><ul>
+<li><a class="reference internal" href="#from-queryset"><code class="docutils literal notranslate"><span class="pre">from_queryset()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custom-managers-and-model-inheritance">Gestionnaires personnalisés et héritage de modèle</a></li>
+<li><a class="reference internal" href="#implementation-concerns">Détails d’implémentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="search.html"
+                        title="Chapitre précédent">Recherche</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="sql.html"
+                        title="Chapitre suivant">Lancement de requêtes SQL brutes</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/db/managers.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="search.html" title="Recherche">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="sql.html" title="Lancement de requêtes SQL brutes">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

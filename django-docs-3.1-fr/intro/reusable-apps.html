@@ -1,0 +1,375 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tutoriel avancé : concevoir des applications réutilisables &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Quelle lecture pour la suite" href="whatsnext.html" />
+    <link rel="prev" title="Écriture de votre première application Django, 7ème partie" href="tutorial07.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="tutorial07.html" title="Écriture de votre première application Django, 7ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="whatsnext.html" title="Quelle lecture pour la suite">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="intro-reusable-apps">
+            
+  <div class="section" id="s-advanced-tutorial-how-to-write-reusable-apps">
+<span id="advanced-tutorial-how-to-write-reusable-apps"></span><h1>Tutoriel avancé&nbsp;: concevoir des applications réutilisables<a class="headerlink" href="#advanced-tutorial-how-to-write-reusable-apps" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce tutoriel avancé commence là où le <a class="reference internal" href="tutorial07.html"><span class="doc">tutoriel 7</span></a> s’est arrêté. Nous allons transformer notre application de sondage Web en un paquet Python autonome qu’il sera possible de réutiliser dans de nouveaux projets et de partager avec d’autres personnes.</p>
+<p>Si vous n’avez pas récemment suivi les tutoriels 1–7, nous vous encourageons à les parcourir à nouveau afin que votre exemple de projet corresponde à celui qui est décrit ci-dessous.</p>
+<div class="section" id="s-reusability-matters">
+<span id="reusability-matters"></span><h2>Importance du recyclage<a class="headerlink" href="#reusability-matters" title="Lien permanent vers ce titre">¶</a></h2>
+<p>C’est un gros travail de concevoir, construire, tester et maintenir une application Web. Beaucoup de projets Python et Django ont des problématiques communes. Ne serait-il pas merveilleux si nous pouvions économiser un peu de ce travail répétitif&nbsp;?</p>
+<p>Le recyclage de code est un principe de vie en Python. Le site <a class="reference external" href="https://pypi.org/">Python Package Index (PyPI)</a> recense une très large variété de paquets qu’il est possible d’utiliser dans ses propres programmes Python. Parcourez le site <a class="reference external" href="https://djangopackages.org">Django Packages</a> pour trouver des applications réutilisables qu’il est possible d’intégrer dans votre projet. Django lui-même n’est qu’un paquet Python. Cela signifie que vous pouvez prendre des paquets Python ou des applications Django existantes et les composer dans votre propre projet Web. Vous n’avez plus qu’à écrire les parties qui font de votre projet un projet unique.</p>
+<p>Disons que vous débutez un nouveau projet qui nécessite une application de sondage telle que celle sur laquelle nous avons travaillé. Comme pouvez-vous recycler cette application&nbsp;? Heureusement, vous êtes déjà sur la bonne voie. Dans le <a class="reference internal" href="tutorial01.html"><span class="doc">tutoriel 1</span></a>, nous avons vu comment découpler les sondages de la configuration d’URL de base du projet en utilisant un <code class="docutils literal notranslate"><span class="pre">include</span></code>. Dans ce tutoriel, nous irons un peu plus loin pour rendre l’application simple à utiliser dans de nouveaux projets et prête à être publiée pour que d’autres puissent l’installer et l’exploiter.</p>
+<div class="admonition-package-app admonition">
+<p class="first admonition-title">Paquet&nbsp;? Application&nbsp;?</p>
+<p>Un <a class="reference external" href="https://docs.python.org/3/glossary.html#term-package" title="(disponible dans Python v3.9)"><span class="xref std std-term">paquet</span></a> Python permet de regrouper du code Python pour qu’il puisse être facilement réutilisé. Un paquet contient un ou plusieurs fichiers de code Python (aussi connus sous le nom de «&nbsp;modules&nbsp;»).</p>
+<p>Un paquet peut être importé avec <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">foo.bar</span></code> ou <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">foo</span> <span class="pre">import</span> <span class="pre">bar</span></code>. Pour qu’un répertoire (comme <code class="docutils literal notranslate"><span class="pre">polls</span></code>) constitue un paquet, il doit contenir un fichier spécial <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>, même si ce dernier est vide.</p>
+<p>Une <em>application</em> Django est un paquet Python qui est spécialement prévu pour fonctionner dans un projet Django. Une application peut utiliser des conventions Django partagées, comme la présence de sous-modules <code class="docutils literal notranslate"><span class="pre">models</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span></code>, <code class="docutils literal notranslate"><span class="pre">urls</span></code> et <code class="docutils literal notranslate"><span class="pre">views</span></code>.</p>
+<p class="last">Par la suite, nous utilisons le terme <em>empaquetage</em> (packaging) pour décrire le processus de création d’un paquet Python facile à installer par tout le monde. Cela peut prêter à confusion, effectivement.</p>
+</div>
+</div>
+<div class="section" id="s-your-project-and-your-reusable-app">
+<span id="your-project-and-your-reusable-app"></span><h2>Votre projet et votre application recyclable<a class="headerlink" href="#your-project-and-your-reusable-app" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Après les tutoriels précédents, notre projet devrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysite</span><span class="o">/</span>
+    <span class="n">manage</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">mysite</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">asgi</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">wsgi</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">polls</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">admin</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">apps</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">migrations</span><span class="o">/</span>
+            <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+            <span class="mi">0001</span><span class="n">_initial</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">static</span><span class="o">/</span>
+            <span class="n">polls</span><span class="o">/</span>
+                <span class="n">images</span><span class="o">/</span>
+                    <span class="n">background</span><span class="o">.</span><span class="n">gif</span>
+                <span class="n">style</span><span class="o">.</span><span class="n">css</span>
+        <span class="n">templates</span><span class="o">/</span>
+            <span class="n">polls</span><span class="o">/</span>
+                <span class="n">detail</span><span class="o">.</span><span class="n">html</span>
+                <span class="n">index</span><span class="o">.</span><span class="n">html</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">html</span>
+        <span class="n">tests</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">urls</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">views</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">templates</span><span class="o">/</span>
+        <span class="n">admin</span><span class="o">/</span>
+            <span class="n">base_site</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>Vous avez créé <code class="docutils literal notranslate"><span class="pre">mysite/templates</span></code> dans le <a class="reference internal" href="tutorial07.html"><span class="doc">tutoriel 7</span></a> et <code class="docutils literal notranslate"><span class="pre">polls/templates</span></code> dans le <a class="reference internal" href="tutorial03.html"><span class="doc">tutoriel 3</span></a>. Il est peut-être maintenant plus facile de comprendre pourquoi nous avons séparé les répertoires de gabarits du projet de ceux de l’application&nbsp;: tout ce qui fait partie de l’application de sondage se trouve dans <code class="docutils literal notranslate"><span class="pre">polls</span></code>. L’application forme un tout par elle-même et est ainsi plus facile à intégrer dans un nouveau projet.</p>
+<p>Le répertoire <code class="docutils literal notranslate"><span class="pre">polls</span></code> pourrait maintenant être copié dans un nouveau projet Django pour être immédiatement utilisé. L’application n’est cependant pas encore tout à fait prête pour être publiée. Pour cela, il faut encore empaqueter l’application afin que d’autres puissent facilement l’installer.</p>
+</div>
+<div class="section" id="s-installing-some-prerequisites">
+<span id="s-installing-reusable-apps-prerequisites"></span><span id="installing-some-prerequisites"></span><span id="installing-reusable-apps-prerequisites"></span><h2>Installation de quelques prérequis<a class="headerlink" href="#installing-some-prerequisites" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’état actuel de la construction de paquets Python est un peu embrouillé par l’utilisation de plusieurs outils. Dans ce tutoriel, nous allons utiliser <a class="reference external" href="https://pypi.org/project/setuptools/">setuptools</a> pour construire nos paquets. C’est l’outil d’empaquetage que nous recommandons (fusionné avec le dérivé <code class="docutils literal notranslate"><span class="pre">distribute</span></code>). Nous utiliserons aussi <a class="reference external" href="https://pypi.org/project/pip/">pip</a> pour l’installer et le désinstaller. Vous devriez installer maintenant ces deux paquets. Si vous avez besoin d’aide, vous pouvez vous référer à <a class="reference internal" href="../topics/install.html#installing-official-release"><span class="std std-ref">comment installer Django avec pip</span></a>. Vous pouvez installer <code class="docutils literal notranslate"><span class="pre">setuptools</span></code> de la même manière.</p>
+</div>
+<div class="section" id="s-packaging-your-app">
+<span id="packaging-your-app"></span><h2>Empaquetage de l’application<a class="headerlink" href="#packaging-your-app" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L”<em>empaquetage</em> Python se réfère à la préparation d’une application dans un format spécifique qui peut être facilement installé et utilisé. Django lui-même est empaqueté de manière très semblable. Pour une petite application comme la nôtre, ce processus n’est pas trop difficile.</p>
+<ol class="arabic">
+<li><p class="first">Premièrement, créez un répertoire parent pour <code class="docutils literal notranslate"><span class="pre">polls</span></code>, en dehors de votre projet Django. Nommez ce répertoire <code class="docutils literal notranslate"><span class="pre">django-polls</span></code>.</p>
+<div class="admonition-choosing-a-name-for-your-app admonition">
+<p class="first admonition-title">Choix d’un nom pour votre application</p>
+<p>Au moment de choisir un nom pour votre paquet, consultez les ressources comme PyPI pour éviter des conflits de nom avec des paquets existants. Il est souvent utile de préfixer votre nom de module avec <code class="docutils literal notranslate"><span class="pre">django-</span></code> lors de la création d’un paquet à distribuer. Les personnes qui cherchent des applications Django peuvent ainsi identifier plus facilement votre application comme étant spécifique à Django.</p>
+<p class="last">Les étiquettes d’applications (c’est-à-dire la partie finale du chemin pointé vers le paquet de l’application) figurant dans <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> <em>doivent</em> être uniques. Évitez d’utiliser la même étiquette que l’une des <a class="reference internal" href="../ref/contrib/index.html"><span class="doc">applications contribuées</span></a> de Django, par exemple <code class="docutils literal notranslate"><span class="pre">auth</span></code>, <code class="docutils literal notranslate"><span class="pre">admin</span></code> ou <code class="docutils literal notranslate"><span class="pre">messages</span></code>.</p>
+</div>
+</li>
+<li><p class="first">Déplacez le répertoire <code class="docutils literal notranslate"><span class="pre">polls</span></code> dans le répertoire <code class="docutils literal notranslate"><span class="pre">django-polls</span></code>.</p>
+</li>
+<li><p class="first">Créez un fichier <code class="docutils literal notranslate"><span class="pre">django-polls/README.rst</span></code> contenant ceci&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">django-polls/README.rst</span><a class="headerlink" href="#id1" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="gh">=====</span>
+<span class="gh">Polls</span>
+<span class="gh">=====</span>
+
+Polls is a Django app to conduct Web-based polls. For each question,
+visitors can choose between a fixed number of answers.
+
+Detailed documentation is in the &quot;docs&quot; directory.
+
+<span class="gh">Quick start</span>
+<span class="gh">-----------</span>
+
+<span class="m">1.</span> Add &quot;polls&quot; to your INSTALLED_APPS setting like this::
+
+    INSTALLED_APPS = [
+<span class="cp">        ...</span>
+<span class="cp">        &#39;polls&#39;,</span>
+<span class="cp">    ]</span>
+
+<span class="m">2.</span> Include the polls URLconf in your project urls.py like this::
+
+    path(&#39;polls/&#39;, include(&#39;polls.urls&#39;)),
+
+<span class="m">3.</span> Run <span class="s">``python manage.py migrate``</span> to create the polls models.
+
+<span class="m">4.</span> Start the development server and visit http://127.0.0.1:8000/admin/
+   to create a poll (you&#39;ll need the Admin app enabled).
+
+<span class="m">5.</span> Visit http://127.0.0.1:8000/polls/ to participate in the poll.
+</pre></div>
+</div>
+</div>
+</li>
+<li><p class="first">Créez un fichier <code class="docutils literal notranslate"><span class="pre">django-polls/LICENSE</span></code>. Le choix d’une licence n’est pas dans le thème de ce tutoriel, mais nous vous rendons attentif au fait que du code publié sans licence est <em>inutile</em>. Django et de nombreuses applications compatibles Django sont distribués sous licence BSD&nbsp;; vous êtes bien sûr libre d’utiliser la licence de votre choix. Sachez seulement que le choix de la licence a un impact sur la quantité d’utilisateurs potentiels de votre code.</p>
+</li>
+<li><p class="first">Ensuite, nous allons créer les fichiers <code class="docutils literal notranslate"><span class="pre">setup.cfg</span></code> et <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> qui précisent la façon de construire et d’installer l’application. Nous ne nous lancerons pas dans une explication détaillée de ces fichiers, mais vous trouverez plus d’informations dans la <a class="reference external" href="https://setuptools.readthedocs.io/en/latest/">documentation de setuptools</a>. Créez les fichiers <code class="docutils literal notranslate"><span class="pre">django-polls/setup.cfg</span></code> et <code class="docutils literal notranslate"><span class="pre">django-polls/setup.py</span></code> avec le contenu suivant&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">django-polls/setup.cfg</span><a class="headerlink" href="#id2" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-ini notranslate"><div class="highlight"><pre><span></span><span class="k">[metadata]</span>
+<span class="na">name</span> <span class="o">=</span> <span class="s">django-polls</span>
+<span class="na">version</span> <span class="o">=</span> <span class="s">0.1</span>
+<span class="na">description</span> <span class="o">=</span> <span class="s">A Django app to conduct Web-based polls.</span>
+<span class="na">long_description</span> <span class="o">=</span> <span class="s">file: README.rst</span>
+<span class="na">url</span> <span class="o">=</span> <span class="s">https://www.example.com/</span>
+<span class="na">author</span> <span class="o">=</span> <span class="s">Your Name</span>
+<span class="na">author_email</span> <span class="o">=</span> <span class="s">yourname@example.com</span>
+<span class="na">license</span> <span class="o">=</span> <span class="s">BSD-3-Clause  # Example license</span>
+<span class="na">classifiers</span> <span class="o">=</span><span class="s"></span>
+<span class="s">    Environment :: Web Environment</span>
+<span class="s">    Framework :: Django</span>
+<span class="s">    Framework :: Django :: X.Y  # Replace &quot;X.Y&quot; as appropriate</span>
+<span class="s">    Intended Audience :: Developers</span>
+<span class="s">    License :: OSI Approved :: BSD License</span>
+<span class="s">    Operating System :: OS Independent</span>
+<span class="s">    Programming Language :: Python</span>
+<span class="s">    Programming Language :: Python :: 3</span>
+<span class="s">    Programming Language :: Python :: 3 :: Only</span>
+<span class="s">    Programming Language :: Python :: 3.6</span>
+<span class="s">    Programming Language :: Python :: 3.7</span>
+<span class="s">    Programming Language :: Python :: 3.8</span>
+<span class="s">    Topic :: Internet :: WWW/HTTP</span>
+<span class="s">    Topic :: Internet :: WWW/HTTP :: Dynamic Content</span>
+
+<span class="k">[options]</span>
+<span class="na">include_package_data</span> <span class="o">=</span> <span class="s">true</span>
+<span class="na">packages</span> <span class="o">=</span> <span class="s">find:</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">django-polls/setup.py</span><a class="headerlink" href="#id3" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">setuptools</span> <span class="kn">import</span> <span class="n">setup</span>
+
+<span class="n">setup</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</li>
+<li><p class="first">Seuls des modules et paquets Python sont inclus par défaut dans le paquet. Pour ajouter des fichiers supplémentaires, nous devrons créer un fichier <code class="docutils literal notranslate"><span class="pre">MANIFEST.in</span></code>. La documentation de <code class="docutils literal notranslate"><span class="pre">setuptools</span></code> mentionnée à l’étape précédente présente ce fichier en détails. Pour inclure les gabarits et les fichiers <code class="docutils literal notranslate"><span class="pre">README.rst</span></code> et <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code>, créez un fichier <code class="docutils literal notranslate"><span class="pre">django-polls/MANIFEST.in</span></code> avec le contenu suivant&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">django-polls/MANIFEST.in</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>include LICENSE
+include README.rst
+recursive-include polls/static *
+recursive-include polls/templates *
+</pre></div>
+</div>
+</div>
+</li>
+<li><p class="first">Il est facultatif, mais recommandé, d’inclure de la documentation détaillée dans votre application. Créez un répertoire vide <code class="docutils literal notranslate"><span class="pre">django-polls/docs</span></code> en prévision de contenu documentaire. Ajoutez une ligne supplémentaire dans <code class="docutils literal notranslate"><span class="pre">django-polls/MANIFEST.in</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">recursive</span><span class="o">-</span><span class="n">include</span> <span class="n">docs</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>Notez que le répertoire <code class="docutils literal notranslate"><span class="pre">docs</span></code> ne sera pas inclus dans votre paquet tant que vous n’y ajoutez pas de fichier. Beaucoup d’applications Django offrent aussi un version en ligne de leur documentation par le moyen de sites comme <a class="reference external" href="https://readthedocs.org">readthedocs.org</a>.</p>
+</li>
+<li><p class="first">Essayez de construire votre paquet avec <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span></code> (lancé depuis <code class="docutils literal notranslate"><span class="pre">django-polls</span></code>). Cela va créer un répertoire nommé <code class="docutils literal notranslate"><span class="pre">dist</span></code> et construire votre nouveau paquet, <code class="docutils literal notranslate"><span class="pre">django-polls-0.1.tar.gz</span></code>.</p>
+</li>
+</ol>
+<p>Pour plus d’informations sur l’empaquetage, consultez (en anglais) le <a class="reference external" href="https://packaging.python.org/tutorials/packaging-projects/">Tutoriel sur l’empaquetage et la distribution de projets</a>.</p>
+</div>
+<div class="section" id="s-using-your-own-package">
+<span id="using-your-own-package"></span><h2>Utilisation de son propre paquet<a class="headerlink" href="#using-your-own-package" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Comme nous avons déplacé le répertoire <code class="docutils literal notranslate"><span class="pre">polls</span></code> hors du projet, celui-ci ne fonctionne plus. Nous allons maintenant corriger ça en installant notre nouveau paquet <code class="docutils literal notranslate"><span class="pre">django-polls</span></code>.</p>
+<div class="admonition-installing-as-a-user-library admonition">
+<p class="first admonition-title">Installation en tant que bibliothèque utilisateur</p>
+<p>Les étapes suivantes installent <code class="docutils literal notranslate"><span class="pre">django-polls</span></code> comme une bibliothèque utilisateur. Les installations «&nbsp;utilisateur&nbsp;» comportent bien des avantages sur l’installation de paquets au niveau système, comme de pouvoir être utilisables sur des systèmes dont vous n’êtes pas administrateur ou pour éviter que le paquet ne perturbe des services du système ou d’autres utilisateurs de la machine.</p>
+<p class="last">Notez que les installations «&nbsp;utilisateur&nbsp;» peuvent tout de même influencer le comportement d’outils système qui tournent sous l’identité de cet utilisateur, il est donc plus robuste d’utiliser un environnement virtuel (voir ci-dessous).</p>
+</div>
+<ol class="arabic">
+<li><p class="first">Pour installer le paquet, utilisez pip (vous l’avez déjà <a class="reference internal" href="#installing-reusable-apps-prerequisites"><span class="std std-ref">installé</span></a>, n’est-ce pas&nbsp;?)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span> <span class="n">django</span><span class="o">-</span><span class="n">polls</span><span class="o">/</span><span class="n">dist</span><span class="o">/</span><span class="n">django</span><span class="o">-</span><span class="n">polls</span><span class="o">-</span><span class="mf">0.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Si tout va bien, votre projet Django devrait de nouveau fonctionner correctement. Lancez à nouveau le serveur pour le vérifier.</p>
+</li>
+<li><p class="first">Pour désinstaller le paquet, utilisez pip&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pip</span> <span class="n">uninstall</span> <span class="n">django</span><span class="o">-</span><span class="n">polls</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="s-publishing-your-app">
+<span id="publishing-your-app"></span><h2>Publication de l’application<a class="headerlink" href="#publishing-your-app" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Après avoir empaqueté et testé <code class="docutils literal notranslate"><span class="pre">django-polls</span></code>, il est prêt à être partagé avec le monde entier&nbsp;! Si ce n’était pas qu’un exemple, vous pourriez maintenant&nbsp;:</p>
+<ul class="simple">
+<li>Envoyer le paquet à un ami par courriel.</li>
+<li>Envoyer le paquet sur votre site Web.</li>
+<li>Publier le paquet dans un dépôt public, tel que le <a class="reference internal" href="#the-python-package-index-pypi">Python Package Index (PyPI)</a>. <a class="reference external" href="https://packaging.python.org">packaging.python.org</a> dispose d’un <a class="reference external" href="https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives">bon tutoriel</a> (en anglais) qui explique comment faire cela.</li>
+</ul>
+</div>
+<div class="section" id="s-installing-python-packages-with-a-virtual-environment">
+<span id="installing-python-packages-with-a-virtual-environment"></span><h2>Installation de paquets Python avec un environnement virtuel<a class="headerlink" href="#installing-python-packages-with-a-virtual-environment" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Précédemment, nous avons installé l’application de sondage comme bibliothèque utilisateur. Cela comporte quelques désavantages&nbsp;:</p>
+<ul class="simple">
+<li>La modification de bibliothèques utilisateurs peut influencer d’autres logiciels Python sur votre système.</li>
+<li>Vous ne pourrez pas faire fonctionner plusieurs versions de ce paquet en parallèle (ou avec d’autres portant le même nom).</li>
+</ul>
+<p>Typiquement, ces situations ne se produisent que lorsque vous maintenez plusieurs projets Django. Dans ces cas, la meilleure solution est d’utiliser <a class="reference external" href="https://docs.python.org/3/tutorial/venv.html" title="(disponible dans Python v3.9)"><span class="xref std std-doc">venv</span></a>. Cet outil permet de maintenir plusieurs environnements Python isolés les uns des autres, ayant chacun leur propre copie des bibliothèques et de l’espace de nom des paquets.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutoriel avancé&nbsp;: concevoir des applications réutilisables</a><ul>
+<li><a class="reference internal" href="#reusability-matters">Importance du recyclage</a></li>
+<li><a class="reference internal" href="#your-project-and-your-reusable-app">Votre projet et votre application recyclable</a></li>
+<li><a class="reference internal" href="#installing-some-prerequisites">Installation de quelques prérequis</a></li>
+<li><a class="reference internal" href="#packaging-your-app">Empaquetage de l’application</a></li>
+<li><a class="reference internal" href="#using-your-own-package">Utilisation de son propre paquet</a></li>
+<li><a class="reference internal" href="#publishing-your-app">Publication de l’application</a></li>
+<li><a class="reference internal" href="#installing-python-packages-with-a-virtual-environment">Installation de paquets Python avec un environnement virtuel</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="tutorial07.html"
+                        title="Chapitre précédent">Écriture de votre première application Django, 7ème partie</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="whatsnext.html"
+                        title="Chapitre suivant">Quelle lecture pour la suite</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/reusable-apps.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="tutorial07.html" title="Écriture de votre première application Django, 7ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="whatsnext.html" title="Quelle lecture pour la suite">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

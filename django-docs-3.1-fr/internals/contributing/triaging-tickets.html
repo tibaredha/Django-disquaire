@@ -1,0 +1,433 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tri des tickets &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Écriture du code" href="writing-code/index.html" />
+    <link rel="prev" title="Signalement d’anomalies ou demandes de fonctionnalités" href="bugs-and-features.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="bugs-and-features.html" title="Signalement d’anomalies ou demandes de fonctionnalités">previous</a>
+     |
+    <a href="../index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="writing-code/index.html" title="Écriture du code">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="internals-contributing-triaging-tickets">
+            
+  <div class="section" id="s-triaging-tickets">
+<span id="triaging-tickets"></span><h1>Tri des tickets<a class="headerlink" href="#triaging-tickets" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Django utilise <a class="reference external" href="https://code.djangoproject.com/">Trac</a> pour la gestion du travail autour de son code. Trac est un jardin soigné par la communauté formés de bogues que les gens ont trouvé et de fonctionnalités que certains souhaitent voir apparaître. Comme dans tout jardin, il y a parfois des mauvaises graines à enlever et quelquefois des fleurs et des légumes doivent être cueillis. Nous avons besoin de vous pour faire le tri afin qu’au final, tout le monde en bénéficie.</p>
+<p>Comme pour tout jardin, nous pouvons aspirer à la perfection, mais dans la réalité, elle n’existe jamais. Même dans les jardins les plus purs, il y a toujours des escargots et des insectes. Dans un jardin communautaire, il y a aussi des personnes voulant aider de manière bien intentionnée et qui fertilisent les graines et empoisonnent les roses. C’est la tâche de la communauté entière de s’autogérer, de limiter au mieux les problèmes et d’éduquer ceux qui arrivent dans la communauté afin qu’ils puissent devenir des membres contributifs de valeur.</p>
+<p>De même, bien que nous visions que Trac soit une représentation parfaite de l’état de progression de Django, nous reconnaissons que cela n’arrivera pas. En distribuant la charge de maintenance de Trac à la communauté, nous acceptons qu’il y aura des erreurs. Trac est « majoritairement à jour » et nous assumons que dans certains cas il se trompe. Cela nous va. Nous sommes des perfectionnistes avec des délais !</p>
+<p>Nous comptons sur la communauté pour qu’elle continue de participer, de garder les tickets dans un état le plus juste possible et qu’elle amène les sujets de discussion dans nos listes de diffusion lorsqu’il y a de la confusion ou des désaccords.</p>
+<p>Django est un projet communautaire et chaque contribution est utile. Nous ne pouvons pas le faire sans <strong>vous</strong> !</p>
+<div class="section" id="s-triage-workflow">
+<span id="triage-workflow"></span><h2>Procédures de tri des tickets<a class="headerlink" href="#triage-workflow" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Malheureusement, un certain nombre de signalement de bogues ou de demandes de fonctionnalités dans le système des tickets ne contiennent pas tous les <a class="reference internal" href="bugs-and-features.html"><span class="doc">détails requis</span></a>. Certains tickets ont des correctifs, mais ceux-ci ne satisfont pas toujours à toutes les exigences d’un <a class="reference internal" href="writing-code/submitting-patches.html#patch-style"><span class="std std-ref">bon correctif</span></a>.</p>
+<p>Une manière d’aider est de « trier » des tickets que d’autres utilisateurs ont créés.</p>
+<p>Most of the workflow is based around the concept of a ticket’s
+<a class="reference internal" href="#triage-stages"><span class="std std-ref">triage stages</span></a>. Each stage describes where in its
+lifetime a given ticket is at any time. Along with a handful of flags, this
+attribute easily tells us what and who each ticket is waiting on.</p>
+<p>Comme une image vaut mieux que mille mots, commençons par ceci :</p>
+<a class="reference internal image-reference" href="../../_images/triage_process.svg"><img alt="Django's ticket triage workflow" height="501" src="../../_images/triage_process.svg" width="400" /></a>
+<p>Il existe deux rôles dans ce diagramme :</p>
+<ul class="simple">
+<li>Les commiteurs : des personnes ayant accès de commit et qui sont responsables de rendre la décision finale pour la fusion des correctifs.</li>
+<li>Les trieurs de tickets : n’importe quel membre de la communauté Django choisissant de s’impliquer dans le processus de développement de Django. Notre installation Trac est volontairement ouverte au public et quiconque peut trier des tickets. Django est un projet communautaire et nous encourageons le <a class="reference internal" href="#how-can-i-help-with-triaging"><span class="std std-ref">tri par la communauté</span></a>.</li>
+</ul>
+<p>En guise d’exemple, voici le cycle de vie d’un ticket moyen :</p>
+<ul class="simple">
+<li>Alice crée un ticket et y associe une requête de contribution incomplète (pas de tests, implémentation non correcte).</li>
+<li>Bob révise la requête de contribution, marque le ticket avec les coches « Accepted », « needs tests » et « patch needs improvement », puis ajoute un commentaire indiquant à Alice comme le correctif peut être amélioré.</li>
+<li>Alice met à jour la requête de contribution, ajoutant des tests (sans modifier l’implémentation). Elle décoche les deux cases correspondantes.</li>
+<li>Charlie révise la requête de contribution et enlève la coche « patch needs improvement » et ajoute son commentaire au sujet de l’amélioration de l’implémentation.</li>
+<li>Alice met à jour la demande de contribution, corrigeant l’implémentation. Elle enlève le drapeau « patch needs improvement » (correctif nécessite amélioration).</li>
+<li>Daisy relit la demande de contribution et marque le ticket comme « Ready for checkin » (prêt pour l’intégration).</li>
+<li>Jacob, un commiteur, révise la demande de contribution et l’intègre dans le code principal (« merge »).</li>
+</ul>
+<p>Certains tickets n’ont pas besoin d’autant d’interventions, mais il y a aussi des tickets qui en nécessitent beaucoup plus.</p>
+</div>
+<div class="section" id="s-triage-stages">
+<span id="s-id1"></span><span id="triage-stages"></span><span id="id1"></span><h2>Étapes de tri<a class="headerlink" href="#triage-stages" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Nous décrivons ci-dessous plus en détails les diverses étapes par lesquelles un ticket passe durant son parcours de vie.</p>
+<div class="section" id="s-unreviewed">
+<span id="unreviewed"></span><h3>Non traité (Unreviewed)<a class="headerlink" href="#unreviewed" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le ticket n’a pas été relu par quelqu’un qui se sentait qualifié pour juger si ce ticket contient un problème réel, une fonctionnalité raisonnable ou s’il devrait plutôt être fermé pour une ou différentes raisons.</p>
+</div>
+<div class="section" id="s-accepted">
+<span id="accepted"></span><h3>Accepté (Accepted)<a class="headerlink" href="#accepted" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La grande zone grise ! La signification absolue de « accepté » est que le problème décrit dans le ticket est valide et se trouve dans un état où on peut travailler sur sa résolution. Au-delà de cela, d’autres aspects sont à prendre en considération :</p>
+<ul>
+<li><p class="first"><strong>Accepted + No Flags</strong></p>
+<p>The ticket is valid, but no one has submitted a patch for it yet. Often this
+means you could safely start writing a patch for it. This is generally more
+true for the case of accepted bugs than accepted features. A ticket for a bug
+that has been accepted means that the issue has been verified by at least one
+triager as a legitimate bug - and should probably be fixed if possible. An
+accepted new feature may only mean that one triager thought the feature would
+be good to have, but this alone does not represent a consensus view or imply
+with any certainty that a patch will be accepted for that feature. Seek more
+feedback before writing an extensive patch if you are in doubt.</p>
+</li>
+<li><p class="first"><strong>Accepted + Has Patch</strong></p>
+<p>The ticket is waiting for people to review the supplied patch. This means
+downloading the patch and trying it out, verifying that it contains tests
+and docs, running the test suite with the included patch, and leaving
+feedback on the ticket.</p>
+</li>
+<li><p class="first"><strong>Accepted + Has Patch + Needs …</strong></p>
+<p>This means the ticket has been reviewed, and has been found to need further
+work. «&nbsp;Needs tests&nbsp;» and «&nbsp;Needs documentation&nbsp;» are self-explanatory. «&nbsp;Patch
+needs improvement&nbsp;» will generally be accompanied by a comment on the ticket
+explaining what is needed to improve the code.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-ready-for-checkin">
+<span id="ready-for-checkin"></span><h3>Prêt pour le commit (Ready For Checkin)<a class="headerlink" href="#ready-for-checkin" title="Lien permanent vers ce titre">¶</a></h3>
+<p>The ticket was reviewed by any member of the community other than the person
+who supplied the patch and found to meet all the requirements for a
+commit-ready patch. A committer now needs to give the patch a final
+review prior to being committed. See the
+<a class="reference internal" href="new-contributors.html#new-contributors-faq"><span class="std std-ref">New contributors” FAQ</span></a> for «&nbsp;My ticket has been in
+RFC forever! What should I do?&nbsp;»</p>
+</div>
+<div class="section" id="s-someday-maybe">
+<span id="someday-maybe"></span><h3>Un jour peut-être (Someday/Maybe)<a class="headerlink" href="#someday-maybe" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Cette étape n’apparaît pas dans le diagramme. Elle est utilisée avec modération pour garder la trace d’idées plus générales ou de demandes de fonctionnalités à plus long terme.</p>
+<p>These tickets are uncommon and overall less useful since they don’t describe
+concrete actionable issues. They are enhancement requests that we might
+consider adding someday to the framework if an excellent patch is submitted.
+They are not a high priority.</p>
+</div>
+</div>
+<div class="section" id="s-other-triage-attributes">
+<span id="other-triage-attributes"></span><h2>Autres attributs de tri<a class="headerlink" href="#other-triage-attributes" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Un certain nombre de drapeaux, apparaissant sous forme de cases à cocher dans Trac, peuvent être définis pour un ticket :</p>
+<div class="section" id="s-has-patch">
+<span id="has-patch"></span><h3>Has patch (possède un correctif)<a class="headerlink" href="#has-patch" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Cela signifie que le ticket possède un <a class="reference internal" href="writing-code/submitting-patches.html"><span class="doc">correctif</span></a> associé. Ceux-ci sont analysés pour estimer si le correctif est « bon ».</p>
+<p>Les trois champs suivants (Needs documentation, Needs tests, Patch needs improvement) ne s’appliquent que lorsqu’un correctif est disponible.</p>
+</div>
+<div class="section" id="s-needs-documentation">
+<span id="needs-documentation"></span><h3>Needs documentation (a besoin de documentation)<a class="headerlink" href="#needs-documentation" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ce drapeau est utilisé pour les tickets ayant un correctif, mais pas encore de documentation. La documentation complète des fonctionnalités est un prérequis avant de pouvoir faire entrer du code dans Django.</p>
+</div>
+<div class="section" id="s-needs-tests">
+<span id="needs-tests"></span><h3>Needs tests (a besoin de tests)<a class="headerlink" href="#needs-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ce drapeau indique que le correctif a besoin de tests unitaires associés. Encore une fois, il s’agit d’un élément obligatoire pour un correctif valable.</p>
+</div>
+<div class="section" id="s-patch-needs-improvement">
+<span id="patch-needs-improvement"></span><h3>Patch needs improvement (le correctif a besoin d’améliorations)<a class="headerlink" href="#patch-needs-improvement" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ce drapeau signifie que même si le ticket <em>possède</em> un correctif, il n’est pas encore prêt à être commité. Cela peut signifier que le correctif n’est plus applicable, que son implémentation est défaillante ou que le code ne correspond pas aux standards exigés.</p>
+</div>
+<div class="section" id="s-easy-pickings">
+<span id="easy-pickings"></span><h3>Easy pickings (simple à corriger)<a class="headerlink" href="#easy-pickings" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Désigne les tickets qui nécessitent de petits correctifs assez simples.</p>
+</div>
+<div class="section" id="s-type">
+<span id="type"></span><h3>Type<a class="headerlink" href="#type" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les billets doivent être classés par <em>type</em> parmi&nbsp;:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>New Feature (nouvelle fonctionnalité)</dt>
+<dd>Pour ajouter quelque chose de nouveau.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Bug</dt>
+<dd>Quand une chose existante est cassé ou n’a pas le fonctionnement attendu.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Nettoyage/optimisation</dt>
+<dd>Lorsque rien n’est cassé mais quelque chose pourrait être plus propre, mieux, plus rapide, plus puissant.</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="s-component">
+<span id="component"></span><h3>Component (composant)<a class="headerlink" href="#component" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les tickets doivent être classés en composants indiquant quelle partie du code de Django ils concernent. Cela aide à organiser les tickets et à les rendre plus facilement retrouvables.</p>
+</div>
+<div class="section" id="s-severity">
+<span id="severity"></span><h3>Severity (sévérité)<a class="headerlink" href="#severity" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’attribut <em>severity</em> est utilisé pour identifier les tickets bloquants, c’est-à-dire des problèmes devant être absolument résolus avant de publier la prochaine version de Django. Typiquement, il s’agit de bogues provoquant des régressions en comparaison d’anciennes versions ou qui sont potentiellement la cause de pertes de données importantes. Cet attribut est assez rarement utilisé et la grande majorité des tickets possèdent un niveau de sévérité « normal ».</p>
+</div>
+<div class="section" id="s-version">
+<span id="version"></span><h3>Version<a class="headerlink" href="#version" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est possible d’utiliser l’attribut <em>version</em> pour indiquer la version dans laquelle le bogue signalé a été identifié.</p>
+</div>
+<div class="section" id="s-ui-ux">
+<span id="ui-ux"></span><h3>UI/UX<a class="headerlink" href="#ui-ux" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ce drapeau est utilisé pour les tickets qui sont liés aux questions d’interface utilisateur et d’expérience d’utilisation. Par exemple, ce drapeau serait approprié pour des fonctionnalités de présentation à l’utilisateur dans les formulaires ou l’interface d’administration.</p>
+</div>
+<div class="section" id="s-cc">
+<span id="cc"></span><h3>Cc<a class="headerlink" href="#cc" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est possible d’ajouter son nom d’utilisateur ou son adresse électronique dans ce champ pour être averti lorsque de nouvelles contributions sont apportées au ticket concerné.</p>
+</div>
+<div class="section" id="s-keywords">
+<span id="keywords"></span><h3>Keywords (mots-clés)<a class="headerlink" href="#keywords" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Avec ce champ, il est possible d’étiqueter un ticket par plusieurs mots-clés. Cela peut par exemple être utile pour grouper plusieurs tickets autour d’un même thème. Les mots-clés peuvent être séparés par des virgules ou des espaces. Les recherches par mot-clé cherchent un mot-clé dans toute l’expression. Par exemple, si on clique sur le mot-clé « form » d’un ticket, les résultats contiendront tous les tickets étiquetés avec des mots tels que « formset », « modelformset » ou « ManagementForm ».</p>
+</div>
+</div>
+<div class="section" id="s-closing-tickets">
+<span id="s-id2"></span><span id="closing-tickets"></span><span id="id2"></span><h2>Fermeture de tickets<a class="headerlink" href="#closing-tickets" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsqu’un ticket a terminé son cycle de vie utile, il est temps de le fermer. Cependant, la fermeture d’un ticket est une grande responsabilité. Il faut être certain que le problème est réellement réglé, et il faut garder à l’esprit que celui qui a ouvert le ticket pourrait ne pas être heureux de voir son ticket fermé (sauf si une correction a été appliquée !). Si vous n’êtes pas sûr qu’un ticket doit être fermé, laissez un commentaire avec votre raisonnement.</p>
+<p>Si vous fermez réellement un ticket, vous devez toujours vous assurer des éléments suivants :</p>
+<ul class="simple">
+<li>Être certain que le problème est résolu.</li>
+<li>Laisser un commentaire expliquant la décision de fermer le ticket.</li>
+<li>S’il existe une manière d’améliorer le ticket pour qu’il soit réouvert, le faire savoir.</li>
+<li>Si le ticket est un doublon, faire référence au ticket original. De même, ajouter une référence croisée en ajoutant un commentaire sur le ticket original, ce qui permet d’avoir accès à davantage d’informations sur le bogue signalé ou la fonctionnalité demandée.</li>
+<li><strong>Soyez poli.</strong> Personne n’aime voir son ticket être fermé. Cela peut être frustrant et même décourageant. La meilleure manière d’éviter de détourner les gens de la contribution à Django est de rester poli et amical, et d’offrir des suggestions sur la manière d’améliorer le ticket ainsi que d’autres tickets à venir.</li>
+</ul>
+<p>Un ticket peut être résolu de plusieurs façons&nbsp;:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>fixed (résolu)</dt>
+<dd>Utilisé quand un correctif a été intégré à Django et que le problème est réglé.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>invalid (non valide)</dt>
+<dd>Utilisé lorsque le ticket est jugé incorrect. Cela signifie que le problème du ticket est en fait le résultat d’une erreur de l’utilisateur ou que le problème décrit s’applique à un autre composant que Django, ou encore qu’il ne s’agit ni d’un signalement d’erreur, ni d’une demande d’amélioration (par exemple, certains utilisateurs débutants ouvrent des tickets pour des demandes de support).</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>wontfix (ne sera pas résolu)</dt>
+<dd>Utilisé lorsque quelqu’un décide que cette requête n’est pas jugée digne d’être prise en compte dans Django. Il peut arriver qu’un ticket soit fermé comme «&nbsp;wontfix&nbsp;» avec une demande de lancer une discussion sur la liste de diffusion <a class="reference internal" href="../mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a> s’il existe un désaccord avec l’explication fournie par la personne qui a fermé le ticket. D’autres fois, une discussion sur la liste de diffusion précède la fermeture du ticket. Utilisez toujours la liste de diffusion pour obtenir un consensus avant de réouvrir un ticket fermé comme « wontfix ».</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>duplicate (doublon)</dt>
+<dd>Utilisé lorsqu’un autre ticket recouvre le même problème. En fermant les tickets doublons, la discussion reste centralisée à un seul endroit, ce qui aide tout le monde.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>worksforme (marche pour moi)</dt>
+<dd>Utilisé lorsque le ticket ne contient pas assez de détails pour reproduire l’anomalie originale.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>needsinfo (besoin d’informations)</dt>
+<dd>Utilisé lorsque le ticket ne contient pas assez d’informations pour reproduire le problème signalé, mais qu’il est potentiellement valable. Le ticket devrait être réouvert après que des informations supplémentaires ont été fournies.</dd>
+</dl>
+</li>
+</ul>
+<p>Si vous pensez que le ticket a été fermé par erreur, soit que le problème demeure, soit qu’il est réapparu ailleurs ou encore que les trieurs se sont trompés, vous pouvez réouvrir le ticket en fournissant des informations complémentaires. Encore une fois, évitez de réouvrir des tickets qui ont été fermés comme «&nbsp;wontfix&nbsp;», mais dans ce cas, préférez la discussion du problème sur la liste <a class="reference internal" href="../mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a>.</p>
+</div>
+<div class="section" id="s-how-can-i-help-with-triaging">
+<span id="s-id3"></span><span id="how-can-i-help-with-triaging"></span><span id="id3"></span><h2>Commet puis-je aider à trier les tickets&nbsp;?<a class="headerlink" href="#how-can-i-help-with-triaging" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le processus de tri est principalement mené par des membres de la communauté. Vraiment, <strong>TOUT LE MONDE</strong> peut aider.</p>
+<p>Pour vous impliquer, commencez par <a class="reference external" href="https://www.djangoproject.com/accounts/password/reset/">créer un compte sur Trac</a>. Si vous disposez d’un compte mais que vous avez oublié le mot de passe, vous pouvez le réinitialiser en utilisant la <a class="reference external" href="https://www.djangoproject.com/accounts/register/">page de réinitialisation de mot de passe</a>.</p>
+<p>Puis, vous pouvez aider en&nbsp;:</p>
+<ul class="simple">
+<li>Fermant les nouveaux tickets («&nbsp;Unreviewed&nbsp;») comme «&nbsp;invalid&nbsp;», «&nbsp;worksforme&nbsp;», «&nbsp;duplicate&nbsp;» ou « wontfix ».</li>
+<li>Fermant les nouveaux tickets («&nbsp;Unreviewed&nbsp;») comme «&nbsp;needsinfo&nbsp;» lorsque la description est trop vague pour qu’on puisse imaginer une résolution ou lorsqu’il s’agit de demandes de fonctionnalité qui nécessitent une discussion sur la liste <a class="reference internal" href="../mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a>.</li>
+<li>Corrigeant les coches «&nbsp;Needs tests&nbsp;», «&nbsp;Needs documentation&nbsp;» ou «&nbsp;Has patch&nbsp;» pour les tickets où elles ne sont pas correctement définies.</li>
+<li>Activant la coche <a class="reference external" href="https://code.djangoproject.com/query?status=!closed&amp;easy=1">«&nbsp;Easy pickings&nbsp;»</a> pour les tickets de faible portée et relativement évidents.</li>
+<li>Définissant le <em>type</em> des tickets qui ne sont pas encore catégorisés.</li>
+<li>Vérifiant que les anciens tickets sont toujours valables. SI un ticket n’a pas vu d’activité depuis longtemps, il est possible que le problème ait été résolu dans l’intervalle sans que le ticket ait été fermé.</li>
+<li>Identifiant des tendances et des thèmes dans les tickets. Si de nombreux signalements de bogues concernent une partie particulière de Django, cela peut indiquer que cette partie de code a besoin de réécriture. Si une tendance se dégage, il est suggéré d’amener une discussion (en faisant référence aux tickets concernés) sur la liste <a class="reference internal" href="../mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a>.</li>
+<li>Vérifiant si les correctifs soumis par d’autres utilisateurs sont corrects. S’ils sont corrects et qu’ils contiennent la documentation et les tests nécessaires, vous pouvez faire passer le ticket à l’état «&nbsp;Ready for Checkin&nbsp;». Dans le cas contraire, écrivez un commentaire expliquant pourquoi et cochez les cases correspondantes («&nbsp;Patch needs improvement&nbsp;», «&nbsp;Needs tests&nbsp;», etc.).</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>La <a class="reference external" href="https://code.djangoproject.com/wiki/Reports">page des rapports</a> contient des liens vers de nombreuses requêtes Trac utiles, y compris certaines orientées sur le triage des tickets et la relecture de correctifs comme suggéré ci-dessus.</p>
+<p class="last">Vous pouvez aussi trouver plus de <a class="reference internal" href="new-contributors.html"><span class="doc">Conseils pour les nouveaux contributeurs</span></a>.</p>
+</div>
+<p>Cependant, nous demandons à tous les membres de la communauté de respecter les principes suivants en travaillant sur la base de données des tickets :</p>
+<ul class="simple">
+<li>S’il vous plaît, <strong>ne faites pas</strong> passer vos propres tickets en « Ready for checkin ». Vous pouvez faire passer des tickets d’autres personnes que vous avez révisés en « Ready for checkin », mais il est nécessaire d’avoir au minimum une autre personne de la communauté qui ait révisé le correctif que vous avez proposé.</li>
+<li>S’il vous plaît, <strong>ne revenez pas</strong> sur une décision dans d’abord écrire un message à <a class="reference internal" href="../mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a> pour trouver un consensus.</li>
+<li>Si vous n’êtes pas certain de devoir faire une modification, ne la faites pas, mais laissez plutôt un commentaire avec vos préoccupations sur le ticket, ou écrivez un message sur <a class="reference internal" href="../mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a>. Il est légitime de ne pas savoir, mais votre opinion compte tout de même.</li>
+</ul>
+</div>
+<div class="section" id="s-bisecting-a-regression">
+<span id="bisecting-a-regression"></span><h2>Recherche d’origine d’une régression avec bisect<a class="headerlink" href="#bisecting-a-regression" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une régression est un bogue présent dans une version plus récente de Django et qui ne l’était pas avant. Un élément d’information extrêmement utile est le commit qui a introduit la régression. Le fait de connaître le commit qui est la cause du changement de comportement aide à découvrir si la modification était intentionnelle ou s’il s’agit d’un effet de bord inattendu. Voici comment vous pouvez trouver ce commit.</p>
+<p>Commencez par écrire un test de régression du problème pour la suite de tests de Django. Par exemple, nous supposons que nous recherchons une régression dans les migrations. Après avoir écrit le test et confirmé que celui-ci échoue avec le code le plus récent, placez-le dans un fichier séparé que vous pouvez exécuter de manière indépendante. Pour notr exemple, nous supposons que nous avons placé le test dans le fichier <code class="docutils literal notranslate"><span class="pre">tests/migrations/test_regression.py</span></code>, qui peut être exécuté avec</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./runtests.py migrations.test_regression
+</pre></div>
+</div>
+<p>Puis, nous marquons le point actuel dans l’historique comme « mauvais » (bad) dans la mesure où le test échoue</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git bisect bad
+<span class="go">You need to start by &quot;git bisect start&quot;</span>
+<span class="go">Do you want me to do it for you [Y/n]? y</span>
+</pre></div>
+</div>
+<p>Nous devons maintenant trouver un point dans l’historique git avant l’introduction de la régression (c’est-à-dire un point où le test passe). Utilisez quelque chose comme <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">HEAD~100</span></code> pour extraire une version du code précédente (100 commits dans le passé, dans ce cas). Vérifiez si le test passe ou échoue. S’il échoue, marquez ce point comme « mauvais » (<code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span> <span class="pre">bad</span></code>), puis continuez d’extraire du code plus ancien et refaites le contrôle jusqu’à ce que vous trouviez un point d’historique où le test passe, et marquez alors ce point comme « bon » (good)</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git bisect good
+<span class="go">Bisecting: X revisions left to test after this (roughly Y steps)</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<p>Nous sommes maintenant prêt pour la partie sympa : utilisez <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span> <span class="pre">run</span></code> pour automatiser la suite du processus</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git bisect run tests/runtests.py migrations.test_regression
+</pre></div>
+</div>
+<p>Vous devriez voir <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">bisect</span></code> utiliser une recherche binaire pour extraire automatiquement les révisions entre les bons et mauvais commits jusqu’à ce qu’il trouve le premier commit « mauvais » où le test échoue.</p>
+<p>À ce stade, reportez vos résultats sur le ticket Trac et ajoutez le test de régression en pièce jointe. Lorsque quelqu’un écrira une correctif pour ce problème, il disposera déjà de votre test comme point de départ.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tri des tickets</a><ul>
+<li><a class="reference internal" href="#triage-workflow">Procédures de tri des tickets</a></li>
+<li><a class="reference internal" href="#triage-stages">Étapes de tri</a><ul>
+<li><a class="reference internal" href="#unreviewed">Non traité (Unreviewed)</a></li>
+<li><a class="reference internal" href="#accepted">Accepté (Accepted)</a></li>
+<li><a class="reference internal" href="#ready-for-checkin">Prêt pour le commit (Ready For Checkin)</a></li>
+<li><a class="reference internal" href="#someday-maybe">Un jour peut-être (Someday/Maybe)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-triage-attributes">Autres attributs de tri</a><ul>
+<li><a class="reference internal" href="#has-patch">Has patch (possède un correctif)</a></li>
+<li><a class="reference internal" href="#needs-documentation">Needs documentation (a besoin de documentation)</a></li>
+<li><a class="reference internal" href="#needs-tests">Needs tests (a besoin de tests)</a></li>
+<li><a class="reference internal" href="#patch-needs-improvement">Patch needs improvement (le correctif a besoin d’améliorations)</a></li>
+<li><a class="reference internal" href="#easy-pickings">Easy pickings (simple à corriger)</a></li>
+<li><a class="reference internal" href="#type">Type</a></li>
+<li><a class="reference internal" href="#component">Component (composant)</a></li>
+<li><a class="reference internal" href="#severity">Severity (sévérité)</a></li>
+<li><a class="reference internal" href="#version">Version</a></li>
+<li><a class="reference internal" href="#ui-ux">UI/UX</a></li>
+<li><a class="reference internal" href="#cc">Cc</a></li>
+<li><a class="reference internal" href="#keywords">Keywords (mots-clés)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#closing-tickets">Fermeture de tickets</a></li>
+<li><a class="reference internal" href="#how-can-i-help-with-triaging">Commet puis-je aider à trier les tickets&nbsp;?</a></li>
+<li><a class="reference internal" href="#bisecting-a-regression">Recherche d’origine d’une régression avec bisect</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="bugs-and-features.html"
+                        title="Chapitre précédent">Signalement d’anomalies ou demandes de fonctionnalités</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="writing-code/index.html"
+                        title="Chapitre suivant">Écriture du code</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/internals/contributing/triaging-tickets.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="bugs-and-features.html" title="Signalement d’anomalies ou demandes de fonctionnalités">previous</a>
+     |
+    <a href="../index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="writing-code/index.html" title="Écriture du code">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

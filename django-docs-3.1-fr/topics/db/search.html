@@ -1,0 +1,227 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Recherche &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Gestionnaires" href="managers.html" />
+    <link rel="prev" title="Agrégation" href="aggregation.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="aggregation.html" title="Agrégation">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="managers.html" title="Gestionnaires">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-db-search">
+            
+  <div class="section" id="s-search">
+<span id="search"></span><h1>Recherche<a class="headerlink" href="#search" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Un tâche courante des applications Web est de rechercher des données dans la base de données en fonction de la saisie d’utilisateurs. Dans un cas simple, cela peut se limiter à filtrer une liste d’objets par catégorie. Un cas d’utilisation plus complexe pourrait impliquer une recherche avec pondération, catégorisation, mise en évidence, multilingue, etc. Ce document présente certains cas d’utilisation possibles et les outils pouvant être utilisés.</p>
+<p>Nous ferons référence aux mêmes modèles que dans <a class="reference internal" href="queries.html"><span class="doc">Création de requêtes</span></a>.</p>
+<div class="section" id="s-use-cases">
+<span id="use-cases"></span><h2>Cas d’utilisation<a class="headerlink" href="#use-cases" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-standard-textual-queries">
+<span id="standard-textual-queries"></span><h3>Requêtes textuelles standard<a class="headerlink" href="#standard-textual-queries" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les champs basés sur du texte offrent quelques opérations de correspondance. Par exemple, vous pourriez vouloir permettre de rechercher un auteur comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__contains</span><span class="o">=</span><span class="s1">&#39;Terry&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Author: Terry Gilliam&gt;, &lt;Author: Terry Jones&gt;]</span>
+</pre></div>
+</div>
+<p>Il s’agit d’une solution très fragile car elle exige que l’utilisateur connaisse une sous-chaîne exacte du nom de l’auteur. Une meilleure approche pourrait faire appel à une recherche indépendante de la casse (<a class="reference internal" href="../../ref/models/querysets.html#std:fieldlookup-icontains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">icontains</span></code></a>), mais ce n’est qu’une petite amélioration.</p>
+</div>
+<div class="section" id="s-a-database-s-more-advanced-comparison-functions">
+<span id="a-database-s-more-advanced-comparison-functions"></span><h3>Des fonctions comparatives de base de données plus avancées<a class="headerlink" href="#a-database-s-more-advanced-comparison-functions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous utilisez PostgreSQL, Django fournit <a class="reference internal" href="../../ref/contrib/postgres/search.html"><span class="doc">une sélection d’outils spécifiques à cette base de données</span></a> pour permettre d’exploiter des options de requête plus complexes. D’autres bases de données ont des outils différents, parfois via des greffons ou des fonctions définies par les utilisateurs. Django ne les prend pas en charge pour le moment. Nous utiliserons quelques exemples tirés de PostgreSQL pour démontrer le genre de fonctionnalités que les bases de données peuvent offrir.</p>
+<div class="admonition-searching-in-other-databases admonition">
+<p class="first admonition-title">Recherche avec d’autres bases de données</p>
+<p class="last">Tous les outils de recherche proposés par <a class="reference internal" href="../../ref/contrib/postgres/index.html#module-django.contrib.postgres" title="django.contrib.postgres: PostgreSQL-specific fields and features"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.contrib.postgres</span></code></a> sont construits entièrement sur des API publiques telles que les <a class="reference internal" href="../../ref/models/lookups.html"><span class="doc">expressions de recherche personnalisées</span></a> et les <a class="reference internal" href="../../ref/models/database-functions.html"><span class="doc">fonctions de base de données</span></a>. En fonction de la base de données, vous devriez pouvoir construire des requêtes en approchant des API similaires. Si des aspects spécifiques ne peuvent pas être résolus de cette façon, merci de bien vouloir ouvrir un ticket.</p>
+</div>
+<p>Dans l’exemple ci-dessus, nous avons déterminé qu’une recherche non sensible à la casse serait plus utile. Quand on est confronté à des noms sortant de l’alphabet anglais, une autre amélioration possible est d’utiliser les <a class="reference internal" href="../../ref/contrib/postgres/lookups.html#std:fieldlookup-unaccent"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">comparaisons</span> <span class="pre">sans</span> <span class="pre">accents</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__unaccent__icontains</span><span class="o">=</span><span class="s1">&#39;Helen&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Author: Helen Mirren&gt;, &lt;Author: Helena Bonham Carter&gt;, &lt;Author: Hélène Joy&gt;]</span>
+</pre></div>
+</div>
+<p>Cela fait apparaître un autre problème, où nous cherchons des correspondances avec une autre orthographe du nom. Dans ce cas, nous obtenons toutefois une asymétrie, une recherche pour  <code class="docutils literal notranslate"><span class="pre">Helen</span></code> trouvera <code class="docutils literal notranslate"><span class="pre">Helena</span></code> ou <code class="docutils literal notranslate"><span class="pre">Hélène</span></code>, mais pas l’inverse. Une autre option serait d’utiliser une comparaison par <a class="reference internal" href="../../ref/contrib/postgres/lookups.html#std:fieldlookup-trigram_similar"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">trigram_similar</span></code></a> qui compare des suites de lettres.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__unaccent__lower__trigram_similar</span><span class="o">=</span><span class="s1">&#39;Hélène&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Author: Helen Mirren&gt;, &lt;Author: Hélène Joy&gt;]</span>
+</pre></div>
+</div>
+<p>Nous rencontrons maintenant un problème différent&nbsp;: le nom plus long «&nbsp;Helena Bonham Carter&nbsp;» n’apparaît pas car il est bien plus long. Les recherches par trigramme envisagent toutes les combinaisons de trois lettres et comparent combien apparaissent à la fois dans les chaînes source et de recherche. En ce qui concerne le nom plus long, il y a plus de combinaisons qui n’apparaissent pas dans la chaîne source, ce qui explique qu’il n’est plus considéré comme une correspondance proche.</p>
+<p>Le choix correct de fonctions de comparaison dépend ici du jeu de données particulier, par exemple en fonction des langues utilisées et du type de texte à rechercher. Tous les exemples que nous avons examinés portent sur des chaînes courtes et où l’utilisateur va probablement saisir un terme proche (selon plusieurs définitions) des données sources.</p>
+</div>
+<div class="section" id="s-document-based-search">
+<span id="document-based-search"></span><h3>Recherche basée sur des documents<a class="headerlink" href="#document-based-search" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les opérations de base de données standard atteignent leurs limites lorsqu’on est confronté à de gros blocs de texte. Alors que les exemples précédents peuvent être considérés comme des opérations sur une chaîne de caractères, la recherche plein texte examine les mots réels. En fonction du système utilisé, il est probable que certains des concepts suivants seront utilisés&nbsp;:</p>
+<ul class="simple">
+<li>Ignorance des «&nbsp;mots vides&nbsp;» tels que «&nbsp;a&nbsp;», «&nbsp;le&nbsp;», «&nbsp;et&nbsp;».</li>
+<li>Racines de mots, afin que «&nbsp;cheval&nbsp;» et «&nbsp;chevaux&nbsp;» soient considérés identiques.</li>
+<li>Pondération des mots basée sur différents critères tels que la fréquence d’apparition dans le texte ou l’importance des champs (titre, mots-clés, etc.) dans lesquels ils apparaissent.</li>
+</ul>
+<p>Il existe de nombreuses alternatives de logiciels spécialisés pour la recherche, dont <a class="reference external" href="https://www.elastic.co/">Elastic</a> et <a class="reference external" href="https://lucene.apache.org/solr/">Solr</a> sont parmi les plus célèbres. Ce sont des solutions de recherche basées sur des documents complets. Pour les utiliser avec des modèles Django, il sera nécessaire d’ajouter une couche de traduction des données en documents textuels, y compris des références inverses contenant les identifiants de base de données. Lorsqu’une recherche utilisant ces moteurs renvoie un certain document, il est alors possible de l’extraire de la base de données. Plusieurs bibliothèques tierces sont conçues pour vous assister dans cette tâche.</p>
+<div class="section" id="s-postgresql-support">
+<span id="postgresql-support"></span><h4>Prise en charge des outils PostgreSQL<a class="headerlink" href="#postgresql-support" title="Lien permanent vers ce titre">¶</a></h4>
+<p>PostgreSQL possède sa propre implémentation de recherche plein texte. Même si elle n’est pas autant performante que certains autres moteurs de recherche, elle a l’avantage de se trouver dans la base de données elle-même et peut donc être facilement combinée à d’autres requêtes relationnelles telles que la catégorisation.</p>
+<p>Le module <a class="reference internal" href="../../ref/contrib/postgres/index.html#module-django.contrib.postgres" title="django.contrib.postgres: PostgreSQL-specific fields and features"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.contrib.postgres</span></code></a> fournit certains utilitaires pour préparer ces requêtes. Par exemple, une requête pourrait sélectionner tous les articles de blog qui mentionnent «&nbsp;cheese&nbsp;»:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">body_text__search</span><span class="o">=</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Entry: Cheese on Toast recipes&gt;, &lt;Entry: Pizza recipes&gt;]</span>
+</pre></div>
+</div>
+<p>Il est aussi possible de filtrer sur une combinaison de champs et de modèles liés&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">search</span><span class="o">=</span><span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;blog__tagline&#39;</span><span class="p">,</span> <span class="s1">&#39;body_text&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>
+<span class="go">[</span>
+<span class="go">    &lt;Entry: Cheese on Toast recipes&gt;,</span>
+<span class="go">    &lt;Entry: Pizza Recipes&gt;,</span>
+<span class="go">    &lt;Entry: Dairy farming in Argentina&gt;,</span>
+<span class="go">]</span>
+</pre></div>
+</div>
+<p>Voir le document <a class="reference internal" href="../../ref/contrib/postgres/search.html"><span class="doc">Recherche plein texte</span></a> de <code class="docutils literal notranslate"><span class="pre">contrib.postgres</span></code> pour de plus amples détails.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Recherche</a><ul>
+<li><a class="reference internal" href="#use-cases">Cas d’utilisation</a><ul>
+<li><a class="reference internal" href="#standard-textual-queries">Requêtes textuelles standard</a></li>
+<li><a class="reference internal" href="#a-database-s-more-advanced-comparison-functions">Des fonctions comparatives de base de données plus avancées</a></li>
+<li><a class="reference internal" href="#document-based-search">Recherche basée sur des documents</a><ul>
+<li><a class="reference internal" href="#postgresql-support">Prise en charge des outils PostgreSQL</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="aggregation.html"
+                        title="Chapitre précédent">Agrégation</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="managers.html"
+                        title="Chapitre suivant">Gestionnaires</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/db/search.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="aggregation.html" title="Agrégation">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="managers.html" title="Gestionnaires">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,305 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Processus de publication de Django &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Calendrier d’obsolescence de Django" href="deprecation.html" />
+    <link rel="prev" title="Politique de sécurité de Django" href="security.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="security.html" title="Politique de sécurité de Django">previous</a>
+     |
+    <a href="index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="deprecation.html" title="Calendrier d’obsolescence de Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="internals-release-process">
+            
+  <div class="section" id="s-django-s-release-process">
+<span id="django-s-release-process"></span><h1>Processus de publication de Django<a class="headerlink" href="#django-s-release-process" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-official-releases">
+<span id="s-id1"></span><span id="official-releases"></span><span id="id1"></span><h2>Publications officielles<a class="headerlink" href="#official-releases" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Depuis la version 1.0, la numérotation des versions de Django fonctionne comme ceci&nbsp;:</p>
+<ul class="simple">
+<li>Les versions sont numérotées sous la forme <code class="docutils literal notranslate"><span class="pre">A.B</span></code> ou <code class="docutils literal notranslate"><span class="pre">A.B.C</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">A.B</span></code> est le numéro de version de <em>publication majeure</em>. Chaque version est rétrocompatible autant que possible avec la version précédente. Les exceptions à cette règle sont énumérées dans les notes de publication.</li>
+<li><code class="docutils literal notranslate"><span class="pre">C</span></code> est le numéro de <em>version corrective</em>, qui est incrémenté pour les corrections de bogues et de sécurité. Ces publications sont 100% rétrocompatibles avec les précédentes versions correctives. La seule exception concerne les cas où un problème de sécurité ou de perte de données ne peut pas être résolu sans casser la rétrocompatibilité. Si cela se produit, les notes de publication donnent alors des instructions de mise à jour détaillées.</li>
+<li>Avant une nouvelle publication majeure, des publications alpha, beta et d’évaluation sont diffusées. Elles sont numérotées sous la forme <code class="docutils literal notranslate"><span class="pre">A.B</span> <span class="pre">alpha/beta/rc</span> <span class="pre">N</span></code>, ce qui signifie la <code class="docutils literal notranslate"><span class="pre">Nième</span></code> version alpha/beta/d’évaluation de la version  <code class="docutils literal notranslate"><span class="pre">A.B</span></code>.</li>
+</ul>
+<p>Dans git, chaque version de Django possède un «&nbsp;tag&nbsp;» nommé selon son numéro de version, signé avec la clé de publication de Django. De plus, chaque série de versions possède sa propre branche, appelée <code class="docutils literal notranslate"><span class="pre">stable/A.B.x</span></code>, et les publications corrigeant des anomalies ou des failles de sécurité sont produites à partir de ces branches.</p>
+<p>Pour plus d’informations sur la manière dont le projet Django produit de nouvelles publications à des fins de sécurité, veuillez consulter nos <a class="reference internal" href="security.html"><span class="doc">politiques de sécurité</span></a>.</p>
+<dl class="glossary docutils">
+<dt id="term-feature-release">Publication majeure</dt>
+<dd>Les publications majeures (A.B, A.B+1, etc.) apparaissent environ tous les huit mois, voir <a class="reference internal" href="#id2">processus de publication</a> pour les détails. Ces publications contiennent de nouvelles fonctionnalités ainsi que des améliorations à celles déjà existantes, entre autres.</dd>
+<dt id="term-patch-release">Publication corrective</dt>
+<dd><p class="first">Les publications correctives (A.B.C, A.B.C+1, etc.) sont diffusées si nécessaire, pour corriger des anomalies ou des problèmes de sécurité.</p>
+<p class="last">Ces publications sont 100% compatibles avec la version majeure à laquelle elle correspond, sauf si c’est impossible en raison de problèmes de sécurité ou de pertes de données. Ainsi, la réponse à la question « dois-je mettre à jour à la dernière publication corrective ? » est toujours « oui ».</p>
+</dd>
+<dt id="term-long-term-support-release">Publication avec prise en charge à long terme</dt>
+<dd><p class="first">Certaines publications majeures sont désignées comme des versions prises en charge à long terme (LTS). Celles-ci vont recevoir les correctifs de sécurité et liées aux pertes de données pendant une durée garantie, habituellement pendant trois ans.</p>
+<p class="last">Voir la <a class="reference external" href="https://www.djangoproject.com/download/">page de téléchargement</a> pour connaître les publications désignées comme prises en charge à long terme.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="s-release-cadence">
+<span id="s-internal-release-cadence"></span><span id="release-cadence"></span><span id="internal-release-cadence"></span><h2>Rythme de publication<a class="headerlink" href="#release-cadence" title="Lien permanent vers ce titre">¶</a></h2>
+<p>À partir de la version 2.0, les numéros de version utilisent une forme libre du <a class="reference external" href="https://semver.org/">versionnement sémantique</a> de façon à ce que chaque version suivant une LTS recommence à la prochaine version «&nbsp;point zéro&nbsp;». Par exemple&nbsp;: 2.0, 2.1, 2.2 (LTS), 3.0, 3.1, 3.2 (LTS), etc.</p>
+<p>SemVer facilite la détection au premier coup d’œil de la compatibilité des versions les unes avec les autres. C’est aussi une aide pour anticiper le moment où les blocs de compatibilité seront supprimés. Il ne s’agit pas d’une forme pure de SemVer, car chaque version majeure continue de comporter quelques incompatibilités documentées lorsqu’un chemin d’obsolescence n’est pas possible ou que le coût en serait trop élevé. De plus, les obsolescences démarrées lors d’une version LTS (X.2) sont supprimées dans une version non .0 (Y.1) pour correspondre à notre politique de conservation des blocs de compatibilité durant au minimum deux version majeures. Lisez la section suivante qui comporte un exemple.</p>
+</div>
+<div class="section" id="s-deprecation-policy">
+<span id="s-internal-release-deprecation-policy"></span><span id="deprecation-policy"></span><span id="internal-release-deprecation-policy"></span><h2>Politique d’obsolescence<a class="headerlink" href="#deprecation-policy" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une version majeure peut rendre obsolètes certaines fonctionnalités de versions précédentes. Si une fonctionnalité est rendue obsolète lors de la version majeure <code class="docutils literal notranslate"><span class="pre">A.x</span></code>, elle continuera de fonctionner dans toutes les versions <code class="docutils literal notranslate"><span class="pre">A.x</span></code> (quel que soit x), mais produira des avertissements. Les fonctionnalités obsolètes seront supprimées dans la version B.0, ou B.1 pour les fonctionnalités rendues obsolètes dans la dernière version A.x afin de s’assurer que les avertissements d’obsolescence apparaissent au minimum dans deux versions majeures.</p>
+<p>Par exemple, si nous décidons de rendre obsolète une fonction dans Django 4.2 :</p>
+<ul class="simple">
+<li>Django 4.2 contiendra une copie rétrocompatible de la fonction, mais en déclenchant un avertissement <code class="docutils literal notranslate"><span class="pre">RemovedInDjango51Warning</span></code>.</li>
+<li>Django 5.0 (la version qui suit 4.2) contiendra encore la copie rétrocompatible.</li>
+<li>Django 5.1 supprimera totalement la fonction.</li>
+</ul>
+<p>Les avertissements sont silencieux par défaut. Vous pouvez faire afficher ces avertissements avec l’option <code class="docutils literal notranslate"><span class="pre">-Wd</span></code> de Python.</p>
+<p>Un exemple plus générique</p>
+<ul class="simple">
+<li>X.0</li>
+<li>X.1</li>
+<li>X.2 LTS</li>
+<li>Y.0 : abandon des blocs de compatibilité ajoutés dans X.0 et X.1.</li>
+<li>Y.1 : abandon des blocs de compatibilité ajoutés dans X.2.</li>
+<li>Y.2 LTS : aucune suppression de bloc de compatibilité (même si Y.0 n’est plus prise en charge, les applications tierces doivent maintenir la compatibilité avec X.2 LTS pour faciliter les transitions de LTS à LTS).</li>
+<li>Z.0 : abandon des blocs de compatibilité ajoutés dans Y.0 et Y.1.</li>
+</ul>
+<p>See also the <a class="reference internal" href="contributing/writing-code/submitting-patches.html#deprecating-a-feature"><span class="std std-ref">Deprecating a feature</span></a> guide.</p>
+</div>
+<div class="section" id="s-supported-versions">
+<span id="s-supported-versions-policy"></span><span id="supported-versions"></span><span id="supported-versions-policy"></span><h2>Versions prises en charge<a class="headerlink" href="#supported-versions" title="Lien permanent vers ce titre">¶</a></h2>
+<p>At any moment in time, Django’s developer team will support a set of releases to
+varying levels. See <a class="reference external" href="https://www.djangoproject.com/download/#supported-versions">the supported versions section</a> of the download
+page for the current state of support for each version.</p>
+<ul>
+<li><p class="first">La branche master de développement reçoit les nouvelles fonctionnalités et les corrections de bogues qui nécessitent des révisions de code non triviales.</p>
+</li>
+<li><p class="first">Les correctifs appliqués à la branche principale doivent également être appliqués à la dernière branche de publications stables, afin d’être publiés lors de la version corrective suivante de cette série, s’ils concernent des corrections de problèmes critiques&nbsp;:</p>
+<ul class="simple">
+<li>Failles de sécurité.</li>
+<li>Bogues provoquant des pertes de données.</li>
+<li>Bogues provoquant des plantages.</li>
+<li>Des bogues fonctionnels majeurs dans des nouvelles fonctionnalités de la dernière version stable.</li>
+<li>Regressions from older versions of Django introduced in the current release
+series.</li>
+</ul>
+<p>La règle de base est que des corrections sont rétroportées vers la dernière version stable s’il s’agit de bogues qui auraient bloqué une publication normale (bloqueurs de publication).</p>
+</li>
+<li><p class="first">Les correctifs de sécurité et les bogues de perte de données sont appliqués à la branche master actuelle, aux deux dernières branches de version stable et à toute autre branche faisant partie d’une prise en charge à long terme (LTS).</p>
+</li>
+<li><p class="first">Documentation fixes generally will be more freely backported to the last
+release branch. That’s because it’s highly advantageous to have the docs for
+the last release be up-to-date and correct, and the risk of introducing
+regressions is much less of a concern.</p>
+</li>
+</ul>
+<p>As a concrete example, consider a moment in time halfway between the release of
+Django 5.1 and 5.2. At this point in time:</p>
+<ul class="simple">
+<li>Features will be added to development master, to be released as Django 5.2.</li>
+<li>Critical bug fixes will be applied to the <code class="docutils literal notranslate"><span class="pre">stable/5.1.x</span></code> branch, and
+released as 5.1.1, 5.1.2, etc.</li>
+<li>Security fixes and bug fixes for data loss issues will be applied to
+<code class="docutils literal notranslate"><span class="pre">master</span></code> and to the <code class="docutils literal notranslate"><span class="pre">stable/5.1.x</span></code>, <code class="docutils literal notranslate"><span class="pre">stable/5.0.x</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">stable/4.2.x</span></code> (LTS) branches. They will trigger the release of <code class="docutils literal notranslate"><span class="pre">5.1.1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">5.0.5</span></code>, <code class="docutils literal notranslate"><span class="pre">4.2.8</span></code>, etc.</li>
+<li>Documentation fixes will be applied to master, and, if easily backported, to
+the latest stable branch, <code class="docutils literal notranslate"><span class="pre">5.1.x</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="s-release-process">
+<span id="s-id2"></span><span id="release-process"></span><span id="id2"></span><h2>Processus de publication<a class="headerlink" href="#release-process" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django suit un calendrier de publication à date fixe, avec des publications majeures environ tous les 8 mois.</p>
+<p>Après chaque publication majeure, le gestionnaire de publication annonce le calendrier de la prochaine version majeure.</p>
+<div class="section" id="s-release-cycle">
+<span id="release-cycle"></span><h3>Cycle de publication<a class="headerlink" href="#release-cycle" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Chaque cycle de publication consiste en trois parties :</p>
+<div class="section" id="s-phase-one-feature-proposal">
+<span id="phase-one-feature-proposal"></span><h4>Phase 1 : propositions de fonctionnalités<a class="headerlink" href="#phase-one-feature-proposal" title="Lien permanent vers ce titre">¶</a></h4>
+<p>La première phase du processus de publication comprend l’évaluation des fonctionnalités majeures à inclure dans la prochaine version. Ceci implique qu’une grande partie du travail préliminaire sur ces fonctionnalités ait été fait, du code fonctionnel étant toujours préférable aux grandes idées.</p>
+<p>Les fonctionnalités majeures d’une publication à venir seront ajoutées à la page wiki de la feuille de route, par ex. <a class="reference external" href="https://code.djangoproject.com/wiki/Version1.11Roadmap">https://code.djangoproject.com/wiki/Version1.11Roadmap</a>.</p>
+</div>
+<div class="section" id="s-phase-two-development">
+<span id="phase-two-development"></span><h4>Phase 2 : développement<a class="headerlink" href="#phase-two-development" title="Lien permanent vers ce titre">¶</a></h4>
+<p>The second part of the release schedule is the «&nbsp;heads-down&nbsp;» working period.
+Using the roadmap produced at the end of phase one, we’ll all work very hard to
+get everything on it done.</p>
+<p>At the end of phase two, any unfinished features will be postponed until the
+next release.</p>
+<p>Phase two will culminate with an alpha release. At this point, the
+<code class="docutils literal notranslate"><span class="pre">stable/A.B.x</span></code> branch will be forked from <code class="docutils literal notranslate"><span class="pre">master</span></code>.</p>
+</div>
+<div class="section" id="s-phase-three-bugfixes">
+<span id="phase-three-bugfixes"></span><h4>Phase three: bugfixes<a class="headerlink" href="#phase-three-bugfixes" title="Lien permanent vers ce titre">¶</a></h4>
+<p>The last part of a release cycle is spent fixing bugs – no new features will
+be accepted during this time. We’ll try to release a beta release one month
+after the alpha and a release candidate one month after the beta.</p>
+<p>The release candidate marks the string freeze, and it happens at least two
+weeks before the final release. After this point, new translatable strings
+must not be added.</p>
+<p>During this phase, committers will be more and more conservative with
+backports, to avoid introducing regressions. After the release candidate, only
+release blockers and documentation fixes should be backported.</p>
+<p>In parallel to this phase, <code class="docutils literal notranslate"><span class="pre">master</span></code> can receive new features, to be released
+in the <code class="docutils literal notranslate"><span class="pre">A.B+1</span></code> cycle.</p>
+</div>
+</div>
+<div class="section" id="s-bug-fix-releases">
+<span id="bug-fix-releases"></span><h3>Bug-fix releases<a class="headerlink" href="#bug-fix-releases" title="Lien permanent vers ce titre">¶</a></h3>
+<p>À la suite d’une publication majeure (par ex. A.B), la version précédente passe en mode correction de bogues.</p>
+<p>The branch for the previous feature release (e.g. <code class="docutils literal notranslate"><span class="pre">stable/A.B-1.x</span></code>) will
+include bugfixes. Critical bugs fixed on master must <em>also</em> be fixed on the
+bugfix branch; this means that commits need to cleanly separate bug fixes from
+feature additions. The developer who commits a fix to master will be
+responsible for also applying the fix to the current bugfix branch.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Processus de publication de Django</a><ul>
+<li><a class="reference internal" href="#official-releases">Publications officielles</a></li>
+<li><a class="reference internal" href="#release-cadence">Rythme de publication</a></li>
+<li><a class="reference internal" href="#deprecation-policy">Politique d’obsolescence</a></li>
+<li><a class="reference internal" href="#supported-versions">Versions prises en charge</a></li>
+<li><a class="reference internal" href="#release-process">Processus de publication</a><ul>
+<li><a class="reference internal" href="#release-cycle">Cycle de publication</a><ul>
+<li><a class="reference internal" href="#phase-one-feature-proposal">Phase 1 : propositions de fonctionnalités</a></li>
+<li><a class="reference internal" href="#phase-two-development">Phase 2 : développement</a></li>
+<li><a class="reference internal" href="#phase-three-bugfixes">Phase three: bugfixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bug-fix-releases">Bug-fix releases</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="security.html"
+                        title="Chapitre précédent">Politique de sécurité de Django</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="deprecation.html"
+                        title="Chapitre suivant">Calendrier d’obsolescence de Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/internals/release-process.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="security.html" title="Politique de sécurité de Django">previous</a>
+     |
+    <a href="index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="deprecation.html" title="Calendrier d’obsolescence de Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

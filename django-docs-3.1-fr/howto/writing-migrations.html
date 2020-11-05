@@ -1,0 +1,477 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écriture de migrations de base de données &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="FAQ Django" href="../faq/index.html" />
+    <link rel="prev" title="Comment installer Django avec Windows" href="windows.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="windows.html" title="Comment installer Django avec Windows">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="../faq/index.html" title="FAQ Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-writing-migrations">
+            
+  <div class="section" id="s-writing-database-migrations">
+<span id="writing-database-migrations"></span><h1>Écriture de migrations de base de données<a class="headerlink" href="#writing-database-migrations" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document présente la façon de structurer et d’écrire des migrations de base de données pour différents scénarios auxquels vous pourriez être confrontés. Pour du contenu introductif aux migrations, consultez le <a class="reference internal" href="../topics/migrations.html"><span class="doc">guide thématique</span></a>.</p>
+<div class="section" id="s-data-migrations-and-multiple-databases">
+<span id="s-id1"></span><span id="data-migrations-and-multiple-databases"></span><span id="id1"></span><h2>Migrations de données et bases de données multiples<a class="headerlink" href="#data-migrations-and-multiple-databases" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque vous utilisez plusieurs bases de données, il peut être nécessaire de déterminer si une migration doit être appliquée à une certaine base de données. Par exemple, il est possible qu’une migration ne doive s’appliquer qu’à <strong>une seule</strong> base de données.</p>
+<p>Pour faire cela, il est possible de se baser sur l’alias de base de données de la connexion dans une opération <code class="docutils literal notranslate"><span class="pre">RunPython</span></code> en consultant l’attribut <code class="docutils literal notranslate"><span class="pre">schema_editor.connection.alias</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">def</span> <span class="nf">forwards</span><span class="p">(</span><span class="n">apps</span><span class="p">,</span> <span class="n">schema_editor</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">schema_editor</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">alias</span> <span class="o">!=</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="c1"># Your migration code goes here</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># Dependencies to other migrations</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">forwards</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Vous pouvez également fournir des indications qui seront transmises à la méthode <a class="reference internal" href="../topics/db/multi-db.html#allow_migrate" title="allow_migrate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">allow_migrate()</span></code></a> des routeurs de base de données, dans <code class="docutils literal notranslate"><span class="pre">**hints</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">myapp/dbrouters.py</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyRouter</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">allow_migrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">app_label</span><span class="p">,</span> <span class="n">model_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">hints</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;target_db&#39;</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">db</span> <span class="o">==</span> <span class="n">hints</span><span class="p">[</span><span class="s1">&#39;target_db&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</pre></div>
+</div>
+</div>
+<p>Puis, pour s’appuyer sur ce code dans une migration, procédez comme suit&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">def</span> <span class="nf">forwards</span><span class="p">(</span><span class="n">apps</span><span class="p">,</span> <span class="n">schema_editor</span><span class="p">):</span>
+    <span class="c1"># Your migration code goes here</span>
+    <span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># Dependencies to other migrations</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">forwards</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;target_db&#39;</span><span class="p">:</span> <span class="s1">&#39;default&#39;</span><span class="p">}),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Si votre opération <code class="docutils literal notranslate"><span class="pre">RunPython</span></code> ou <code class="docutils literal notranslate"><span class="pre">RunSQL</span></code> n’affecte qu’un seul modèle, il est de bon aloi de passer <code class="docutils literal notranslate"><span class="pre">model_name</span></code> comme indicateur pour la rendre aussi transparente que possible par rapport au routeur. C’est particulièrement important pour les applications tierces et réutilisables.</p>
+</div>
+<div class="section" id="s-migrations-that-add-unique-fields">
+<span id="migrations-that-add-unique-fields"></span><h2>Migrations ajoutant des champs uniques<a class="headerlink" href="#migrations-that-add-unique-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’application d’une «&nbsp;simple&nbsp;» migration qui ajoute un champ unique non nul à une table qui contient déjà des lignes va produire une erreur car la valeur utilisée pour remplir les champs existants n’est générée qu’une seule fois, ce qui va à l’encontre de la contrainte d’unicité.</p>
+<p>Il est donc nécessaire de suivre les étapes suivantes. Dans cet exemple, nous allons ajouter un champ non nul <a class="reference internal" href="../ref/models/fields.html#django.db.models.UUIDField" title="django.db.models.UUIDField"><code class="xref py py-class docutils literal notranslate"><span class="pre">UUIDField</span></code></a> avec une valeur par défaut. Modifiez le champ adéquat en fonction de vos propres besoins.</p>
+<ul>
+<li><p class="first">Ajoutez le champ à votre modèle avec les paramètres <code class="docutils literal notranslate"><span class="pre">default=uuid.uuid4</span></code> et <code class="docutils literal notranslate"><span class="pre">unique=True</span></code> (choisissez une valeur par défaut adéquate au type de champ que vous ajoutez).</p>
+</li>
+<li><p class="first">Lancez la commande <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a>. Cela devrait générer une migration contenant une opération <code class="docutils literal notranslate"><span class="pre">AddField</span></code>.</p>
+</li>
+<li><p class="first">Générez deux fichiers de migration vides pour la même application en exécutant deux fois <code class="docutils literal notranslate"><span class="pre">makemigrations</span> <span class="pre">monapp</span> <span class="pre">--empty</span></code>. Nous avons renommé les fichiers de migration dans les exemples ci-dessous pour leur donner des noms plus explicites.</p>
+</li>
+<li><p class="first">Copiez l’opération <code class="docutils literal notranslate"><span class="pre">AddField</span></code> à partir de la migration auto-générée (le premier des trois nouveaux fichiers) vers la dernière migration, modifiez <code class="docutils literal notranslate"><span class="pre">AddField</span></code> en <code class="docutils literal notranslate"><span class="pre">AlterField</span></code> et ajoutez des importations pour <code class="docutils literal notranslate"><span class="pre">uuid</span></code> et <code class="docutils literal notranslate"><span class="pre">models</span></code>. Par exemple&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">0006_remove_uuid_null.py</span><a class="headerlink" href="#id5" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by Django A.B on YYYY-MM-DD HH:MM</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">migrations</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;0005_populate_uuid_values&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">AlterField</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;mymodel&#39;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span>
+            <span class="n">field</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">UUIDField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</li>
+<li><p class="first">Modifiez le premier fichier de migration. La classe de migration générée devrait ressembler à ceci&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">0004_add_uuid_field.py</span><a class="headerlink" href="#id6" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;0003_auto_20150129_1705&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">AddField</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;mymodel&#39;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span>
+            <span class="n">field</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">UUIDField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Modifiez <code class="docutils literal notranslate"><span class="pre">unique=True</span></code> en <code class="docutils literal notranslate"><span class="pre">null=True</span></code>, ce qui créera le champ intermédiaire pouvant contenir la valeur <code class="docutils literal notranslate"><span class="pre">null</span></code> et va différer la création de la contrainte d’unicité en attendant que nous ayons terminé de remplir les valeurs uniques pour chaque ligne.</p>
+</li>
+<li><p class="first">Dans le premier fichier de mgiration vide, ajoutez une opération <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> ou <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunSQL" title="django.db.migrations.operations.RunSQL"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSQL</span></code></a> pour générer une valeur unique (UUID dans l’exemple) pour chaque ligne existante. Ajoutez aussi une importation pour <code class="docutils literal notranslate"><span class="pre">uuid</span></code>. Par exemple&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">0005_populate_uuid_values.py</span><a class="headerlink" href="#id7" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by Django A.B on YYYY-MM-DD HH:MM</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">migrations</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="k">def</span> <span class="nf">gen_uuid</span><span class="p">(</span><span class="n">apps</span><span class="p">,</span> <span class="n">schema_editor</span><span class="p">):</span>
+    <span class="n">MyModel</span> <span class="o">=</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;MyModel&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">update_fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">])</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;0004_add_uuid_field&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="c1"># omit reverse_code=... if you don&#39;t want the migration to be reversible.</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">gen_uuid</span><span class="p">,</span> <span class="n">reverse_code</span><span class="o">=</span><span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="o">.</span><span class="n">noop</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</li>
+<li><p class="first">Vous pouvez maintenant appliquer les migrations comme d’habitude avec la commande <a class="reference internal" href="../ref/django-admin.html#django-admin-migrate"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">migrate</span></code></a>.</p>
+<p>Notez qu’il existe un conflit de concurrence si vous permettez de créer des objets lorsque cette migration se déroule. Les objets créés après l’opération <code class="docutils literal notranslate"><span class="pre">AddField</span></code> mais avant <code class="docutils literal notranslate"><span class="pre">RunPython</span></code> verront leur valeur originale <code class="docutils literal notranslate"><span class="pre">uuid</span></code> écrasée.</p>
+</li>
+</ul>
+<div class="section" id="s-non-atomic-migrations">
+<span id="s-id2"></span><span id="non-atomic-migrations"></span><span id="id2"></span><h3>Migrations non atomiques<a class="headerlink" href="#non-atomic-migrations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Avec les bases de données qui gèrent les transactions pour les instructions de définition de schéma (SQLite and PostgreSQL), les migrations s’exécuteront par défaut dans une transaction. Pour des cas d’utilisation tels que l’application de migrations de données sur des grosses tables, il est possible d’empêcher qu’une migration s’exécute dans une transaction en définissant l’attribut <code class="docutils literal notranslate"><span class="pre">atomic</span></code> à <code class="docutils literal notranslate"><span class="pre">False</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="n">atomic</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>Dans une telle migration, toutes les opérations sont lancées sans transaction. Il est possible d’exécuter certaines parties de la migration dans une transaction en utilisant <a class="reference internal" href="../topics/db/transactions.html#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> ou en passant <code class="docutils literal notranslate"><span class="pre">atomic=True</span></code> à <code class="docutils literal notranslate"><span class="pre">RunPython</span></code>.</p>
+<p>Voici un exemple d’une migration de données non atomique qui met à jour une grosse table en lots plus petits&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span><span class="p">,</span> <span class="n">transaction</span>
+
+<span class="k">def</span> <span class="nf">gen_uuid</span><span class="p">(</span><span class="n">apps</span><span class="p">,</span> <span class="n">schema_editor</span><span class="p">):</span>
+    <span class="n">MyModel</span> <span class="o">=</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;MyModel&#39;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">uuid__isnull</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">uuid__isnull</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="mi">1000</span><span class="p">]:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="n">atomic</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">gen_uuid</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>L’attribut <code class="docutils literal notranslate"><span class="pre">atomic</span></code> n’a pas d’effet pour les bases de données qui ne gèrent pas les transactions DDL (par ex. MySQL, Oracle). (La prise en charge par MySQL des instructions DDL atomiques &lt;<a class="reference external" href="https://dev.mysql.com/doc/refman/en/atomic-ddl.html">https://dev.mysql.com/doc/refman/en/atomic-ddl.html</a>&gt;`_ concerne des instructions individuelles et non pas une série d’instructions à l’intérieur d’une transaction qui pourrait être annulée.)</p>
+</div>
+</div>
+<div class="section" id="s-controlling-the-order-of-migrations">
+<span id="controlling-the-order-of-migrations"></span><h2>Contrôle de l’ordre des migrations<a class="headerlink" href="#controlling-the-order-of-migrations" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django détermine l’ordre dans lequel les migrations doivent être appliquées non pas selon le nom de fichier des migrations, mais en construisant un graphe basé sur deux propriétés de la classe <code class="docutils literal notranslate"><span class="pre">Migration</span></code>: <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> et <code class="docutils literal notranslate"><span class="pre">run_before</span></code>.</p>
+<p>Si vous avez déjà utilisé la commande <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a>, vous avez probablement vu la présence de <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> car les migrations créées automatiquement définissent cet attribut dans le cadre du processus de création.</p>
+<p>La propriété <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> est déclarée comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;0123_the_previous_migration&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Cela suffit en général, mais de temps à autre, il peut être nécessaire de s’assurer que la migration s’exécute <em>avant</em> une autre. C’est par exemple utile pour que des migrations d’applications tierces s’exécutent <em>après</em> celles du modèle de remplacement <a class="reference internal" href="../ref/settings.html#std:setting-AUTH_USER_MODEL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">AUTH_USER_MODEL</span></code></a>.</p>
+<p>Pour faire cela, placez toutes les migrations qui doivent dépendre des vôtres dans l’attribut <code class="docutils literal notranslate"><span class="pre">run_before</span></code> de votre classe <code class="docutils literal notranslate"><span class="pre">Migration</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="n">run_before</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;third_party_app&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_do_awesome&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Privilégiez autant que possible l’usage de <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> par rapport à <code class="docutils literal notranslate"><span class="pre">run_before</span></code>. <code class="docutils literal notranslate"><span class="pre">run_before</span></code> ne devrait être utilisé que dans le cas où il n’est pas souhaitable ou pas possible de définir <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> dans la migration que vous voulez faire exécuter après celle que vous êtes en train d’écrire.</p>
+</div>
+<div class="section" id="s-migrating-data-between-third-party-apps">
+<span id="migrating-data-between-third-party-apps"></span><h2>Migration de données entre applications tierces<a class="headerlink" href="#migrating-data-between-third-party-apps" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Vous pouvez utiliser une migration de données pour déplacer des données d’une application tierce à une autre.</p>
+<p>Si vous prévoyez d’enlever l’ancienne application plus tard, il vous faudra définir la propriété <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> en fonction de la présence de l’ancienne application dans les applications installées. Sinon, des dépendances vont manquer au moment de désinstaller l’ancienne application. De même, il faudra intercepter <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#LookupError" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a> dans l’appel à <code class="docutils literal notranslate"><span class="pre">apps.get_model()</span></code> qui récupère les modèles de l’ancienne application. Cette approche vous permet de déployer votre projet partout sans devoir d’abord installer puis désinstaller l’ancienne application.</p>
+<p>Voici un exemple de migration&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">myapp/migrations/0124_move_old_app_to_new_app.py</span><a class="headerlink" href="#id8" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.apps</span> <span class="kn">import</span> <span class="n">apps</span> <span class="k">as</span> <span class="n">global_apps</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">migrations</span>
+
+<span class="k">def</span> <span class="nf">forwards</span><span class="p">(</span><span class="n">apps</span><span class="p">,</span> <span class="n">schema_editor</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">OldModel</span> <span class="o">=</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s1">&#39;old_app&#39;</span><span class="p">,</span> <span class="s1">&#39;OldModel&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">LookupError</span><span class="p">:</span>
+        <span class="c1"># The old app isn&#39;t installed.</span>
+        <span class="k">return</span>
+
+    <span class="n">NewModel</span> <span class="o">=</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s1">&#39;new_app&#39;</span><span class="p">,</span> <span class="s1">&#39;NewModel&#39;</span><span class="p">)</span>
+    <span class="n">NewModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">bulk_create</span><span class="p">(</span>
+        <span class="n">NewModel</span><span class="p">(</span><span class="n">new_attribute</span><span class="o">=</span><span class="n">old_object</span><span class="o">.</span><span class="n">old_attribute</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">old_object</span> <span class="ow">in</span> <span class="n">OldModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">forwards</span><span class="p">,</span> <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="o">.</span><span class="n">noop</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;myapp&#39;</span><span class="p">,</span> <span class="s1">&#39;0123_the_previous_migration&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;new_app&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">global_apps</span><span class="o">.</span><span class="n">is_installed</span><span class="p">(</span><span class="s1">&#39;old_app&#39;</span><span class="p">):</span>
+        <span class="n">dependencies</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;old_app&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Considérez également ce qui va se passer lorsque la migration sera désappliquée. Vous pouvez soit ne rien faire (comme dans l’exemple ci-dessus), soit enlever certaines ou toutes les données de la nouvelle application. Ajustez le second paramètre de l’opération <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-mod docutils literal notranslate"><span class="pre">RunPython</span></code></a> en fonction de votre choix.</p>
+</div>
+<div class="section" id="s-changing-a-manytomanyfield-to-use-a-through-model">
+<span id="s-id3"></span><span id="changing-a-manytomanyfield-to-use-a-through-model"></span><span id="id3"></span><h2>Modification d’un champ <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> pour utiliser un modèle intermédiaire<a class="headerlink" href="#changing-a-manytomanyfield-to-use-a-through-model" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous modifiez un champ <a class="reference internal" href="../ref/models/fields.html#django.db.models.ManyToManyField" title="django.db.models.ManyToManyField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManyToManyField</span></code></a> pour utiliser un modèle <code class="docutils literal notranslate"><span class="pre">through</span></code> intermédiaire, la migration par défaut va supprimer la table existante et en créer une nouvelle, ce qui effacera les relations existantes. Pour éviter cela, vous pouvez utiliser <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.SeparateDatabaseAndState" title="django.db.migrations.operations.SeparateDatabaseAndState"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeparateDatabaseAndState</span></code></a> pour renommer la table existante avec le nouveau nom tout en indiquant à l’autodétecteur de migrations que le nouveau modèle a été créé. Le nom actuel de la table est visible avec les commandes <a class="reference internal" href="../ref/django-admin.html#django-admin-sqlmigrate"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">sqlmigrate</span></code></a> ou <a class="reference internal" href="../ref/django-admin.html#django-admin-dbshell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">dbshell</span></code></a>. Le nouveau nom de table est celui de la propriété <code class="docutils literal notranslate"><span class="pre">_meta.db_table</span></code> du modèle intermédiaire. Votre nouveau modèle intermédiaire doit utiliser les mêmes noms de clés étrangères que Django. De plus, si vous ajoutez des champs supplémentaires, ils doivent être ajoutés dans des opérations de migration après <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.SeparateDatabaseAndState" title="django.db.migrations.operations.SeparateDatabaseAndState"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeparateDatabaseAndState</span></code></a>.</p>
+<p>Par exemple, si nous avions un modèle <code class="docutils literal notranslate"><span class="pre">Book</span></code> avec un champ <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> le liant avec <code class="docutils literal notranslate"><span class="pre">Author</span></code>, on pourrait ajouter un modèle intermédiaire <code class="docutils literal notranslate"><span class="pre">AuthorBook</span></code> avec un nouveau champ <code class="docutils literal notranslate"><span class="pre">is_primary</span></code> comme ceci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">import</span> <span class="nn">django.db.models.deletion</span>
+
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;core&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">SeparateDatabaseAndState</span><span class="p">(</span>
+            <span class="n">database_operations</span><span class="o">=</span><span class="p">[</span>
+                <span class="c1"># Old table name from checking with sqlmigrate, new table</span>
+                <span class="c1"># name from AuthorBook._meta.db_table.</span>
+                <span class="n">migrations</span><span class="o">.</span><span class="n">RunSQL</span><span class="p">(</span>
+                    <span class="n">sql</span><span class="o">=</span><span class="s1">&#39;ALTER TABLE core_book_authors RENAME TO core_authorbook&#39;</span><span class="p">,</span>
+                    <span class="n">reverse_sql</span><span class="o">=</span><span class="s1">&#39;ALTER TABLE core_authorbook RENAME TO core_book_authors&#39;</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">],</span>
+            <span class="n">state_operations</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">migrations</span><span class="o">.</span><span class="n">CreateModel</span><span class="p">(</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;AuthorBook&#39;</span><span class="p">,</span>
+                    <span class="n">fields</span><span class="o">=</span><span class="p">[</span>
+                        <span class="p">(</span>
+                            <span class="s1">&#39;id&#39;</span><span class="p">,</span>
+                            <span class="n">models</span><span class="o">.</span><span class="n">AutoField</span><span class="p">(</span>
+                                <span class="n">auto_created</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">serialize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                <span class="n">verbose_name</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">),</span>
+                        <span class="p">(</span>
+                            <span class="s1">&#39;author&#39;</span><span class="p">,</span>
+                            <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+                                <span class="n">on_delete</span><span class="o">=</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">deletion</span><span class="o">.</span><span class="n">DO_NOTHING</span><span class="p">,</span>
+                                <span class="n">to</span><span class="o">=</span><span class="s1">&#39;core.Author&#39;</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">),</span>
+                        <span class="p">(</span>
+                            <span class="s1">&#39;book&#39;</span><span class="p">,</span>
+                            <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+                                <span class="n">on_delete</span><span class="o">=</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">deletion</span><span class="o">.</span><span class="n">DO_NOTHING</span><span class="p">,</span>
+                                <span class="n">to</span><span class="o">=</span><span class="s1">&#39;core.Book&#39;</span><span class="p">,</span>
+                            <span class="p">),</span>
+                        <span class="p">),</span>
+                    <span class="p">],</span>
+                <span class="p">),</span>
+                <span class="n">migrations</span><span class="o">.</span><span class="n">AlterField</span><span class="p">(</span>
+                    <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;book&#39;</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;authors&#39;</span><span class="p">,</span>
+                    <span class="n">field</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span>
+                        <span class="n">to</span><span class="o">=</span><span class="s1">&#39;core.Author&#39;</span><span class="p">,</span>
+                        <span class="n">through</span><span class="o">=</span><span class="s1">&#39;core.AuthorBook&#39;</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">],</span>
+        <span class="p">),</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">AddField</span><span class="p">(</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="s1">&#39;authorbook&#39;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;is_primary&#39;</span><span class="p">,</span>
+            <span class="n">field</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-changing-an-unmanaged-model-to-managed">
+<span id="changing-an-unmanaged-model-to-managed"></span><h2>Modification d’un modèle non géré en géré<a class="headerlink" href="#changing-an-unmanaged-model-to-managed" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous souhaitez modifier un modèle non géré (<a class="reference internal" href="../ref/models/options.html#django.db.models.Options.managed" title="django.db.models.Options.managed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">managed=False</span></code></a>) en modèle géré, vous devez enlever <code class="docutils literal notranslate"><span class="pre">managed=False</span></code> et générer une migration avant de faire d’autres modifications de schéma du modèle, car les modifications de schéma figurant dans la même migration que celle contenant l’opération de modification de  <code class="docutils literal notranslate"><span class="pre">Meta.managed</span></code> pourraient ne pas être appliquées.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écriture de migrations de base de données</a><ul>
+<li><a class="reference internal" href="#data-migrations-and-multiple-databases">Migrations de données et bases de données multiples</a></li>
+<li><a class="reference internal" href="#migrations-that-add-unique-fields">Migrations ajoutant des champs uniques</a><ul>
+<li><a class="reference internal" href="#non-atomic-migrations">Migrations non atomiques</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#controlling-the-order-of-migrations">Contrôle de l’ordre des migrations</a></li>
+<li><a class="reference internal" href="#migrating-data-between-third-party-apps">Migration de données entre applications tierces</a></li>
+<li><a class="reference internal" href="#changing-a-manytomanyfield-to-use-a-through-model">Modification d’un champ <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> pour utiliser un modèle intermédiaire</a></li>
+<li><a class="reference internal" href="#changing-an-unmanaged-model-to-managed">Modification d’un modèle non géré en géré</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="windows.html"
+                        title="Chapitre précédent">Comment installer Django avec Windows</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../faq/index.html"
+                        title="Chapitre suivant">FAQ Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/howto/writing-migrations.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="windows.html" title="Comment installer Django avec Windows">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="../faq/index.html" title="FAQ Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

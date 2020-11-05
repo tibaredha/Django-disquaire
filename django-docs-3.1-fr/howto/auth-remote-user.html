@@ -1,0 +1,200 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Authentification avec REMOTE_USER &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Écriture de commandes django-admin personnalisées" href="custom-management-commands.html" />
+    <link rel="prev" title="Guides pratiques" href="index.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="index.html" title="Guides pratiques">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="custom-management-commands.html" title="Écriture de commandes &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;django-admin&lt;/span&gt;&lt;/code&gt; personnalisées">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-auth-remote-user">
+            
+  <div class="section" id="s-authentication-using-remote-user">
+<span id="authentication-using-remote-user"></span><h1>Authentification avec <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code><a class="headerlink" href="#authentication-using-remote-user" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document présente la procédure pour utiliser des sources d’authentification externes (pour lesquelles le serveur Web définit la variable d’environnement <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code>) dans vos applications Django. Ce type de solution d’authentification est typique des sites intranet, avec des solutions d’authentification centralisée comme IIS et Integrated Windows Authentication ou Apache et <a class="reference external" href="https://httpd.apache.org/docs/2.2/mod/mod_authnz_ldap.html">mod_authnz_ldap</a>, <a class="reference external" href="https://www.apereo.org/projects/cas">CAS</a>, <a class="reference external" href="http://weblogin.org">Cosign</a>, <a class="reference external" href="https://www.stanford.edu/services/webauth/">WebAuth</a>, <a class="reference external" href="https://sourceforge.net/projects/mod-auth-sspi">mod_auth_sspi</a>, etc.</p>
+<p>Lorsque le serveur Web se charge de l’authentification, il définit généralement la variable d’environnement <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> à destination de l’application sous-jacente. Dans Django, <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> est accessible par l’attribut <a class="reference internal" href="../ref/request-response.html#django.http.HttpRequest.META" title="django.http.HttpRequest.META"><code class="xref py py-attr docutils literal notranslate"><span class="pre">request.META</span></code></a>. Django peut être configuré pour exploiter la valeur <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> en utilisant les classes <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code>, <code class="docutils literal notranslate"><span class="pre">PersistentRemoteUserMiddleware</span></code> et <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.backends.RemoteUserBackend" title="django.contrib.auth.backends.RemoteUserBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteUserBackend</span></code></a> qui se trouvent dans <a class="reference internal" href="../topics/auth/index.html#module-django.contrib.auth" title="django.contrib.auth: Django's authentication framework."><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.contrib.auth</span></code></a>.</p>
+<div class="section" id="s-configuration">
+<span id="configuration"></span><h2>Configuration<a class="headerlink" href="#configuration" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Vous devez tout d’abord ajouter <a class="reference internal" href="../ref/middleware.html#django.contrib.auth.middleware.RemoteUserMiddleware" title="django.contrib.auth.middleware.RemoteUserMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.contrib.auth.middleware.RemoteUserMiddleware</span></code></a> au réglage <a class="reference internal" href="../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> <strong>après</strong> la valeur <a class="reference internal" href="../ref/middleware.html#django.contrib.auth.middleware.AuthenticationMiddleware" title="django.contrib.auth.middleware.AuthenticationMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.contrib.auth.middleware.AuthenticationMiddleware</span></code></a>&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MIDDLEWARE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;...&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.auth.middleware.RemoteUserMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;...&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Puis, vous devez remplacez <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.backends.ModelBackend" title="django.contrib.auth.backends.ModelBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelBackend</span></code></a> par <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.backends.RemoteUserBackend" title="django.contrib.auth.backends.RemoteUserBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteUserBackend</span></code></a> dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-AUTHENTICATION_BACKENDS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">AUTHENTICATION_BACKENDS</span></code></a>&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AUTHENTICATION_BACKENDS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;django.contrib.auth.backends.RemoteUserBackend&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Avec cette configuration, <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code> va détecter le nom d’utilisateur dans <code class="docutils literal notranslate"><span class="pre">request.META['REMOTE_USER']</span></code> et va authentifier et connecter automatiquement cet utilisateur à l’aide de <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.backends.RemoteUserBackend" title="django.contrib.auth.backends.RemoteUserBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteUserBackend</span></code></a>.</p>
+<p>Soyez conscient que cette configuration particulière désactive l’authentification avec le <code class="docutils literal notranslate"><span class="pre">ModelBackend</span></code> par défaut. Cela signifie que si la valeur de <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> n’est pas configurée, l’utilisateur ne parviendra pas à se connecter, même en utilisant l’interface d’administration de Django. Ajouter <code class="docutils literal notranslate"><span class="pre">'django.contrib.auth.backends.ModelBackend'</span></code> à la liste des <code class="docutils literal notranslate"><span class="pre">AUTHENTICATION_BACKENDS</span></code> utilisera <code class="docutils literal notranslate"><span class="pre">ModelBackend</span></code> comme solution de repli si <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> est absent, ce qui permettra de résoudre ces problèmes.</p>
+<p>La gestion des utilisateurs de Django, tels que les vue de <code class="docutils literal notranslate"><span class="pre">contrib.admin</span></code> et la commande de gestion <a class="reference internal" href="../ref/django-admin.html#django-admin-createsuperuser"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">createsuperuser</span></code></a>, ne s’intègrent pas avec des utilisateurs distants. Ces interfaces travaillent avec les utilisateurs stockés dans la base de données indépendamment de `` AUTHENTICATION_BACKENDS``.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Comme <code class="docutils literal notranslate"><span class="pre">RemoteUserBackend</span></code> hérite de <code class="docutils literal notranslate"><span class="pre">ModelBackend</span></code>, le contrôle des permissions implémenté dans <code class="docutils literal notranslate"><span class="pre">ModelBackend</span></code> est toujours disponible.</p>
+<p class="last">Les utilisateurs avec <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.models.User.is_active" title="django.contrib.auth.models.User.is_active"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_active=False</span></code></a> ne seront pas autorisés à s’authentifier. Utilisez <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.backends.AllowAllUsersRemoteUserBackend" title="django.contrib.auth.backends.AllowAllUsersRemoteUserBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">AllowAllUsersRemoteUserBackend</span></code></a> si vous voulez les autoriser à se connecter.</p>
+</div>
+<p>Si votre mécanisme d’authentification utilise un en-tête HTTP personnalisé à la place de <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code>, vous pouvez créer une sous-classe de <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code> et définir l’attribut <code class="docutils literal notranslate"><span class="pre">header</span></code> à la clé de <code class="docutils literal notranslate"><span class="pre">request.META</span></code> désirée. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.middleware</span> <span class="k">import</span> <span class="n">RemoteUserMiddleware</span>
+
+<span class="k">class</span> <span class="nc">CustomHeaderMiddleware</span><span class="p">(</span><span class="n">RemoteUserMiddleware</span><span class="p">):</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s1">&#39;HTTP_AUTHUSER&#39;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Soyez très prudent si vous utilisez une sous-classe de <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code> avec un en-tête HTTP personnalisé. Vous devez être certain que le serveur Web frontal définit ou ajuste toujours cet en-tête sur la base des contrôles d’authentification appropriés, et ne permet à personne d’envoyer une valeur d’en-tête trafiquée. Comme les en-têtes HTTP <code class="docutils literal notranslate"><span class="pre">X-Auth-User</span></code> et <code class="docutils literal notranslate"><span class="pre">X-Auth_User</span></code> (par exemple) sont tous deux normalisés en <code class="docutils literal notranslate"><span class="pre">HTTP_X_AUTH_USER</span></code> dans le dictionnaire <code class="docutils literal notranslate"><span class="pre">request.META</span></code>, vous devez aussi contrôler que votre serveur Web n’autorise pas les en-têtes trafiqués qui utilisent des soulignements à la place des tirets.</p>
+<p class="last">Cet avertissement ne s’applique pas à <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code> dans sa configuration par défaut avec <code class="docutils literal notranslate"><span class="pre">header</span> <span class="pre">=</span> <span class="pre">'REMOTE_USER'</span></code>, car une clé qui ne commence pas par <code class="docutils literal notranslate"><span class="pre">HTTP_</span></code> dans <code class="docutils literal notranslate"><span class="pre">request.META</span></code> ne peut être définie que par le serveur WSGI, et pas directement à partir d’un en-tête de requête HTTP.</p>
+</div>
+<p>Si vous avez besoin de plus de maîtrise, vous pouvez créer votre propre moteur d’authentification héritant de <a class="reference internal" href="../ref/contrib/auth.html#django.contrib.auth.backends.RemoteUserBackend" title="django.contrib.auth.backends.RemoteUserBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteUserBackend</span></code></a> et surcharger un ou plusieurs de ses attributs et méthodes.</p>
+</div>
+<div class="section" id="s-using-remote-user-on-login-pages-only">
+<span id="s-persistent-remote-user-middleware-howto"></span><span id="using-remote-user-on-login-pages-only"></span><span id="persistent-remote-user-middleware-howto"></span><h2>Utilisation de <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> uniquement pour les pages de connexion<a class="headerlink" href="#using-remote-user-on-login-pages-only" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’intergiciel d’authentification <code class="docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code> part du principe que l’en-tête de requête HTTP <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> est présent pour toutes les requêtes authentifiées. C’est en général le cas lorsqu’un mécanisme du genre Basic HTTP Auth avec <code class="docutils literal notranslate"><span class="pre">htpasswd</span></code> est utilisé, mais avec des méthodes d’authentification comme Negotiate (GSSAPI/Kerberos) ou autres méthodes gourmandes en ressources, l’authentification au niveau du serveur HTTP frontal n’est habituellement configurée que pour une ou quelques URL de connexion&nbsp;; après une authentification réussie, l’application est censé maintenir elle-même la session authentifiée.</p>
+<p><a class="reference internal" href="../ref/middleware.html#django.contrib.auth.middleware.PersistentRemoteUserMiddleware" title="django.contrib.auth.middleware.PersistentRemoteUserMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">PersistentRemoteUserMiddleware</span></code></a> prend en charge ce cas d’utilisation. Il maintient la session authentifiée jusqu’à une déconnexion explicite par l’utilisateur. Cette classe peut être utilisée en remplacement de <a class="reference internal" href="../ref/middleware.html#django.contrib.auth.middleware.RemoteUserMiddleware" title="django.contrib.auth.middleware.RemoteUserMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoteUserMiddleware</span></code></a> dans la documentation ci-dessus sans autre modification.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Authentification avec <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code></a><ul>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#using-remote-user-on-login-pages-only">Utilisation de <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code> uniquement pour les pages de connexion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="index.html"
+                        title="Chapitre précédent">Guides pratiques</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="custom-management-commands.html"
+                        title="Chapitre suivant">Écriture de commandes <code class="docutils literal notranslate"><span class="pre">django-admin</span></code> personnalisées</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/howto/auth-remote-user.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="index.html" title="Guides pratiques">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="custom-management-commands.html" title="Écriture de commandes &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;django-admin&lt;/span&gt;&lt;/code&gt; personnalisées">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

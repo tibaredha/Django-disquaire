@@ -1,0 +1,336 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Fichiers téléversés et gestionnaires de téléversement &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Formulaires" href="../forms/index.html" />
+    <link rel="prev" title="API de stockage des fichiers" href="storage.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="storage.html" title="API de stockage des fichiers">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="../forms/index.html" title="Formulaires">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-files-uploads">
+            
+  <div class="section" id="s-module-django.core.files.uploadedfile">
+<span id="s-uploaded-files-and-upload-handlers"></span><span id="module-django.core.files.uploadedfile"></span><span id="uploaded-files-and-upload-handlers"></span><h1>Fichiers téléversés et gestionnaires de téléversement<a class="headerlink" href="#module-django.core.files.uploadedfile" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-uploaded-files">
+<span id="uploaded-files"></span><h2>Fichiers téléversés<a class="headerlink" href="#uploaded-files" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.core.files.uploadedfile.UploadedFile">
+<em class="property">class </em><code class="descname">UploadedFile</code><a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Durant les téléversements de fichiers, les données de fichiers réelles sont stockées dans <a class="reference internal" href="../request-response.html#django.http.HttpRequest.FILES" title="django.http.HttpRequest.FILES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">request.FILES</span></code></a>. Chaque élément de ce dictionnaire est un objet <code class="docutils literal notranslate"><span class="pre">UploadedFile</span></code> (ou une sous-classe), un adaptateur autour d’un fichier téléversé. En général, c’est par l’une de ces méthodes que l’on accède au contenu téléversé&nbsp;:</p>
+<dl class="method">
+<dt id="django.core.files.uploadedfile.UploadedFile.read">
+<code class="descclassname">UploadedFile.</code><code class="descname">read</code>()<a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.read" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Lit toutes les données du fichier téléversé. Soyez prudent avec cette méthode&nbsp;: si le fichier concerné est très gros, il pourrait dépasser les capacités de votre système si vous essayez de le lire en mémoire. Il est plutôt recommandé d’utiliser <code class="docutils literal notranslate"><span class="pre">chunks()</span></code>, voir ci-dessous.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadedfile.UploadedFile.multiple_chunks">
+<code class="descclassname">UploadedFile.</code><code class="descname">multiple_chunks</code>(<em>chunk_size=None</em>)<a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.multiple_chunks" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si le fichier téléversé est assez gros pour avoir besoin d’être lu en plusieurs segments. Par défaut, cela concerne tous les fichiers plus gros que 2,5 mébioctets, mais cela peut être configuré&nbsp;; voir ci-dessous.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadedfile.UploadedFile.chunks">
+<code class="descclassname">UploadedFile.</code><code class="descname">chunks</code>(<em>chunk_size=None</em>)<a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.chunks" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un générateur renvoyant des segments du fichier. Si <code class="docutils literal notranslate"><span class="pre">multiple_chunks()</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, il est conseillé d’utiliser cette méthode avec une boucle au lieu d’utiliser <code class="docutils literal notranslate"><span class="pre">read()</span></code>.</p>
+<p>En pratique, il est souvent plus simple de toujours utiliser <code class="docutils literal notranslate"><span class="pre">chunks()</span></code>. En bouclant sur <code class="docutils literal notranslate"><span class="pre">chunks()</span></code> au lieu d’appeler <code class="docutils literal notranslate"><span class="pre">read()</span></code>, on peut s’assurer que les gros fichiers ne saturent pas la mémoire du système.</p>
+</dd></dl>
+
+<p>Voici quelques attributs utiles de <code class="docutils literal notranslate"><span class="pre">UploadedFile</span></code>:</p>
+<dl class="attribute">
+<dt id="django.core.files.uploadedfile.UploadedFile.name">
+<code class="descclassname">UploadedFile.</code><code class="descname">name</code><a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le nom du fichier téléversé (par ex. <code class="docutils literal notranslate"><span class="pre">mon_fichier.txt</span></code>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.files.uploadedfile.UploadedFile.size">
+<code class="descclassname">UploadedFile.</code><code class="descname">size</code><a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.size" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La taille en octets du fichier téléversé.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.files.uploadedfile.UploadedFile.content_type">
+<code class="descclassname">UploadedFile.</code><code class="descname">content_type</code><a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.content_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’en-tête <code class="docutils literal notranslate"><span class="pre">content-type</span></code> associé au fichier téléversé (par ex.  <em class="mimetype">text/plain</em> ou <em class="mimetype">application/pdf</em>). Comme toute donnée en provenance d’un utilisateur, on ne peut pas être certain que le fichier soit vraiment de ce type. Il est toujours nécessaire de valider que le contenu du fichier corresponde bien au type de contenu prétendu par l’en-tête, «  avoir confiance mais contrôler&nbsp;».</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.files.uploadedfile.UploadedFile.content_type_extra">
+<code class="descclassname">UploadedFile.</code><code class="descname">content_type_extra</code><a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.content_type_extra" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un dictionnaire contenant des paramètres supplémentaires transmis à l’en-tête <code class="docutils literal notranslate"><span class="pre">content-type</span></code>. Ils sont généralement fournis par des services comme Google App Engine qui interceptent et gèrent les téléversements de fichiers à votre place. Par conséquent, votre gestionnaire peut ne pas recevoir le contenu du fichier téléversé, mais plutôt une URL ou un autre pointeur vers le fichier (voir <span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2388.html#section-5.3"><strong>RFC 2388</strong></a>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.files.uploadedfile.UploadedFile.charset">
+<code class="descclassname">UploadedFile.</code><code class="descname">charset</code><a class="headerlink" href="#django.core.files.uploadedfile.UploadedFile.charset" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Pour les types de contenu <em class="mimetype">text/*</em>, le codage de caractères (par ex. <code class="docutils literal notranslate"><span class="pre">utf8</span></code>) indiqué par le navigateur. Encore une fois, «&nbsp;avoir confiance, mais contrôler&nbsp;» est la stratégie la plus sage ici.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Comme pour les fichiers Python normaux, vous pouvez lire le fichier ligne par ligne en bouclant sur le fichier téléversé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">uploadedfile</span><span class="p">:</span>
+    <span class="n">do_something_with</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="last">Les lignes sont découpées en utilisant des <span class="target" id="index-5"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0278"><strong>sauts de ligne universels</strong></a>. Les séquences suivantes sont reconnues comme marques de fin de ligne&nbsp;: la convention de fin de ligne Unix <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>, la convention Windows <code class="docutils literal notranslate"><span class="pre">'\r\n'</span></code>, ainsi que l’ancienne convention Macintosh <code class="docutils literal notranslate"><span class="pre">'\r'</span></code>.</p>
+</div>
+<p>Parmi les sous-classes de <code class="docutils literal notranslate"><span class="pre">UploadedFile</span></code>, on trouve&nbsp;:</p>
+<dl class="class">
+<dt id="django.core.files.uploadedfile.TemporaryUploadedFile">
+<em class="property">class </em><code class="descname">TemporaryUploadedFile</code><a class="headerlink" href="#django.core.files.uploadedfile.TemporaryUploadedFile" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un fichier téléversé vers un emplacement temporaire (c.-à-d. en flux vers disque). Cette classe est utilisée par <a class="reference internal" href="#django.core.files.uploadhandler.TemporaryFileUploadHandler" title="django.core.files.uploadhandler.TemporaryFileUploadHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemporaryFileUploadHandler</span></code></a>. En plus des méthodes de <a class="reference internal" href="#django.core.files.uploadedfile.UploadedFile" title="django.core.files.uploadedfile.UploadedFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">UploadedFile</span></code></a>, elle possède une méthode supplémentaire&nbsp;:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadedfile.TemporaryUploadedFile.temporary_file_path">
+<code class="descclassname">TemporaryUploadedFile.</code><code class="descname">temporary_file_path</code>()<a class="headerlink" href="#django.core.files.uploadedfile.TemporaryUploadedFile.temporary_file_path" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le chemin complet du fichier téléversé temporaire.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.core.files.uploadedfile.InMemoryUploadedFile">
+<em class="property">class </em><code class="descname">InMemoryUploadedFile</code><a class="headerlink" href="#django.core.files.uploadedfile.InMemoryUploadedFile" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un fichier téléversé en mémoire (c.-à-d. en flux vers mémoire). Cette classe est utilisée par <a class="reference internal" href="#django.core.files.uploadhandler.MemoryFileUploadHandler" title="django.core.files.uploadhandler.MemoryFileUploadHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemoryFileUploadHandler</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.core.files.uploadhandler">
+<span id="s-built-in-upload-handlers"></span><span id="module-django.core.files.uploadhandler"></span><span id="built-in-upload-handlers"></span><h2>Gestionnaires de téléversement intégrés<a class="headerlink" href="#module-django.core.files.uploadhandler" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Conjointement, <a class="reference internal" href="#django.core.files.uploadhandler.MemoryFileUploadHandler" title="django.core.files.uploadhandler.MemoryFileUploadHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemoryFileUploadHandler</span></code></a> et <a class="reference internal" href="#django.core.files.uploadhandler.TemporaryFileUploadHandler" title="django.core.files.uploadhandler.TemporaryFileUploadHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemporaryFileUploadHandler</span></code></a> définissent le comportement Django par défaut de téléversement de fichier en plaçant les petits fichiers en mémoire et les plus gros sur le disque. Ils se trouvent dans <code class="docutils literal notranslate"><span class="pre">django.core.files.uploadhandler</span></code>.</p>
+<dl class="class">
+<dt id="django.core.files.uploadhandler.MemoryFileUploadHandler">
+<em class="property">class </em><code class="descname">MemoryFileUploadHandler</code><a class="headerlink" href="#django.core.files.uploadhandler.MemoryFileUploadHandler" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Gestionnaire de téléversement de fichier pour transférer en flux les téléversements vers la mémoire (utilisé pour de petits fichiers).</p>
+<dl class="class">
+<dt id="django.core.files.uploadhandler.TemporaryFileUploadHandler">
+<em class="property">class </em><code class="descname">TemporaryFileUploadHandler</code><a class="headerlink" href="#django.core.files.uploadhandler.TemporaryFileUploadHandler" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Gestionnaire de téléversement qui écrit en flux les données vers un fichier temporaire en utilisant <a class="reference internal" href="#django.core.files.uploadedfile.TemporaryUploadedFile" title="django.core.files.uploadedfile.TemporaryUploadedFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemporaryUploadedFile</span></code></a>.</p>
+</div>
+<div class="section" id="s-writing-custom-upload-handlers">
+<span id="s-custom-upload-handlers"></span><span id="writing-custom-upload-handlers"></span><span id="custom-upload-handlers"></span><h2>Écriture de gestionnaires de téléversement personnalisés<a class="headerlink" href="#writing-custom-upload-handlers" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.core.files.uploadhandler.FileUploadHandler">
+<em class="property">class </em><code class="descname">FileUploadHandler</code><a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Tous les gestionnaires de téléversement de fichiers doivent hériter de <code class="docutils literal notranslate"><span class="pre">django.core.files.uploadhandler.FileUploadHandler</span></code>. Ils peuvent être placés à n’importe quel endroit.</p>
+<div class="section" id="s-required-methods">
+<span id="required-methods"></span><h3>Méthodes obligatoires<a class="headerlink" href="#required-methods" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les gestionnaires de téléversement personnalisés <strong>doivent</strong> définir les méthodes suivantes&nbsp;:</p>
+<dl class="method">
+<dt id="django.core.files.uploadhandler.FileUploadHandler.receive_data_chunk">
+<code class="descclassname">FileUploadHandler.</code><code class="descname">receive_data_chunk</code>(<em>raw_data</em>, <em>start</em>)<a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler.receive_data_chunk" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Reçoit un «&nbsp;segment&nbsp;» de données du fichier téléversé.</p>
+<p><code class="docutils literal notranslate"><span class="pre">raw_data</span></code> est une chaîne d’octets contenant les données envoyées.</p>
+<p><code class="docutils literal notranslate"><span class="pre">start</span></code> est la position dans le fichier correspondant au début de ce segment <code class="docutils literal notranslate"><span class="pre">raw_data</span></code>.</p>
+<p>Les données que vous renvoyez seront retransmises aux méthodes <code class="docutils literal notranslate"><span class="pre">receive_data_chunk</span></code> des gestionnaires de téléversement suivants. De cette façon, un gestionnaire peut être un «&nbsp;filtre&nbsp;» pour d’autres gestionnaires.</p>
+<p>Renvoyez <code class="docutils literal notranslate"><span class="pre">None</span></code> depuis <code class="docutils literal notranslate"><span class="pre">receive_data_chunk</span></code> pour empêcher les gestionnaires de téléversement restants de recevoir ce segment. Cela peut être utile si vous stockez vous-même les données reçues et que vous ne souhaitez pas que les gestionnaires suivants stockent une copie des données.</p>
+<p>Si vous générez une exception <code class="docutils literal notranslate"><span class="pre">StopUpload</span></code> ou <code class="docutils literal notranslate"><span class="pre">SkipFile</span></code>, le téléversement s’interrompt ou le fichier est complètement ignoré.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadhandler.FileUploadHandler.file_complete">
+<code class="descclassname">FileUploadHandler.</code><code class="descname">file_complete</code>(<em>file_size</em>)<a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler.file_complete" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Appelée lorsque le téléversement d’un fichier est terminé.</p>
+<p>Le gestionnaire doit renvoyer un objet <code class="docutils literal notranslate"><span class="pre">UploadedFile</span></code> qui sera stocké dans <code class="docutils literal notranslate"><span class="pre">request.FILES</span></code>. Les gestionnaires peuvent aussi renvoyer <code class="docutils literal notranslate"><span class="pre">None</span></code> pour indiquer que l’objet <code class="docutils literal notranslate"><span class="pre">UploadedFile</span></code> doit provenir d’un des gestionnaires de téléversement suivants.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-optional-methods">
+<span id="optional-methods"></span><h3>Méthodes facultatives<a class="headerlink" href="#optional-methods" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les gestionnaires de téléversement peuvent aussi définir l’une des méthodes ou des attributs facultatifs suivants&nbsp;:</p>
+<dl class="attribute">
+<dt id="django.core.files.uploadhandler.FileUploadHandler.chunk_size">
+<code class="descclassname">FileUploadHandler.</code><code class="descname">chunk_size</code><a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler.chunk_size" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Taille, en octets, des segments que Django stocke en mémoire et transmet au gestionnaire. En clair, cet attribut contrôle la taille des segments qui sont envoyés à <code class="docutils literal notranslate"><span class="pre">FileUploadHandler.receive_data_chunk</span></code>.</p>
+<p>Pour des performances optimales, la taille des segments devrait être divisible par <code class="docutils literal notranslate"><span class="pre">4</span></code> sans excéder 2&nbsp;Gio (2<sup>31</sup> octets). Lorsque différentes tailles de segment sont indiquées par différents gestionnaires, Django utilise la taille de segment la plus petite d’entre elles.</p>
+<p>La valeur par défaut est 64*2<sup>10</sup> octets ou 64 Kio.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadhandler.FileUploadHandler.new_file">
+<code class="descclassname">FileUploadHandler.</code><code class="descname">new_file</code>(<em>field_name</em>, <em>file_name</em>, <em>content_type</em>, <em>content_length</em>, <em>charset</em>, <em>content_type_extra</em>)<a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler.new_file" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Fonction de rappel signalant qu’un nouvel envoi de fichier démarre. Elle est appelée avant que les données commencent à être envoyées à un gestionnaire de téléversement.</p>
+<p><code class="docutils literal notranslate"><span class="pre">field_name</span></code> est le nom (chaîne) du champ de fichier <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">file_name</span></code> est le nom de fichier indiqué par le navigateur.</p>
+<p><code class="docutils literal notranslate"><span class="pre">content_type</span></code> est le type MIME indiqué par le navigateur, par exemple <code class="docutils literal notranslate"><span class="pre">'image/jpeg'</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">content_length</span></code> est la taille de l’image indiquée par le navigateur. Il arrive que cette valeur ne soit pas indiquée et contienne <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">charset</span></code> est le jeu de caractères (par ex. <code class="docutils literal notranslate"><span class="pre">utf8</span></code>) indiqué par le navigateur. Comme <code class="docutils literal notranslate"><span class="pre">content_length</span></code>, il arrive que cette valeur ne soit pas donnée.</p>
+<p><code class="docutils literal notranslate"><span class="pre">content_type_extra</span></code> contient des informations supplémentaires au sujet du fichier selon l’en-tête <code class="docutils literal notranslate"><span class="pre">content-type</span></code>. Voir <a class="reference internal" href="#django.core.files.uploadedfile.UploadedFile.content_type_extra" title="django.core.files.uploadedfile.UploadedFile.content_type_extra"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UploadedFile.content_type_extra</span></code></a>.</p>
+<p>Cette méthode peut générer une exception <code class="docutils literal notranslate"><span class="pre">StopFutureHandlers</span></code> pour empêcher d’autres gestionnaires de gérer ce fichier après celui-ci.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadhandler.FileUploadHandler.upload_complete">
+<code class="descclassname">FileUploadHandler.</code><code class="descname">upload_complete</code>()<a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler.upload_complete" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Fonction de rappel signalant que tout le téléversement est terminé (tous les fichiers).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.files.uploadhandler.FileUploadHandler.handle_raw_input">
+<code class="descclassname">FileUploadHandler.</code><code class="descname">handle_raw_input</code>(<em>input_data</em>, <em>META</em>, <em>content_length</em>, <em>boundary</em>, <em>encoding</em>)<a class="headerlink" href="#django.core.files.uploadhandler.FileUploadHandler.handle_raw_input" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Permet au gestionnaire de surcharger complètement l’analyse de l’entrée HTTP brute.</p>
+<p><code class="docutils literal notranslate"><span class="pre">input_data</span></code> est un objet de type fichier prenant en charge la lecture (<code class="docutils literal notranslate"><span class="pre">read()</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">META</span></code> est le même objet que <code class="docutils literal notranslate"><span class="pre">request.META</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">content_length</span></code> est la taille des données dans <code class="docutils literal notranslate"><span class="pre">input_data</span></code>. Ne lisez pas plus de <code class="docutils literal notranslate"><span class="pre">content_length</span></code> octets à partir de <code class="docutils literal notranslate"><span class="pre">input_data</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">boundary</span></code> est la frontière MIME de cette requête.</p>
+<p><code class="docutils literal notranslate"><span class="pre">encoding</span></code> est le codage de cette requête.</p>
+<p>Renvoyez <code class="docutils literal notranslate"><span class="pre">None</span></code> si vous voulez que la gestion du téléversement se poursuive, ou un tuple <code class="docutils literal notranslate"><span class="pre">(POST,</span> <span class="pre">FILES)</span></code> si vous voulez renvoyer directement les nouvelles structures de données prêtes à l’emploi par la requête.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Fichiers téléversés et gestionnaires de téléversement</a><ul>
+<li><a class="reference internal" href="#uploaded-files">Fichiers téléversés</a></li>
+<li><a class="reference internal" href="#module-django.core.files.uploadhandler">Gestionnaires de téléversement intégrés</a></li>
+<li><a class="reference internal" href="#writing-custom-upload-handlers">Écriture de gestionnaires de téléversement personnalisés</a><ul>
+<li><a class="reference internal" href="#required-methods">Méthodes obligatoires</a></li>
+<li><a class="reference internal" href="#optional-methods">Méthodes facultatives</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="storage.html"
+                        title="Chapitre précédent">API de stockage des fichiers</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../forms/index.html"
+                        title="Chapitre suivant">Formulaires</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/files/uploads.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="storage.html" title="API de stockage des fichiers">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="../forms/index.html" title="Formulaires">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

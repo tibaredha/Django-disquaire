@@ -1,0 +1,266 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Traitement conditionnel de vue &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Signatures cryptographiques" href="signing.html" />
+    <link rel="prev" title="L’infrastructure de cache dans Django" href="cache.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="cache.html" title="L’infrastructure de cache dans Django">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="signing.html" title="Signatures cryptographiques">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-conditional-view-processing">
+            
+  <div class="section" id="s-conditional-view-processing">
+<span id="conditional-view-processing"></span><h1>Traitement conditionnel de vue<a class="headerlink" href="#conditional-view-processing" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les clients HTTP peuvent envoyer plusieurs en-têtes pour signaler au serveur des copies de ressources qu’ils ont déjà rencontrées. C’est fréquemment employé lors de l’obtention d’une page Web (par une requête HTTP <code class="docutils literal notranslate"><span class="pre">GET</span></code>) pour éviter d’envoyer toutes les données quand le client en a déjà récupéré une partie. Cependant, les mêmes en-têtes peuvent être utilisés par toutes les méthodes HTTP (<code class="docutils literal notranslate"><span class="pre">POST</span></code>, <code class="docutils literal notranslate"><span class="pre">PUT</span></code>, <code class="docutils literal notranslate"><span class="pre">DELETE</span></code>, etc.).</p>
+<p>Pour chaque page (réponse) que Django renvoie depuis une vue, il est susceptible de définir deux en-têtes HTTP&nbsp;: l’en-tête <code class="docutils literal notranslate"><span class="pre">ETag</span></code> et l’en-tête <code class="docutils literal notranslate"><span class="pre">Last-Modified</span></code>. Ces en-têtes sont facultatifs dans les réponses HTTP. Ils peuvent être définis par la fonction de vue ou il est possible de compter sur l’intergiciel <a class="reference internal" href="../ref/middleware.html#django.middleware.http.ConditionalGetMiddleware" title="django.middleware.http.ConditionalGetMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalGetMiddleware</span></code></a> pour définir l’en-tête <code class="docutils literal notranslate"><span class="pre">ETag</span></code>.</p>
+<p>Lorsqu’un client demande une nouvelle fois la même ressource, il peut envoyer avec la requête un en-tête tel que <span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7232.html#section-3.3"><strong>If-modified-since</strong></a> ou <span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7232.html#section-3.4"><strong>If-unmodified-since</strong></a> contenant la date de dernière modification qu’il a reçue, ou <span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7232.html#section-3.1"><strong>If-match</strong></a> ou <span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7232.html#section-3.2"><strong>If-none-match</strong></a> contenant la dernière valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> qu’il a reçue. Si la version actuelle de la page correspond à la valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> envoyée par le client ou que la ressource n’a pas été modifiée entre temps, le serveur peut renvoyer un code de statut 304 au lieu d’une réponse complète, indiquant par là au client que rien n’a changé. En fonction de l’en-tête, si la page a été modifiée ou ne correspond pas au contenu <code class="docutils literal notranslate"><span class="pre">ETag</span></code> envoyé par le client, un code de statut 412 (Precondition Failed) peut être renvoyé.</p>
+<p>Dans les cas où vous avez besoin d’un contrôle plus fin, vous pouvez utiliser les fonctions de traitement conditionnel par vue.</p>
+<div class="section" id="s-the-condition-decorator">
+<span id="s-conditional-decorators"></span><span id="the-condition-decorator"></span><span id="conditional-decorators"></span><h2>Le décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code><a class="headerlink" href="#the-condition-decorator" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Parfois (et assez souvent en réalité), vous pouvez créer des fonctions pour calculer rapidement la valeur <a class="reference external" href="https://tools.ietf.org/html/rfc7232#section-2.3">ETag</a> ou la date de dernière modification d’une ressource, <strong>sans</strong> devoir procéder à toutes les opérations nécessaires à la construction complète de la vue. Django peut ensuite utiliser ces fonctions pour fournir une option de «&nbsp;court-circuitage rapide&nbsp;» du traitement de la vue. Par exemple pour indiquer au client que le contenu n’a pas été modifié depuis la requête précédente.</p>
+<p>Ces deux fonctions sont transmises comme paramètres au décorateur <code class="docutils literal notranslate"><span class="pre">django.views.decorators.http.condition</span></code>. Ce décorateur les exploite (vous pouvez n’en fournir qu’une s’il n’est pas possible de calculer facilement et rapidement les deux éléments) pour savoir si les en-têtes de la requête HTTP correspondent à ceux de la ressource. Lorsque ce n’est pas le cas, une nouvelle copie de la ressource doit être calculée et donc la vue normale est appelée.</p>
+<p>La signature du décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code> correspond à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">condition</span><span class="p">(</span><span class="n">etag_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_modified_func</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Les deux fonctions, celle pour calculer la valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> et celle pour la date de dernière modification, reçoivent l’objet <code class="docutils literal notranslate"><span class="pre">request</span></code> entrant ainsi que les mêmes paramètres, dans le même ordre, que la fonction de vue qu’elles enveloppent. La fonction de rappel <code class="docutils literal notranslate"><span class="pre">last_modified_func</span></code> doit renvoyer une valeur date/heure standard indiquant la date de dernière modification de la ressource ou <code class="docutils literal notranslate"><span class="pre">None</span></code> si la ressource n’existe pas. La fonction de rappel du décorateur <code class="docutils literal notranslate"><span class="pre">etag</span></code> doit renvoyer une chaîne représentant la valeur <a class="reference external" href="https://tools.ietf.org/html/rfc7232#section-2.3">ETag</a> de la ressource, ou <code class="docutils literal notranslate"><span class="pre">None</span></code> si la ressource n’existe pas.</p>
+<p>Le décorateur définit les en-têtes <code class="docutils literal notranslate"><span class="pre">ETag</span></code> et <code class="docutils literal notranslate"><span class="pre">Last-Modified</span></code> de la réponse s’ils ne sont pas déjà définis par la vue et si la méthode de la requête est sûre (<code class="docutils literal notranslate"><span class="pre">GET</span></code> ou <code class="docutils literal notranslate"><span class="pre">HEAD</span></code>).</p>
+<p>Il est probablement plus adéquat d’expliquer la façon d’utiliser cette fonctionnalité par un exemple. Admettons que vous ayez ces deux modèles représentant un petit système de blog&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Blog</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">Entry</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">blog</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Blog</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">published</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Si la page d’accueil affichant les derniers articles de blog ne change que lorsque vous ajoutez un nouvel article, vous pouvez calculer très rapidement la date de dernière modification. Vous avez besoin de la date <code class="docutils literal notranslate"><span class="pre">published</span></code> la plus récente de chaque article associé à ce blog. Une façon de le faire serait&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">latest_entry</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">blog_id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">blog</span><span class="o">=</span><span class="n">blog_id</span><span class="p">)</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="s2">&quot;published&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">published</span>
+</pre></div>
+</div>
+<p>Vous pouvez dès lors utiliser cette fonction pour fournir une détection rapide d’une page d’accueil inchangée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.decorators.http</span> <span class="k">import</span> <span class="n">condition</span>
+
+<span class="nd">@condition</span><span class="p">(</span><span class="n">last_modified_func</span><span class="o">=</span><span class="n">latest_entry</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">front_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">blog_id</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition-be-careful-with-the-order-of-decorators admonition">
+<p class="first admonition-title">Attention à l’ordre des décorateurs</p>
+<p class="last">Lorsque <code class="docutils literal notranslate"><span class="pre">condition()</span></code> renvoie une réponse conditionnelle, tout décorateur qui le suit sera ignoré et ne s’appliquera pas à la réponse. Ainsi, tout décorateur devant s’appliquer à la fois à la réponse de vue normale et à la réponse conditionnelle doit se trouver au-dessus de <code class="docutils literal notranslate"><span class="pre">condition()</span></code>. En particulier, <a class="reference internal" href="http/decorators.html#django.views.decorators.vary.vary_on_cookie" title="django.views.decorators.vary.vary_on_cookie"><code class="xref py py-func docutils literal notranslate"><span class="pre">vary_on_cookie()</span></code></a>, <a class="reference internal" href="http/decorators.html#django.views.decorators.vary.vary_on_headers" title="django.views.decorators.vary.vary_on_headers"><code class="xref py py-func docutils literal notranslate"><span class="pre">vary_on_headers()</span></code></a> et <a class="reference internal" href="http/decorators.html#django.views.decorators.cache.cache_control" title="django.views.decorators.cache.cache_control"><code class="xref py py-func docutils literal notranslate"><span class="pre">cache_control()</span></code></a> doivent figurer en premier car la <span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7232.html#section-4.1"><strong>RFC 7232</strong></a> exige que les en-têtes qu’ils définissent soient présents dans les réponses 304.</p>
+</div>
+</div>
+<div class="section" id="s-shortcuts-for-only-computing-one-value">
+<span id="shortcuts-for-only-computing-one-value"></span><h2>Raccourcis pour le calcul d’une seule valeur<a class="headerlink" href="#shortcuts-for-only-computing-one-value" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En règle générale, si vous pouvez fournir des fonctions à la fois pour le calcul de la valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> et la date de dernière modification, il est bien de le faire. On ne connaît pas à l’avance les en-têtes qu’un client HTTP donné va envoyer, on peut donc s’attendre à devoir gérer les deux cas de figure. Cependant, il peut arriver qu’une seule des deux valeurs soit facile à calculer et Django fournit donc des décorateurs qui ne gèrent que la valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> ou que la date de dernière modification.</p>
+<p>Les décorateurs <code class="docutils literal notranslate"><span class="pre">django.views.decorators.http.etag</span></code> et <code class="docutils literal notranslate"><span class="pre">django.views.decorators.http.last_modified</span></code> reçoivent le même type de fonction que le décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code>. Leur signature est&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">etag</span><span class="p">(</span><span class="n">etag_func</span><span class="p">)</span>
+<span class="n">last_modified</span><span class="p">(</span><span class="n">last_modified_func</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Nous pourrions écrire l’exemple précédent qui n’utilisait que la fonction de dernière modification en choisissant l’un de ces décorateurs&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@last_modified</span><span class="p">(</span><span class="n">latest_entry</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">front_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">blog_id</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>…ou&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">front_page</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">blog_id</span><span class="p">):</span>
+    <span class="o">...</span>
+<span class="n">front_page</span> <span class="o">=</span> <span class="n">last_modified</span><span class="p">(</span><span class="n">latest_entry</span><span class="p">)(</span><span class="n">front_page</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="s-use-condition-when-testing-both-conditions">
+<span id="use-condition-when-testing-both-conditions"></span><h3>Test des deux conditions avec <code class="docutils literal notranslate"><span class="pre">condition</span></code><a class="headerlink" href="#use-condition-when-testing-both-conditions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il pourrait paraître plus élégant pour certaines personnes d’essayer d’enchaîner les décorateurs <code class="docutils literal notranslate"><span class="pre">etag</span></code> et <code class="docutils literal notranslate"><span class="pre">last_modified</span></code> pour tester les deux pré-conditions. Cependant, l’effet produit serait faux.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bad code. Don&#39;t do this!</span>
+<span class="nd">@etag</span><span class="p">(</span><span class="n">etag_func</span><span class="p">)</span>
+<span class="nd">@last_modified</span><span class="p">(</span><span class="n">last_modified_func</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+
+<span class="c1"># End of bad code.</span>
+</pre></div>
+</div>
+<p>Le premier décorateur n’a aucune conscience du second et pourrait répondre que la réponse n’a pas été modifiée même quand le second décorateur en déciderait autrement. Le décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code> utilise les deux fonctions de rappel de concert pour prendre la bonne décision.</p>
+</div>
+</div>
+<div class="section" id="s-using-the-decorators-with-other-http-methods">
+<span id="using-the-decorators-with-other-http-methods"></span><h2>Utilisation des décorateurs avec d’autres méthodes HTTP<a class="headerlink" href="#using-the-decorators-with-other-http-methods" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code> est utile au-delà des requêtes <code class="docutils literal notranslate"><span class="pre">GET</span></code> et <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> (les requêtes <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> sont similaires aux requêtes <code class="docutils literal notranslate"><span class="pre">GET</span></code> dans cette optique). Il peut aussi être utilisé pour faire les vérifications nécessaires pour les requêtes <code class="docutils literal notranslate"><span class="pre">POST</span></code>, <code class="docutils literal notranslate"><span class="pre">PUT</span></code> et <code class="docutils literal notranslate"><span class="pre">DELETE</span></code>. Dans ces cas de figure, l’idée n’est pas de renvoyer une réponse «&nbsp;non modifiée&nbsp;», mais d’indiquer au client que la ressource qu’ils tentent de modifier a subi des modifications dans l’intervalle.</p>
+<p>Par exemple, considérez l’échange suivant entre un client et un serveur&nbsp;:</p>
+<ol class="arabic simple">
+<li>Le client demande <code class="docutils literal notranslate"><span class="pre">/foo/</span></code>.</li>
+<li>Le serveur répond avec un contenu dont la valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> vaut <code class="docutils literal notranslate"><span class="pre">&quot;abcd1234&quot;</span></code>.</li>
+<li>Le client envoie une requête HTTP <code class="docutils literal notranslate"><span class="pre">PUT</span></code> vers <code class="docutils literal notranslate"><span class="pre">/foo/</span></code> pour mettre à jour la ressource. Il envoie également un en-tête <code class="docutils literal notranslate"><span class="pre">If-Match:</span> <span class="pre">&quot;abcd1234&quot;</span></code> pour indiquer la version qu’il tente de mettre à jour.</li>
+<li>Le serveur vérifie si la ressource a changé en calculant la valeur <code class="docutils literal notranslate"><span class="pre">ETag</span></code> comme il l’a fait pour la requête <code class="docutils literal notranslate"><span class="pre">GET</span></code> (en utilisant la même fonction). Si la ressource a <em>effectivement</em> changé, il renvoie un code de statut 412 signifiant «&nbsp;Échec de condition préalable&nbsp;» (precondition failed).</li>
+<li>Le client envoie une requête <code class="docutils literal notranslate"><span class="pre">GET</span></code> vers <code class="docutils literal notranslate"><span class="pre">/foo/</span></code> après la réception de la réponse 412 afin de récupérer une version mise à jour du contenu avant de le mettre à jour.</li>
+</ol>
+<p>La chose importante démontrée par cet exemple est que les mêmes fonctions peuvent être utilisées pour calculer les valeurs <code class="docutils literal notranslate"><span class="pre">ETag</span></code> et date de dernière modification dans toutes les situations. En fait, vous <strong>devez</strong> utiliser les mêmes fonctions afin que les mêmes valeurs soient renvoyées à chaque fois.</p>
+<div class="admonition-validator-headers-with-non-safe-request-methods admonition">
+<p class="first admonition-title">En-têtes de validation avec les méthodes de requête non sûres</p>
+<p class="last">Le décorateur  <code class="docutils literal notranslate"><span class="pre">condition</span></code> ne définit les en-têtes de validation (<code class="docutils literal notranslate"><span class="pre">ETag</span></code> et <code class="docutils literal notranslate"><span class="pre">Last-Modified</span></code>) que pour les méthodes HTTP sûres, c’est-à-dire <code class="docutils literal notranslate"><span class="pre">GET</span></code> et <code class="docutils literal notranslate"><span class="pre">HEAD</span></code>. SI vous souhaitez les avoir avec d’autres méthodes, vous devez les définir dans la vue. Voir <span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7231.html#section-4.3.4"><strong>RFC 7231#section-4.3.4</strong></a> pour connaître la distinction entre la définition d’un en-tête de validation dans les réponses aux requêtes envoyées par <code class="docutils literal notranslate"><span class="pre">PUT</span></code> en comparaison de <code class="docutils literal notranslate"><span class="pre">POST</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-comparison-with-middleware-conditional-processing">
+<span id="comparison-with-middleware-conditional-processing"></span><h2>Comparaison avec l’intergiciel de traitement conditionnel<a class="headerlink" href="#comparison-with-middleware-conditional-processing" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django fournit une gestion conditionnelle de <code class="docutils literal notranslate"><span class="pre">GET</span></code> via l’intergiciel <a class="reference internal" href="../ref/middleware.html#django.middleware.http.ConditionalGetMiddleware" title="django.middleware.http.ConditionalGetMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.middleware.http.ConditionalGetMiddleware</span></code></a>. Bien qu’il soit adapté à de nombreuses situations, les fonctionnalités de cet intergiciel présentent des limites quant à un usage avancé&nbsp;:</p>
+<ul class="simple">
+<li>Il est appliqué globalement à toutes les vues d’un projet.</li>
+<li>Il ne vous économise pas le travail de génération de la réponse, ce qui peut être coûteux.</li>
+<li>Il n’est adapté qu’aux requêtes HTTP <code class="docutils literal notranslate"><span class="pre">GET</span></code>.</li>
+</ul>
+<p>Vous devriez choisir ici l’outil le plus approprié à votre problème particulier. Si vous arrivez à calculer rapidement les valeurs <code class="docutils literal notranslate"><span class="pre">ETag</span></code> et de date de dernière modification et que certaines vues prennent du temps à produire leur contenu, vous devriez envisager d’utiliser le décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code> présenté dans ce document. Par contre, si tout fonctionne déjà de manière assez fluide, restez-en à la solution des intergiciels et vous continuerez de réduire la quantité de trafic réseau en direction des clients dans les cas où les contenus des vues n’ont pas changé.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Traitement conditionnel de vue</a><ul>
+<li><a class="reference internal" href="#the-condition-decorator">Le décorateur <code class="docutils literal notranslate"><span class="pre">condition</span></code></a></li>
+<li><a class="reference internal" href="#shortcuts-for-only-computing-one-value">Raccourcis pour le calcul d’une seule valeur</a><ul>
+<li><a class="reference internal" href="#use-condition-when-testing-both-conditions">Test des deux conditions avec <code class="docutils literal notranslate"><span class="pre">condition</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-the-decorators-with-other-http-methods">Utilisation des décorateurs avec d’autres méthodes HTTP</a></li>
+<li><a class="reference internal" href="#comparison-with-middleware-conditional-processing">Comparaison avec l’intergiciel de traitement conditionnel</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="cache.html"
+                        title="Chapitre précédent">L’infrastructure de cache dans Django</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="signing.html"
+                        title="Chapitre suivant">Signatures cryptographiques</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/topics/conditional-view-processing.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="cache.html" title="L’infrastructure de cache dans Django">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="signing.html" title="Signatures cryptographiques">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,932 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Champs de modèles spécifiques à PostgreSQL &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Champs et composants de formulaires spécifiques à PostgreSQL" href="forms.html" />
+    <link rel="prev" title="Contraintes de bases de données spécifiques à PostgreSQL" href="constraints.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="constraints.html" title="Contraintes de bases de données spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="forms.html" title="Champs et composants de formulaires spécifiques à PostgreSQL">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-postgres-fields">
+            
+  <div class="section" id="s-postgresql-specific-model-fields">
+<span id="postgresql-specific-model-fields"></span><h1>Champs de modèles spécifiques à PostgreSQL<a class="headerlink" href="#postgresql-specific-model-fields" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Tous ces champs sont disponibles dans le module <code class="docutils literal notranslate"><span class="pre">django.contrib.postgres.fields</span></code>.</p>
+<div class="section" id="s-indexing-these-fields">
+<span id="indexing-these-fields"></span><h2>Indexation de ces champs<a class="headerlink" href="#indexing-these-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<p><a class="reference internal" href="../../models/indexes.html#django.db.models.Index" title="django.db.models.Index"><code class="xref py py-class docutils literal notranslate"><span class="pre">Index</span></code></a> et <a class="reference internal" href="../../models/fields.html#django.db.models.Field.db_index" title="django.db.models.Field.db_index"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Field.db_index</span></code></a> créent les deux un index B-tree, ce qui n’est pas spécialement utile lors de requêtes sur des types de données complexes. Les index tels que <a class="reference internal" href="indexes.html#django.contrib.postgres.indexes.GinIndex" title="django.contrib.postgres.indexes.GinIndex"><code class="xref py py-class docutils literal notranslate"><span class="pre">GinIndex</span></code></a> et <a class="reference internal" href="indexes.html#django.contrib.postgres.indexes.GistIndex" title="django.contrib.postgres.indexes.GistIndex"><code class="xref py py-class docutils literal notranslate"><span class="pre">GistIndex</span></code></a> sont mieux adaptés, même si le choix de l’index dépend des requêtes effectivement utilisées. En général, GiST est un bon choix pour les <a class="reference internal" href="#range-fields"><span class="std std-ref">champs d’intervalle</span></a> et le champ <a class="reference internal" href="#django.contrib.postgres.fields.HStoreField" title="django.contrib.postgres.fields.HStoreField"><code class="xref py py-class docutils literal notranslate"><span class="pre">HStoreField</span></code></a>, alors que GIN est souvent utile pour les champs <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField" title="django.contrib.postgres.fields.ArrayField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayField</span></code></a>.</p>
+</div>
+<div class="section" id="s-arrayfield">
+<span id="arrayfield"></span><h2><code class="docutils literal notranslate"><span class="pre">ArrayField</span></code><a class="headerlink" href="#arrayfield" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.ArrayField">
+<em class="property">class </em><code class="descname">ArrayField</code>(<em>base_field</em>, <em>size=None</em>, <em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.ArrayField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un champ pour stocker des listes de données. La plupart des types de champs peuvent être utilisés&nbsp;; passez une autre instance de champ dans l’attribut <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField.base_field" title="django.contrib.postgres.fields.ArrayField.base_field"><code class="xref py py-attr docutils literal notranslate"><span class="pre">base_field</span></code></a>. Vous pouvez aussi indiquer une taille dans <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField.size" title="django.contrib.postgres.fields.ArrayField.size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">size</span></code></a>. <code class="docutils literal notranslate"><span class="pre">ArrayField</span></code> peut être imbriqué pour stocker des tableaux multidimensionnels.</p>
+<p>Si vous donnez une valeur <a class="reference internal" href="../../models/fields.html#django.db.models.Field.default" title="django.db.models.Field.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default</span></code></a> à ce champ, assurez-vous que ce soit un objet exécutable tel que <code class="docutils literal notranslate"><span class="pre">list</span></code> (pour une valeur par défaut vide) ou un objet exécutable qui renvoie une liste (par exemple une fonction). L’utilisation de <code class="docutils literal notranslate"><span class="pre">default=[]</span></code> n’est pas correct car cela crée une valeur par défaut mutante qui est partagée entre les instances de <code class="docutils literal notranslate"><span class="pre">ArrayField</span></code>.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.ArrayField.base_field">
+<code class="descname">base_field</code><a class="headerlink" href="#django.contrib.postgres.fields.ArrayField.base_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce paramètre est obligatoire.</p>
+<p>Définit le type de données sous-jacent et le comportement du tableau. Il devrait s’agir d’une instance d’une sous-classe de <a class="reference internal" href="../../models/fields.html#django.db.models.Field" title="django.db.models.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>. Par exemple, cela pourrait être un <a class="reference internal" href="../../models/fields.html#django.db.models.IntegerField" title="django.db.models.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a> ou un <a class="reference internal" href="../../models/fields.html#django.db.models.CharField" title="django.db.models.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a>. La plupart des types de champs sont autorisés, à l’exception de ceux qui gèrent des données relationnelles (<a class="reference internal" href="../../models/fields.html#django.db.models.ForeignKey" title="django.db.models.ForeignKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForeignKey</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.OneToOneField" title="django.db.models.OneToOneField"><code class="xref py py-class docutils literal notranslate"><span class="pre">OneToOneField</span></code></a> et <a class="reference internal" href="../../models/fields.html#django.db.models.ManyToManyField" title="django.db.models.ManyToManyField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManyToManyField</span></code></a>).</p>
+<p>Il est possible d’imbriquer des champs tabulaires, c’est-à-dire que <code class="docutils literal notranslate"><span class="pre">base_field</span></code> peut contenir une instance de <code class="docutils literal notranslate"><span class="pre">ArrayField</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">ArrayField</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">ChessBoard</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">board</span> <span class="o">=</span> <span class="n">ArrayField</span><span class="p">(</span>
+        <span class="n">ArrayField</span><span class="p">(</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>La transformation de valeurs entre la base de données et le modèle, la validation de données et la configuration ainsi que la sérialisation sont tous délégués au champ de base sous-jacent.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.ArrayField.size">
+<code class="descname">size</code><a class="headerlink" href="#django.contrib.postgres.fields.ArrayField.size" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce paramètre est facultatif.</p>
+<p>Si présent, le tableau aura la taille maximale indiquée. Cette valeur est transmise à la base de données, même si PostgreSQL n’applique actuellement pas cette restriction.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Lors de l’imbrication de champs <code class="docutils literal notranslate"><span class="pre">ArrayField</span></code>, que le paramètre <code class="docutils literal notranslate"><span class="pre">size</span></code> soit défini ou non, PostgreSQL exige que les tableaux soient rectangulaires&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">ArrayField</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Board</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="n">ArrayField</span><span class="p">(</span><span class="n">ArrayField</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()))</span>
+
+<span class="c1"># Valid</span>
+<span class="n">Board</span><span class="p">(</span><span class="n">pieces</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="p">])</span>
+
+<span class="c1"># Not valid</span>
+<span class="n">Board</span><span class="p">(</span><span class="n">pieces</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+<p class="last">Si des formes irrégulières sont nécessaires, le sous-champ doit pouvoir être nul et les valeurs doivent être complétées avec <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</div>
+<div class="section" id="s-querying-arrayfield">
+<span id="querying-arrayfield"></span><h3>Interrogation de <code class="docutils literal notranslate"><span class="pre">ArrayField</span></code><a class="headerlink" href="#querying-arrayfield" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il existe plusieurs recherches et transformations spécifiques au champ <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField" title="django.contrib.postgres.fields.ArrayField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayField</span></code></a>. Nous allons utiliser le modèle d’exemple suivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">ArrayField</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Post</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">ArrayField</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<div class="section" id="s-contains">
+<span id="s-std:fieldlookup-arrayfield.contains"></span><span id="contains"></span><span id="std:fieldlookup-arrayfield.contains"></span><h4><code class="docutils literal notranslate"><span class="pre">contains</span></code><a class="headerlink" href="#contains" title="Lien permanent vers ce titre">¶</a></h4>
+<p>La recherche <a class="reference internal" href="../../models/querysets.html#std:fieldlookup-contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a> est surchargée pour <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField" title="django.contrib.postgres.fields.ArrayField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayField</span></code></a>. Les objets renvoyés sont ceux pour qui les valeurs transmises forment un sous-ensemble des données. Elle utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">&#64;&gt;</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;First post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Second post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Third post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__contains</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__contains</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Third post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__contains</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;django&#39;</span><span class="p">,</span> <span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-contained-by">
+<span id="s-std:fieldlookup-arrayfield.contained_by"></span><span id="contained-by"></span><span id="std:fieldlookup-arrayfield.contained_by"></span><h4><code class="docutils literal notranslate"><span class="pre">contained_by</span></code><a class="headerlink" href="#contained-by" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Il s’agit de l’inverse de la recherche <a class="reference internal" href="#std:fieldlookup-arrayfield.contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a>, les objets renvoyés sont ceux pour qui les données forment un sous-ensemble des valeurs transmises. Elle utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">&lt;&#64;</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;First post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Second post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Third post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__contained_by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__contained_by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;, &lt;Post: Third post&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-overlap">
+<span id="s-std:fieldlookup-arrayfield.overlap"></span><span id="overlap"></span><span id="std:fieldlookup-arrayfield.overlap"></span><h4><code class="docutils literal notranslate"><span class="pre">overlap</span></code><a class="headerlink" href="#overlap" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie les objets dont les données contiennent au moins une valeur en commun avec celles transmises. Utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">&amp;&amp;</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;First post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Second post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Third post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;tutorial&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__overlap</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__overlap</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;tutorial&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;, &lt;Post: Third post&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-len">
+<span id="s-std:fieldlookup-arrayfield.len"></span><span id="len"></span><span id="std:fieldlookup-arrayfield.len"></span><h4><code class="docutils literal notranslate"><span class="pre">len</span></code><a class="headerlink" href="#len" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie la longueur du tableau. Les recherches disponibles à la suite de celle-ci sont celles qui sont disponibles pour les champs <a class="reference internal" href="../../models/fields.html#django.db.models.IntegerField" title="django.db.models.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;First post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Second post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__len</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Post: Second post&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-index-transforms">
+<span id="s-std:fieldlookup-arrayfield.index"></span><span id="index-transforms"></span><span id="std:fieldlookup-arrayfield.index"></span><h4>Transformations d’indice<a class="headerlink" href="#index-transforms" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les transformations d’index indicent dans les tableaux. Tout nombre entier non négatif est utilisable. Aucune erreur n’est produite si l’indice dépasse la taille <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField.size" title="django.contrib.postgres.fields.ArrayField.size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">size</span></code></a> du tableau. Les recherches disponibles à la suite de la transformation sont celles du champ <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField.base_field" title="django.contrib.postgres.fields.ArrayField.base_field"><code class="xref py py-attr docutils literal notranslate"><span class="pre">base_field</span></code></a>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;First post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Second post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__0</span><span class="o">=</span><span class="s1">&#39;thoughts&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__1__iexact</span><span class="o">=</span><span class="s1">&#39;Django&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__276</span><span class="o">=</span><span class="s1">&#39;javascript&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet []&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PostgreSQL utilise l’indiçage à partir de 1 pour les champs de type tableau lors de l’écriture de SQL brut. Cependant, ces indices ainsi que ceux utilisés dans les <a class="reference internal" href="#std:fieldlookup-arrayfield.slice"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">segmentations</span></code></a> emploient des indices depuis 0 afin de rester cohérent avec Python.</p>
+</div>
+</div>
+<div class="section" id="s-slice-transforms">
+<span id="s-std:fieldlookup-arrayfield.slice"></span><span id="slice-transforms"></span><span id="std:fieldlookup-arrayfield.slice"></span><h4>Transformations de segmentation<a class="headerlink" href="#slice-transforms" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les transformations de segmentation segmentent dans les tableaux. Toute paire de nombres entiers non négatifs peut être utilisée, séparée par un seul soulignement. Les recherches disponibles après la transformation ne changent pas. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;First post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">,</span> <span class="s1">&#39;django&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Second post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Third post&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;django&#39;</span><span class="p">,</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__0_1</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Post</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tags__0_2__contains</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;thoughts&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Post: First post&gt;, &lt;Post: Second post&gt;]&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PostgreSQL utilise l’indiçage à partir de 1 pour les champs de type tableau lors de l’écriture de SQL brut. Cependant, ces segmentations ainsi que celles utilisées dans les <a class="reference internal" href="#std:fieldlookup-arrayfield.index"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">indices</span></code></a> emploient des indices depuis 0 afin de rester cohérent avec Python.</p>
+</div>
+<div class="admonition-multidimensional-arrays-with-indexes-and-slices admonition">
+<p class="first admonition-title">Indices et segmentations avec les tableaux multidimensionnels</p>
+<p class="last">Le comportement de PostgreSQL est plutôt ésotérique lorsqu’il s’agit d’indicer ou de segmenter des tableaux à plusieurs dimensions. L’emploi des indices pour atteindre une donnée imbriquée fonctionne dans tous les cas, mais la plupart des autres segmentations se comportent bizarrement au niveau de la base de données et ne peuvent pas être prises en charge de manière cohérente et logique par Django.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-citext-fields">
+<span id="citext-fields"></span><h2>Champs <code class="docutils literal notranslate"><span class="pre">CIText</span></code><a class="headerlink" href="#citext-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.CIText">
+<em class="property">class </em><code class="descname">CIText</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.CIText" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin pour créer des champs texte insensibles à la casse soutenus par le type <a class="reference external" href="https://www.postgresql.org/docs/current/citext.html">citext</a>. Lisez les <a class="reference external" href="https://www.postgresql.org/docs/current/citext.html#id-1.11.7.17.7">conséquences au niveau des performances</a> avant de l’utiliser.</p>
+<p>Pour utiliser <code class="docutils literal notranslate"><span class="pre">citext</span></code>, employez l’opération <a class="reference internal" href="operations.html#django.contrib.postgres.operations.CITextExtension" title="django.contrib.postgres.operations.CITextExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">CITextExtension</span></code></a> afin de <a class="reference internal" href="operations.html#create-postgresql-extensions"><span class="std std-ref">configurer l’extension citext</span></a> dans PostgreSQL avant la première opération de migration <code class="docutils literal notranslate"><span class="pre">CreateModel</span></code>.</p>
+<p>Si vous utilisez un champ <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField" title="django.contrib.postgres.fields.ArrayField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayField</span></code></a> de <code class="docutils literal notranslate"><span class="pre">CIText</span></code>, vous devez ajouter <code class="docutils literal notranslate"><span class="pre">'django.contrib.postgres'</span></code> dans votre réglage <a class="reference internal" href="../../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>, sinon les valeurs de champs apparaîtront sous forme de chaînes comme <code class="docutils literal notranslate"><span class="pre">'{thoughts,django}'</span></code>.</p>
+<p>Plusieurs champs qui utilisent cette classe mixin sont fournis&nbsp;:</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.postgres.fields.CICharField">
+<em class="property">class </em><code class="descname">CICharField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.CICharField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.postgres.fields.CIEmailField">
+<em class="property">class </em><code class="descname">CIEmailField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.CIEmailField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.postgres.fields.CITextField">
+<em class="property">class </em><code class="descname">CITextField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.CITextField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ces champs héritent respectivement de <a class="reference internal" href="../../models/fields.html#django.db.models.CharField" title="django.db.models.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.EmailField" title="django.db.models.EmailField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailField</span></code></a> et <a class="reference internal" href="../../models/fields.html#django.db.models.TextField" title="django.db.models.TextField"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextField</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_length</span></code> ne sera pas vérifiée au niveau de la base de données car <code class="docutils literal notranslate"><span class="pre">citext</span></code> se comporte comme le type PostgreSQL <code class="docutils literal notranslate"><span class="pre">text</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-hstorefield">
+<span id="hstorefield"></span><h2><code class="docutils literal notranslate"><span class="pre">HStoreField</span></code><a class="headerlink" href="#hstorefield" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.HStoreField">
+<em class="property">class </em><code class="descname">HStoreField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.HStoreField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un champ pour stocker des paires clé-valeur. Le type de données Python utilisé est un dictionnaire <code class="docutils literal notranslate"><span class="pre">dict</span></code>. Les clés doivent être des chaînes et les valeurs peuvent être soit des chaînes, soit la valeur nulle (<code class="docutils literal notranslate"><span class="pre">None</span></code> en Python).</p>
+<p>Pour utiliser ce champ, il faut&nbsp;:</p>
+<ol class="arabic simple">
+<li>Ajouter <code class="docutils literal notranslate"><span class="pre">'django.contrib.postgres'</span></code> à votre réglage <a class="reference internal" href="../../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</li>
+<li><a class="reference internal" href="operations.html#create-postgresql-extensions"><span class="std std-ref">Configurer l’extension hstore</span></a> dans PostgreSQL.</li>
+</ol>
+<p>Vous verrez une erreur du genre <code class="docutils literal notranslate"><span class="pre">can't</span> <span class="pre">adapt</span> <span class="pre">type</span> <span class="pre">'dict'</span></code> si vous omettez la première étape, ou <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">&quot;hstore&quot;</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">exist</span></code> si vous omettez la seconde.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Parfois, il est utile de pouvoir limiter les clés admises comme valides pour un champ donné. Cela peut se faire à l’aide de <a class="reference internal" href="validators.html#django.contrib.postgres.validators.KeysValidator" title="django.contrib.postgres.validators.KeysValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeysValidator</span></code></a>.</p>
+</div>
+<div class="section" id="s-querying-hstorefield">
+<span id="querying-hstorefield"></span><h3>Interrogation de <code class="docutils literal notranslate"><span class="pre">HStoreField</span></code><a class="headerlink" href="#querying-hstorefield" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En plus de la possibilité d’interroger en fonction de la clé, il existe quelques recherches tout exprès pour les champs <code class="docutils literal notranslate"><span class="pre">HStoreField</span></code>.</p>
+<p>Nous allons utiliser le modèle d’exemple suivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">HStoreField</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Dog</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">HStoreField</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<div class="section" id="s-key-lookups">
+<span id="s-std:fieldlookup-hstorefield.key"></span><span id="key-lookups"></span><span id="std:fieldlookup-hstorefield.key"></span><h4>Recherches par clé<a class="headerlink" href="#key-lookups" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Pour rechercher en fonction d’une clé donnée, utilisez cette clé comme nom de requête&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;labrador&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__breed</span><span class="o">=</span><span class="s1">&#39;collie&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+<p>Il est possible d’enchaîner d’autres recherches après une recherche par clé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__breed__contains</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Rufus&gt;, &lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+<p>Si la clé avec laquelle vous souhaitez rechercher entre en conflit avec le nom d’une recherche existante, vous devez utiliser la recherche <a class="reference internal" href="#std:fieldlookup-hstorefield.contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">hstorefield.contains</span></code></a> à la place.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Comme n’importe quelle chaîne peut être une clé d’une valeur <code class="docutils literal notranslate"><span class="pre">hstore</span></code>, toute recherche autre que celles mentionnées ci-dessous sera interprétée comme une recherche par clé. Aucune erreur n’est produite. Faites spécialement attention aux erreurs de frappe et vérifiez systématiquement que vos requêtes fonctionnent correctement.</p>
+</div>
+</div>
+<div class="section" id="s-std:fieldlookup-hstorefield.contains">
+<span id="s-id1"></span><span id="std:fieldlookup-hstorefield.contains"></span><span id="id1"></span><h4><code class="docutils literal notranslate"><span class="pre">contains</span></code><a class="headerlink" href="#std:fieldlookup-hstorefield.contains" title="Lien permanent vers ce titre">¶</a></h4>
+<p>La recherche <a class="reference internal" href="../../models/querysets.html#std:fieldlookup-contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a> est surchargée pour <a class="reference internal" href="#django.contrib.postgres.fields.HStoreField" title="django.contrib.postgres.fields.HStoreField"><code class="xref py py-class docutils literal notranslate"><span class="pre">HStoreField</span></code></a>. Les objets renvoyés sont ceux pour qui le dictionnaire de paires clé-valeur est totalement contenu dans le champ. Elle utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">&#64;&gt;</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;labrador&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Fred&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__contains</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Rufus&gt;, &lt;Dog: Meg&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__contains</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">})</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-std:fieldlookup-hstorefield.contained_by">
+<span id="s-id2"></span><span id="std:fieldlookup-hstorefield.contained_by"></span><span id="id2"></span><h4><code class="docutils literal notranslate"><span class="pre">contained_by</span></code><a class="headerlink" href="#std:fieldlookup-hstorefield.contained_by" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Il s’agit de l’inverse de la recherche <a class="reference internal" href="#std:fieldlookup-hstorefield.contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a>, les objets renvoyés sont ceux pour qui les paires de clé-valeur forment un sous-ensemble des valeurs transmises. Elle utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">&lt;&#64;</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;labrador&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Fred&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__contained_by</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Meg&gt;, &lt;Dog: Fred&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__contained_by</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">})</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Fred&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-has-key">
+<span id="s-std:fieldlookup-hstorefield.has_key"></span><span id="has-key"></span><span id="std:fieldlookup-hstorefield.has_key"></span><h4><code class="docutils literal notranslate"><span class="pre">has_key</span></code><a class="headerlink" href="#has-key" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie les objets dont les données contiennent la clé indiquée. Utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">?</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;labrador&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__has_key</span><span class="o">=</span><span class="s1">&#39;owner&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-has-any-keys">
+<span id="s-std:fieldlookup-hstorefield.has_any_keys"></span><span id="has-any-keys"></span><span id="std:fieldlookup-hstorefield.has_any_keys"></span><h4><code class="docutils literal notranslate"><span class="pre">has_any_keys</span></code><a class="headerlink" href="#has-any-keys" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie les objets dont les données contiennent au moins une des clés indiquées. Utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">?|</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;labrador&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Fred&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__has_any_keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;owner&#39;</span><span class="p">,</span> <span class="s1">&#39;breed&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Rufus&gt;, &lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-has-keys">
+<span id="s-std:fieldlookup-hstorefield.has_keys"></span><span id="has-keys"></span><span id="std:fieldlookup-hstorefield.has_keys"></span><h4><code class="docutils literal notranslate"><span class="pre">has_keys</span></code><a class="headerlink" href="#has-keys" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie les objets dont les données contiennent toutes les clés indiquées. Utilise l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">?&amp;</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__has_keys</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;breed&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-keys">
+<span id="s-std:fieldlookup-hstorefield.keys"></span><span id="keys"></span><span id="std:fieldlookup-hstorefield.keys"></span><h4><code class="docutils literal notranslate"><span class="pre">keys</span></code><a class="headerlink" href="#keys" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie l’ensemble des clés des objets concernés. Notez que l’ordre n’est pas garanti, ce qui fait que cette transformation est surtout utile quand elle est combinée à des recherches sur <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField" title="django.contrib.postgres.fields.ArrayField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayField</span></code></a>. Utilise la fonction SQL <code class="docutils literal notranslate"><span class="pre">akeys()</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;toy&#39;</span><span class="p">:</span> <span class="s1">&#39;bone&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__keys__overlap</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;breed&#39;</span><span class="p">,</span> <span class="s1">&#39;toy&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Rufus&gt;, &lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-values">
+<span id="s-std:fieldlookup-hstorefield.values"></span><span id="values"></span><span id="std:fieldlookup-hstorefield.values"></span><h4><code class="docutils literal notranslate"><span class="pre">values</span></code><a class="headerlink" href="#values" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Renvoie l’ensemble des valeurs des objets concernés. Notez que l’ordre n’est pas garanti, ce qui fait que cette transformation est surtout utile quand elle est combinée à des recherches sur <a class="reference internal" href="#django.contrib.postgres.fields.ArrayField" title="django.contrib.postgres.fields.ArrayField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayField</span></code></a>. Utilise la fonction SQL <code class="docutils literal notranslate"><span class="pre">avalues()</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Rufus&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;labrador&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Meg&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;breed&#39;</span><span class="p">:</span> <span class="s1">&#39;collie&#39;</span><span class="p">,</span> <span class="s1">&#39;owner&#39;</span><span class="p">:</span> <span class="s1">&#39;Bob&#39;</span><span class="p">})</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Dog</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data__values__contains</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;collie&#39;</span><span class="p">])</span>
+<span class="go">&lt;QuerySet [&lt;Dog: Meg&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-jsonfield">
+<span id="jsonfield"></span><h2><code class="docutils literal notranslate"><span class="pre">JSONField</span></code><a class="headerlink" href="#jsonfield" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.JSONField">
+<em class="property">class </em><code class="descname">JSONField</code>(<em>encoder=None</em>, <em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.JSONField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un champ pour stocker des données JSON encodées. En Python, les données sont représentées dans leur format natif correspondant&nbsp;: dictionnaires, listes, chaînes, nombres, booléens et <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.JSONField.encoder">
+<code class="descname">encoder</code><a class="headerlink" href="#django.contrib.postgres.fields.JSONField.encoder" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe facultative de codage en JSON pour sérialiser les types de données non prises en charge par le sérialiseur JSON standard (<code class="docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="docutils literal notranslate"><span class="pre">uuid</span></code>, etc.). Par exemple, vous pouvez utiliser la classe <a class="reference internal" href="../../../topics/serialization.html#django.core.serializers.json.DjangoJSONEncoder" title="django.core.serializers.json.DjangoJSONEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoJSONEncoder</span></code></a> ou toute autre classe héritant de <a class="reference external" href="https://docs.python.org/3/library/json.html#json.JSONEncoder" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">json.JSONEncoder</span></code></a>.</p>
+<p>Lorsque la valeur est récupérée de la base de données, elle sera dans le format choisi par le codeur personnalisé (la plupart du temps une chaîne), il vous faudra donc intervenir pour reconvertir la valeur dans le type de données initial (<a class="reference internal" href="../../models/instances.html#django.db.models.Model.from_db" title="django.db.models.Model.from_db"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Model.from_db()</span></code></a> et <a class="reference internal" href="../../models/fields.html#django.db.models.Field.from_db_value" title="django.db.models.Field.from_db_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Field.from_db_value()</span></code></a> sont deux points d’entrée possibles pour cela). La désérialisation pourrait devoir tenir compte de l’incertitude liée au type de la valeur d’entrée. Par exemple, vous courez le risque de renvoyer un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> qui était en fait une chaîne qui était fortuitement au même format que celui choisi pour les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code>.</p>
+</dd></dl>
+
+<p>Si vous donnez une valeur <a class="reference internal" href="../../models/fields.html#django.db.models.Field.default" title="django.db.models.Field.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default</span></code></a> à ce champ, assurez-vous que ce soit un objet exécutable tel que <code class="docutils literal notranslate"><span class="pre">dict</span></code> (pour une valeur par défaut vide) ou un objet exécutable qui renvoie un dictionnaire (par exemple une fonction). L’utilisation de <code class="docutils literal notranslate"><span class="pre">default={}</span></code> n’est pas correct car cela crée une valeur par défaut mutante qui est partagée entre les instances de <code class="docutils literal notranslate"><span class="pre">JSONField</span></code>.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">PostgreSQL dispose de deux types de données natifs basés sur JSON&nbsp;: <code class="docutils literal notranslate"><span class="pre">json</span></code>  et <code class="docutils literal notranslate"><span class="pre">jsonb</span></code>. La principale différence entre eux est la façon dont ils sont stockés et comment ils peuvent être interrogés. Le champ <code class="docutils literal notranslate"><span class="pre">json</span></code> de PostgreSQL est stocké comme la représentation textuelle d’origine du JSON et doit être décodé à la volée lorsqu’on l’interroge sur la base de clés. Le champ <code class="docutils literal notranslate"><span class="pre">jsonb</span></code> est stocké en fonction de la structure réelle du JSON qui permet l’indexation. En contre-partie, l’écriture du champ <code class="docutils literal notranslate"><span class="pre">jsonb</span></code> est légèrement plus coûteuse. <code class="docutils literal notranslate"><span class="pre">JSONField</span></code> utilise le type <code class="docutils literal notranslate"><span class="pre">jsonb</span></code>.</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified">Obsolète depuis la version 3.1: </span>Utilisez plutôt <a class="reference internal" href="../../models/fields.html#django.db.models.JSONField" title="django.db.models.JSONField"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.db.models.JSONField</span></code></a>.</p>
+</div>
+<div class="section" id="s-querying-jsonfield">
+<span id="querying-jsonfield"></span><h3>Interrogation de <code class="docutils literal notranslate"><span class="pre">JSONField</span></code><a class="headerlink" href="#querying-jsonfield" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Voir <a class="reference internal" href="../../../topics/db/queries.html#querying-jsonfield"><span class="std std-ref">Interrogation de JSONField</span></a> pour plus de détails.</p>
+</div>
+</div>
+<div class="section" id="s-range-fields">
+<span id="s-id3"></span><span id="range-fields"></span><span id="id3"></span><h2>Champs d’intervalle<a class="headerlink" href="#range-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il existe cinq types de champs d’intervalle, correspondant au types d’intervalles natifs de PostgreSQL. Ces champs sont utilisés pour stocker un intervalle de valeurs&nbsp;; par exemple, l’heure de début et de fin d’un événement ou l’intervalle des âges appropriés à une activité.</p>
+<p>Tous les champs d’intervalle produisent des objets <a class="reference external" href="https://www.psycopg.org/docs/extras.html#adapt-range" title="(disponible dans Psycopg v2.8)"><span class="xref std std-ref">Range psycopg2</span></a> en Python, mais acceptent aussi des tuples en entrée si aucune information de limite n’est nécessaire. Par défaut, la limite inférieure est incluse et la limite supérieure exclue&nbsp;; c’est-à-dire <code class="docutils literal notranslate"><span class="pre">[)</span></code> (consultez la documentation PostgreSQL pour plus de détails sur les <a class="reference external" href="https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-IO">différentes limites</a>).</p>
+<div class="section" id="s-integerrangefield">
+<span id="integerrangefield"></span><h3><code class="docutils literal notranslate"><span class="pre">IntegerRangeField</span></code><a class="headerlink" href="#integerrangefield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.IntegerRangeField">
+<em class="property">class </em><code class="descname">IntegerRangeField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.IntegerRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Stocke un intervalle de nombres entiers. Basé sur un <a class="reference internal" href="../../models/fields.html#django.db.models.IntegerField" title="django.db.models.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a>. Représenté par un <code class="docutils literal notranslate"><span class="pre">int4range</span></code> dans la base de données et un <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.NumericRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericRange</span></code></a> en Python.</p>
+<p>Quelles que soient les limites indiquées lors de l’enregistrement des données, PostgreSQL renvoie toujours un intervalle dans sa forme canonique qui inclut la limite inférieure et exclut la limite supérieure, c’est-à-dire <code class="docutils literal notranslate"><span class="pre">[)</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-bigintegerrangefield">
+<span id="bigintegerrangefield"></span><h3><code class="docutils literal notranslate"><span class="pre">BigIntegerRangeField</span></code><a class="headerlink" href="#bigintegerrangefield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.BigIntegerRangeField">
+<em class="property">class </em><code class="descname">BigIntegerRangeField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.BigIntegerRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Stocke un intervalle de nombres entiers étendus. Basé sur un <a class="reference internal" href="../../models/fields.html#django.db.models.BigIntegerField" title="django.db.models.BigIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigIntegerField</span></code></a>. Représenté par un <code class="docutils literal notranslate"><span class="pre">int8range</span></code> dans la base de données et un <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.NumericRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericRange</span></code></a> en Python.</p>
+<p>Quelles que soient les limites indiquées lors de l’enregistrement des données, PostgreSQL renvoie toujours un intervalle dans sa forme canonique qui inclut la limite inférieure et exclut la limite supérieure, c’est-à-dire <code class="docutils literal notranslate"><span class="pre">[)</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-decimalrangefield">
+<span id="decimalrangefield"></span><h3><code class="docutils literal notranslate"><span class="pre">DecimalRangeField</span></code><a class="headerlink" href="#decimalrangefield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.DecimalRangeField">
+<em class="property">class </em><code class="descname">DecimalRangeField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.DecimalRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Stocke un intervalle de valeurs en virgule flottante. Basé sur un <a class="reference internal" href="../../models/fields.html#django.db.models.DecimalField" title="django.db.models.DecimalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalField</span></code></a>. Représenté par un <code class="docutils literal notranslate"><span class="pre">numrange</span></code> dans la base de données et un <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.NumericRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericRange</span></code></a> en Python.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-datetimerangefield">
+<span id="datetimerangefield"></span><h3><code class="docutils literal notranslate"><span class="pre">DateTimeRangeField</span></code><a class="headerlink" href="#datetimerangefield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.DateTimeRangeField">
+<em class="property">class </em><code class="descname">DateTimeRangeField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.DateTimeRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Stocke un intervalle de date/heures. Basé sur la classe <a class="reference internal" href="../../models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a>. Représenté par un <code class="docutils literal notranslate"><span class="pre">tstzrange</span></code> dans la base de données et par un <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.DateTimeTZRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeTZRange</span></code></a> dans Python.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-daterangefield">
+<span id="daterangefield"></span><h3><code class="docutils literal notranslate"><span class="pre">DateRangeField</span></code><a class="headerlink" href="#daterangefield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.DateRangeField">
+<em class="property">class </em><code class="descname">DateRangeField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.DateRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Stocke un intervalle de dates. Basé sur un <a class="reference internal" href="../../models/fields.html#django.db.models.DateField" title="django.db.models.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a>. Représenté par un <code class="docutils literal notranslate"><span class="pre">daterange</span></code> dans la base de données et un <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.DateRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateRange</span></code></a> en Python.</p>
+<p>Quelles que soient les limites indiquées lors de l’enregistrement des données, PostgreSQL renvoie toujours un intervalle dans sa forme canonique qui inclut la limite inférieure et exclut la limite supérieure, c’est-à-dire <code class="docutils literal notranslate"><span class="pre">[)</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-querying-range-fields">
+<span id="querying-range-fields"></span><h3>Interrogation de champs d’intervalle<a class="headerlink" href="#querying-range-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il existe un certain nombre de recherches et de transformations spécifiques aux champs d’intervalle. Ils sont disponibles pour tous les champs ci-dessus, mais nous allons utiliser le modèle d’exemple suivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">IntegerRangeField</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Event</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+    <span class="n">ages</span> <span class="o">=</span> <span class="n">IntegerRangeField</span><span class="p">()</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<p>Nous allons aussi utiliser les objets d’exemple suivants&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="k">import</span> <span class="n">timezone</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">now</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Soft play&#39;</span><span class="p">,</span> <span class="n">ages</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="n">now</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Pub trip&#39;</span><span class="p">,</span> <span class="n">ages</span><span class="o">=</span><span class="p">(</span><span class="mi">21</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>et <code class="docutils literal notranslate"><span class="pre">NumericRange</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">psycopg2.extras</span> <span class="k">import</span> <span class="n">NumericRange</span>
+</pre></div>
+</div>
+<div class="section" id="s-containment-functions">
+<span id="containment-functions"></span><h4>Fonctions de contenance<a class="headerlink" href="#containment-functions" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Comme pour les autres champs PostgreSQL, trois opérateurs de contenance standard sont disponibles&nbsp;: <code class="docutils literal notranslate"><span class="pre">contains</span></code>, <code class="docutils literal notranslate"><span class="pre">contained_by</span></code> et <code class="docutils literal notranslate"><span class="pre">overlap</span></code>, utilisant respectivement les opérateurs SQL <code class="docutils literal notranslate"><span class="pre">&#64;&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;&#64;</span></code> et <code class="docutils literal notranslate"><span class="pre">&amp;&amp;</span></code>.</p>
+<div class="section" id="s-std:fieldlookup-rangefield.contains">
+<span id="s-id4"></span><span id="std:fieldlookup-rangefield.contains"></span><span id="id4"></span><h5><code class="docutils literal notranslate"><span class="pre">contains</span></code><a class="headerlink" href="#std:fieldlookup-rangefield.contains" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__contains</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-std:fieldlookup-rangefield.contained_by">
+<span id="s-id5"></span><span id="std:fieldlookup-rangefield.contained_by"></span><span id="id5"></span><h5><code class="docutils literal notranslate"><span class="pre">contained_by</span></code><a class="headerlink" href="#std:fieldlookup-rangefield.contained_by" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__contained_by</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+<p>La recherche <code class="docutils literal notranslate"><span class="pre">contained_by</span></code> est aussi disponible pour les types de champ autres que intervalle&nbsp;: <a class="reference internal" href="../../models/fields.html#django.db.models.SmallAutoField" title="django.db.models.SmallAutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmallAutoField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.AutoField" title="django.db.models.AutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.BigAutoField" title="django.db.models.BigAutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigAutoField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.SmallIntegerField" title="django.db.models.SmallIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmallIntegerField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.IntegerField" title="django.db.models.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.BigIntegerField" title="django.db.models.BigIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigIntegerField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.DecimalField" title="django.db.models.DecimalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.FloatField" title="django.db.models.FloatField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.DateField" title="django.db.models.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a> et <a class="reference internal" href="../../models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">psycopg2.extras</span> <span class="k">import</span> <span class="n">DateTimeTZRange</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">start__contained_by</span><span class="o">=</span><span class="n">DateTimeTZRange</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge pour les champs <a class="reference internal" href="../../models/fields.html#django.db.models.SmallAutoField" title="django.db.models.SmallAutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmallAutoField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.AutoField" title="django.db.models.AutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.BigAutoField" title="django.db.models.BigAutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigAutoField</span></code></a>, <a class="reference internal" href="../../models/fields.html#django.db.models.SmallIntegerField" title="django.db.models.SmallIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmallIntegerField</span></code></a> et <a class="reference internal" href="../../models/fields.html#django.db.models.DecimalField" title="django.db.models.DecimalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalField</span></code></a> a été ajoutée.</p>
+</div>
+</div>
+<div class="section" id="s-std:fieldlookup-rangefield.overlap">
+<span id="s-id6"></span><span id="std:fieldlookup-rangefield.overlap"></span><span id="id6"></span><h5><code class="docutils literal notranslate"><span class="pre">overlap</span></code><a class="headerlink" href="#std:fieldlookup-rangefield.overlap" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__overlap</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-comparison-functions">
+<span id="comparison-functions"></span><h4>Fonctions de comparaison<a class="headerlink" href="#comparison-functions" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les champs d’intervalle prennent en charge les recherches standard&nbsp;: <a class="reference internal" href="../../models/querysets.html#std:fieldlookup-lt"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">lt</span></code></a>, <a class="reference internal" href="../../models/querysets.html#std:fieldlookup-gt"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">gt</span></code></a>, <a class="reference internal" href="../../models/querysets.html#std:fieldlookup-lte"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">lte</span></code></a> et <a class="reference internal" href="../../models/querysets.html#std:fieldlookup-gte"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">gte</span></code></a>. Elles ne sont pas particulièrement utiles, la comparaison s’opère d’abord sur la limite inférieure et si nécessaire, sur la limite supérieure ensuite. C’est également la stratégie adoptée pour trier selon un champ d’intervalle. Il est recommandé d’utiliser plutôt les opérateurs spécifiques de comparaison d’intervalle.</p>
+<div class="section" id="s-fully-lt">
+<span id="s-std:fieldlookup-rangefield.fully_lt"></span><span id="fully-lt"></span><span id="std:fieldlookup-rangefield.fully_lt"></span><h5><code class="docutils literal notranslate"><span class="pre">fully_lt</span></code><a class="headerlink" href="#fully-lt" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les intervalles renvoyés sont strictement inférieurs à l’intervalle transmis. En d’autres termes, tous les points d’un intervalle renvoyé sont plus petits que tous ceux de l’intervalle transmis.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__fully_lt</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-fully-gt">
+<span id="s-std:fieldlookup-rangefield.fully_gt"></span><span id="fully-gt"></span><span id="std:fieldlookup-rangefield.fully_gt"></span><h5><code class="docutils literal notranslate"><span class="pre">fully_gt</span></code><a class="headerlink" href="#fully-gt" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les intervalles renvoyés sont strictement supérieurs à l’intervalle transmis. En d’autres termes, tous les points d’un intervalle renvoyé sont plus grands que tous ceux de l’intervalle transmis.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__fully_gt</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Pub trip&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-not-lt">
+<span id="s-std:fieldlookup-rangefield.not_lt"></span><span id="not-lt"></span><span id="std:fieldlookup-rangefield.not_lt"></span><h5><code class="docutils literal notranslate"><span class="pre">not_lt</span></code><a class="headerlink" href="#not-lt" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les intervalles renvoyés ne contiennent aucun élément plus petit que ceux de l’intervalle transmis, c’est-à-dire que la limite inférieure d’un intervalle renvoyé est au moins égale à la limite inférieure de l’intervalle transmis.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__not_lt</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;, &lt;Event: Pub trip&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-not-gt">
+<span id="s-std:fieldlookup-rangefield.not_gt"></span><span id="not-gt"></span><span id="std:fieldlookup-rangefield.not_gt"></span><h5><code class="docutils literal notranslate"><span class="pre">not_gt</span></code><a class="headerlink" href="#not-gt" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les intervalles renvoyés ne contiennent aucun élément plus grand que ceux de l’intervalle transmis, c’est-à-dire que la limite supérieure d’un intervalle renvoyé n’est pas plus grande que la limite supérieure de l’intervalle transmis.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__not_gt</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-adjacent-to">
+<span id="s-std:fieldlookup-rangefield.adjacent_to"></span><span id="adjacent-to"></span><span id="std:fieldlookup-rangefield.adjacent_to"></span><h5><code class="docutils literal notranslate"><span class="pre">adjacent_to</span></code><a class="headerlink" href="#adjacent-to" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les intervalles renvoyés partagent une limite avec l’intervalle transmis.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__adjacent_to</span><span class="o">=</span><span class="n">NumericRange</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;, &lt;Event: Pub trip&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-querying-using-the-bounds">
+<span id="querying-using-the-bounds"></span><h4>Interrogation à l’aide des limites<a class="headerlink" href="#querying-using-the-bounds" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Trois transformations sont disponibles pour être utilisées dans les requêtes. Vous pouvez extraire la limite inférieure ou supérieure, ou interroger sur la base de l’intervalle vide.</p>
+<div class="section" id="s-startswith">
+<span id="s-std:fieldlookup-rangefield.startswith"></span><span id="startswith"></span><span id="std:fieldlookup-rangefield.startswith"></span><h5><code class="docutils literal notranslate"><span class="pre">startswith</span></code><a class="headerlink" href="#startswith" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les objets renvoyés possèdent la limite inférieure indiquée. Peut être suivie par des recherches valides pour le champ de base.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__startswith</span><span class="o">=</span><span class="mi">21</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Event: Pub trip&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-endswith">
+<span id="s-std:fieldlookup-rangefield.endswith"></span><span id="endswith"></span><span id="std:fieldlookup-rangefield.endswith"></span><h5><code class="docutils literal notranslate"><span class="pre">endswith</span></code><a class="headerlink" href="#endswith" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les objets renvoyés possèdent la limite supérieure indiquée. Peut être suivie par des recherches valides pour le champ de base.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__endswith</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-isempty">
+<span id="s-std:fieldlookup-rangefield.isempty"></span><span id="isempty"></span><span id="std:fieldlookup-rangefield.isempty"></span><h5><code class="docutils literal notranslate"><span class="pre">isempty</span></code><a class="headerlink" href="#isempty" title="Lien permanent vers ce titre">¶</a></h5>
+<p>Les objets renvoyés sont des intervalles vides. Peut être suivie par des recherches valides pour un champ <a class="reference internal" href="../../models/fields.html#django.db.models.BooleanField" title="django.db.models.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__isempty</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&lt;QuerySet []&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-lower-inc">
+<span id="s-std:fieldlookup-rangefield.lower_inc"></span><span id="lower-inc"></span><span id="std:fieldlookup-rangefield.lower_inc"></span><h5><code class="docutils literal notranslate"><span class="pre">lower_inc</span></code><a class="headerlink" href="#lower-inc" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Renvoie les objets dont la limite inférieure est incluse ou exclue, selon la valeur booléenne transmise. Peut être suivie par des recherches valides pour un champ <a class="reference internal" href="../../models/fields.html#django.db.models.BooleanField" title="django.db.models.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__lower_inc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Event: Soft play&gt;, &lt;Event: Pub trip&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-lower-inf">
+<span id="s-std:fieldlookup-rangefield.lower_inf"></span><span id="lower-inf"></span><span id="std:fieldlookup-rangefield.lower_inf"></span><h5><code class="docutils literal notranslate"><span class="pre">lower_inf</span></code><a class="headerlink" href="#lower-inf" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Renvoie les objets dont la limite inférieure est illimitée (infinie) ou limitée, selon la valeur booléenne transmise. Peut être suivie par des recherches valides pour un champ <a class="reference internal" href="../../models/fields.html#django.db.models.BooleanField" title="django.db.models.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__lower_inf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&lt;QuerySet []&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-upper-inc">
+<span id="s-std:fieldlookup-rangefield.upper_inc"></span><span id="upper-inc"></span><span id="std:fieldlookup-rangefield.upper_inc"></span><h5><code class="docutils literal notranslate"><span class="pre">upper_inc</span></code><a class="headerlink" href="#upper-inc" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Renvoie les objets dont la limite supérieure est incluse ou exclue, selon la valeur booléenne transmise. Peut être suivie par des recherches valides pour un champ <a class="reference internal" href="../../models/fields.html#django.db.models.BooleanField" title="django.db.models.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__upper_inc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&lt;QuerySet []&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-upper-inf">
+<span id="s-std:fieldlookup-rangefield.upper_inf"></span><span id="upper-inf"></span><span id="std:fieldlookup-rangefield.upper_inf"></span><h5><code class="docutils literal notranslate"><span class="pre">upper_inf</span></code><a class="headerlink" href="#upper-inf" title="Lien permanent vers ce titre">¶</a></h5>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Renvoie les objets dont la limite supérieure est illimitée (infinie) ou limitée, selon la valeur booléenne transmise. Peut être suivie par des recherches valides pour un champ <a class="reference internal" href="../../models/fields.html#django.db.models.BooleanField" title="django.db.models.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Event</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ages__upper_inf</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Event: Pub trip&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-defining-your-own-range-types">
+<span id="defining-your-own-range-types"></span><h3>Définition de ses propres types d’intervalle<a class="headerlink" href="#defining-your-own-range-types" title="Lien permanent vers ce titre">¶</a></h3>
+<p>PostgreSQL permet de définir ses propres types d’intervalle. Les implémentations de champs de modèle et de formulaire de Django utilisent les classes de base ci-dessous, et psycopg2 propose une fonction <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.register_range" title="(disponible dans Psycopg v2.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">register_range()</span></code></a> pour permettre l’utilisation de types d’intervalle personnalisés.</p>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.RangeField">
+<em class="property">class </em><code class="descname">RangeField</code>(<em>**options</em>)<a class="headerlink" href="#django.contrib.postgres.fields.RangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Classe de base pour les champs de modèle de type intervalle.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.RangeField.base_field">
+<code class="descname">base_field</code><a class="headerlink" href="#django.contrib.postgres.fields.RangeField.base_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La classe de champ de modèle à utiliser.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.RangeField.range_type">
+<code class="descname">range_type</code><a class="headerlink" href="#django.contrib.postgres.fields.RangeField.range_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le type d’intervalle psycopg2 à utiliser.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.RangeField.form_field">
+<code class="descname">form_field</code><a class="headerlink" href="#django.contrib.postgres.fields.RangeField.form_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La classe de champ de formulaire à utiliser. Doit être une sous-classe de <a class="reference internal" href="#django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField" title="django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.contrib.postgres.forms.BaseRangeField</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField">
+<em class="property">class </em><code class="descclassname">django.contrib.postgres.forms.</code><code class="descname">BaseRangeField</code><a class="headerlink" href="#django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Classe de base pour les champs de formulaire de type intervalle.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField.base_field">
+<code class="descname">base_field</code><a class="headerlink" href="#django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField.base_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le champ de formulaire à utiliser.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField.range_type">
+<code class="descname">range_type</code><a class="headerlink" href="#django.contrib.postgres.fields.django.contrib.postgres.forms.BaseRangeField.range_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le type d’intervalle psycopg2 à utiliser.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-range-operators">
+<span id="range-operators"></span><h3>Opérateurs d’intervalle<a class="headerlink" href="#range-operators" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="versionadded">
+<span class="title">New in Django 3.0.</span> </div>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.RangeOperators">
+<em class="property">class </em><code class="descname">RangeOperators</code><a class="headerlink" href="#django.contrib.postgres.fields.RangeOperators" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>PostgreSQL fournit un ensemble d’opérateurs SQL pouvant être utilisés avec les types de données intervalle (voir la <a class="reference external" href="https://www.postgresql.org/docs/current/functions-range.html#RANGE-OPERATORS-TABLE">documentation PostgreSQL</a> pour tous les détails sur les opérateurs d’intervalle). Cette classe est pensée comme une méthode utilitaire pour éviter des fautes de frappe. Les noms d’opérateurs se recoupent avec les noms de leur opérateur de requête correspondant.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RangeOperators</span><span class="p">:</span>
+    <span class="n">EQUAL</span> <span class="o">=</span> <span class="s1">&#39;=&#39;</span>
+    <span class="n">NOT_EQUAL</span> <span class="o">=</span> <span class="s1">&#39;&lt;&gt;&#39;</span>
+    <span class="n">CONTAINS</span> <span class="o">=</span> <span class="s1">&#39;@&gt;&#39;</span>
+    <span class="n">CONTAINED_BY</span> <span class="o">=</span> <span class="s1">&#39;&lt;@&#39;</span>
+    <span class="n">OVERLAPS</span> <span class="o">=</span> <span class="s1">&#39;&amp;&amp;&#39;</span>
+    <span class="n">FULLY_LT</span> <span class="o">=</span> <span class="s1">&#39;&lt;&lt;&#39;</span>
+    <span class="n">FULLY_GT</span> <span class="o">=</span> <span class="s1">&#39;&gt;&gt;&#39;</span>
+    <span class="n">NOT_LT</span> <span class="o">=</span> <span class="s1">&#39;&amp;&gt;&#39;</span>
+    <span class="n">NOT_GT</span> <span class="o">=</span> <span class="s1">&#39;&amp;&lt;&#39;</span>
+    <span class="n">ADJACENT_TO</span> <span class="o">=</span> <span class="s1">&#39;-|-&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-rangeboundary-expressions">
+<span id="rangeboundary-expressions"></span><h3>Expressions RangeBoundary()<a class="headerlink" href="#rangeboundary-expressions" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="versionadded">
+<span class="title">New in Django 3.0.</span> </div>
+<dl class="class">
+<dt id="django.contrib.postgres.fields.RangeBoundary">
+<em class="property">class </em><code class="descname">RangeBoundary</code>(<em>inclusive_lower=True</em>, <em>inclusive_upper=False</em>)<a class="headerlink" href="#django.contrib.postgres.fields.RangeBoundary" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="django.contrib.postgres.fields.RangeBoundary.inclusive_lower">
+<code class="descname">inclusive_lower</code><a class="headerlink" href="#django.contrib.postgres.fields.RangeBoundary.inclusive_lower" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Si <code class="docutils literal notranslate"><span class="pre">True</span></code> (par défaut), la limite inférieure est inclusive (<code class="docutils literal notranslate"><span class="pre">'['</span></code>), sinon elle est exclusive (<code class="docutils literal notranslate"><span class="pre">'('</span></code>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.fields.RangeBoundary.inclusive_upper">
+<code class="descname">inclusive_upper</code><a class="headerlink" href="#django.contrib.postgres.fields.RangeBoundary.inclusive_upper" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Si <code class="docutils literal notranslate"><span class="pre">False</span></code> (par défaut), la limite supérieure est exclusive (<code class="docutils literal notranslate"><span class="pre">'('</span></code>), sinon elle est inclusive (<code class="docutils literal notranslate"><span class="pre">']'</span></code>).</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Une expression <code class="docutils literal notranslate"><span class="pre">RangeBoundary()</span></code> représente les limites d’un intervalle. Elle peut être utilisée avec une fonction d’intervalle personnalisée qui reçoit des limites, par exemple pour définir <a class="reference internal" href="constraints.html#django.contrib.postgres.constraints.ExclusionConstraint" title="django.contrib.postgres.constraints.ExclusionConstraint"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExclusionConstraint</span></code></a>. Voir la <a class="reference external" href="https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-INCLUSIVITY">documentation PostgreSQL</a> pour tous les détails.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Champs de modèles spécifiques à PostgreSQL</a><ul>
+<li><a class="reference internal" href="#indexing-these-fields">Indexation de ces champs</a></li>
+<li><a class="reference internal" href="#arrayfield"><code class="docutils literal notranslate"><span class="pre">ArrayField</span></code></a><ul>
+<li><a class="reference internal" href="#querying-arrayfield">Interrogation de <code class="docutils literal notranslate"><span class="pre">ArrayField</span></code></a><ul>
+<li><a class="reference internal" href="#contains"><code class="docutils literal notranslate"><span class="pre">contains</span></code></a></li>
+<li><a class="reference internal" href="#contained-by"><code class="docutils literal notranslate"><span class="pre">contained_by</span></code></a></li>
+<li><a class="reference internal" href="#overlap"><code class="docutils literal notranslate"><span class="pre">overlap</span></code></a></li>
+<li><a class="reference internal" href="#len"><code class="docutils literal notranslate"><span class="pre">len</span></code></a></li>
+<li><a class="reference internal" href="#index-transforms">Transformations d’indice</a></li>
+<li><a class="reference internal" href="#slice-transforms">Transformations de segmentation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#citext-fields">Champs <code class="docutils literal notranslate"><span class="pre">CIText</span></code></a></li>
+<li><a class="reference internal" href="#hstorefield"><code class="docutils literal notranslate"><span class="pre">HStoreField</span></code></a><ul>
+<li><a class="reference internal" href="#querying-hstorefield">Interrogation de <code class="docutils literal notranslate"><span class="pre">HStoreField</span></code></a><ul>
+<li><a class="reference internal" href="#key-lookups">Recherches par clé</a></li>
+<li><a class="reference internal" href="#std:fieldlookup-hstorefield.contains"><code class="docutils literal notranslate"><span class="pre">contains</span></code></a></li>
+<li><a class="reference internal" href="#std:fieldlookup-hstorefield.contained_by"><code class="docutils literal notranslate"><span class="pre">contained_by</span></code></a></li>
+<li><a class="reference internal" href="#has-key"><code class="docutils literal notranslate"><span class="pre">has_key</span></code></a></li>
+<li><a class="reference internal" href="#has-any-keys"><code class="docutils literal notranslate"><span class="pre">has_any_keys</span></code></a></li>
+<li><a class="reference internal" href="#has-keys"><code class="docutils literal notranslate"><span class="pre">has_keys</span></code></a></li>
+<li><a class="reference internal" href="#keys"><code class="docutils literal notranslate"><span class="pre">keys</span></code></a></li>
+<li><a class="reference internal" href="#values"><code class="docutils literal notranslate"><span class="pre">values</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#jsonfield"><code class="docutils literal notranslate"><span class="pre">JSONField</span></code></a><ul>
+<li><a class="reference internal" href="#querying-jsonfield">Interrogation de <code class="docutils literal notranslate"><span class="pre">JSONField</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#range-fields">Champs d’intervalle</a><ul>
+<li><a class="reference internal" href="#integerrangefield"><code class="docutils literal notranslate"><span class="pre">IntegerRangeField</span></code></a></li>
+<li><a class="reference internal" href="#bigintegerrangefield"><code class="docutils literal notranslate"><span class="pre">BigIntegerRangeField</span></code></a></li>
+<li><a class="reference internal" href="#decimalrangefield"><code class="docutils literal notranslate"><span class="pre">DecimalRangeField</span></code></a></li>
+<li><a class="reference internal" href="#datetimerangefield"><code class="docutils literal notranslate"><span class="pre">DateTimeRangeField</span></code></a></li>
+<li><a class="reference internal" href="#daterangefield"><code class="docutils literal notranslate"><span class="pre">DateRangeField</span></code></a></li>
+<li><a class="reference internal" href="#querying-range-fields">Interrogation de champs d’intervalle</a><ul>
+<li><a class="reference internal" href="#containment-functions">Fonctions de contenance</a><ul>
+<li><a class="reference internal" href="#std:fieldlookup-rangefield.contains"><code class="docutils literal notranslate"><span class="pre">contains</span></code></a></li>
+<li><a class="reference internal" href="#std:fieldlookup-rangefield.contained_by"><code class="docutils literal notranslate"><span class="pre">contained_by</span></code></a></li>
+<li><a class="reference internal" href="#std:fieldlookup-rangefield.overlap"><code class="docutils literal notranslate"><span class="pre">overlap</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#comparison-functions">Fonctions de comparaison</a><ul>
+<li><a class="reference internal" href="#fully-lt"><code class="docutils literal notranslate"><span class="pre">fully_lt</span></code></a></li>
+<li><a class="reference internal" href="#fully-gt"><code class="docutils literal notranslate"><span class="pre">fully_gt</span></code></a></li>
+<li><a class="reference internal" href="#not-lt"><code class="docutils literal notranslate"><span class="pre">not_lt</span></code></a></li>
+<li><a class="reference internal" href="#not-gt"><code class="docutils literal notranslate"><span class="pre">not_gt</span></code></a></li>
+<li><a class="reference internal" href="#adjacent-to"><code class="docutils literal notranslate"><span class="pre">adjacent_to</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#querying-using-the-bounds">Interrogation à l’aide des limites</a><ul>
+<li><a class="reference internal" href="#startswith"><code class="docutils literal notranslate"><span class="pre">startswith</span></code></a></li>
+<li><a class="reference internal" href="#endswith"><code class="docutils literal notranslate"><span class="pre">endswith</span></code></a></li>
+<li><a class="reference internal" href="#isempty"><code class="docutils literal notranslate"><span class="pre">isempty</span></code></a></li>
+<li><a class="reference internal" href="#lower-inc"><code class="docutils literal notranslate"><span class="pre">lower_inc</span></code></a></li>
+<li><a class="reference internal" href="#lower-inf"><code class="docutils literal notranslate"><span class="pre">lower_inf</span></code></a></li>
+<li><a class="reference internal" href="#upper-inc"><code class="docutils literal notranslate"><span class="pre">upper_inc</span></code></a></li>
+<li><a class="reference internal" href="#upper-inf"><code class="docutils literal notranslate"><span class="pre">upper_inf</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-your-own-range-types">Définition de ses propres types d’intervalle</a></li>
+<li><a class="reference internal" href="#range-operators">Opérateurs d’intervalle</a></li>
+<li><a class="reference internal" href="#rangeboundary-expressions">Expressions RangeBoundary()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="constraints.html"
+                        title="Chapitre précédent">Contraintes de bases de données spécifiques à PostgreSQL</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="forms.html"
+                        title="Chapitre suivant">Champs et composants de formulaires spécifiques à PostgreSQL</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/postgres/fields.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="constraints.html" title="Contraintes de bases de données spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="forms.html" title="Champs et composants de formulaires spécifiques à PostgreSQL">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,586 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Fuseaux horaires &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Journalisation" href="../logging.html" />
+    <link rel="prev" title="Régionalisation des formats" href="formatting.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="formatting.html" title="Régionalisation des formats">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="../logging.html" title="Journalisation">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-i18n-timezones">
+            
+  <div class="section" id="s-time-zones">
+<span id="time-zones"></span><h1>Fuseaux horaires<a class="headerlink" href="#time-zones" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-overview">
+<span id="s-time-zones-overview"></span><span id="overview"></span><span id="time-zones-overview"></span><h2>Aperçu<a class="headerlink" href="#overview" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque la prise en charge des fuseaux horaires est activée, Django stocke les informations de date/heure en UTC dans la base de données, utilise en interne des objets date/heure conscients de leur fuseau horaire et les convertit dans les gabarits et les formulaires en utilisant le fuseau horaire de l’utilisateur.</p>
+<p>C’est très pratique si vos utilisateurs sont répartis sur plus d’un fuseau horaire et que vous vouliez afficher les informations temporelles selon l’heure locale de chacun.</p>
+<p>Même si votre site Web n’est utilisé que dans un seul fuseau horaire, stocker les données en UTC dans la base de données fait partie des bonnes pratiques. La  raison principale étant l’heure d’été (Daylight Saving Time - DST). Dans beaucoup de pays, l’heure d’été fait avancer d’une heure au printemps et reculer d’une heure en automne. Si vous travaillez en temps local, vous risquez d’obtenir des erreurs deux fois par année, au moment de la transition (la documentation de <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a> aborde <a class="reference external" href="http://pytz.sourceforge.net/#problems-with-localtime">ces questions</a> plus en détails). ce n’est probablement pas un problème pour votre blog, mais c’en est un si vous surfacturez ou sous-facturez vos clients d’une heure, deux fois par année, chaque année. La solution à ce problème est d’utiliser UTC dans le code, et le temps local uniquement lors des interactions avec les utilisateurs du site.</p>
+<p>La prise en charge des fuseaux horaires est désactivée par défaut. Pour l’activer, définissez <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">True</span></code></a> dans votre fichier de réglages. La prise en charge des fuseaux horaires utilise <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a> qui est installé en même temps que Django.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Le fichier <code class="file docutils literal notranslate"><span class="pre">settings.py</span></code> créé par défaut par <a class="reference internal" href="../../ref/django-admin.html#django-admin-startproject"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">django-admin</span> <span class="pre">startproject</span></code></a> définit <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">True</span></code></a> par commodité.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Il existe également un réglage différent mais lié nommé <a class="reference internal" href="../../ref/settings.html#std:setting-USE_L10N"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_L10N</span></code></a> qui contrôle l’activation ou non des formats de régionalisation. Voir <a class="reference internal" href="formatting.html"><span class="doc">Régionalisation des formats</span></a> pour plus de détails.</p>
+</div>
+<p>Si vous êtes empêtré dans un problème particulier, commencez par lire la <a class="reference internal" href="#time-zones-faq"><span class="std std-ref">FAQ des fuseaux horaires</span></a>.</p>
+</div>
+<div class="section" id="s-concepts">
+<span id="concepts"></span><h2>Concepts<a class="headerlink" href="#concepts" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-naive-and-aware-datetime-objects">
+<span id="s-naive-vs-aware-datetimes"></span><span id="naive-and-aware-datetime-objects"></span><span id="naive-vs-aware-datetimes"></span><h3>Objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs et conscients<a class="headerlink" href="#naive-and-aware-datetime-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les objets <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a> de Python possèdent un attribut <code class="docutils literal notranslate"><span class="pre">tzinfo</span></code> pouvant être utilisé pour stocker le fuseau horaire, représenté par une instance d’une sous-classe de <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.tzinfo</span></code></a>. Lorsque cet attribut est défini et qu’il décrit un décalage horaire, l’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> est <strong>conscient</strong>. Dans le cas contraire, il est <strong>naïf</strong>.</p>
+<p>Vous pouvez utiliser  <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.is_aware" title="django.utils.timezone.is_aware"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_aware()</span></code></a> et <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.is_naive" title="django.utils.timezone.is_naive"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_naive()</span></code></a> pour déterminer si les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> sont conscients (aware) ou naïfs.</p>
+<p>Lorsque la prise en charge des fuseaux horaires est désactivée, Django utilise des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs en heure locale. C’est suffisant dans de nombreux cas. Dans ce mode, pour obtenir le temps actuel, vous écririez&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Lorsque la prise en charge des fuseaux horaires est activée (<a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ=True</span></code></a>), Django utilise des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients de leur fuseau horaire. Si vote code crée des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code>, ils devraient également être conscients. Dans ce mode, l’exemple ci-dessus devient&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="k">import</span> <span class="n">timezone</span>
+
+<span class="n">now</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">La manipulation des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients n’est pas toujours intuitive. Par exemple, le paramètre <code class="docutils literal notranslate"><span class="pre">tzinfo</span></code> du constructeur standard de <code class="docutils literal notranslate"><span class="pre">datetime</span></code> ne fonctionne pas de manière fiable pour les fuseaux horaires avec heure d’été. L’utilisation de l’heure UTC est généralement sûre&nbsp;; si vous utilisez d’autres fuseaux horaires, vous devriez lire attentivement la documentation de <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a>.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Les objets <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.time</span></code></a> de Python comportent également un attribut <code class="docutils literal notranslate"><span class="pre">tzinfo</span></code>, et PostgreSQL possède un type correspondant <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">with</span> <span class="pre">time</span> <span class="pre">zone</span></code> (heure avec fuseau horaire). Cependant, comme l’explique la documentation de PostgreSQL, ce type «&nbsp;prête des propriétés qui font douter de son utilité&nbsp;».</p>
+<p class="last">Django ne prend en charge que des objets <code class="docutils literal notranslate"><span class="pre">time</span></code> naïfs et génère une exception si vous essayez d’enregistrer un objet <code class="docutils literal notranslate"><span class="pre">time</span></code> conscient, dans la mesure où un fuseau horaire n’a pas de sens pour un objet <code class="docutils literal notranslate"><span class="pre">time</span></code> sans date associée.</p>
+</div>
+</div>
+<div class="section" id="s-interpretation-of-naive-datetime-objects">
+<span id="s-naive-datetime-objects"></span><span id="interpretation-of-naive-datetime-objects"></span><span id="naive-datetime-objects"></span><h3>Interprétation des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs<a class="headerlink" href="#interpretation-of-naive-datetime-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, Django accepte encore les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs, afin de préserver la rétrocompatibilité. Lorsque la couche base de données en reçoit un, elle essaie de le rendre conscient en l’interprétant dans le <a class="reference internal" href="#default-current-time-zone"><span class="std std-ref">fuseau horaire par défaut</span></a> et génère un avertissement.</p>
+<p>Malheureusement, durant les transitions d’heure d’été, certains objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> n’existent pas ou sont ambigus. Dans de telles situations, <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a> génère une exception. C’est pourquoi vous devriez toujours créer des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients lorsque la prise en charge des fuseaux horaires est activée.</p>
+<p>En pratique, c’est rarement un problème. Django produit des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients dans les modèles et les formulaires, et la plupart du temps, les nouveaux objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> sont créés à partir d’objets existants par des opérations <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">timedelta</span></code></a>. Le seul objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> qui est souvent créé dans du code applicatif est l’heure actuelle et <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">timezone.now()</span></code></a> fait automatiquement ce qu’il faut.</p>
+</div>
+<div class="section" id="s-default-time-zone-and-current-time-zone">
+<span id="s-default-current-time-zone"></span><span id="default-time-zone-and-current-time-zone"></span><span id="default-current-time-zone"></span><h3>Fuseau horaire par défaut et fuseau horaire actuel<a class="headerlink" href="#default-time-zone-and-current-time-zone" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le <strong>fuseau horaire par défaut</strong> est le fuseau horaire défini par le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a>.</p>
+<p>Le <strong>fuseau horaire actuel</strong> est le fuseau horaire utilisé pour l’affichage.</p>
+<p>Vous devriez définir le fuseau horaire actuel au fuseau horaire réel de l’utilisateur avec <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.activate" title="django.utils.timezone.activate"><code class="xref py py-func docutils literal notranslate"><span class="pre">activate()</span></code></a>. Sinon, c’est le fuseau horaire par défaut qui est utilisé.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Comme expliqué dans la documentation de <a class="reference internal" href="../../ref/settings.html#std:setting-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a>, Django définit des variables d’environnement afin que son processus tourne dans le fuseau horaire par défaut. Ce comportement est indépendant de la valeur de <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> et du fuseau horaire actuel.</p>
+<p class="last">Lorsque <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, ceci est utile pour préserver la rétrocompatibilité avec les applications qui se basent encore sur le temps local. Cepedant, <a class="reference internal" href="#naive-datetime-objects"><span class="std std-ref">comme expliqué ci-dessus</span></a>, ce n’est pas totalement fiable et vous devriez toujours travailler avec des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients en UTC dans votre propre code. Par exemple, utilisez <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime.fromtimestamp" title="(disponible dans Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fromtimestamp()</span></code></a> et définissez le paramètre <code class="docutils literal notranslate"><span class="pre">tz</span></code> à <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.utc" title="django.utils.timezone.utc"><code class="xref py py-data docutils literal notranslate"><span class="pre">utc</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="s-selecting-the-current-time-zone">
+<span id="selecting-the-current-time-zone"></span><h3>Sélection du fuseau horaire actuel<a class="headerlink" href="#selecting-the-current-time-zone" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le fuseau horaire actuel est l’équivalent de la  <a class="reference internal" href="index.html#term-locale-name"><span class="xref std std-term">langue</span></a> actuelle pour les traductions. Cependant, il n’y a pas d’équivalent à l’en-tête HTTP <code class="docutils literal notranslate"><span class="pre">Accept-Language</span></code> que Django pourrait utiliser pour déterminer automatiquement le fuseau horaire de l’utilisateur. Au lieu de cela, Django fournit des <a class="reference internal" href="../../ref/utils.html#time-zone-selection-functions"><span class="std std-ref">fonctions de sélection du fuseau horaire</span></a>. Utilisez-les pour bâtir une logique de sélection du fuseau horaire qui a du sens dans votre situation.</p>
+<p>La plupart des sites Web se préoccupant des fuseaux horaires demandent aux utilisateurs leur fuseau horaire de domicile et stockent cette information dans le profil des utilisateurs. Pour les utilisateurs anonymes, ils utilisent le fuseau horaire de la majorité de leur public ou l’heure UTC. <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a> propose des <a class="reference external" href="http://pytz.sourceforge.net/#helpers">utilitaires</a>, comme une liste de fuseaux horaires par pays, qu’il est possible d’exploiter pour faire une présélection des choix les plus probables.</p>
+<p>Voici un exemple qui stocke le fuseau horaire actuel dans la session (la gestion d’erreur est totalement absente par simplicité).</p>
+<p>Ajoutez l’intergiciel suivant à <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pytz</span>
+
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="k">import</span> <span class="n">timezone</span>
+
+<span class="k">class</span> <span class="nc">TimezoneMiddleware</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">get_response</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span> <span class="o">=</span> <span class="n">get_response</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">tzname</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;django_timezone&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tzname</span><span class="p">:</span>
+            <span class="n">timezone</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="n">tzname</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timezone</span><span class="o">.</span><span class="n">deactivate</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Créez une vue capable de définir le fuseau horaire actuel&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render</span>
+
+<span class="k">def</span> <span class="nf">set_timezone</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;django_timezone&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s1">&#39;timezone&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;template.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;timezones&#39;</span><span class="p">:</span> <span class="n">pytz</span><span class="o">.</span><span class="n">common_timezones</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Ajoutez un formulaire dans <code class="docutils literal notranslate"><span class="pre">template.html</span></code> dont la cible <code class="docutils literal notranslate"><span class="pre">POST</span></code> est cette vue&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">tz</span> <span class="cp">%}</span>
+<span class="cp">{%</span> <span class="k">get_current_timezone</span> <span class="k">as</span> <span class="nv">TIME_ZONE</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s1">&#39;set_timezone&#39;</span> <span class="cp">%}</span><span class="s">&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;timezone&quot;</span><span class="p">&gt;</span>Time zone:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">select</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;timezone&quot;</span><span class="p">&gt;</span>
+        <span class="cp">{%</span> <span class="k">for</span> <span class="nv">tz</span> <span class="k">in</span> <span class="nv">timezones</span> <span class="cp">%}</span>
+        <span class="p">&lt;</span><span class="nt">option</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">tz</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">tz</span> <span class="o">==</span> <span class="nv">TIME_ZONE</span> <span class="cp">%}</span> <span class="na">selected</span><span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">tz</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">option</span><span class="p">&gt;</span>
+        <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+    <span class="p">&lt;/</span><span class="nt">select</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;Set&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-time-zone-aware-input-in-forms">
+<span id="s-time-zones-in-forms"></span><span id="time-zone-aware-input-in-forms"></span><span id="time-zones-in-forms"></span><h2>Saisie de données avec fuseau horaire dans les formulaires<a class="headerlink" href="#time-zone-aware-input-in-forms" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque vous activez la prise en charge des fuseaux horaires, Django interprète les dates/heures saisies dans les formulaires dans le <a class="reference internal" href="#default-current-time-zone"><span class="std std-ref">fuseau horaire actuel</span></a> et place des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients dans <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>.</p>
+<p>Si le fuseau horaire actuel génère une exception pour les dates/heures qui n’existent pas ou qui sont ambiguës car elles se trouvent dans une transition d’heure d’été (les fuseaux horaires dans <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a> le font), ces dates/heures seront signalées comme non valables.</p>
+</div>
+<div class="section" id="s-time-zone-aware-output-in-templates">
+<span id="s-time-zones-in-templates"></span><span id="time-zone-aware-output-in-templates"></span><span id="time-zones-in-templates"></span><h2>Affichage de fuseaux horaires conscients dans les gabarits<a class="headerlink" href="#time-zone-aware-output-in-templates" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque vous activez la prise en charge des fuseaux horaires, Django convertit les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> dans le <a class="reference internal" href="#default-current-time-zone"><span class="std std-ref">fuseau horaire actuel</span></a> au moment où ils sont affichés dans un gabarit. Ce comportement est très semblable à la <a class="reference internal" href="formatting.html"><span class="doc">régionalisation des formats</span></a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Django ne convertit pas les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs car ils peuvent être ambigus et parce que votre code ne doit jamais produire de tels objets naïfs lorsque la prise en charge des fuseaux horaires est activée. Cependant, vous pouvez forcer la conversion avec les filtres de gabarit décrits ci-dessous.</p>
+</div>
+<p>La conversion en temps local n’est pas toujours adéquate, par exemple dans le cas où vous générez du contenu à destination d’autres ordinateurs. Les filtres et balises suivants, mis à disposition par la bibliothèque de balises de gabarit <code class="docutils literal notranslate"><span class="pre">tz</span></code>, permettent de contrôler les conversions de fuseaux horaires.</p>
+<div class="section" id="s-template-tags">
+<span id="template-tags"></span><h3>Balises de gabarit<a class="headerlink" href="#template-tags" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="section" id="s-localtime">
+<span id="s-std:templatetag-localtime"></span><span id="localtime"></span><span id="std:templatetag-localtime"></span><h4><code class="docutils literal notranslate"><span class="pre">localtime</span></code><a class="headerlink" href="#localtime" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Active ou désactive la conversion d’objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients dans le fuseau horaire actuel à l’intérieur du bloc contenu.</p>
+<p>Cette balise a exactement le même effet que le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> en ce qui concerne le moteur de gabarits. Elle permet un contrôle plus précis des endroits où la conversion se fait.</p>
+<p>Pour activer ou désactiver la conversion pour un bloc de gabarit, utilisez&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">tz</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">localtime</span> <span class="nv">on</span> <span class="cp">%}</span>
+    <span class="cp">{{</span> <span class="nv">value</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endlocaltime</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">localtime</span> <span class="nv">off</span> <span class="cp">%}</span>
+    <span class="cp">{{</span> <span class="nv">value</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endlocaltime</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">La valeur de <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> n’est pas prise en compte à l’intérieur d’un bloc <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">localtime</span> <span class="pre">%}</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-timezone">
+<span id="s-std:templatetag-timezone"></span><span id="timezone"></span><span id="std:templatetag-timezone"></span><h4><code class="docutils literal notranslate"><span class="pre">timezone</span></code><a class="headerlink" href="#timezone" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Définit ou annule le fuseau horaire actuel dans le bloc contenu. Lorsque le fuseau horaire actuel est annulé, c’est le fuseau horaire par défaut qui s’applique.</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">tz</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">timezone</span> <span class="s2">&quot;Europe/Paris&quot;</span> <span class="cp">%}</span>
+    Paris time: <span class="cp">{{</span> <span class="nv">value</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endtimezone</span> <span class="cp">%}</span>
+
+<span class="cp">{%</span> <span class="k">timezone</span> <span class="kp">None</span> <span class="cp">%}</span>
+    Server time: <span class="cp">{{</span> <span class="nv">value</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endtimezone</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-get-current-timezone">
+<span id="s-std:templatetag-get_current_timezone"></span><span id="get-current-timezone"></span><span id="std:templatetag-get_current_timezone"></span><h4><code class="docutils literal notranslate"><span class="pre">get_current_timezone</span></code><a class="headerlink" href="#get-current-timezone" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Vous pouvez obtenir le nom du fuseau horaire actuel en utilisant la balise <code class="docutils literal notranslate"><span class="pre">get_current_timezone</span></code>:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">get_current_timezone</span> <span class="k">as</span> <span class="nv">TIME_ZONE</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Une alternative possible est d’activer le processeur de contexte <a class="reference internal" href="../../ref/templates/api.html#django.template.context_processors.tz" title="django.template.context_processors.tz"><code class="xref py py-func docutils literal notranslate"><span class="pre">tz()</span></code></a> et d’utiliser la variable de contexte <code class="docutils literal notranslate"><span class="pre">TIME_ZONE</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-template-filters">
+<span id="template-filters"></span><h3>Filtres de gabarit<a class="headerlink" href="#template-filters" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ces filtres acceptent aussi bien des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients que naïfs. À des fins de conversion, ils partent du principe que les objets naïfs sont dans le fuseau horaire par défaut. Ils renvoient toujours des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients.</p>
+<div class="section" id="s-std:templatefilter-localtime">
+<span id="s-id1"></span><span id="std:templatefilter-localtime"></span><span id="id1"></span><h4><code class="docutils literal notranslate"><span class="pre">localtime</span></code><a class="headerlink" href="#std:templatefilter-localtime" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Force la conversion d’une valeur unique dans le fuseau horaire actuel.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">tz</span> <span class="cp">%}</span>
+
+<span class="cp">{{</span> <span class="nv">value</span><span class="o">|</span><span class="nf">localtime</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-utc">
+<span id="s-std:templatefilter-utc"></span><span id="utc"></span><span id="std:templatefilter-utc"></span><h4><code class="docutils literal notranslate"><span class="pre">utc</span></code><a class="headerlink" href="#utc" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Force la conversion d’une seule valeur en UTC.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">tz</span> <span class="cp">%}</span>
+
+<span class="cp">{{</span> <span class="nv">value</span><span class="o">|</span><span class="nf">utc</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-std:templatefilter-timezone">
+<span id="s-id2"></span><span id="std:templatefilter-timezone"></span><span id="id2"></span><h4><code class="docutils literal notranslate"><span class="pre">timezone</span></code><a class="headerlink" href="#std:templatefilter-timezone" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Force la conversion d’une seule valeur dans un fuseau horaire arbitraire.</p>
+<p>Le paramètre doit être une instance d’une sous-classe de <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a> ou un nom de fuseau horaire.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">tz</span> <span class="cp">%}</span>
+
+<span class="cp">{{</span> <span class="nv">value</span><span class="o">|</span><span class="nf">timezone</span><span class="s2">:&quot;Europe/Paris&quot;</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-migration-guide">
+<span id="s-time-zones-migration-guide"></span><span id="migration-guide"></span><span id="time-zones-migration-guide"></span><h2>Guide de migration<a class="headerlink" href="#migration-guide" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Voici comment effectuer la migration d’un projet démarré avant que Django ne prenne en charge les fuseaux horaires.</p>
+<div class="section" id="s-database">
+<span id="database"></span><h3>Base de données<a class="headerlink" href="#database" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="section" id="s-postgresql">
+<span id="postgresql"></span><h4>PostgreSQL<a class="headerlink" href="#postgresql" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le moteur PostgreSQL stocke les dates/heures comme <code class="docutils literal notranslate"><span class="pre">timestamp</span> <span class="pre">with</span> <span class="pre">time</span> <span class="pre">zone</span></code>. En pratique, cela signifie qu’il convertit les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> en UTC à partir du fuseau horaire de la connexion au moment du stockage, et à partir d’UTC vers le fuseau horaire de la connexion lors de la sélection.</p>
+<p>En conséquence, si vous utilisez PostgreSQL, vous pouvez librement passer de <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">False</span></code> à <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">True</span></code> et inversement. Le fuseau horaire de la connexion de la base de données sera défini respectivement à <a class="reference internal" href="../../ref/settings.html#std:setting-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a> et à <code class="docutils literal notranslate"><span class="pre">UTC</span></code>, ce qui fait que Django reçoit des dates/heures correctes dans tous les cas. Vous n’avez pas à convertir les données.</p>
+</div>
+<div class="section" id="s-other-databases">
+<span id="other-databases"></span><h4>Autres bases de données<a class="headerlink" href="#other-databases" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les autres moteurs stockent les dates/heures sans information de fuseau horaire. Si vous passez de <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">False</span></code> à <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">True</span></code>, vous devez convertir vos données du temps local en UTC, ce qui n’est pas déterministe si votre temps local est sujet à l’heure d’été.</p>
+</div>
+</div>
+<div class="section" id="s-code">
+<span id="code"></span><h3>Code<a class="headerlink" href="#code" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La première étape est d’ajouter <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">True</span></code></a> à votre fichier de réglages. À ce stade, tout devrait fonctionner en principe. Si vous créez des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs dans votre code, Django les rend conscients en cas de besoin.</p>
+<p>Cependant, ces conversions peuvent échouer aux alentours des transitions d’heure d’été, ce qui signifie que vous n’obtenez pas encore tous les bénéfices de la prise en charge des fuseaux horaires. Il est également probable que vous rencontriez quelques problèmes car il est impossible de comparer une date/heure naïve avec une date/heure consciente. Comme Django vous donne maintenant des dates/heures conscientes, vous obtiendrez des exceptions chaque fois que vous comparez une date/heure provenant d’un modèle ou d’un formulaire avec une date/heure naïve que vous avez créée dans votre code.</p>
+<p>La seconde étape est donc de réviser votre code pour que chaque endroit où vous créer des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code>, ceux-ci soient conscients. Cela peut se faire progressivement. <a class="reference internal" href="../../ref/utils.html#module-django.utils.timezone" title="django.utils.timezone: Timezone support."><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.utils.timezone</span></code></a> définit quelques utilitaires bien pratiques pour du code compatible&nbsp;: <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">now()</span></code></a>, <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.is_aware" title="django.utils.timezone.is_aware"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_aware()</span></code></a>, <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.is_naive" title="django.utils.timezone.is_naive"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_naive()</span></code></a>, <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.make_aware" title="django.utils.timezone.make_aware"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_aware()</span></code></a> et <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.make_naive" title="django.utils.timezone.make_naive"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_naive()</span></code></a>.</p>
+<p>Finalement, pour vous aider à trouver le code qui a besoin d’être mis à jour, Django émet un avertissement lorsque vous essayez d’enregistrer une date/heure naïve dans la base de données&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ne">RuntimeWarning</span><span class="p">:</span> <span class="n">DateTimeField</span> <span class="n">ModelName</span><span class="o">.</span><span class="n">field_name</span> <span class="n">received</span> <span class="n">a</span> <span class="n">naive</span>
+<span class="n">datetime</span> <span class="p">(</span><span class="mi">2012</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span> <span class="mo">00</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">00</span><span class="p">)</span> <span class="k">while</span> <span class="n">time</span> <span class="n">zone</span> <span class="n">support</span> <span class="ow">is</span> <span class="n">active</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Durant le développement, vous pouvez transformer ces avertissements en exceptions et obtenir une trace d’appel en ajoutant ce qui suit dans votre fichier de réglages&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span>
+    <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;DateTimeField .* received a naive datetime&quot;</span><span class="p">,</span>
+    <span class="ne">RuntimeWarning</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;django\.db\.models\.fields&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-fixtures">
+<span id="fixtures"></span><h3>Instantanés<a class="headerlink" href="#fixtures" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lors de la sérialisation d’une date/heure consciente, le décalage UTC est pris en compte, comme ceci&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;2011-09-01T13:20:30+03:00&quot;</span>
+</pre></div>
+</div>
+<p>Alors que pour une date/heure naïve, ce n’est pas le cas&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;2011-09-01T13:20:30&quot;</span>
+</pre></div>
+</div>
+<p>Pour les modèles comportant des champs <a class="reference internal" href="../../ref/models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a>, cette différence rend impossible l’écriture d’un instantané fonctionnant à la fois avec et sans prise en charge des fuseaux horaires.</p>
+<p>Les instantanés générés avec <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">False</span></code> ou avant Django 1.4 utilisent le format «&nbsp;naïf&nbsp;». Si votre projet contient de tels instantanés et que vous activez la prise en charge des fuseaux horaires, vous verrez des exceptions <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a> lorsque vous les chargez. Pour vous débarrasser des ces avertissements, vous devez convertir vos instantanés au format «&nbsp;conscient&nbsp;».</p>
+<p>Vous pouvez régénérer les instantanés avec <a class="reference internal" href="../../ref/django-admin.html#django-admin-loaddata"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">loaddata</span></code></a>, puis <a class="reference internal" href="../../ref/django-admin.html#django-admin-dumpdata"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">dumpdata</span></code></a>. Ou s’ils ne sont pas trop gros, vous pouvez les modifier et ajouter le décalage UTC correspondant à votre  <a class="reference internal" href="../../ref/settings.html#std:setting-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a> dans chaque objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> sérialisé.</p>
+</div>
+</div>
+<div class="section" id="s-faq">
+<span id="s-time-zones-faq"></span><span id="faq"></span><span id="time-zones-faq"></span><h2>FAQ<a class="headerlink" href="#faq" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-setup">
+<span id="setup"></span><h3>Configuration<a class="headerlink" href="#setup" title="Lien permanent vers ce titre">¶</a></h3>
+<ol class="arabic">
+<li><p class="first"><strong>Je n’ai pas besoin de plusieurs fuseaux horaires. Dois-je activer la prise en charge des fuseaux horaires&nbsp;?</strong></p>
+<p>Oui. Lorsque la prise en charge des fuseaux horaires est activée, Django utilise un modèle plus précis du temps local. Cela vous protège de bogues subtils et non reproductibles lors des transitions d’heure d’été (DST).</p>
+<p>Lorsque vous activez la prise en charge des fuseaux horaires, vous allez rencontrer certaines erreurs parce que vous utilisez des dates/heures naïves là où Django s’attend à des dates/heures conscientes. De telles erreurs apparaissent lors de l’exécution des tests. Vous apprendrez rapidement comment éviter les opérations non valides.</p>
+<p>D’un autre côté, les bogues qui proviennent d’une non prise en charge des fuseaux horaires sont beaucoup plus durs à prévenir, à diagnostiquer et à corriger. Tout ce qui touche aux tâches planifiées ou à l’arithmétique des dates/heures est sujet à de subtils bogues qui ne vous affecteront qu’une ou deux fois par année.</p>
+<p>C’est pour ces raisons que la prise en charge des fuseaux horaires est activée par défaut dans les nouveaux projets, et vous devriez garder ce réglage pour autant que vous n’ayez pas une bonne raison de ne pas le faire.</p>
+</li>
+<li><p class="first"><strong>J’ai activé la prise en charge des fuseaux horaires. Suis-je tranquille&nbsp;?</strong></p>
+<p>Peut-être. Vous êtes mieux protégé des bogues liés à l’heure d’été, mais il est toujours possible que vous vous trompiez en convertissant sans précaution des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs en objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients et vice-versa.</p>
+<p>Si votre application se connecte à d’autres systèmes, par exemple si elle interroge un service Web, prenez soin de bien définir les dates/heures. Pour les transmettre de manière fiable, leur représentation doit inclure le décalage UTC ou leur valeur doit être en UTC (ou les deux&nbsp;!).</p>
+<p>Finalement, notre système de calendrier contient des cas limites intéressants. Par exemple, il n’est pas toujours possible de soustraire une année directement d’une date donnée</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">one_year_before</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>  <span class="c1"># Wrong example.</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">one_year_before</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="go">datetime.datetime(2011, 3, 1, 10, 0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">one_year_before</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">ValueError</span>: <span class="n">day is out of range for month</span>
+</pre></div>
+</div>
+<p>Pour implémenter une telle fonction correctement, vous devez décider si 2012-02-29 moins une année est 2011-02-28 ou 2011-03-01, ce qui dépend de vos exigences métier.</p>
+</li>
+<li><p class="first"><strong>Comment interagir avec une base de données stockant les dates/heures en temps local&nbsp;?</strong></p>
+<p>Définissez l’option <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a> au fuseau horaire correspondant à cette base de données dans le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a>.</p>
+<p>C’est utile pour se connecter à une base de données qui ne gère pas les fuseaux horaires et qui n’est pas gérée par Django lorsque <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="s-troubleshooting">
+<span id="troubleshooting"></span><h3>Dépannage<a class="headerlink" href="#troubleshooting" title="Lien permanent vers ce titre">¶</a></h3>
+<ol class="arabic">
+<li><p class="first"><strong>Mon application plante avec</strong> <code class="docutils literal notranslate"><span class="pre">TypeError:</span> <span class="pre">can't</span> <span class="pre">compare</span> <span class="pre">offset-naive</span></code> <code class="docutils literal notranslate"><span class="pre">and</span> <span class="pre">offset-aware</span> <span class="pre">datetimes</span></code> <strong>, qu’est-ce que je fais faux&nbsp;?</strong></p>
+<p>Reproduisons cette erreur en comparant des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïf et conscient&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">naive</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aware</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">naive</span> <span class="o">==</span> <span class="n">aware</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">TypeError</span>: <span class="n">can&#39;t compare offset-naive and offset-aware datetimes</span>
+</pre></div>
+</div>
+<p>Si vous rencontrez cette erreur, il est très probable que votre code compare ces deux choses&nbsp;:</p>
+<ul class="simple">
+<li>un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> fourni par Django, par exemple une valeur lue à partir d’un champ de formulaire ou d’un champ de modèle. Comme vous avez activé la prise en charge des fuseaux horaires, cet objet est conscient.</li>
+<li>un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> généré dans votre code de manière naïve (sinon vous ne liriez pas ceci).</li>
+</ul>
+<p>Généralement, la solution correcte est de modifier votre code pour qu’il utilise plutôt un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscient.</p>
+<p>Si vous écrivez une application réutilisable qui doit fonctionner indépendamment de la valeur de <a class="reference internal" href="../../ref/settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a>, il peut être utile d’appeler <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.utils.timezone.now()</span></code></a>. Cette fonction renvoie la date et l’heure actuelle sous forme d’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïf lorsque <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">False</span></code> et sous forme d’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscient lorsque <code class="docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">True</span></code>. Vous pouvez y ajouter ou soustraire une valeur <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.timedelta</span></code></a> selon vos besoins.</p>
+</li>
+<li><p class="first"><strong>Je vois beaucoup de</strong> <code class="docutils literal notranslate"><span class="pre">RuntimeWarning:</span> <span class="pre">DateTimeField</span> <span class="pre">received</span> <span class="pre">a</span> <span class="pre">naive</span> <span class="pre">datetime</span></code> <code class="docutils literal notranslate"><span class="pre">(YYYY-MM-DD</span> <span class="pre">HH:MM:SS)</span></code> <code class="docutils literal notranslate"><span class="pre">while</span> <span class="pre">time</span> <span class="pre">zone</span> <span class="pre">support</span> <span class="pre">is</span> <span class="pre">active</span></code> <strong>, est-ce mauvais signe&nbsp;?</strong></p>
+<p>Lorsque la prise en charge des fuseaux horaires est activée, la couche de base de données s’attend à ne recevoir que des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients de votre code. Cet avertissement se produit lorsqu’elle reçoit un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïf. Cela indique que vous n’avez pas terminé de transformer votre code pour la prise en charge des fuseaux horaires. Veuillez vous référer au <a class="reference internal" href="#time-zones-migration-guide"><span class="std std-ref">guide de migration</span></a> pour des indications supplémentaires sur ce processus.</p>
+<p>Dans l’intervalle et par rétrocompatibilité, Django considère l’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> comme se trouvant dans le fuseau horaire par défaut, ce qui correspond généralement à la réalité.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">now.date()</span></code> <strong>est hier&nbsp;! (ou demain)</strong></p>
+<p>Si vous avez toujours utilisé des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs, vous pensez probablement pouvoir convertir un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> en objet <code class="docutils literal notranslate"><span class="pre">date</span></code> en appelant sa méthode <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime.date" title="(disponible dans Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">date()</span></code></a>. Vous considérez également que <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">date</span></code></a> est très semblable à <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>, avec moins de précision.</p>
+<p>Rien de cela n’est vrai dans un environnement conscient des fuseaux horaires&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">paris_tz</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;Europe/Paris&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_york_tz</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">paris</span> <span class="o">=</span> <span class="n">paris_tz</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>
+<span class="go"># This is the correct way to convert between time zones with pytz.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_york</span> <span class="o">=</span> <span class="n">new_york_tz</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">paris</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">new_york_tz</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">paris</span> <span class="o">==</span> <span class="n">new_york</span><span class="p">,</span> <span class="n">paris</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">==</span> <span class="n">new_york</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+<span class="go">(True, False)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">paris</span> <span class="o">-</span> <span class="n">new_york</span><span class="p">,</span> <span class="n">paris</span><span class="o">.</span><span class="n">date</span><span class="p">()</span> <span class="o">-</span> <span class="n">new_york</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+<span class="go">(datetime.timedelta(0), datetime.timedelta(1))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">paris</span>
+<span class="go">datetime.datetime(2012, 3, 3, 1, 30, tzinfo=&lt;DstTzInfo &#39;Europe/Paris&#39; CET+1:00:00 STD&gt;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_york</span>
+<span class="go">datetime.datetime(2012, 3, 2, 19, 30, tzinfo=&lt;DstTzInfo &#39;America/New_York&#39; EST-1 day, 19:00:00 STD&gt;)</span>
+</pre></div>
+</div>
+<p>Comme le montre cet exemple, le même objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> peut représenter une date différente selon le fuseau horaire dans lequel il est représenté. Mais le problème réel est plus fondamental.</p>
+<p>Un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> représente un <strong>point dans le temps</strong>. C’est absolu et cela ne dépend de rien d’autre. Au contraire, une date est un <strong>concept calendaire</strong>. Il s’agit d’une période de temps dont les limites dépendent du fuseau horaire dans lequel la date est considérée. Comme vous pouvez le voir, ces deux concepts sont fondamentalement différents et la conversion d’un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> en un objet <code class="docutils literal notranslate"><span class="pre">date</span></code> n’est pas une opération déterministe.</p>
+<p>Qu’est-ce que cela signifie en pratique&nbsp;?</p>
+<p>Généralement, vous devriez éviter de convertir un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> en <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">date</span></code></a>. Par exemple, vous pouvez utiliser le filtre de gabarit <a class="reference internal" href="../../ref/templates/builtins.html#std:templatefilter-date"><code class="xref std std-tfilter docutils literal notranslate"><span class="pre">date</span></code></a> pour n’afficher que la partie date d’un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code>. Ce filtre convertit l’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> dans le fuseau horaire actuel avant de le mettre en forme, s’assurant ainsi que le résultat produit sera correct.</p>
+<p>Si vous avez réellement besoin d’effectuer vous-même la conversion, vous devez d’abord prendre soin de convertir l’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> dans le fuseau horaire approprié. Il s’agit généralement du fuseau horaire actuel&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">timezone</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;Asia/Singapore&quot;</span><span class="p">))</span>
+<span class="go"># For this example, we set the time zone to Singapore, but here&#39;s how</span>
+<span class="go"># you would obtain the current time zone in the general case.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">current_tz</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">get_current_timezone</span><span class="p">()</span>
+<span class="go"># Again, this is the correct way to convert between time zones with pytz.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">local</span> <span class="o">=</span> <span class="n">current_tz</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">paris</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">current_tz</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">local</span>
+<span class="go">datetime.datetime(2012, 3, 3, 8, 30, tzinfo=&lt;DstTzInfo &#39;Asia/Singapore&#39; SGT+8:00:00 STD&gt;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">local</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+<span class="go">datetime.date(2012, 3, 3)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first"><strong>J’obtiens une erreur</strong> «&nbsp;<code class="docutils literal notranslate"><span class="pre">Are</span> <span class="pre">time</span> <span class="pre">zone</span> <span class="pre">definitions</span> <span class="pre">for</span> <span class="pre">your</span> <span class="pre">database</span> <span class="pre">installed?</span></code>&nbsp;»</p>
+<p>Si vous utilisez MySQL, consultez la section <a class="reference internal" href="../../ref/databases.html#mysql-time-zone-definitions"><span class="std std-ref">Définitions de fuseaux horaires</span></a> des notes MySQL pour plus d’instructions sur le chargement des définitions de fuseaux horaires.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="s-usage">
+<span id="usage"></span><h3>Utilisation<a class="headerlink" href="#usage" title="Lien permanent vers ce titre">¶</a></h3>
+<ol class="arabic">
+<li><p class="first"><strong>J’ai une chaîne</strong> <code class="docutils literal notranslate"><span class="pre">&quot;2012-02-21</span> <span class="pre">10:28:45&quot;</span></code> <strong>et je sais qu’elle est dans le fuseau horaire ** ``&nbsp;»Europe/Helsinki&nbsp;»``. Comment puis-je la transformer en un objet ``datetime`` conscient&nbsp;?</strong></p>
+<p>C’est exactement le rôle de <a class="reference external" href="http://pytz.sourceforge.net/">pytz</a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils.dateparse</span> <span class="k">import</span> <span class="n">parse_datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">naive</span> <span class="o">=</span> <span class="n">parse_datetime</span><span class="p">(</span><span class="s2">&quot;2012-02-21 10:28:45&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pytz</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;Europe/Helsinki&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">naive</span><span class="p">,</span> <span class="n">is_dst</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="go">datetime.datetime(2012, 2, 21, 10, 28, 45, tzinfo=&lt;DstTzInfo &#39;Europe/Helsinki&#39; EET+2:00:00 STD&gt;)</span>
+</pre></div>
+</div>
+<p>Notez que <code class="docutils literal notranslate"><span class="pre">localize</span></code> est une extension de pytz à l’API <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a>. Il peut être nécessaire d’intercepter les erreurs <code class="docutils literal notranslate"><span class="pre">pytz.InvalidTimeError</span></code>. La documentation de pytz contient <a class="reference external" href="http://pytz.sourceforge.net/#example-usage">davantage d’exemples</a>. Il est recommandé de la consulter avant d’essayer de manipuler des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients.</p>
+</li>
+<li><p class="first"><strong>Comment puis-je obtenir le temps local dans le fuseau horaire actuel&nbsp;?</strong></p>
+<p>Et bien, la première question à se poser est&nbsp;: est-ce réellement nécessaire&nbsp;?</p>
+<p>Le temps local ne doit être utilisé que lorsque l’on interagit avec des humains, et la couche des gabarits fournit des <a class="reference internal" href="#time-zones-in-templates"><span class="std std-ref">filtres et des balises</span></a> pour convertir des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> dans le fuseau horaire de votre choix.</p>
+<p>De plus, Python sait comparer des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> conscients, en prenant en compte les décalages UTC si nécessaire. C’est beaucoup plus simple (et potentiellement plus rapide) d’écrire tout le code des modèles et des vues en UTC. Ainsi, dans la plupart des cas, l’objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> en UTC renvoyé par <a class="reference internal" href="../../ref/utils.html#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.utils.timezone.now()</span></code></a> sera suffisant.</p>
+<p>Par souci d’exhaustivité, si vous devez vraiment obtenir le temps local dans le fuseau horaire actuel, voici comment vous pouvez l’obtenir&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">timezone</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+<span class="go">datetime.datetime(2012, 3, 3, 20, 10, 53, 873365, tzinfo=&lt;DstTzInfo &#39;Europe/Paris&#39; CET+1:00:00 STD&gt;)</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, le fuseau horaire actuel est <code class="docutils literal notranslate"><span class="pre">&quot;Europe/Paris&quot;</span></code>.</p>
+</li>
+<li><p class="first"><strong>Comment puis-je voir tous les fuseaux horaires disponibles&nbsp;?</strong></p>
+<p><a class="reference external" href="http://pytz.sourceforge.net/">pytz</a> fournit des <a class="reference external" href="http://pytz.sourceforge.net/#helpers">utilitaires</a>, y compris une liste des fuseaux horaires actuels et une liste de tous les fuseaux horaires disponibles, parmi lesquels se trouvent aussi certains qui n’ont qu’un intérêt historique.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Fuseaux horaires</a><ul>
+<li><a class="reference internal" href="#overview">Aperçu</a></li>
+<li><a class="reference internal" href="#concepts">Concepts</a><ul>
+<li><a class="reference internal" href="#naive-and-aware-datetime-objects">Objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs et conscients</a></li>
+<li><a class="reference internal" href="#interpretation-of-naive-datetime-objects">Interprétation des objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code> naïfs</a></li>
+<li><a class="reference internal" href="#default-time-zone-and-current-time-zone">Fuseau horaire par défaut et fuseau horaire actuel</a></li>
+<li><a class="reference internal" href="#selecting-the-current-time-zone">Sélection du fuseau horaire actuel</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#time-zone-aware-input-in-forms">Saisie de données avec fuseau horaire dans les formulaires</a></li>
+<li><a class="reference internal" href="#time-zone-aware-output-in-templates">Affichage de fuseaux horaires conscients dans les gabarits</a><ul>
+<li><a class="reference internal" href="#template-tags">Balises de gabarit</a><ul>
+<li><a class="reference internal" href="#localtime"><code class="docutils literal notranslate"><span class="pre">localtime</span></code></a></li>
+<li><a class="reference internal" href="#timezone"><code class="docutils literal notranslate"><span class="pre">timezone</span></code></a></li>
+<li><a class="reference internal" href="#get-current-timezone"><code class="docutils literal notranslate"><span class="pre">get_current_timezone</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#template-filters">Filtres de gabarit</a><ul>
+<li><a class="reference internal" href="#std:templatefilter-localtime"><code class="docutils literal notranslate"><span class="pre">localtime</span></code></a></li>
+<li><a class="reference internal" href="#utc"><code class="docutils literal notranslate"><span class="pre">utc</span></code></a></li>
+<li><a class="reference internal" href="#std:templatefilter-timezone"><code class="docutils literal notranslate"><span class="pre">timezone</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#migration-guide">Guide de migration</a><ul>
+<li><a class="reference internal" href="#database">Base de données</a><ul>
+<li><a class="reference internal" href="#postgresql">PostgreSQL</a></li>
+<li><a class="reference internal" href="#other-databases">Autres bases de données</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#code">Code</a></li>
+<li><a class="reference internal" href="#fixtures">Instantanés</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#faq">FAQ</a><ul>
+<li><a class="reference internal" href="#setup">Configuration</a></li>
+<li><a class="reference internal" href="#troubleshooting">Dépannage</a></li>
+<li><a class="reference internal" href="#usage">Utilisation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="formatting.html"
+                        title="Chapitre précédent">Régionalisation des formats</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../logging.html"
+                        title="Chapitre suivant">Journalisation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/i18n/timezones.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="formatting.html" title="Régionalisation des formats">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="../logging.html" title="Journalisation">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

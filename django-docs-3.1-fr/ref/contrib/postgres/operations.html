@@ -1,0 +1,292 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Opérations de migration de base de données &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Recherche plein texte" href="search.html" />
+    <link rel="prev" title="Recherches spécifiques à PostgreSQL" href="lookups.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="lookups.html" title="Recherches spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="search.html" title="Recherche plein texte">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-postgres-operations">
+            
+  <div class="section" id="s-database-migration-operations">
+<span id="database-migration-operations"></span><h1>Opérations de migration de base de données<a class="headerlink" href="#database-migration-operations" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Toutes ces <a class="reference internal" href="../../migration-operations.html"><span class="doc">opérations</span></a> sont disponibles dans le module <code class="docutils literal notranslate"><span class="pre">django.contrib.postgres.operations</span></code>.</p>
+<div class="section" id="s-creating-extension-using-migrations">
+<span id="s-create-postgresql-extensions"></span><span id="creating-extension-using-migrations"></span><span id="create-postgresql-extensions"></span><h2>Création d’extension à l’aide des migrations<a class="headerlink" href="#creating-extension-using-migrations" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il est possible de créer une extension de base de données PostgreSQL en utilisant un fichier de migration. Cet exemple crée une extension hstore, mais le même principe est applicable aux autres extensions.</p>
+<p>Configurer l’extension hstore dans PostgreSQL avant la première opération <code class="docutils literal notranslate"><span class="pre">CreateModel</span></code> ou <code class="docutils literal notranslate"><span class="pre">AddField</span></code> qui concerne un champ <a class="reference internal" href="fields.html#django.contrib.postgres.fields.HStoreField" title="django.contrib.postgres.fields.HStoreField"><code class="xref py py-class docutils literal notranslate"><span class="pre">HStoreField</span></code></a> en ajoutant une migration comprenant l’opération <a class="reference internal" href="#django.contrib.postgres.operations.HStoreExtension" title="django.contrib.postgres.operations.HStoreExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">HStoreExtension</span></code></a>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.operations</span> <span class="k">import</span> <span class="n">HStoreExtension</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">HStoreExtension</span><span class="p">(),</span>
+        <span class="o">...</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Pour la plupart des extensions, il est nécessaire que l’utilisateur de base de données possède les droits de superutilisateur. Si l’utilisateur de base de données Django ne possède pas les privilèges suffisants, il est alors nécessaire de créer l’extension en dehors des migrations Django avec un utilisateur qui possède ces droits. Dans ce cas, connectez-vous à la base de données et lancez la requête <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">EXTENSION</span> <span class="pre">IF</span> <span class="pre">NOT</span> <span class="pre">EXISTS</span> <span class="pre">hstore;</span></code>.</p>
+</div>
+<div class="section" id="s-createextension">
+<span id="createextension"></span><h2><code class="docutils literal notranslate"><span class="pre">CreateExtension</span></code><a class="headerlink" href="#createextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.CreateExtension">
+<em class="property">class </em><code class="descname">CreateExtension</code>(<em>name</em>)<a class="headerlink" href="#django.contrib.postgres.operations.CreateExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une sous-classe d”<code class="docutils literal notranslate"><span class="pre">Operation</span></code> qui installe une extension PostgreSQL. Pour les extensions courantes, utilisez l’une des sous-classes plus spécifiques ci-dessous.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.operations.CreateExtension.name">
+<code class="descname">name</code><a class="headerlink" href="#django.contrib.postgres.operations.CreateExtension.name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce paramètre est obligatoire. Le nom de l’extension à installer.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-bloomextension">
+<span id="bloomextension"></span><h2><code class="docutils literal notranslate"><span class="pre">BloomExtension</span></code><a class="headerlink" href="#bloomextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.BloomExtension">
+<em class="property">class </em><code class="descname">BloomExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.BloomExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">bloom</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-btreeginextension">
+<span id="btreeginextension"></span><h2><code class="docutils literal notranslate"><span class="pre">BtreeGinExtension</span></code><a class="headerlink" href="#btreeginextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.BtreeGinExtension">
+<em class="property">class </em><code class="descname">BtreeGinExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.BtreeGinExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">btree_gin</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-btreegistextension">
+<span id="btreegistextension"></span><h2><code class="docutils literal notranslate"><span class="pre">BtreeGistExtension</span></code><a class="headerlink" href="#btreegistextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.BtreeGistExtension">
+<em class="property">class </em><code class="descname">BtreeGistExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.BtreeGistExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">btree_gist</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-citextextension">
+<span id="citextextension"></span><h2><code class="docutils literal notranslate"><span class="pre">CITextExtension</span></code><a class="headerlink" href="#citextextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.CITextExtension">
+<em class="property">class </em><code class="descname">CITextExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.CITextExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">citext</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-cryptoextension">
+<span id="cryptoextension"></span><h2><code class="docutils literal notranslate"><span class="pre">CryptoExtension</span></code><a class="headerlink" href="#cryptoextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.CryptoExtension">
+<em class="property">class </em><code class="descname">CryptoExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.CryptoExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">pgcrypto</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-hstoreextension">
+<span id="hstoreextension"></span><h2><code class="docutils literal notranslate"><span class="pre">HStoreExtension</span></code><a class="headerlink" href="#hstoreextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.HStoreExtension">
+<em class="property">class </em><code class="descname">HStoreExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.HStoreExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">hstore</span></code> et configure également la connexion afin d’interpréter les données hstore pour un usage possible dans les migrations suivantes.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-trigramextension">
+<span id="trigramextension"></span><h2><code class="docutils literal notranslate"><span class="pre">TrigramExtension</span></code><a class="headerlink" href="#trigramextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.TrigramExtension">
+<em class="property">class </em><code class="descname">TrigramExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.TrigramExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">pg_trgm</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-unaccentextension">
+<span id="unaccentextension"></span><h2><code class="docutils literal notranslate"><span class="pre">UnaccentExtension</span></code><a class="headerlink" href="#unaccentextension" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.UnaccentExtension">
+<em class="property">class </em><code class="descname">UnaccentExtension</code><a class="headerlink" href="#django.contrib.postgres.operations.UnaccentExtension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Installe l’extension <code class="docutils literal notranslate"><span class="pre">unaccent</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-concurrent-index-operations">
+<span id="concurrent-index-operations"></span><h2>Opérations d’index concurrentes<a class="headerlink" href="#concurrent-index-operations" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="versionadded">
+<span class="title">New in Django 3.0.</span> </div>
+<p>PostgreSQL prend en charge l’option <code class="docutils literal notranslate"><span class="pre">CONCURRENTLY</span></code> pour les instructions <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">INDEX</span></code> et <code class="docutils literal notranslate"><span class="pre">DROP</span> <span class="pre">INDEX</span></code> pour ajouter et supprimer des index sans verrouiller les écritures. Cette option est utile pour l’ajout ou la suppression d’index  dans une base de données active en production.</p>
+<dl class="class">
+<dt id="django.contrib.postgres.operations.AddIndexConcurrently">
+<em class="property">class </em><code class="descname">AddIndexConcurrently</code>(<em>model_name</em>, <em>index</em>)<a class="headerlink" href="#django.contrib.postgres.operations.AddIndexConcurrently" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Comme <a class="reference internal" href="../../migration-operations.html#django.db.migrations.operations.AddIndex" title="django.db.migrations.operations.AddIndex"><code class="xref py py-class docutils literal notranslate"><span class="pre">AddIndex</span></code></a>, mais crée un index avec l’option <code class="docutils literal notranslate"><span class="pre">CONCURRENTLY</span></code>. Il existe quelques mises en garde à respecter quand on utilise cette option, lisez <a class="reference external" href="https://www.postgresql.org/docs/current/sql-createindex.html#SQL-CREATEINDEX-CONCURRENTLY">la documentation PostgreSQL sur la construction concurrente d’index</a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.postgres.operations.RemoveIndexConcurrently">
+<em class="property">class </em><code class="descname">RemoveIndexConcurrently</code>(<em>model_name</em>, <em>name</em>)<a class="headerlink" href="#django.contrib.postgres.operations.RemoveIndexConcurrently" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Comme <a class="reference internal" href="../../migration-operations.html#django.db.migrations.operations.RemoveIndex" title="django.db.migrations.operations.RemoveIndex"><code class="xref py py-class docutils literal notranslate"><span class="pre">RemoveIndex</span></code></a>, mais supprime l’index avec l’option <code class="docutils literal notranslate"><span class="pre">CONCURRENTLY</span></code>. Il existe quelques mises en garde à respecter quand on utilise cette option, lisez <a class="reference external" href="https://www.postgresql.org/docs/current/sql-dropindex.html">la documentation PostgreSQL</a>.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">L’option <code class="docutils literal notranslate"><span class="pre">CONCURRENTLY</span></code> n’est pas prise en charge à l’intérieur d’une transaction (voir <a class="reference internal" href="../../../howto/writing-migrations.html#non-atomic-migrations"><span class="std std-ref">migrations non atomiques</span></a>).</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Opérations de migration de base de données</a><ul>
+<li><a class="reference internal" href="#creating-extension-using-migrations">Création d’extension à l’aide des migrations</a></li>
+<li><a class="reference internal" href="#createextension"><code class="docutils literal notranslate"><span class="pre">CreateExtension</span></code></a></li>
+<li><a class="reference internal" href="#bloomextension"><code class="docutils literal notranslate"><span class="pre">BloomExtension</span></code></a></li>
+<li><a class="reference internal" href="#btreeginextension"><code class="docutils literal notranslate"><span class="pre">BtreeGinExtension</span></code></a></li>
+<li><a class="reference internal" href="#btreegistextension"><code class="docutils literal notranslate"><span class="pre">BtreeGistExtension</span></code></a></li>
+<li><a class="reference internal" href="#citextextension"><code class="docutils literal notranslate"><span class="pre">CITextExtension</span></code></a></li>
+<li><a class="reference internal" href="#cryptoextension"><code class="docutils literal notranslate"><span class="pre">CryptoExtension</span></code></a></li>
+<li><a class="reference internal" href="#hstoreextension"><code class="docutils literal notranslate"><span class="pre">HStoreExtension</span></code></a></li>
+<li><a class="reference internal" href="#trigramextension"><code class="docutils literal notranslate"><span class="pre">TrigramExtension</span></code></a></li>
+<li><a class="reference internal" href="#unaccentextension"><code class="docutils literal notranslate"><span class="pre">UnaccentExtension</span></code></a></li>
+<li><a class="reference internal" href="#concurrent-index-operations">Opérations d’index concurrentes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="lookups.html"
+                        title="Chapitre précédent">Recherches spécifiques à PostgreSQL</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="search.html"
+                        title="Chapitre suivant">Recherche plein texte</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/postgres/operations.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="lookups.html" title="Recherches spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="search.html" title="Recherche plein texte">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

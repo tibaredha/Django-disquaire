@@ -1,0 +1,586 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Transactions de base de données &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Bases de données multiples" href="multi-db.html" />
+    <link rel="prev" title="Lancement de requêtes SQL brutes" href="sql.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="sql.html" title="Lancement de requêtes SQL brutes">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="multi-db.html" title="Bases de données multiples">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-db-transactions">
+            
+  <div class="section" id="s-module-django.db.transaction">
+<span id="s-database-transactions"></span><span id="module-django.db.transaction"></span><span id="database-transactions"></span><h1>Transactions de base de données<a class="headerlink" href="#module-django.db.transaction" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Django donne quelques moyens de contrôler la gestion des transactions de base de données.</p>
+<div class="section" id="s-managing-database-transactions">
+<span id="managing-database-transactions"></span><h2>Gestion des transactions de base de données<a class="headerlink" href="#managing-database-transactions" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-django-s-default-transaction-behavior">
+<span id="django-s-default-transaction-behavior"></span><h3>Comportement de transaction par défaut de Django<a class="headerlink" href="#django-s-default-transaction-behavior" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le comportement par défaut de Django est de fonctionner en mode de validation automatique («&nbsp;autocommit&nbsp;»). Chaque requête est immédiatement validée dans la base de données, sauf si une transaction est en cours. <a class="reference internal" href="#autocommit-details"><span class="std std-ref">Voir ci-dessous pour plus de détails</span></a>.</p>
+<p>Django utilise automatiquement des transactions ou des points de sauvegarde pour garantir l’intégrité des opérations de l’ORM qui nécessitent plusieurs requêtes, particulièrement les requêtes <a class="reference internal" href="queries.html#topics-db-queries-delete"><span class="std std-ref">delete()</span></a> et <a class="reference internal" href="queries.html#topics-db-queries-update"><span class="std std-ref">update()</span></a>.</p>
+<p>La classe <a class="reference internal" href="../testing/tools.html#django.test.TestCase" title="django.test.TestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></a> de Django englobe aussi chaque test dans une transaction pour des raisons de performance.</p>
+</div>
+<div class="section" id="s-tying-transactions-to-http-requests">
+<span id="s-id1"></span><span id="tying-transactions-to-http-requests"></span><span id="id1"></span><h3>Couplage des transactions aux requêtes HTTP<a class="headerlink" href="#tying-transactions-to-http-requests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Une façon fréquente de gérer les transactions sur le Web est d’envelopper chaque requête dans une transaction. Définissez <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-ATOMIC_REQUESTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ATOMIC_REQUESTS</span></code></a> à <code class="docutils literal notranslate"><span class="pre">True</span></code> dans la configuration de chaque base de données pour laquelle vous souhaitez activer ce comportement.</p>
+<p>Voici comment cela fonctionne. Avant d’appeler une fonction de vue, Django démarre une transaction. Si la réponse est renvoyée sans problème particulier, Django valide la transaction. Si la vue génère une exception, Django annule la transaction.</p>
+<p>Il est possible d’effectuer des sous-transactions à l’aide de points de sauvegarde dans le code de la vue, typiquement avec le gestionnaire de contexte <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>. Cependant, quand la vue se termine, soit tous les changements sont validés, soit tous sont annulés.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Bien que la simplicité de ce modèle de transaction est attrayant, il devient inefficace lorsque le trafic augmente. L’ouverture d’une transaction pour chaque vue présente un certain coût. L’impact sur la performance dépend de la manière dont vos applications font usage des requêtes et de la manière dont la base de données gère les verrous.</p>
+</div>
+<div class="admonition-per-request-transactions-and-streaming-responses admonition">
+<p class="first admonition-title">Transactions par requête et réponses en flux</p>
+<p>Lorsqu’une vue renvoie une réponse en flux (<a class="reference internal" href="../../ref/request-response.html#django.http.StreamingHttpResponse" title="django.http.StreamingHttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamingHttpResponse</span></code></a>), la lecture du contenu de la réponse exécute fréquemment du code pour générer le contenu. Comme la vue s’est déjà terminée, ce code s’exécute en dehors de la transaction.</p>
+<p class="last">De manière générale, il n’est pas conseillé d’écrire dans la base de données durant la génération d’une réponse en flux, car il n’y a plus de méthode raisonnable pour gérer les erreurs après le début de l’envoi de la réponse.</p>
+</div>
+<p>En pratique, cette fonctionnalité enveloppe chaque fonction de vue dans le décorateur <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> décrit ci-dessous.</p>
+<p>Notez que seule l’exécution de la vue est incluse dans la transaction. Les intergiciels s’exécutent en dehors de la transaction, de même que le rendu des réponses par gabarit.</p>
+<p>Lorsque <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-ATOMIC_REQUESTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ATOMIC_REQUESTS</span></code></a> est actif, il est toujours possible d’empêcher les vues de s’exécuter dans une transaction.</p>
+<dl class="function">
+<dt id="django.db.transaction.non_atomic_requests">
+<code class="descname">non_atomic_requests</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.non_atomic_requests" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce décorateur annule l’effet de <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-ATOMIC_REQUESTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ATOMIC_REQUESTS</span></code></a> pour une vue donnée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">transaction</span>
+
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">non_atomic_requests</span>
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">do_stuff</span><span class="p">()</span>
+
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">non_atomic_requests</span><span class="p">(</span><span class="n">using</span><span class="o">=</span><span class="s1">&#39;other&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_other_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">do_stuff_on_the_other_database</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Cela ne fonctionne que lorsque le décorateur est appliqué à la vue elle-même.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-controlling-transactions-explicitly">
+<span id="controlling-transactions-explicitly"></span><h3>Contrôle explicite des transactions<a class="headerlink" href="#controlling-transactions-explicitly" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django fournit une API unifiée pour contrôler les transactions de base de données.</p>
+<dl class="function">
+<dt id="django.db.transaction.atomic">
+<code class="descname">atomic</code>(<em>using=None</em>, <em>savepoint=True</em>)<a class="headerlink" href="#django.db.transaction.atomic" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’atomicité est la propriété de base des transactions de base de données. <code class="docutils literal notranslate"><span class="pre">atomic</span></code> permet de créer un bloc de code à l’intérieur duquel l’atomicité est garantie au niveau de la base de données. Si le bloc de code se termine avec succès, les modifications sont validées dans la base de données. Si une exception apparaît, les modifications sont annulées en bloc.</p>
+<p>Les blocs <code class="docutils literal notranslate"><span class="pre">atomic</span></code> peuvent être imbriqués. Dans ce cas, lorsqu’un bloc intérieur se termine avec succès, ses effets peuvent encore être annulés si une exception est générée plus loin dans le bloc englobant.</p>
+<p><code class="docutils literal notranslate"><span class="pre">atomic</span></code> peut être utilisé comme <span class="xref std std-term">décorateur</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">transaction</span>
+
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">viewfunc</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># This code executes inside a transaction.</span>
+    <span class="n">do_stuff</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>et comme <span class="xref std std-term">gestionnaire de contexte</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">transaction</span>
+
+<span class="k">def</span> <span class="nf">viewfunc</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># This code executes in autocommit mode (Django&#39;s default).</span>
+    <span class="n">do_stuff</span><span class="p">()</span>
+
+    <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+        <span class="c1"># This code executes inside a transaction.</span>
+        <span class="n">do_more_stuff</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>L’insertion d”<code class="docutils literal notranslate"><span class="pre">atomic</span></code> dans un bloc try/except est une manière naturelle de gérer les erreurs d’intégrité&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">transaction</span>
+
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">viewfunc</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">create_parent</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+            <span class="n">generate_relationships</span><span class="p">()</span>
+    <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+        <span class="n">handle_exception</span><span class="p">()</span>
+
+    <span class="n">add_children</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, même si <code class="docutils literal notranslate"><span class="pre">generate_relationships()</span></code> provoque une erreur de base de données en cassant une contrainte d’intégrité, vous pouvez exécuter des requêtes dans <code class="docutils literal notranslate"><span class="pre">add_children()</span></code> et les modifications de <code class="docutils literal notranslate"><span class="pre">create_parent()</span></code> sont toujours présentes et liées à la même transaction. Notez que toute opération exécutée dans <code class="docutils literal notranslate"><span class="pre">generate_relationships()</span></code> aura déjà été annulée proprement lorsque <code class="docutils literal notranslate"><span class="pre">handle_exception()</span></code> est appelée, ce qui fait que le gestionnaire d’exception peut très bien agir au niveau de la base de données si nécessaire.</p>
+<div class="admonition-avoid-catching-exceptions-inside-atomic admonition">
+<p class="first admonition-title">Évitez d’intercepter des exceptions à l’intérieur d”<code class="docutils literal notranslate"><span class="pre">atomic</span></code>!</p>
+<p>À la sortie d’un bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code>, Django examine si la sortie se fait normalement ou par une exception afin de déterminer s’il doit valider ou annuler la transaction. Si vous interceptez et gérez des exceptions à l’intérieur du bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code>, vous cachez à Django le fait qu’un problème est survenu. Cela peut aboutir à des comportements inattendus.</p>
+<p>Ce problème concerne plus spécifiquement les exceptions <a class="reference internal" href="../../ref/exceptions.html#django.db.DatabaseError" title="django.db.DatabaseError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DatabaseError</span></code></a> et ses sous-classes telles que  <a class="reference internal" href="../../ref/exceptions.html#django.db.IntegrityError" title="django.db.IntegrityError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IntegrityError</span></code></a>. Après une telle erreur, la transaction est cassée et Django procédera à son annulation dès la sortie du bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code>. Si vous essayez d’exécuter des requêtes en base de données avant que l’annulation intervienne, Django générera une exception <a class="reference internal" href="../../ref/exceptions.html#django.db.transaction.TransactionManagementError" title="django.db.transaction.TransactionManagementError"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionManagementError</span></code></a>. Vous pouvez également rencontrer ce comportement lorsqu’un gestionnaire de signal lié à l’ORM génère une exception.</p>
+<p>La manière correcte d’intercepter les erreurs de base de données est de le faire autour du bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code> comme dans l’exemple ci-dessus. Si nécessaire, ajoutez un bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code> supplémentaire à cet effet. Cette stratégie présente un autre avantage&nbsp;: elle délimite explicitement les opérations qui seront annulées si une exception se produit.</p>
+<p class="last">Si vous interceptez les exceptions générées par des requêtes SQL brutes, le comportement de Django n’est pas défini et dépend de la base de données.</p>
+</div>
+<div class="admonition-you-may-need-to-manually-revert-model-state-when-rolling-back-a-transaction admonition">
+<p class="first admonition-title">Vous devrez peut-être réinitialiser manuellement l’état du modèle lors du renversement d’une transaction.</p>
+<p>Les valeurs des champs d’un modèle ne seront pas réinitialisées lorsqu’une rétrogradation des transactions se produit. Cela pourrait conduire à un état de modèle incompatible à moins que vous ne restauriez manuellement les valeurs de champ d’origine.</p>
+<p>Par exemple, considérons <code class="docutils literal notranslate"><span class="pre">MyModel</span></code> avec un champ <code class="docutils literal notranslate"><span class="pre">active</span></code>, cet extrait garantit que la vérification à la fin <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">obj.active</span></code> utilise la valeur correcte si la mise à jour de <code class="docutils literal notranslate"><span class="pre">active</span></code> vers <code class="docutils literal notranslate"><span class="pre">True</span></code> échoue dans la transaction</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">DatabaseError</span><span class="p">,</span> <span class="n">transaction</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">(</span><span class="n">active</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">DatabaseError</span><span class="p">:</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<p>Afin de garantir l’atomicité, <code class="docutils literal notranslate"><span class="pre">atomic</span></code> désactive certaines API. Si vous tentez de valider une transaction, de l’annuler ou de modifier l’état de validation automatique de la connexion de base de données à l’intérieur d’un bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code>, vous obtiendrez une exception.</p>
+<p><code class="docutils literal notranslate"><span class="pre">atomic</span></code> accepte un paramètre <code class="docutils literal notranslate"><span class="pre">using</span></code> devant correspondre au nom d’une base de données. Si ce paramètre n’est pas présent, Django utilise la base de données <code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code>.</p>
+<p>En arrière-plan, le code de gestion des transactions de Django&nbsp;:</p>
+<ul class="simple">
+<li>ouvre une transaction lorsqu’il entre dans le premier bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code>;</li>
+<li>crée un point de sauvegarde lorsqu’il entre dans un bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code> imbriqué&nbsp;;</li>
+<li>libère le point de sauvegarde ou annule la transaction jusqu’au point de sauvegarde en quittant le bloc imbriqué&nbsp;;</li>
+<li>valide ou annule la transaction en quittant le bloc de départ.</li>
+</ul>
+<p>Vous pouvez désactiver la création de points de sauvegarde pour les blocs imbriqués en définissant le paramètre <code class="docutils literal notranslate"><span class="pre">savepoint</span></code> à <code class="docutils literal notranslate"><span class="pre">False</span></code>. Si une exception survient, Django procède à l’annulation de la transaction au moment de quitter le premier bloc ayant un point de sauvegarde, le cas échéant, ou le bloc initial sinon. L’atomicité est toujours garantie par la transaction du bloc initial. Cette option ne devrait être utilisée que si la création des points de sauvegarde affecte les performances de manière évidente. Le désavantage est que cela casse la gestion d’erreurs telle que décrite précédemment.</p>
+<p>Il est possible d’utiliser <code class="docutils literal notranslate"><span class="pre">atomic</span></code> lorsque la validation automatique est désactivée. Seuls des points de sauvegarde seront utilisés, même pour le bloc initial.</p>
+</dd></dl>
+
+<div class="admonition-performance-considerations admonition">
+<p class="first admonition-title">Considérations sur la performance</p>
+<p class="last">Les transactions ouvertes constituent une pénalité de performance pour votre serveur de base de données. Pour minimiser cet impact, gardez vos transactions aussi brèves que possible. C’est particulièrement important si vous utilisez <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> dans des processus de longue durée, en dehors du cycle requête/réponse de Django.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-autocommit">
+<span id="autocommit"></span><h2>Autocommit<a class="headerlink" href="#autocommit" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-why-django-uses-autocommit">
+<span id="s-autocommit-details"></span><span id="why-django-uses-autocommit"></span><span id="autocommit-details"></span><h3>Pourquoi Django utilise-t-il l’autocommit<a class="headerlink" href="#why-django-uses-autocommit" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Dans le standard SQL, chaque requête SQL démarre une transaction, sauf s’il y en a déjà une en cours. De telles transactions doivent ensuite être explicitement soit validées (commit), soit annulées (rollback).</p>
+<p>Ce n’est pas toujours très pratique pour les développeurs d’applications. Pour contourner ce problème, la plupart des bases de données mettent à disposition un mode «&nbsp;autocommit&nbsp;». Lorsque ce mode est actif et qu’il n’y a pas de transaction ouverte, chaque requête SQL est englobée dans sa propre transaction. En d’autres termes, chacune de ces requêtes non seulement démarre une transaction, mais cette transaction est aussi automatiquement validée ou annulée en fonction du résultat de la requête.</p>
+<p><span class="target" id="index-6"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0249"><strong>PEP 249</strong></a>, la spécification d’API de base de données Python v2.0, exige que le mode autocommit soit initialement désactivé. Django surcharge ce comportement par défaut et active le mode autocommit.</p>
+<p>Pour empêcher cela, vous pouvez <a class="reference internal" href="#deactivate-transaction-management"><span class="std std-ref">désactiver la gestion des transactions</span></a>, mais ce n’est pas recommandé.</p>
+</div>
+<div class="section" id="s-deactivating-transaction-management">
+<span id="s-deactivate-transaction-management"></span><span id="deactivating-transaction-management"></span><span id="deactivate-transaction-management"></span><h3>Désactivation de la gestion des transaction<a class="headerlink" href="#deactivating-transaction-management" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez désactiver totalement la gestion des transactions de Django pour une base de données précise en définissant <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-AUTOCOMMIT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">AUTOCOMMIT</span></code></a> à <code class="docutils literal notranslate"><span class="pre">False</span></code> dans sa configuration. Si vous faites cela, Django n’activera pas le mode autocommit et n’effectue aucune opération de commit. Vous obtenez alors le comportement habituel de la bibliothèque de base de données sous-jacente.</p>
+<p>Cela demande que vous effectuiez un commit explicite de chaque transaction, même de celles initiées par Django ou par des bibliothèques tierces. Ainsi, cela convient mieux à des situations où vous souhaitez mettre en place votre propre intergiciel de gestion des transactions ou que vous faites des choses plutôt étranges.</p>
+</div>
+</div>
+<div class="section" id="s-performing-actions-after-commit">
+<span id="performing-actions-after-commit"></span><h2>Lancement d’actions après le commit<a class="headerlink" href="#performing-actions-after-commit" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il peut arriver que vous ayez besoin d’effectuer une action liée à la transaction de base de données en cours, mais seulement si la transaction se termine par un commit réussi. On peut citer comme exemple une tâche <a class="reference external" href="https://pypi.org/project/celery/">Celery</a>, une notification par courriel ou une invalidation de cache.</p>
+<p>Django fournit la fonction <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a> pour inscrire des fonctions de rappel qui seront exécutées après le commit réussi de la transaction&nbsp;:</p>
+<dl class="function">
+<dt id="django.db.transaction.on_commit">
+<code class="descname">on_commit</code>(<em>func</em>, <em>using=None</em>)<a class="headerlink" href="#django.db.transaction.on_commit" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Passez une fonction (qui n’accepte pas de paramètre) à <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">transaction</span>
+
+<span class="k">def</span> <span class="nf">do_something</span><span class="p">():</span>
+    <span class="k">pass</span>  <span class="c1"># send a mail, invalidate a cache, fire off a Celery task, etc.</span>
+
+<span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">do_something</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Il est aussi possible d’envelopper la fonction dans une lambda&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">some_celery_task</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="s1">&#39;arg1&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>La fonction transmise sera appelée immédiatement après une écriture potentielle de base de données pour laquelle <code class="docutils literal notranslate"><span class="pre">on_commit()</span></code> a été appelée et se terminant par un commit réussi.</p>
+<p>Si vous appelez <code class="docutils literal notranslate"><span class="pre">on_commit()</span></code> alors qu’aucune transaction n’est en cours, la fonction transmise est immédiatement exécutée.</p>
+<p>Si cette écriture de base de données potentielle se trouve annulée (rollback), typiquement lorsqu’une exception non traitée est générée dans le bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>, la fonction est ignorée et ne sera jamais appelée.</p>
+<div class="section" id="s-savepoints">
+<span id="savepoints"></span><h3>Points de sauvegarde («&nbsp;savepoints&nbsp;»)<a class="headerlink" href="#savepoints" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les points de sauvegarde (blocs <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> imbriqués) sont gérés correctement. C’est-à-dire qu’une fonction inscrite par <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a> après un point de sauvegarde (dans un bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> imbriqué) sera appelée après le commit de la transaction la plus externe, mais pas dans le cas où une annulation (rollback) de ce point de sauvegarde ou de tout autre point de sauvegarde précédent se produit pendant la transaction&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>  <span class="c1"># Outer atomic, start a new transaction</span>
+    <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>  <span class="c1"># Inner atomic block, create a savepoint</span>
+        <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+
+<span class="c1"># foo() and then bar() will be called when leaving the outermost block</span>
+</pre></div>
+</div>
+<p>D’un autre côté, lorsqu’un point de sauvegarde est annulé (en raison de l’apparition d’une exception), la fonction définie à l’intérieur de point de sauvegarde ne sera pas appelée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>  <span class="c1"># Outer atomic, start a new transaction</span>
+    <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>  <span class="c1"># Inner atomic block, create a savepoint</span>
+            <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">SomeError</span><span class="p">()</span>  <span class="c1"># Raising an exception - abort the savepoint</span>
+    <span class="k">except</span> <span class="n">SomeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+<span class="c1"># foo() will be called, but not bar()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-order-of-execution">
+<span id="order-of-execution"></span><h3>Ordre d’exécution<a class="headerlink" href="#order-of-execution" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les fonctions <code class="docutils literal notranslate"><span class="pre">on_commit</span></code> d’une transaction donnée sont exécutées dans l’ordre de leur inscription.</p>
+</div>
+<div class="section" id="s-exception-handling">
+<span id="exception-handling"></span><h3>Gestion des exceptions<a class="headerlink" href="#exception-handling" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si l’une des fonctions <code class="docutils literal notranslate"><span class="pre">on_commit</span></code> dans une transaction donnée génère une exception non traitée, aucune fonction inscrite à la suite dans cette même transaction ne sera exécutée. Ceci correspond au même comportement qui se serait produit si vous aviez exécuté ces fonctions séquentiellement vous-même sans <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a>.</p>
+</div>
+<div class="section" id="s-timing-of-execution">
+<span id="timing-of-execution"></span><h3>Ordre d’exécution<a class="headerlink" href="#timing-of-execution" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les fonctions de rappel sont exécutées <em>après</em> un commit réussi, ce qui fait qu’une exception dans une fonction de rappel ne provoquera pas d’annulation de transaction. Elles ne sont exécutées qu’en cas de succès de la transaction, mais <em>sans</em> faire partie de la transaction. Pour les cas d’utilisation visés (notifications par courriel, tâches Celery, etc.) cela devrait convenir. Dans le cas contraire (par exemple si l’action à effectuer est si critique que son échec devrait aussi faire échouer la transaction principale), il ne faut alors pas exploiter le point d’entrée <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a>. Une alternative possible est un <a class="reference external" href="https://en.wikipedia.org/wiki/Two-phase_commit_protocol">commit en deux phases</a> tel que la <a class="reference external" href="https://www.psycopg.org/docs/usage.html#tpc" title="(disponible dans Psycopg v2.8)"><span class="xref std std-ref">prise en charge du protocole de commit en deux phases de psycopg</span></a> ou les <span class="target" id="index-7"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0249#optional-two-phase-commit-extensions"><strong>extensions facultatives de commit en deux phases dans la spécification DB-API de Python</strong></a>.</p>
+<p>Les fonctions de rappel ne sont pas appelées avant que la connexion ne repasse en mode autocommit après le commit (sinon toute requête dans une fonction de rappel ouvrirait une transaction implicite empêchant la connexion de repasser en mode de commit automatique).</p>
+<p>Si l’on se trouve déjà en mode autocommit et en-dehors d’un bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>, la fonction est immédiatement exécutée sans attendre de commit.</p>
+<p>Les fonctions <code class="docutils literal notranslate"><span class="pre">on_commit</span></code> ne fonctionnent qu’en <a class="reference internal" href="#managing-autocommit"><span class="std std-ref">mode autocommit</span></a> et avec l’API de transaction <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> (ou <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-ATOMIC_REQUESTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ATOMIC_REQUESTS</span></code></a>). L’appel à <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a> lorsque le mode autocommit est désactivé et en-dehors d’un bloc atomique produit une erreur.</p>
+</div>
+<div class="section" id="s-use-in-tests">
+<span id="use-in-tests"></span><h3>Utilisation dans les tests<a class="headerlink" href="#use-in-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La classe <a class="reference internal" href="../testing/tools.html#django.test.TestCase" title="django.test.TestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></a> de Django enveloppe chaque test dans une transaction et annule cette transaction après chaque test, afin de garantir l’isolation des tests. Cela signifie qu’aucune transaction n’est réellement suivie d’un commit et donc qu’aucune des fonctions de rappel <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a> ne sera jamais exécutée. Si vous avez besoin de tester les résultats d’une fonction de rappel <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a>, utilisez plutôt une classe <a class="reference internal" href="../testing/tools.html#django.test.TransactionTestCase" title="django.test.TransactionTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransactionTestCase</span></code></a>.</p>
+</div>
+<div class="section" id="s-why-no-rollback-hook">
+<span id="why-no-rollback-hook"></span><h3>Pourquoi pas de point d’entrée pour les transactions annulées&nbsp;?<a class="headerlink" href="#why-no-rollback-hook" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Un point d’entrée pour les transactions annulées (rollback) est plus difficile à implémenter de manière solide qu’un point d’entrée de commit, car plusieurs choses peuvent provoquer une annulation implicite.</p>
+<p>Par exemple, si la connexion à la base de données s’interrompt en raison d’un processus tué sans aucune chance de terminaison propre, le point d’entrée d’annulation ne sera jamais exécuté.</p>
+<p>Mais il existe une solution&nbsp;: au lieu de faire quelque chose à l’intérieur du bloc atomique (transaction) puis de le défaire en cas d’échec de transaction, utilisez <a class="reference internal" href="#django.db.transaction.on_commit" title="django.db.transaction.on_commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_commit()</span></code></a> pour déporter la tâche au moment où la transaction a réussi. C’est beaucoup plus facile de défaire quelque chose que l’on n’a jamais fait&nbsp;!</p>
+</div>
+</div>
+<div class="section" id="s-low-level-apis">
+<span id="low-level-apis"></span><h2>API de bas niveau<a class="headerlink" href="#low-level-apis" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Si possible, préférez toujours <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>. Il prend en compte les particularités de chaque base de données et évite les opérations non valides.</p>
+<p class="last">L’API de bas niveau n’est utile que si vous implémentez votre propre gestion des transactions.</p>
+</div>
+<div class="section" id="s-managing-autocommit">
+<span id="s-id2"></span><span id="managing-autocommit"></span><span id="id2"></span><h3>Autocommit<a class="headerlink" href="#managing-autocommit" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django fournit une API dans le module <a class="reference internal" href="#module-django.db.transaction" title="django.db.transaction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.db.transaction</span></code></a> pour gérer l’état de validation automatique de chaque connexion de base de données.</p>
+<dl class="function">
+<dt id="django.db.transaction.get_autocommit">
+<code class="descname">get_autocommit</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.get_autocommit" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="django.db.transaction.set_autocommit">
+<code class="descname">set_autocommit</code>(<em>autocommit</em>, <em>using=None</em>)<a class="headerlink" href="#django.db.transaction.set_autocommit" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Ces fonctions acceptent un paramètre <code class="docutils literal notranslate"><span class="pre">using</span></code> qui doit correspondre au nom d’une base de données. Si ce paramètre n’est pas présent, Django utilise la base de données <code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code>.</p>
+<p>La validation automatique («&nbsp;autocommit&nbsp;») est initialement activée. Si vous la désactivez, il est de votre responsabilité de la restaurer ensuite.</p>
+<p>Dès que vous désactivez la validation automatique, vous obtenez le comportement par défaut de votre adaptateur de base de données et Django ne vous aide plus. Même si ce comportement fait l’objet de la <span class="target" id="index-8"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0249"><strong>PEP 249</strong></a>, les implémentations des adaptateurs ne sont pas toujours cohérentes entre elles. Parcourez attentivement la documentation de l’adaptateur que vous utilisez.</p>
+<p>Vous devez vous assurer qu’aucune transaction n’est pendante, généralement en appelant <a class="reference internal" href="#django.db.transaction.commit" title="django.db.transaction.commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">commit()</span></code></a> ou <a class="reference internal" href="#django.db.transaction.rollback" title="django.db.transaction.rollback"><code class="xref py py-func docutils literal notranslate"><span class="pre">rollback()</span></code></a> avant de réactiver la validation automatique.</p>
+<p>Django refuse de désactiver la validation automatique lorsqu’un bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> est actif, car l’atomicité ne serait alors plus respectée.</p>
+</div>
+<div class="section" id="s-transactions">
+<span id="transactions"></span><h3>Transactions<a class="headerlink" href="#transactions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Une transaction est un ensemble atomique de requêtes de base de données. Même si votre programme se plante, la base de données garantit que soit tous les changements seront appliqués, soit aucun.</p>
+<p>Django n’offre pas d’API pour démarrer une transaction. La manière attendue de démarrer une transaction est de désactiver la validation automatique avec <a class="reference internal" href="#django.db.transaction.set_autocommit" title="django.db.transaction.set_autocommit"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_autocommit()</span></code></a>.</p>
+<p>Une fois dans la transaction, vous pouvez choisir d’appliquer les modifications effectuées jusqu’à ce point avec <a class="reference internal" href="#django.db.transaction.commit" title="django.db.transaction.commit"><code class="xref py py-func docutils literal notranslate"><span class="pre">commit()</span></code></a>, ou de toutes les annuler avec <a class="reference internal" href="#django.db.transaction.rollback" title="django.db.transaction.rollback"><code class="xref py py-func docutils literal notranslate"><span class="pre">rollback()</span></code></a>. Ces fonctions sont définies dans <a class="reference internal" href="#module-django.db.transaction" title="django.db.transaction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.db.transaction</span></code></a>.</p>
+<dl class="function">
+<dt id="django.db.transaction.commit">
+<code class="descname">commit</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.commit" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="django.db.transaction.rollback">
+<code class="descname">rollback</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.rollback" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Ces fonctions acceptent un paramètre <code class="docutils literal notranslate"><span class="pre">using</span></code> qui doit correspondre au nom d’une base de données. Si ce paramètre n’est pas présent, Django utilise la base de données <code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code>.</p>
+<p>Django refuse de valider ou d’annuler une transaction lorsqu’un bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> est actif, car l’atomicité ne serait alors plus respectée.</p>
+</div>
+<div class="section" id="s-topics-db-transactions-savepoints">
+<span id="s-id3"></span><span id="topics-db-transactions-savepoints"></span><span id="id3"></span><h3>Points de sauvegarde («&nbsp;savepoints&nbsp;»)<a class="headerlink" href="#topics-db-transactions-savepoints" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Un point de sauvegarde est un marqueur dans une transaction qui vous permet d’annuler une transaction en partie, plutôt que dans sa totalité. Les points de sauvegarde sont disponibles pour les moteurs SQLite, PostgreSQL, Oracle et MySQL (avec le moteur de stockage InnoDB). D’autres moteurs fournissent les fonctions des points de sauvegarde, mais ces fonctions sont vides, elles ne font rien du tout.</p>
+<p>Les points de sauvegarde ne sont pas particulièrement utiles quand la validation automatique est active, ce qui est le comportement par défaut de Django. Cependant, dès que vous ouvrez une transaction avec <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>, vous accumulez une série d’opérations de base de données en attente de validation ou d’annulation. Lorsque vous annulez avec un «&nbsp;rollback&nbsp;», toute la transaction est annulée Les points de sauvegarde permettent d’annuler des opérations de manière plus sélective, plutôt que d’annuler en bloc comme le fait <code class="docutils literal notranslate"><span class="pre">transaction.rollback()</span></code>.</p>
+<p>Lorsque le décorateur <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> est imbriqué, il crée un point de sauvegarde pour permettre une validation ou une annulation partielle. Vous êtes fortement encouragé à utiliser <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> plutôt que les fonctions présentées ci-dessous, mais elles font tout de même partie de l’API publique, et il n’est pas prévu de les rendre obsolètes.</p>
+<p>Chacune de ces fonctions accepte un paramètre <code class="docutils literal notranslate"><span class="pre">using</span></code> devant correspondre au nom de la base de données pour laquelle le comportement s’applique. Si aucun paramètre <code class="docutils literal notranslate"><span class="pre">using</span></code> n’est transmis, c’est la base de données <code class="docutils literal notranslate"><span class="pre">&quot;default&quot;</span></code> qui est utilisée.</p>
+<p>Les points de sauvegarde sont contrôlés par trois fonctions dans <a class="reference internal" href="#module-django.db.transaction" title="django.db.transaction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.db.transaction</span></code></a>:</p>
+<dl class="function">
+<dt id="django.db.transaction.savepoint">
+<code class="descname">savepoint</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.savepoint" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée un nouveau point de sauvegarde. Un point est marqué dans la transaction, à un état qui est reconnu comme «&nbsp;bon&nbsp;». Renvoie l’identifiant du point de sauvegarde (<code class="docutils literal notranslate"><span class="pre">sid</span></code>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.db.transaction.savepoint_commit">
+<code class="descname">savepoint_commit</code>(<em>sid</em>, <em>using=None</em>)<a class="headerlink" href="#django.db.transaction.savepoint_commit" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Libère le point de sauvegarde <code class="docutils literal notranslate"><span class="pre">sid</span></code>. Les modifications effectuées depuis la création du point de sauvegarde sont intégrées dans la transaction.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.db.transaction.savepoint_rollback">
+<code class="descname">savepoint_rollback</code>(<em>sid</em>, <em>using=None</em>)<a class="headerlink" href="#django.db.transaction.savepoint_rollback" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Annule la transaction en revenant au point de sauvegarde <code class="docutils literal notranslate"><span class="pre">sid</span></code>.</p>
+</dd></dl>
+
+<p>Ces fonctions ne font rien si les points de sauvegarde ne sont pas pris en charge ou si la base de données est en mode de validation automatique.</p>
+<p>Une fonction utilitaire est également disponible&nbsp;:</p>
+<dl class="function">
+<dt id="django.db.transaction.clean_savepoints">
+<code class="descname">clean_savepoints</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.clean_savepoints" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Réinitialise le compteur utilisé pour générer les identifiants uniques des points de sauvegarde.</p>
+</dd></dl>
+
+<p>L’exemple suivant illustre l’utilisation des points de sauvegarde&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">transaction</span>
+
+<span class="c1"># open a transaction</span>
+<span class="nd">@transaction</span><span class="o">.</span><span class="n">atomic</span>
+<span class="k">def</span> <span class="nf">viewfunc</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+
+    <span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># transaction now contains a.save()</span>
+
+    <span class="n">sid</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">savepoint</span><span class="p">()</span>
+
+    <span class="n">b</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="c1"># transaction now contains a.save() and b.save()</span>
+
+    <span class="k">if</span> <span class="n">want_to_keep_b</span><span class="p">:</span>
+        <span class="n">transaction</span><span class="o">.</span><span class="n">savepoint_commit</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span>
+        <span class="c1"># open transaction still contains a.save() and b.save()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">transaction</span><span class="o">.</span><span class="n">savepoint_rollback</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span>
+        <span class="c1"># open transaction now contains only a.save()</span>
+</pre></div>
+</div>
+<p>Les points de sauvegarde peuvent être utilisés pour se rétablir après une erreur de base de données en effectuant une annulation partielle des opérations. Si vous faites cela à l’intérieur d’un bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>, tout le bloc sera quand même annulé, car Django ne sait pas que vous avez géré la situation à un plus bas niveau&nbsp;! Pour empêcher cela, vous pouvez contrôler le comportement d’annulation avec les fonctions suivantes.</p>
+<dl class="function">
+<dt id="django.db.transaction.get_rollback">
+<code class="descname">get_rollback</code>(<em>using=None</em>)<a class="headerlink" href="#django.db.transaction.get_rollback" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="django.db.transaction.set_rollback">
+<code class="descname">set_rollback</code>(<em>rollback</em>, <em>using=None</em>)<a class="headerlink" href="#django.db.transaction.set_rollback" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>En définissant le drapeau <code class="docutils literal notranslate"><span class="pre">rollback</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code>, vous forcez une annulation lorsque vous sortez du bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code> le plus proche. Cela peut être utile pour provoquer une annulation sans générer d’exception.</p>
+<p>En le définissant à <code class="docutils literal notranslate"><span class="pre">False</span></code>, vous empêchez une telle annulation. Avant de faire cela, assurez-vous d’avoir bien annulé la transaction jusqu’à un point de sauvegarde en bon état à l’intérieur du bloc <code class="docutils literal notranslate"><span class="pre">atomic</span></code> actuel. Sinon, vous cassez l’atomicité et des corruptions de données peuvent apparaître.</p>
+</div>
+</div>
+<div class="section" id="s-database-specific-notes">
+<span id="database-specific-notes"></span><h2>Notes spécifiques à certaines bases de données<a class="headerlink" href="#database-specific-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-savepoints-in-sqlite">
+<span id="s-id4"></span><span id="savepoints-in-sqlite"></span><span id="id4"></span><h3>Points de sauvegarde dans<a class="headerlink" href="#savepoints-in-sqlite" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Même si les points de sauvegarde sont pris à charge par SQLite, un défaut de conception dans le module <a class="reference external" href="https://docs.python.org/3/library/sqlite3.html#module-sqlite3" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code></a> les rend presque inutilisables.</p>
+<p>Lorsque la validation automatique est active, les points de sauvegarde n’ont pas de raison d’être. Dans le cas contraire, <a class="reference external" href="https://docs.python.org/3/library/sqlite3.html#module-sqlite3" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code></a> valide implicitement la transaction avant les instructions de points de sauvegarde (en fait, il valide avant toute instruction autre que <code class="docutils literal notranslate"><span class="pre">SELECT</span></code>, <code class="docutils literal notranslate"><span class="pre">INSERT</span></code>, <code class="docutils literal notranslate"><span class="pre">UPDATE</span></code>, <code class="docutils literal notranslate"><span class="pre">DELETE</span></code> et <code class="docutils literal notranslate"><span class="pre">REPLACE</span></code>). Ce bogue a deux conséquences&nbsp;:</p>
+<ul class="simple">
+<li>L’API de bas niveau des points de sauvegarde n’est utilisable qu’à l’intérieur d’une transaction, c’est-à-dire dans un bloc <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>.</li>
+<li>Il est impossible d’utiliser <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> lorsque la validation automatique est désactivée.</li>
+</ul>
+</div>
+<div class="section" id="s-transactions-in-mysql">
+<span id="transactions-in-mysql"></span><h3>Transactions dans MySQL<a class="headerlink" href="#transactions-in-mysql" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous utilisez MySQL, la prise en charge des transactions par vos tables varie&nbsp;; tout dépend de la version de MySQL et des types de tables que vous utilisez (par «&nbsp;type de table&nbsp;», nous entendons quelque chose comme «&nbsp;InnoDB&nbsp;» ou «&nbsp;MyISAM&nbsp;»). Les particularités des transactions de MySQL vont au-delà du thème de cette documentation, mais le site de MySQL possède des <a class="reference external" href="https://dev.mysql.com/doc/refman/en/sql-syntax-transactions.html">informations sur les transactions dans MySQL</a>.</p>
+<p>Si votre configuration MySQL ne gère <em>pas</em> les transactions, Django fonctionne toujours en mode de validation automatique&nbsp;: les instructions sont exécutées et validées dès qu’elles sont émises. Si votre configuration MySQL <em>gère</em> les transactions, Django traite les transactions comme expliqué dans ce document.</p>
+</div>
+<div class="section" id="s-handling-exceptions-within-postgresql-transactions">
+<span id="handling-exceptions-within-postgresql-transactions"></span><h3>Traitement des exceptions dans les transactions PostgreSQL<a class="headerlink" href="#handling-exceptions-within-postgresql-transactions" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Cette section n’a de sens que si vous implémentez votre propre gestion des transactions. Ce problème ne peut pas survenir dans le mode par défaut de Django et <a class="reference internal" href="#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> s’en charge automatiquement.</p>
+</div>
+<p>À l’intérieur d’une transaction, lorsque l’appel à un curseur PostgreSQL génère une exception (typiquement <code class="docutils literal notranslate"><span class="pre">IntegrityError</span></code>), toutes les commandes SQL suivantes dans la même transaction échouent avec l’erreur «&nbsp;current transaction is aborted, queries ignored until end of transaction block&nbsp;». Bien qu’il soit improbable qu’une utilisation basique de <code class="docutils literal notranslate"><span class="pre">save()</span></code> génère une exception avec PostgreSQL, il y a des schémas d’utilisation plus pointus qui sont susceptibles de le faire, comme l’enregistrement d’objets avec des champs uniques, l’enregistrement avec les options <code class="docutils literal notranslate"><span class="pre">force_insert</span></code>/<code class="docutils literal notranslate"><span class="pre">force_update</span></code> ou l’appel à des instructions SQL personnalisées.</p>
+<p>Il existe plusieurs manières de se sortir de ce genre d’erreurs.</p>
+<div class="section" id="s-transaction-rollback">
+<span id="transaction-rollback"></span><h4>Annulation de la transaction<a class="headerlink" href="#transaction-rollback" title="Lien permanent vers ce titre">¶</a></h4>
+<p>La première option est d’annuler la totalité de la transaction. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Succeeds, but may be undone by transaction rollback</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Could throw exception</span>
+<span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+    <span class="n">transaction</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Succeeds, but a.save() may have been undone</span>
+</pre></div>
+</div>
+<p>L’appel de <code class="docutils literal notranslate"><span class="pre">transaction.rollback()</span></code> annule la totalité de la transaction. Toute opération de base de données non validée sera perdue. Dans cet exemple, les modifications effectuées par <code class="docutils literal notranslate"><span class="pre">a.save()</span></code> seront perdues, même si cette opération n’a pas elle-même généré d’erreur.</p>
+</div>
+<div class="section" id="s-savepoint-rollback">
+<span id="savepoint-rollback"></span><h4>Annulation du point de sauvegarde<a class="headerlink" href="#savepoint-rollback" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Vous pouvez utiliser des <a class="reference internal" href="#topics-db-transactions-savepoints"><span class="std std-ref">points de sauvegarde</span></a> pour contrôler l’étendue d’une annulation. Avant d’effectuer une opération de base de données potentiellement délicate, vous pouvez définir ou mettre à jour le point de sauvegarde&nbsp;; de cette façon, si l’opération échoue, vous pouvez annuler précisément l’opération concernée, plutôt que la totalité de la transaction. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Succeeds, and never undone by savepoint rollback</span>
+<span class="n">sid</span> <span class="o">=</span> <span class="n">transaction</span><span class="o">.</span><span class="n">savepoint</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Could throw exception</span>
+    <span class="n">transaction</span><span class="o">.</span><span class="n">savepoint_commit</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+    <span class="n">transaction</span><span class="o">.</span><span class="n">savepoint_rollback</span><span class="p">(</span><span class="n">sid</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">()</span> <span class="c1"># Succeeds, and a.save() is never undone</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, <code class="docutils literal notranslate"><span class="pre">a.save()</span></code> ne sera pas annulé dans le cas où <code class="docutils literal notranslate"><span class="pre">b.save()</span></code> génère une exception.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Transactions de base de données</a><ul>
+<li><a class="reference internal" href="#managing-database-transactions">Gestion des transactions de base de données</a><ul>
+<li><a class="reference internal" href="#django-s-default-transaction-behavior">Comportement de transaction par défaut de Django</a></li>
+<li><a class="reference internal" href="#tying-transactions-to-http-requests">Couplage des transactions aux requêtes HTTP</a></li>
+<li><a class="reference internal" href="#controlling-transactions-explicitly">Contrôle explicite des transactions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#autocommit">Autocommit</a><ul>
+<li><a class="reference internal" href="#why-django-uses-autocommit">Pourquoi Django utilise-t-il l’autocommit</a></li>
+<li><a class="reference internal" href="#deactivating-transaction-management">Désactivation de la gestion des transaction</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#performing-actions-after-commit">Lancement d’actions après le commit</a><ul>
+<li><a class="reference internal" href="#savepoints">Points de sauvegarde («&nbsp;savepoints&nbsp;»)</a></li>
+<li><a class="reference internal" href="#order-of-execution">Ordre d’exécution</a></li>
+<li><a class="reference internal" href="#exception-handling">Gestion des exceptions</a></li>
+<li><a class="reference internal" href="#timing-of-execution">Ordre d’exécution</a></li>
+<li><a class="reference internal" href="#use-in-tests">Utilisation dans les tests</a></li>
+<li><a class="reference internal" href="#why-no-rollback-hook">Pourquoi pas de point d’entrée pour les transactions annulées&nbsp;?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#low-level-apis">API de bas niveau</a><ul>
+<li><a class="reference internal" href="#managing-autocommit">Autocommit</a></li>
+<li><a class="reference internal" href="#transactions">Transactions</a></li>
+<li><a class="reference internal" href="#topics-db-transactions-savepoints">Points de sauvegarde («&nbsp;savepoints&nbsp;»)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#database-specific-notes">Notes spécifiques à certaines bases de données</a><ul>
+<li><a class="reference internal" href="#savepoints-in-sqlite">Points de sauvegarde dans</a></li>
+<li><a class="reference internal" href="#transactions-in-mysql">Transactions dans MySQL</a></li>
+<li><a class="reference internal" href="#handling-exceptions-within-postgresql-transactions">Traitement des exceptions dans les transactions PostgreSQL</a><ul>
+<li><a class="reference internal" href="#transaction-rollback">Annulation de la transaction</a></li>
+<li><a class="reference internal" href="#savepoint-rollback">Annulation du point de sauvegarde</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="sql.html"
+                        title="Chapitre précédent">Lancement de requêtes SQL brutes</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="multi-db.html"
+                        title="Chapitre suivant">Bases de données multiples</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/db/transactions.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="sql.html" title="Lancement de requêtes SQL brutes">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="multi-db.html" title="Bases de données multiples">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

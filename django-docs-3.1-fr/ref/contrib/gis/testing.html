@@ -1,0 +1,251 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Test des applications GeoDjango &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Déploiement de GeoDjango" href="deployment.html" />
+    <link rel="prev" title="Cartes de sites géographiques" href="sitemaps.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="sitemaps.html" title="Cartes de sites géographiques">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="deployment.html" title="Déploiement de GeoDjango">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-gis-testing">
+            
+  <div class="section" id="s-testing-geodjango-apps">
+<span id="testing-geodjango-apps"></span><h1>Test des applications GeoDjango<a class="headerlink" href="#testing-geodjango-apps" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Dans cette documentation, vous trouverez des notes et des réglages supplémentaires pour les utilisateurs de <a class="reference internal" href="#testing-postgis"><span class="std std-ref">PostGIS</span></a>.</p>
+<div class="section" id="s-postgis">
+<span id="s-testing-postgis"></span><span id="postgis"></span><span id="testing-postgis"></span><h2>PostGIS<a class="headerlink" href="#postgis" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-settings">
+<span id="settings"></span><h3>Réglages<a class="headerlink" href="#settings" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Les réglages ci-dessous ont des valeurs par défaut raisonnables et n’ont généralement pas besoin d’être définis manuellement.</p>
+</div>
+<div class="section" id="s-postgis-version">
+<span id="s-std:setting-POSTGIS_VERSION"></span><span id="postgis-version"></span><span id="std:setting-POSTGIS_VERSION"></span><h4><code class="docutils literal notranslate"><span class="pre">POSTGIS_VERSION</span></code><a class="headerlink" href="#postgis-version" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Lorsque le moteur spatial de GeoDjango s’initialise avec PostGIS, il doit effectuer une requête SQL pour déterminer la version pour savoir quels sont les fonctionnalités disponibles. Les utilisateurs avancés souhaitant éviter cette requête supplémentaire peuvent définir la version de façon manuelle par un tuple à 3 éléments de nombres entiers indiquant les numéros de version majeur, mineur et micro de PostGIS. Par exemple, pour indiquer que la version de PostGIS est X.Y.Z, il faut écrire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">POSTGIS_VERSION</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-obtaining-sufficient-privileges">
+<span id="obtaining-sufficient-privileges"></span><h3>Obtention des privilèges nécessaires<a class="headerlink" href="#obtaining-sufficient-privileges" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En fonction de votre configuration, cette section décrit plusieurs méthodes pour configurer un utilisateur de base de données disposant de suffisamment de privilèges pour exécuter les tests pour des applications GeoDjango avec PostgreSQL. Si votre <a class="reference internal" href="install/postgis.html#spatialdb-template"><span class="std std-ref">modèle de base de données spatiale</span></a> a été créé en suivant les instructions, il suffit que l’utilisateur de la base de données de test ait les droits de créer des bases de données. Dans d’autres configurations, il se peut qu’il soit nécessaire d’utiliser un superutilisateur de base de données.</p>
+<div class="section" id="s-create-database-user">
+<span id="create-database-user"></span><h4>Création d’un utilisateur de base de données<a class="headerlink" href="#create-database-user" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Pour créer un utilisateur de base de données ayant le droit de créer des bases de données, utilisez la commande suivante&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ createuser --createdb -R -S &lt;user_name&gt;
+</pre></div>
+</div>
+<p>Les drapeaux <code class="docutils literal notranslate"><span class="pre">-R</span> <span class="pre">-S</span></code> indiquent respectivement que nous ne voulons pas que l’utilisateur puisse créer d’autres utilisateurs (ou rôles), ni qu’il soit un superutilisateur.</p>
+<p>Une autre possibilité est de modifier le rôle d’un utilisateur existant à partir du shell SQL (en supposant que cela se fasse à partir d’un compte superutilisateur)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">postgres</span><span class="c1"># ALTER ROLE &lt;user_name&gt; CREATEDB NOSUPERUSER NOCREATEROLE;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-create-database-superuser">
+<span id="create-database-superuser"></span><h4>Création d’un superutilisateur de base de données<a class="headerlink" href="#create-database-superuser" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Cela peut se faire au moment de la création de l’utilisateur, par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ createuser --superuser &lt;user_name&gt;
+</pre></div>
+</div>
+<p>Ou vous pouvez modifier le rôle de l’utilisateur à partir du shell SQL (en supposant que cela se fasse à partir d’un compte superutilisateur existant)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">postgres</span><span class="c1"># ALTER ROLE &lt;user_name&gt; SUPERUSER;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-windows">
+<span id="windows"></span><h3>Windows<a class="headerlink" href="#windows" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Avec Windows, vous pouvez utiliser l’utilitaire pgAdmin III pour ajouter des privilèges de superutilisateur à un utilisateur de base de données.</p>
+<p>Par défaut, l’installeur PostGIS sous Windows inclut un modèle de base de données spatiale nommé <code class="docutils literal notranslate"><span class="pre">template_postgis</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-geodjango-tests">
+<span id="s-id1"></span><span id="geodjango-tests"></span><span id="id1"></span><h2>Tests de GeoDjango<a class="headerlink" href="#geodjango-tests" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour que les tests de GeoDjango soient exécutés lors du <a class="reference internal" href="../../../internals/contributing/writing-code/unit-tests.html#running-unit-tests"><span class="std std-ref">lancement de la suite de tests de Django</span></a> avec <code class="docutils literal notranslate"><span class="pre">runtests.py</span></code>, toutes les bases de données définies dans le fichier de réglages doivent utiliser l’un des <a class="reference internal" href="db-api.html#spatial-backends"><span class="std std-ref">moteurs de base de données spatiale</span></a>.</p>
+<div class="section" id="s-example">
+<span id="example"></span><h3>Exemple<a class="headerlink" href="#example" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’exemple suivant montre un fichier de réglages minimal définissant des moteurs spatiaux pouvant être utilisé pour exécuter la suite de tests complète de Django, y compris ceux situés dans <a class="reference internal" href="index.html#module-django.contrib.gis" title="django.contrib.gis: Geographic Information System (GIS) extensions for Django"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.contrib.gis</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.contrib.gis.db.backends.postgis&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;geodjango&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="s1">&#39;geodjango&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;other&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.contrib.gis.db.backends.postgis&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;other&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="s1">&#39;geodjango&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="s1">&#39;django_tests_secret_key&#39;</span>
+</pre></div>
+</div>
+<p>En supposant que les réglages ci-dessus se trouvent dans un fichier <code class="docutils literal notranslate"><span class="pre">postgis.py</span></code> dans le même répertoire que <code class="docutils literal notranslate"><span class="pre">runtests.py</span></code>, tous les tests de Django et GeoDjango seront effectués lors de l’exécution de la commande&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./runtests.py --settings=postgis
+</pre></div>
+</div>
+<p>Pour ne lancer que la suite de tests de GeoDjango, indiquez <code class="docutils literal notranslate"><span class="pre">gis_tests</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./runtests.py --settings=postgis gis_tests
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Test des applications GeoDjango</a><ul>
+<li><a class="reference internal" href="#postgis">PostGIS</a><ul>
+<li><a class="reference internal" href="#settings">Réglages</a><ul>
+<li><a class="reference internal" href="#postgis-version"><code class="docutils literal notranslate"><span class="pre">POSTGIS_VERSION</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#obtaining-sufficient-privileges">Obtention des privilèges nécessaires</a><ul>
+<li><a class="reference internal" href="#create-database-user">Création d’un utilisateur de base de données</a></li>
+<li><a class="reference internal" href="#create-database-superuser">Création d’un superutilisateur de base de données</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#windows">Windows</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geodjango-tests">Tests de GeoDjango</a><ul>
+<li><a class="reference internal" href="#example">Exemple</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="sitemaps.html"
+                        title="Chapitre précédent">Cartes de sites géographiques</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="deployment.html"
+                        title="Chapitre suivant">Déploiement de GeoDjango</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/gis/testing.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="sitemaps.html" title="Cartes de sites géographiques">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="deployment.html" title="Déploiement de GeoDjango">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,547 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écrire la documentation &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Traduction de Django" href="localizing.html" />
+    <link rel="prev" title="JavaScript" href="writing-code/javascript.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="writing-code/javascript.html" title="JavaScript">previous</a>
+     |
+    <a href="../index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="localizing.html" title="Traduction de Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="internals-contributing-writing-documentation">
+            
+  <div class="section" id="s-writing-documentation">
+<span id="writing-documentation"></span><h1>Écrire la documentation<a class="headerlink" href="#writing-documentation" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Nous attribuons une grande importance à la cohérence et à la lisibilité de la documentation. Après tout, Django a été créé dans un environnement journalistique ! Nous traitons donc la documentation sur un pied d’égalité avec le code : nous visons à l’améliorer aussi souvent que possible.</p>
+<p>Les modifications de documentation se présentent généralement sous deux formes :</p>
+<ul class="simple">
+<li>Des améliorations générales : corrections d’orthographe, résolutions d’erreurs et meilleures explications par une écriture plus claire et davantage d’exemples.</li>
+<li>Nouvelles fonctionnalités : documentation de fonctionnalités ajoutées au cadre logiciel depuis la version précédente.</li>
+</ul>
+<p>Cette section explique comment les rédacteurs peuvent préparer les modifications de documentation de la manière la plus utile possible et qui évite au maximum les erreurs.</p>
+<div class="section" id="s-getting-the-raw-documentation">
+<span id="getting-the-raw-documentation"></span><h2>Obtention de la documentation brute<a class="headerlink" href="#getting-the-raw-documentation" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Bien que la documentation de Django soit destinée à être lue au format HTML sur <a class="reference external" href="https://docs.djangoproject.com/">https://docs.djangoproject.com/</a>, nous l’éditons dans un ensemble de fichiers textes pour une souplesse maximale. Ces fichiers se trouvent dans le répertoire de premier niveau <code class="docutils literal notranslate"><span class="pre">docs/</span></code> d’une publication de Django.</p>
+<p>Si vous souhaitez commencer à contribuer à la documentation, obtenez la version de développement de Django à partir du dépôt de code source (voir <a class="reference internal" href="../../topics/install.html#installing-development-version"><span class="std std-ref">Installation de la version de développement</span></a>). La version de développement possède la version la plus à jour de la documentation, comme pour le code. Nous reportons aussi les corrections et améliorations de documentation vers la dernière version publiée en fonction de ce que le commiteur décide. Ceci parce qu’il est très avantageux de posséder une documentation de la dernière version publiée la plus à jour et correcte possible (voir <a class="reference internal" href="../../intro/whatsnext.html#differences-between-doc-versions"><span class="std std-ref">Différences entre versions</span></a>).</p>
+</div>
+<div class="section" id="s-getting-started-with-sphinx">
+<span id="getting-started-with-sphinx"></span><h2>Introduction à Sphinx<a class="headerlink" href="#getting-started-with-sphinx" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La documentation de Django utilise le système de documentation <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a>, qui se base lui-même sur <a class="reference external" href="https://docutils.sourceforge.io/">docutils</a>. L’idée de base est de transformer de la documentation en texte brut avec une mise en forme minimale en HTML, PDF ou tout autre format de sortie.</p>
+<p>Pour construire la documentation localement, installez Sphinx :</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m pip install Sphinx
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -m pip install Sphinx
+</pre></div>
+</section>
+</div>
+<p>Puis, à partir du répertoire <code class="docutils literal notranslate"><span class="pre">docs</span></code>, construisez la version HTML :</p>
+<div class="console-block" id="console-block-1">
+<input class="c-tab-unix" id="c-tab-1-unix" type="radio" name="console-1" checked>
+<label for="c-tab-1-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-1-win" type="radio" name="console-1">
+<label for="c-tab-1-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-1-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> make html
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-1-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> make.bat html
+</pre></div>
+</section>
+</div>
+<p>Pour commencer à contribuer, il est recommandé de lire la <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html#rst-index" title="(disponible dans Sphinx v4.0.0+)"><span class="xref std std-ref">référence reStructuredText</span></a>.</p>
+<p>La documentation construite localement possède un thème graphique différent de celui de la documentation sur <a class="reference external" href="https://docs.djangoproject.com">docs.djangoproject.com</a>. Cela ne pose pas de problème. Si vos modifications apparaissent correctement sur votre machine locale, elles seront aussi correctes sur le site Web.</p>
+</div>
+<div class="section" id="s-how-the-documentation-is-organized">
+<span id="how-the-documentation-is-organized"></span><h2>Organisation de la documentation<a class="headerlink" href="#how-the-documentation-is-organized" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La documentation est scindée en plusieurs catégories :</p>
+<ul>
+<li><p class="first">Les <a class="reference internal" href="../../intro/index.html"><span class="doc">tutoriels</span></a> prennent l’utilisateur par la main à travers une série d’étapes pour créer quelque chose.</p>
+<p>L’aspect important d’un tutoriel est d’aider le lecteur à accomplir quelque chose d’utile, de préférence aussi vite que possible, dans le but de lui donner confiance.</p>
+<p>Expliquez la nature du problème à résoudre afin que le lecteur comprenne ce que l’on est en train de faire. Ne pensez pas qu’il faille commencer par des explications sur le fonctionnement des choses ; ce qui compte est ce que le lecteur fait, et non pas ce que vous expliquez. Il peut être utile de faire référence à ce que l’on a fait dans des explications a posteriori.</p>
+</li>
+<li><p class="first">Les <a class="reference internal" href="../../topics/index.html"><span class="doc">guides thématiques</span></a> visent à expliquer un concept ou un sujet d’un point de vue assez général.</p>
+<p>Faites des liens vers le matériel de référence plutôt que de le répéter. Utilisez des exemples et n’hésitez pas à expliquer des choses qui vous semblent évidentes, il pourrait s’agir de l’explication dont quelqu’un a vraiment besoin.</p>
+<p>La mise à disposition de contexte sous-jacent aide les débutants à faire des liens entre le sujet et des éléments qu’ils connaissent déjà.</p>
+</li>
+<li><p class="first">Les <a class="reference internal" href="../../ref/index.html"><span class="doc">guides de référence</span></a> contiennent des références techniques pour les API. Ils présentent le fonctionnement de la machinerie interne de Django avec des instructions d’utilisation.</p>
+<p>Restez bien centré sur le sujet du matériel de référence. Vous pouvez compter sur la connaissance des concepts de base par le lecteur, mais celui-ci cherche à savoir ou à se rappeler comment Django les applique.</p>
+<p>Les guides de référence ne sont pas l’endroit pour des explications générales. Si vous êtes en train d’expliquer des concepts de base, il pourrait être nécessaire de déplacer ce contenu vers un guide thématique.</p>
+</li>
+<li><p class="first">Les <a class="reference internal" href="../../howto/index.html"><span class="doc">guides pratiques</span></a> sont des marches à suivre qui accompagnent le lecteur dans une suite d’étapes dans des sujets clés.</p>
+<p>Ce qui compte le plus dans un guide pratique est le résultat attendu par son lecteur. Un guide pratique doit toujours être orienté sur le résultat plutôt que sur des détails internes sur la manière dont Django implémente ce qui est en cours d’étude.</p>
+<p>Ces guides vont plus loin que les tutoriels et comptent sur un certaine connaissance du fonctionnement de Django. On part du principe que le lecteur a suivi les tutoriels. N’hésitez pas à réorienter le lecteur sur un tutoriel adéquat plutôt que de répéter un contenu existant.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-writing-style">
+<span id="writing-style"></span><h2>Style d’écriture (anglais)<a class="headerlink" href="#writing-style" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lors d’utilisation de pronoms en référence à une personne hypothétique, comme dans « a user with a session cookie », il est préférable d’utiliser des pronoms neutres. Au lieu de :</p>
+<ul class="simple">
+<li>he ou she… utilisez they.</li>
+<li>him ou her… utilisez them.</li>
+<li>his ou her… utilisez their.</li>
+<li>his ou hers… utilisez theirs.</li>
+<li>himself ou herself… utilisez themselves.</li>
+</ul>
+<p>Essayez d’éviter des mots qui minimisent la difficulté impliquée par une tâche ou une opération, tels que « easily », « simply », « just », « merely », « straightforward », etc. L’expérience des gens ne correspond pas forcément à votre attente, et ceux-ci pourraient ressentir de la frustration lorsqu’ils ne trouvent pas qu’une étape est si simple ou évidente que le texte ne le laissait penser.</p>
+</div>
+<div class="section" id="s-commonly-used-terms">
+<span id="commonly-used-terms"></span><h2>Termes fréquemment utilisés<a class="headerlink" href="#commonly-used-terms" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Voici quelques lignes directrices de style pour des termes fréquemment utilisés dans la documentation&nbsp;:</p>
+<ul class="simple">
+<li><strong>Django</strong> – lorsque vous vous référez au cadriciel, toujours avec un D majuscule. Il n’est en minuscules que dans le code Python et dans le logo djangoproject.com.</li>
+<li><strong>email</strong> – sans trait d’union.</li>
+<li><strong>MySQL</strong>, <strong>PostgreSQL</strong>, <strong>SQLite</strong></li>
+<li><strong>SQL</strong> – lorsqu’on se réfère à SQL, la prononciation attendue est « èsquiouèl » et non pas « sicouèl ». Ainsi, dans une phrase comme « Returns an SQL expression », « SQL » doit être précédé d’un « an » et non pas de « a ».</li>
+<li><strong>Python</strong> – mettre une majuscule quand c’est une référence au langage.</li>
+<li><strong>realize</strong>, <strong>customize</strong>, <strong>initialize</strong>, etc. – utiliser le suffixe américain « ize » et non « ise ».</li>
+<li><strong>subclass</strong> – en un mot sans trait d’union, que ce soit pour un verbe (« subclass that model ») ou un nom (« create a subclass »).</li>
+<li><strong>Web</strong>, <strong>World Wide Web</strong>, <strong>the Web</strong> – notez que Web commence toujours par une majuscule lorsqu’on fait référence au World Wide Web.</li>
+<li><strong>website</strong> – en un seul mot, sans majuscule.</li>
+</ul>
+</div>
+<div class="section" id="s-django-specific-terminology">
+<span id="django-specific-terminology"></span><h2>Terminologie spécifique à Django<a class="headerlink" href="#django-specific-terminology" title="Lien permanent vers ce titre">¶</a></h2>
+<ul class="simple">
+<li><strong>model</strong> – sans majuscule.</li>
+<li><strong>template</strong> – sans majuscule.</li>
+<li><strong>URLconf</strong> – trois premières lettres en majuscules, sans espace avant « conf ».</li>
+<li><strong>view</strong> – sans majuscule.</li>
+</ul>
+</div>
+<div class="section" id="s-guidelines-for-restructuredtext-files">
+<span id="guidelines-for-restructuredtext-files"></span><h2>Directives pour les fichiers reStructuredText<a class="headerlink" href="#guidelines-for-restructuredtext-files" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ces lignes directrices régulent le format de notre documentation reST (reStructuredText) :</p>
+<ul>
+<li><p class="first">Dans les titres de section, ne mettez en majuscules que les mots initiaux et les noms propres.</p>
+</li>
+<li><p class="first">Limitez les lignes de la documentation à 80 caractères, sauf si un exemple de code est manifestement moins lisible lorsqu’il est réparti sur deux lignes, ou pour une autre bonne raison.</p>
+</li>
+<li><p class="first">La chose principale à garder en tête lors de l’écriture et de l’édition de la documentation est que plus il y a de balisage sémantique, mieux c’est. Donc</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Add ``django.contrib.auth`` to your ``INSTALLED_APPS``...
+</pre></div>
+</div>
+<p>N’est pas aussi utile que</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Add :mod:`django.contrib.auth` to your :setting:`INSTALLED_APPS`...
+</pre></div>
+</div>
+<p>La raison en est que Sphinx va générer des liens adéquats avec ce deuxième exemple, ce qui aide grandement les lecteurs.</p>
+<p>Il est possible de préfixer la cible par un <code class="docutils literal notranslate"><span class="pre">~</span></code> (caractère tilde) pour que seul le dernier composant du chemin soit affiché. Par exemple,  <code class="docutils literal notranslate"><span class="pre">:mod:`~django.contrib.auth`</span></code> affichera un lien sur le mot « auth » seul.</p>
+</li>
+<li><p class="first">Utilisez <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#module-sphinx.ext.intersphinx" title="(disponible dans Sphinx v4.0.0+)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">intersphinx</span></code></a> pour ajouter des références aux documentations de Python et de Sphinx.</p>
+</li>
+<li><p class="first">Ajoutez <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">code-block::</span> <span class="pre">&lt;lang&gt;</span></code> aux blocs littéraux pour que leur syntaxe soit mise en évidence. Mais on préfère en général laisser agir la coloration syntaxique automatique en utilisant <code class="docutils literal notranslate"><span class="pre">::</span></code> (deux fois deux-points). L’avantage est que du code contenant de la syntaxe non valable ne sera pas coloré. Si par exemple on ajoute <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">code-block::</span> <span class="pre">python</span></code>, la coloration syntaxique sera forcée même si la syntaxe n’est pas entièrement valable.</p>
+</li>
+<li><p class="first">Pour améliorer la lisibilité, utilisez <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">admonition::</span> <span class="pre">Titre</span> <span class="pre">descriptif</span></code> plutôt que <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">note::</span></code>. Utilisez ces boîtes de manière parcimonieuse.</p>
+</li>
+<li><p class="first">Utilisez ces styles d’en-têtes</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">===</span>
+<span class="n">One</span>
+<span class="o">===</span>
+
+<span class="n">Two</span>
+<span class="o">===</span>
+
+<span class="n">Three</span>
+<span class="o">-----</span>
+
+<span class="n">Four</span>
+<span class="o">~~~~</span>
+
+<span class="n">Five</span>
+<span class="o">^^^^</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Utilisez <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-rfc" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-role docutils literal notranslate"><span class="pre">:rfc:</span></code></a> pour faire référence à des RFC et essayez de faire le lien vers la section adéquate si possible. Par exemple, écrivez <code class="docutils literal notranslate"><span class="pre">:rfc:`2324#section-2.3.2`</span></code> ou <code class="docutils literal notranslate"><span class="pre">:rfc:`Texte</span> <span class="pre">de</span> <span class="pre">lien</span> <span class="pre">personnalisé</span> <span class="pre">&lt;2324#section-2.3.2&gt;`</span></code>.</p>
+</li>
+<li><p class="first">Utilisez <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-pep" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-role docutils literal notranslate"><span class="pre">:pep:</span></code></a> pour faire référence aux propositions d’amélioration de Python (PEP) et essayez de faire le lien vers la section adéquate si possible. Par exemple, écrivez <code class="docutils literal notranslate"><span class="pre">:pep:`20#easter-egg`</span></code> ou <code class="docutils literal notranslate"><span class="pre">:pep:`Easter</span> <span class="pre">Egg</span> <span class="pre">&lt;20#easter-egg&gt;`</span></code>.</p>
+</li>
+<li><p class="first">Utilisez <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-mimetype" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-role docutils literal notranslate"><span class="pre">:mimetype:</span></code></a> pour vous référer à un type MIME sauf si la valeur est entre guillemets pour un exemple de code.</p>
+</li>
+<li><p class="first">Use <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-envvar" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-role docutils literal notranslate"><span class="pre">:envvar:</span></code></a> to refer to an environment variable. You may
+also need to define a reference to the documentation for that environment
+variable using <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#directive-envvar" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-dir docutils literal notranslate"><span class="pre">..</span> <span class="pre">envvar::</span></code></a>.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-django-specific-markup">
+<span id="django-specific-markup"></span><h2>Balisage spécifique à Django<a class="headerlink" href="#django-specific-markup" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En plus du <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html#rst-index" title="(disponible dans Sphinx v4.0.0+)"><span class="xref std std-ref">balisage propre à Sphinx</span></a>, la documentation de Django définit quelques unités descriptives supplémentaires :</p>
+<ul>
+<li><p class="first">Réglages</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">setting</span><span class="p">::</span> <span class="n">INSTALLED_APPS</span>
+</pre></div>
+</div>
+<p>Pour faire un lien vers un réglage, utilisez <code class="docutils literal notranslate"><span class="pre">:setting:`INSTALLED_APPS`</span></code>.</p>
+</li>
+<li><p class="first">Balises de gabarit</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">templatetag</span><span class="p">::</span> <span class="n">regroup</span>
+</pre></div>
+</div>
+<p>Pour faire le lien, utilisez <code class="docutils literal notranslate"><span class="pre">:ttag:`regroup`</span></code>.</p>
+</li>
+<li><p class="first">Filtres de gabarit</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">templatefilter</span><span class="p">::</span> <span class="n">linebreaksbr</span>
+</pre></div>
+</div>
+<p>Pour faire le lien, utilisez <code class="docutils literal notranslate"><span class="pre">:tfilter:`linebreaksbr`</span></code>.</p>
+</li>
+<li><p class="first">Requêtes de champs (par ex. <code class="docutils literal notranslate"><span class="pre">Foo.objects.filter(bar__exact=qqchose)</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">fieldlookup</span><span class="p">::</span> <span class="n">exact</span>
+</pre></div>
+</div>
+<p>Pour faire le lien, utilisez <code class="docutils literal notranslate"><span class="pre">:lookup:`exact`</span></code>.</p>
+</li>
+<li><p class="first">Commandes <code class="docutils literal notranslate"><span class="pre">django-admin</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">django</span><span class="o">-</span><span class="n">admin</span><span class="p">::</span> <span class="n">migrate</span>
+</pre></div>
+</div>
+<p>Pour faire le lien, utilisez <code class="docutils literal notranslate"><span class="pre">:djadmin:`migrate`</span></code>.</p>
+</li>
+<li><p class="first">Options de ligne de commande <code class="docutils literal notranslate"><span class="pre">django-admin</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">django</span><span class="o">-</span><span class="n">admin</span><span class="o">-</span><span class="n">option</span><span class="p">::</span> <span class="o">--</span><span class="n">traceback</span>
+</pre></div>
+</div>
+<p>Pour faire le lien, utilisez <code class="docutils literal notranslate"><span class="pre">:option:`nom_commande</span> <span class="pre">--traceback`</span></code> (ou omettez <code class="docutils literal notranslate"><span class="pre">nom_commande</span></code> pour les options partagées par toutes les commandes comme <code class="docutils literal notranslate"><span class="pre">--verbosity</span></code>).</p>
+</li>
+<li><p class="first">Liens vers les tickets Trac (typiquement réservés pour les notes de publication des versions correctives)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>:ticket:`12345`
+</pre></div>
+</div>
+</li>
+</ul>
+<p>La documentation de Django utilise une directive <code class="docutils literal notranslate"><span class="pre">console</span></code> personnalisée pour la documentation des exemples en ligne de commande impliquant <code class="docutils literal notranslate"><span class="pre">django-admin</span></code>, <code class="docutils literal notranslate"><span class="pre">manage.py</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code>, etc.). Dans la production HTML de la documentation, deux onglets apparaîtront dans l’interface, un avec l’invite de commande de type Unix et l’autre avec une invite de commande de style Windows.</p>
+<p>Par exemple, vous pouvez remplacer ce fragment</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>use this command:
+
+.. code-block:: console
+
+    $ python manage.py shell
+</pre></div>
+</div>
+<p>par celui-ci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>use this command:
+
+.. console::
+
+    $ python manage.py shell
+</pre></div>
+</div>
+<p>Remarquez deux choses :</p>
+<ul class="simple">
+<li>Vous allez généralement remplacer les occurrences de la directive <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">code-block::</span> <span class="pre">console</span></code>.</li>
+<li>Vous n’avez pas besoin de modifier le contenu effectif de l’exemple de code. Vous l’écrivez toujours en imaginant un environnement de type Unix (c’est-à-dire un symbole d’invite <code class="docutils literal notranslate"><span class="pre">'$'</span></code>, <code class="docutils literal notranslate"><span class="pre">'/'</span></code> comme séparateur de chemins de systèmes de fichiers, etc.)</li>
+</ul>
+<p>L’exemple ci-dessus va produire un bloc d’exemple de code avec deux onglets. Le premier contiendra :</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py shell
+</pre></div>
+</div>
+<p>(aucun changement par rapport au rendu <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">code-block::</span> <span class="pre">console</span></code> standard).</p>
+<p>Le second contiendra :</p>
+<div class="highlight-doscon notranslate"><div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py shell
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-documenting-new-features">
+<span id="s-id3"></span><span id="documenting-new-features"></span><span id="id3"></span><h2>Documentation de nouvelles fonctionnalités<a class="headerlink" href="#documenting-new-features" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Notre politique pour les nouvelles fonctionnalités est la suivante :</p>
+<blockquote>
+<div>Toute documentation pour de nouvelles fonctionnalités doit être écrite de manière à ce qu’il soit clairement visible que les fonctionnalités ne sont disponibles que pour la version de développement de Django. Nous partons du principe que les lecteurs de la documentation utilisent la dernière version publiée et non pas la version de développement.</div></blockquote>
+<p>La méthode préférée pour marquer les nouvelles fonctionnalités est de précéder leur documentation par «&nbsp;<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">versionadded::</span> <span class="pre">X.Y</span></code>&nbsp;», suivi d’une ligne vierge obligatoire et d’une description facultative (avec indentation).</p>
+<p>Les améliorations générales ou d’autres changements dans l’API qui doivent être mis en évidence utilisent la directive «&nbsp;<code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">versionchanged::</span> <span class="pre">X.Y</span></code>&nbsp;» (au même format que la directive <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> du paragraphe précédent).</p>
+<p>Ces blocs <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> et <code class="docutils literal notranslate"><span class="pre">versionchanged</span></code> doivent être « autonomes », c’est-à-dire que dans la mesure où ces annotations ne sont conservées que dans deux versions principales, il est utile de pouvoir simplement les enlever sans devoir remettre en forme, changer l’indentation ou modifier le texte avoisinant. Par exemple, au lieu de placer toute la description d’une fonctionnalité nouvelle ou modifiée dans un bloc, faite quelque chose comme ceci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>.. class:: Author(first_name, last_name, middle_name=None)
+
+    A person who writes books.
+
+    ``first_name`` is ...
+
+    ...
+
+    ``middle_name`` is ...
+
+    .. versionchanged:: A.B
+
+        The ``middle_name`` argument was added.
+</pre></div>
+</div>
+<p>Placez les annotations pour les modifications au bas de la section, et non pas au-dessus.</p>
+<p>De même, évitez de faire référence à une version spécifique de Django en dehors des blocs <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> et <code class="docutils literal notranslate"><span class="pre">versionchanged</span></code>. Même dans un bloc, il est souvent redondant de mentionner des versions puisque le rendu automatique de ces annotations produit respectivement « New in Django A.B » et « Changed in Django A.B ».</p>
+<p>Si une fonction, un attribut, etc. a été ajouté, il est aussi admis d’utiliser une annotation <code class="docutils literal notranslate"><span class="pre">versionadded</span></code> comme ceci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">attribute</span><span class="p">::</span> <span class="n">Author</span><span class="o">.</span><span class="n">middle_name</span>
+
+    <span class="o">..</span> <span class="n">versionadded</span><span class="p">::</span> <span class="n">A</span><span class="o">.</span><span class="n">B</span>
+
+    <span class="n">An</span> <span class="n">author</span><span class="s1">&#39;s middle name.</span>
+</pre></div>
+</div>
+<p>Nous pouvons enlever l’annotation <code class="docutils literal notranslate"><span class="pre">..</span> <span class="pre">versionadded::</span> <span class="pre">A.B</span></code> sans aucun changement d’indentation lorsque ce sera le bon moment.</p>
+</div>
+<div class="section" id="s-minimizing-images">
+<span id="minimizing-images"></span><h2>Minimiser les images<a class="headerlink" href="#minimizing-images" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Optimisez la taille de compression des images quand c’est possible, pour les fichiers PBG, utilisez OptiPNG et <code class="docutils literal notranslate"><span class="pre">advpng</span></code> de AdvanceCOMP :</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">cd</span> docs
+<span class="gp">$</span> optipng -o7 -zm1-9 -i0 -strip all <span class="sb">`</span>find . -type f -not -path <span class="s2">&quot;./_build/*&quot;</span> -name <span class="s2">&quot;*.png&quot;</span><span class="sb">`</span>
+<span class="gp">$</span> advpng -z4 <span class="sb">`</span>find . -type f -not -path <span class="s2">&quot;./_build/*&quot;</span> -name <span class="s2">&quot;*.png&quot;</span><span class="sb">`</span>
+</pre></div>
+</div>
+<p>Cet exemple est basé sur la version 0.7.5 de OptiPNG. Les versions plus anciennes peuvent se plaindre que l’option <code class="docutils literal notranslate"><span class="pre">--strip</span> <span class="pre">all</span></code> perd des données.</p>
+</div>
+<div class="section" id="s-an-example">
+<span id="an-example"></span><h2>Un exemple<a class="headerlink" href="#an-example" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour un exemple rapide sur la manière dont tout s’enchaîne, considérez l’exemple hypothétique suivant :</p>
+<ul>
+<li><p class="first">Tout d’abord, la disposition générale du document <code class="docutils literal notranslate"><span class="pre">ref/settings.txt</span></code> pourrait ressembler à ceci :</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="gh">========</span>
+<span class="gh">Settings</span>
+<span class="gh">========</span>
+
+<span class="cp">...</span>
+
+<span class="p">..</span> <span class="nt">_available-settings:</span>
+
+<span class="gh">Available settings</span>
+<span class="gh">==================</span>
+
+<span class="cp">...</span>
+
+<span class="p">..</span> <span class="nt">_deprecated-settings:</span>
+
+<span class="gh">Deprecated settings</span>
+<span class="gh">===================</span>
+
+<span class="cp">...</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Ensuite, le document <code class="docutils literal notranslate"><span class="pre">topics/settings.txt</span></code> pourrait contenir quelque chose comme :</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span>You can access a :ref:`listing of all available settings
+<span class="nt">&lt;available-settings&gt;</span>`. For a list of deprecated settings see
+<span class="na">:ref:</span><span class="nv">`deprecated-settings`</span>.
+
+You can find both in the :doc:`settings reference document
+<span class="nt">&lt;/ref/settings&gt;</span>`.
+</pre></div>
+</div>
+<p>Nous utilisons l’élément de référence croisée de Sphinx <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-doc" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-role docutils literal notranslate"><span class="pre">doc</span></code></a> lorsque nous ajoutons un lien vers un autre document dans son entier et l’élément <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/roles.html#role-ref" title="(disponible dans Sphinx v4.0.0+)"><code class="xref rst rst-role docutils literal notranslate"><span class="pre">ref</span></code></a> lorsque nous ajoutons un lien vers un emplacement spécifique dans un document.</p>
+</li>
+<li><p class="first">Puis, voyez comment les réglages sont annotés :</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="p">..</span> <span class="ow">setting</span><span class="p">::</span> ADMINS
+
+<span class="gh">ADMINS</span>
+<span class="gh">======</span>
+
+Default: <span class="s">``[]``</span> (Empty list)
+
+A list of all the people who get code error notifications. When
+<span class="s">``DEBUG=False``</span> and a view raises an exception, Django will email these people
+with the full exception information. Each member of the list should be a tuple
+of (Full name, email address). Example<span class="se">::</span>
+
+<span class="s">    [(&#39;John&#39;, &#39;john@example.com&#39;), (&#39;Mary&#39;, &#39;mary@example.com&#39;)]</span>
+
+Note that Django will email <span class="ge">*all*</span> of these people whenever an error happens.
+See <span class="na">:doc:</span><span class="nv">`/howto/error-reporting`</span> for more information.
+</pre></div>
+</div>
+<p>Ceci balise l’en-tête suivante comme la cible « canonique » du réglage <code class="docutils literal notranslate"><span class="pre">ADMINS</span></code>. Cela signifie que lors de chaque mention de <code class="docutils literal notranslate"><span class="pre">ADMINS</span></code>, on peut y faire référence avec <code class="docutils literal notranslate"><span class="pre">:setting:`ADMINS`</span></code>.</p>
+</li>
+</ul>
+<p>C’est grosso modo ainsi que le tout fonctionne.</p>
+</div>
+<div class="section" id="s-spelling-check">
+<span id="s-documentation-spelling-check"></span><span id="spelling-check"></span><span id="documentation-spelling-check"></span><h2>Correction orthographique<a class="headerlink" href="#spelling-check" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Avant de commiter la documentation, il est recommandé de lancer le correcteur orthographique. Vous devez pour cela installer d’abord sphinxcontrib-spelling &lt;https://pypi.org/project/sphinxcontrib-spelling/&gt;. Puis, à partir du répertoire <code class="docutils literal notranslate"><span class="pre">docs</span></code>, lancez <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">spelling</span></code>. Le cas échéant, les mots faux ainsi que le fichier et le numéro de ligne où ils apparaissent seront enregistrés dans <code class="docutils literal notranslate"><span class="pre">_build/spelling/output.txt</span></code>.</p>
+<p>Si vous rencontrez des faux positifs (des erreurs signalées qui n’en sont pas), faites l’une des choses suivantes :</p>
+<ul class="simple">
+<li>Entourez le code imbriqué ou les noms de marques ou de technologie avec des accents graves(`).</li>
+<li>Cherchez des synonymes que le correcteur orthographique connaît.</li>
+<li>Si vous êtes certain-e que le mot utilisé est correct, ajoutez-le à la liste <code class="docutils literal notranslate"><span class="pre">docs/spelling_wordlist</span></code> (en prenant soin de respecter l’ordre alphabétique).</li>
+</ul>
+</div>
+<div class="section" id="s-translating-documentation">
+<span id="translating-documentation"></span><h2>Traduction de la documentation<a class="headerlink" href="#translating-documentation" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Consultez <a class="reference internal" href="localizing.html#translating-documentation"><span class="std std-ref">Traduction de la documentation de Django</span></a> si vous souhaitez aider à traduire la documentation dans une autre langue.</p>
+</div>
+<div class="section" id="s-django-admin-man-page">
+<span id="s-django-admin-manpage"></span><span id="django-admin-man-page"></span><span id="django-admin-manpage"></span><h2>Page de manuel <code class="docutils literal notranslate"><span class="pre">django-admin</span></code><a class="headerlink" href="#django-admin-man-page" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Sphinx peut générer une page de manuel pour la commande <a class="reference internal" href="../../ref/django-admin.html"><span class="doc">django-admin</span></a>. Ceci est configuré dans <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code>. Au contraire d’autres productions de documentation, cette page de manuel devrait être contenue dans le dépôt de Django et dans ses publications comme <code class="docutils literal notranslate"><span class="pre">docs/man/django-admin.1</span></code>. Il n’est pas nécessaire de mettre à jour ce fichier lors de la mise à jour de la documentation, car sa mise est jour fait partie du processus de publication.</p>
+<p>Pour générer une version à jour de la page de manuel, lancez <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">man</span></code> dans le répertoire <code class="docutils literal notranslate"><span class="pre">docs</span></code>. La nouvelle page de manuel sera écrite dans <code class="docutils literal notranslate"><span class="pre">docs/_build/man/django-admin.1</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écrire la documentation</a><ul>
+<li><a class="reference internal" href="#getting-the-raw-documentation">Obtention de la documentation brute</a></li>
+<li><a class="reference internal" href="#getting-started-with-sphinx">Introduction à Sphinx</a></li>
+<li><a class="reference internal" href="#how-the-documentation-is-organized">Organisation de la documentation</a></li>
+<li><a class="reference internal" href="#writing-style">Style d’écriture (anglais)</a></li>
+<li><a class="reference internal" href="#commonly-used-terms">Termes fréquemment utilisés</a></li>
+<li><a class="reference internal" href="#django-specific-terminology">Terminologie spécifique à Django</a></li>
+<li><a class="reference internal" href="#guidelines-for-restructuredtext-files">Directives pour les fichiers reStructuredText</a></li>
+<li><a class="reference internal" href="#django-specific-markup">Balisage spécifique à Django</a></li>
+<li><a class="reference internal" href="#documenting-new-features">Documentation de nouvelles fonctionnalités</a></li>
+<li><a class="reference internal" href="#minimizing-images">Minimiser les images</a></li>
+<li><a class="reference internal" href="#an-example">Un exemple</a></li>
+<li><a class="reference internal" href="#spelling-check">Correction orthographique</a></li>
+<li><a class="reference internal" href="#translating-documentation">Traduction de la documentation</a></li>
+<li><a class="reference internal" href="#django-admin-man-page">Page de manuel <code class="docutils literal notranslate"><span class="pre">django-admin</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="writing-code/javascript.html"
+                        title="Chapitre précédent">JavaScript</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="localizing.html"
+                        title="Chapitre suivant">Traduction de Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/internals/contributing/writing-documentation.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="writing-code/javascript.html" title="JavaScript">previous</a>
+     |
+    <a href="../index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="localizing.html" title="Traduction de Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

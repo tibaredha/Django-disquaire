@@ -1,0 +1,405 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Signalement d’erreurs &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Données initiales pour les modèles" href="initial-data.html" />
+    <link rel="prev" title="Mise à jour de Django à une version plus récente" href="upgrade-version.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="upgrade-version.html" title="Mise à jour de Django à une version plus récente">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="initial-data.html" title="Données initiales pour les modèles">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-error-reporting">
+            
+  <div class="section" id="s-error-reporting">
+<span id="error-reporting"></span><h1>Signalement d’erreurs<a class="headerlink" href="#error-reporting" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Lorsque vous faites fonctionner un site public, vous devriez toujours désactiver le réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>. Cela va accélérer le serveur et évitera aussi que des utilisateurs mal intentionnés puissent voir des détails de l’application pouvant être révélés dans les pages d’erreur.</p>
+<p>Cependant, lorsqu’un site fonctionne avec <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> réglé à <code class="docutils literal notranslate"><span class="pre">False</span></code>, vous ne verrez jamais les détails des erreurs générés par le site&nbsp;; tout le monde voit les mêmes pages d’erreur publiques. Il est nécessaire de garder la trace des erreurs qui se produisent sur des sites en production, il est donc possible de configurer Django pour qu’il crée des rapports incluant les détails de ces erreurs.</p>
+<div class="section" id="s-email-reports">
+<span id="email-reports"></span><h2>Rapports par messagerie<a class="headerlink" href="#email-reports" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-server-errors">
+<span id="server-errors"></span><h3>Erreurs de serveur<a class="headerlink" href="#server-errors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, Django envoie un courriel aux utilisateurs énumérés dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-ADMINS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ADMINS</span></code></a> à chaque fois que le code génère une exception non interceptée produisant une erreur interne de serveur (strictement parlant, pour toute réponse ayant un code d’état HTTP de 500 ou plus). Les administrateurs sont ainsi notifiés immédiatement à la suite de toute erreur. Les personnes dans <a class="reference internal" href="../ref/settings.html#std:setting-ADMINS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ADMINS</span></code></a> obtiennent une description de l’erreur, une trace Python complète ainsi que des détails sur la requête HTTP qui a causé l’erreur.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pour pouvoir envoyer des courriels, Django a besoin de connaître certains réglages indiquant comment se connecter à un serveur de messagerie. Au minimum, il faut indiquer <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST</span></code></a>, et potentiellement <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_USER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_USER</span></code></a> et <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_PASSWORD"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_PASSWORD</span></code></a>&nbsp;; selon la configuration du serveur de messagerie, il peut toutefois être nécessaire de définir d’autres réglages. Consultez la <a class="reference internal" href="../ref/settings.html"><span class="doc">documentation sur les réglages Django</span></a> pour une liste complète des réglages liés à l’envoi de messages électroniques.</p>
+</div>
+<p>Par défaut, Django envoie ses messages avec l’adresse d’origine <a class="reference external" href="mailto:root&#37;&#52;&#48;localhost">root<span>&#64;</span>localhost</a>. Toutefois, certains fournisseurs de messagerie rejettent tous les messages provenant de cette adresse. Pour utiliser une adresse d’expéditeur différente, modifiez le réglage <a class="reference internal" href="../ref/settings.html#std:setting-SERVER_EMAIL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SERVER_EMAIL</span></code></a>.</p>
+<p>Pour activer ce comportement, placez les adresses électroniques des destinataires dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-ADMINS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ADMINS</span></code></a>.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Les messages d’erreur de serveur sont envoyés par le moyen de l’infrastructure de journalisation, il est donc possible de personnaliser ce comportement en <a class="reference internal" href="../topics/logging.html"><span class="doc">personnalisant la configuration de la journalisation</span></a>.</p>
+</div>
+</div>
+<div class="section" id="s-errors">
+<span id="errors"></span><h3>Erreurs 404<a class="headerlink" href="#errors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django peut aussi être configuré pour envoyer des courriels pour des erreurs de lien cassé (erreurs 404 «&nbsp;page non trouvée&nbsp;»). Django envoie des courriels lors d’erreurs 404 si&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>;</li>
+<li>Votre réglage <a class="reference internal" href="../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> contient <a class="reference internal" href="../ref/middleware.html#django.middleware.common.BrokenLinkEmailsMiddleware" title="django.middleware.common.BrokenLinkEmailsMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.middleware.common.BrokenLinkEmailsMiddleware</span></code></a>.</li>
+</ul>
+<p>Si ces conditions sont remplies, Django envoie un courriel aux utilisateurs mentionnés dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-MANAGERS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MANAGERS</span></code></a> chaque fois que le code signale une erreur 404 et que la requête possède une URL référente («&nbsp;referer&nbsp;»). Il ne prend pas la peine d’envoyer un courriel pour une erreur 404 sans URL référente, car il s’agit généralement de personnes ayant mal saisi une adresse ou de robots Web défectueux. Il ignore aussi les erreurs 404 lorsque l’URL référente est la même que l’URL demandée, car ce comportement est aussi typique des robots Web défectueux.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><a class="reference internal" href="../ref/middleware.html#django.middleware.common.BrokenLinkEmailsMiddleware" title="django.middleware.common.BrokenLinkEmailsMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">BrokenLinkEmailsMiddleware</span></code></a> doit apparaître avant tout autre intergiciel interceptant les erreurs 404, tel que <a class="reference internal" href="../ref/middleware.html#django.middleware.locale.LocaleMiddleware" title="django.middleware.locale.LocaleMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocaleMiddleware</span></code></a> ou <a class="reference internal" href="../ref/contrib/flatpages.html#django.contrib.flatpages.middleware.FlatpageFallbackMiddleware" title="django.contrib.flatpages.middleware.FlatpageFallbackMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlatpageFallbackMiddleware</span></code></a>. Placez-le dans les premières lignes du réglage <a class="reference internal" href="../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>.</p>
+</div>
+<p>Il est possible d’indiquer à Django de ne pas signaler certaines erreurs 404 en ajustant le réglage <a class="reference internal" href="../ref/settings.html#std:setting-IGNORABLE_404_URLS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">IGNORABLE_404_URLS</span></code></a>. Celui-ci est une liste d’expressions régulières compilées. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="n">IGNORABLE_404_URLS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\.(php|cgi)$&#39;</span><span class="p">),</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^/phpmyadmin/&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, une erreur 404 vers toute URL se terminant par <code class="docutils literal notranslate"><span class="pre">.php</span></code> ou <code class="docutils literal notranslate"><span class="pre">.cgi</span></code> ne sera <em>pas</em> signalée. Ni aucune URL commençant par <code class="docutils literal notranslate"><span class="pre">/phpmyadmin/</span></code>.</p>
+<p>L’exemple suivant montre comment exclure certaines URL conventionnellement demandées par les navigateurs et les robots&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="n">IGNORABLE_404_URLS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^/apple-touch-icon.*\.png$&#39;</span><span class="p">),</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^/favicon\.ico$&#39;</span><span class="p">),</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^/robots\.txt$&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>(Notez qu’il s’agit d’expressions régulières, d’où la présence de la barre oblique inverse devant les points pour les échapper.)</p>
+<p>Si vous souhaitez personnaliser davantage le comportement de <a class="reference internal" href="../ref/middleware.html#django.middleware.common.BrokenLinkEmailsMiddleware" title="django.middleware.common.BrokenLinkEmailsMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.middleware.common.BrokenLinkEmailsMiddleware</span></code></a> (par exemple pour ignorer les requêtes en provenance de robots Web), vous devez créer une sous-classe et surcharger ses méthodes.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Les erreurs 404 sont journalisées en utilisant l’infrastructure de journalisation. Par défaut, ces entrées de journal sont ignorées, mais vous pouvez les utiliser pour le signalement d’erreurs en écrivant un gestionnaire et en <a class="reference internal" href="../topics/logging.html"><span class="doc">configurant la journalisation</span></a> en conséquence.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-filtering-error-reports">
+<span id="s-id1"></span><span id="filtering-error-reports"></span><span id="id1"></span><h2>Filtrage de rapports d’erreur<a class="headerlink" href="#filtering-error-reports" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Le filtrage des données sensibles est un problème ardu, et il est quasiment impossible de garantir qu’aucune donnée sensible ne figurera dans un rapport d’erreur. Il faudrait donc limiter l’accès aux rapports d’erreurs aux membres de votre équipe dignes de confiance et éviter de transmettre ces rapports de manière non chiffrée par Internet (comme par exemple par messagerie électronique).</p>
+</div>
+<div class="section" id="s-filtering-sensitive-information">
+<span id="filtering-sensitive-information"></span><h3>Filtrage des informations sensibles<a class="headerlink" href="#filtering-sensitive-information" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les rapports d’erreur sont vraiment utiles pour déboguer les erreurs, il est donc généralement utile de récolter le maximum d’informations à leur sujet. Par défaut, Django récolte une <a class="reference external" href="https://en.wikipedia.org/wiki/Stack_frame">trace complète</a> de l’exception levée, les variables locales de chaque <a class="reference external" href="https://en.wikipedia.org/wiki/Stack_trace">contexte de trace</a> et les <a class="reference internal" href="../ref/request-response.html#httprequest-attributes"><span class="std std-ref">attributs</span></a> de l’objet <a class="reference internal" href="../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a>.</p>
+<p>Il peut cependant arriver que certains types d’information soient trop sensibles et qu’il n’est pas adéquat d’en conserver la trace, par exemple un mot de passe ou un numéro de carte de crédit. En plus d’exclure les réglages apparaissant comme sensibles selon ce qui est expliqué dans la documentation de <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>, Django offre donc un ensemble de fonctions décoratrices pour vous aider à contrôler les informations qui ne devraient pas apparaître dans les rapports d’erreur dans un environnement de production (c’est-à-dire quand <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> est défini à <code class="docutils literal notranslate"><span class="pre">False</span></code>)&nbsp;: <a class="reference internal" href="#django.views.decorators.debug.sensitive_variables" title="django.views.decorators.debug.sensitive_variables"><code class="xref py py-func docutils literal notranslate"><span class="pre">sensitive_variables()</span></code></a> et <a class="reference internal" href="#django.views.decorators.debug.sensitive_post_parameters" title="django.views.decorators.debug.sensitive_post_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">sensitive_post_parameters()</span></code></a>.</p>
+<dl class="function">
+<dt id="django.views.decorators.debug.sensitive_variables">
+<code class="descname">sensitive_variables</code>(<em>*variables</em>)<a class="headerlink" href="#django.views.decorators.debug.sensitive_variables" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Si une fonction (une vue ou toute autre fonction de rappel) de votre code utilise des variables locales susceptibles de contenir des informations sensibles, vous pouvez empêcher les valeurs de ces variables d’apparaître dans les rapports d’erreur en utilisant le décorateur <code class="docutils literal notranslate"><span class="pre">sensitive_variables</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.decorators.debug</span> <span class="k">import</span> <span class="n">sensitive_variables</span>
+
+<span class="nd">@sensitive_variables</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;pw&#39;</span><span class="p">,</span> <span class="s1">&#39;cc&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">process_info</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="n">pw</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">pass_word</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">credit_card_number</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Dans l’exemple ci-dessus, les valeurs des variables <code class="docutils literal notranslate"><span class="pre">user</span></code>, <code class="docutils literal notranslate"><span class="pre">pw</span></code> et <code class="docutils literal notranslate"><span class="pre">cc</span></code> seront masquées et remplacées par des étoiles (<code class="docutils literal notranslate"><span class="pre">**********</span></code>) dans les rapports d’erreur, tandis que la valeur de la variable <code class="docutils literal notranslate"><span class="pre">name</span></code> sera visible.</p>
+<p>Pour masquer systématiquement toutes les variables locales d’une fonction dans les journaux d’erreurs, n’indiquez aucun paramètre au décorateur <code class="docutils literal notranslate"><span class="pre">sensitive_variables</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@sensitive_variables</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">my_function</span><span class="p">():</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition-when-using-multiple-decorators admonition">
+<p class="first admonition-title">Utilisation de plusieurs décorateurs</p>
+<p>Si la variable que vous voulez masquer est également un paramètre de fonction (par ex. <code class="docutils literal notranslate"><span class="pre">user</span></code> dans l’exemple suivant) et si la fonction décorée possède plusieurs décorateurs, prenez soin de placer <code class="docutils literal notranslate"><span class="pre">&#64;sensitive_variables</span></code> au sommet de la chaîne des décorateurs. De cette façon, le paramètre de fonction sera aussi masqué tout en passant par les autres décorateurs&nbsp;:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@sensitive_variables</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;pw&#39;</span><span class="p">,</span> <span class="s1">&#39;cc&#39;</span><span class="p">)</span>
+<span class="nd">@some_decorator</span>
+<span class="nd">@another_decorator</span>
+<span class="k">def</span> <span class="nf">process_info</span><span class="p">(</span><span class="n">user</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.views.decorators.debug.sensitive_post_parameters">
+<code class="descname">sensitive_post_parameters</code>(<em>*parameters</em>)<a class="headerlink" href="#django.views.decorators.debug.sensitive_post_parameters" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Si l’une de vos vues reçoit un objet <a class="reference internal" href="../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a> avec des <a class="reference internal" href="../ref/request-response.html#django.http.HttpRequest.POST" title="django.http.HttpRequest.POST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">paramètres</span> <span class="pre">POST</span></code></a> susceptibles de contenir des informations sensibles, vous pouvez empêcher les valeurs de ces paramètres d’apparaître dans les rapports d’erreur en utilisant le décorateur <code class="docutils literal notranslate"><span class="pre">sensitive_post_parameters</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.decorators.debug</span> <span class="k">import</span> <span class="n">sensitive_post_parameters</span>
+
+<span class="nd">@sensitive_post_parameters</span><span class="p">(</span><span class="s1">&#39;pass_word&#39;</span><span class="p">,</span> <span class="s1">&#39;credit_card_number&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">record_user_profile</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">UserProfile</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+        <span class="n">user</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="n">password</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s1">&#39;pass_word&#39;</span><span class="p">],</span>
+        <span class="n">credit_card</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s1">&#39;credit_card_number&#39;</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Dans l’exemple ci-dessus, les valeurs des paramètres POST <code class="docutils literal notranslate"><span class="pre">pass_word</span></code> et <code class="docutils literal notranslate"><span class="pre">credit_card_number</span></code> seront masquées et remplacées par des étoiles (<code class="docutils literal notranslate"><span class="pre">**********</span></code>) dans la représentation de la requête dans le rapport d’erreur, tandis que la valeur du paramètre <code class="docutils literal notranslate"><span class="pre">name</span></code> sera visible.</p>
+<p>Pour masquer systématiquement tous les paramètres POST d’une requête dans les rapports d’erreur, n’indiquez aucun paramètre au décorateur <code class="docutils literal notranslate"><span class="pre">sensitive_post_parameters</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@sensitive_post_parameters</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Tous les paramètres POST sont systématiquement masqués dans les rapports d’erreur pour certaines vues <a class="reference internal" href="../topics/auth/default.html#module-django.contrib.auth.views" title="django.contrib.auth.views"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.contrib.auth.views</span></code></a> ( <code class="docutils literal notranslate"><span class="pre">login</span></code>, <code class="docutils literal notranslate"><span class="pre">password_reset_confirm</span></code>, <code class="docutils literal notranslate"><span class="pre">password_change</span></code> et <code class="docutils literal notranslate"><span class="pre">add_view</span></code>, ainsi que <code class="docutils literal notranslate"><span class="pre">user_change_password</span></code> dans l’administration de <code class="docutils literal notranslate"><span class="pre">auth</span></code>) pour empêcher la divulgation d’informations sensibles comme les mots de passe.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-custom-error-reports">
+<span id="s-id2"></span><span id="custom-error-reports"></span><span id="id2"></span><h3>Rapports d’erreur personnalisés<a class="headerlink" href="#custom-error-reports" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Tout ce que font <a class="reference internal" href="#django.views.decorators.debug.sensitive_variables" title="django.views.decorators.debug.sensitive_variables"><code class="xref py py-func docutils literal notranslate"><span class="pre">sensitive_variables()</span></code></a> et <a class="reference internal" href="#django.views.decorators.debug.sensitive_post_parameters" title="django.views.decorators.debug.sensitive_post_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">sensitive_post_parameters()</span></code></a>, c’est respectivement annoter la fonction décorée avec les noms des varaibles sensibles et annoter l’objet <code class="docutils literal notranslate"><span class="pre">HttpRequest</span></code> avec les noms des paramètres POST sensibles, afin que ces informations sensibles puissent être plus tard filtrées des rapports lorsqu’une erreur se produit. Le vrai filtrage est effectué par le filtre de rapport d’erreur par défaut de Django, <a class="reference internal" href="#django.views.debug.SafeExceptionReporterFilter" title="django.views.debug.SafeExceptionReporterFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.debug.SafeExceptionReporterFilter</span></code></a>. Ce filtre utilise les annotations des décorateurs pour remplacer les valeurs correspondantes par des étoiles (<code class="docutils literal notranslate"><span class="pre">**********</span></code>) au moment de la production du rapport d’erreur. Si vous souhaitez surcharger ou personnaliser ce comportement par défaut pour tout votre site, vous devez définir votre propre classe de filtre et indiquer à Django de l’utiliser par le moyen du réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_EXCEPTION_REPORTER_FILTER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_EXCEPTION_REPORTER_FILTER</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DEFAULT_EXCEPTION_REPORTER_FILTER</span> <span class="o">=</span> <span class="s1">&#39;path.to.your.CustomExceptionReporterFilter&#39;</span>
+</pre></div>
+</div>
+<p>Vous pouvez aussi contrôler d’une manière plus fine le filtre qu’une vue données doit utiliser en définissant l’attribut <code class="docutils literal notranslate"><span class="pre">exception_reporter_filter</span></code> de l’objet <code class="docutils literal notranslate"><span class="pre">HttpRequest</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">exception_reporter_filter</span> <span class="o">=</span> <span class="n">CustomExceptionReporterFilter</span><span class="p">()</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Votre classe de filtre personnalisée doit hériter de <a class="reference internal" href="#django.views.debug.SafeExceptionReporterFilter" title="django.views.debug.SafeExceptionReporterFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.debug.SafeExceptionReporterFilter</span></code></a> et peut surcharger les attributs et méthodes suivantes&nbsp;:</p>
+<dl class="class">
+<dt id="django.views.debug.SafeExceptionReporterFilter">
+<em class="property">class </em><code class="descname">SafeExceptionReporterFilter</code><a class="headerlink" href="#django.views.debug.SafeExceptionReporterFilter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="django.views.debug.SafeExceptionReporterFilter.cleansed_substitute">
+<code class="descname">cleansed_substitute</code><a class="headerlink" href="#django.views.debug.SafeExceptionReporterFilter.cleansed_substitute" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>La valeur textuelle qui remplacera les données sensibles. Par défaut, il remplace les valeurs des variables sensibles par des étoiles (<code class="docutils literal notranslate"><span class="pre">**********</span></code>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.debug.SafeExceptionReporterFilter.hidden_settings">
+<code class="descname">hidden_settings</code><a class="headerlink" href="#django.views.debug.SafeExceptionReporterFilter.hidden_settings" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Un objet d’expression régulière compilée utilisé pour découvrir les valeurs de réglages et de <code class="docutils literal notranslate"><span class="pre">request.META</span></code> considérées comme sensibles. Équivaut par défaut à</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;API|TOKEN|KEY|SECRET|PASS|SIGNATURE&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.debug.SafeExceptionReporterFilter.is_active">
+<code class="descname">is_active</code>(<em>request</em>)<a class="headerlink" href="#django.views.debug.SafeExceptionReporterFilter.is_active" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> pour activer le filtrage dans <a class="reference internal" href="#django.views.debug.SafeExceptionReporterFilter.get_post_parameters" title="django.views.debug.SafeExceptionReporterFilter.get_post_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_post_parameters()</span></code></a> et <a class="reference internal" href="#django.views.debug.SafeExceptionReporterFilter.get_traceback_frame_variables" title="django.views.debug.SafeExceptionReporterFilter.get_traceback_frame_variables"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_traceback_frame_variables()</span></code></a>. Par défaut, le filtre est actif si <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>. Notez que les valeurs sensibles de <code class="docutils literal notranslate"><span class="pre">request.META</span></code> sont toujours filtrées en compagnie des valeurs sensibles de réglages, tel que décrit dans la documentation de <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.debug.SafeExceptionReporterFilter.get_post_parameters">
+<code class="descname">get_post_parameters</code>(<em>request</em>)<a class="headerlink" href="#django.views.debug.SafeExceptionReporterFilter.get_post_parameters" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le dictionnaire filtré des paramètres POST. Les valeurs des données sensibles sont remplacées par <a class="reference internal" href="#django.views.debug.SafeExceptionReporterFilter.cleansed_substitute" title="django.views.debug.SafeExceptionReporterFilter.cleansed_substitute"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cleansed_substitute</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.debug.SafeExceptionReporterFilter.get_traceback_frame_variables">
+<code class="descname">get_traceback_frame_variables</code>(<em>request</em>, <em>tb_frame</em>)<a class="headerlink" href="#django.views.debug.SafeExceptionReporterFilter.get_traceback_frame_variables" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le dictionnaire filtré des variables locales pour la trace d’erreur donnée. Les valeurs des données sensibles sont remplacées par <a class="reference internal" href="#django.views.debug.SafeExceptionReporterFilter.cleansed_substitute" title="django.views.debug.SafeExceptionReporterFilter.cleansed_substitute"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cleansed_substitute</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Si vous avez besoin de personnaliser les rapports d’erreur au-delà du filtrage en place, vous pouvez indiquer une classe personnalisée de rapport d’erreur en définissant le réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_EXCEPTION_REPORTER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_EXCEPTION_REPORTER</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DEFAULT_EXCEPTION_REPORTER</span> <span class="o">=</span> <span class="s1">&#39;path.to.your.CustomExceptionReporter&#39;</span>
+</pre></div>
+</div>
+<p>Le rapporteur d’exception est responsable de compiler les données du rapport d’exception et de le mettre en forme adéquatement en texte ou HTML (le rapporteur d’exception utilise <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_EXCEPTION_REPORTER_FILTER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_EXCEPTION_REPORTER_FILTER</span></code></a> lors de la préparation des données du rapport d’exception).</p>
+<p>Votre classe de rapporteur personnalisée doit hériter de <a class="reference internal" href="#django.views.debug.ExceptionReporter" title="django.views.debug.ExceptionReporter"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.debug.ExceptionReporter</span></code></a>.</p>
+<dl class="class">
+<dt id="django.views.debug.ExceptionReporter">
+<em class="property">class </em><code class="descname">ExceptionReporter</code><a class="headerlink" href="#django.views.debug.ExceptionReporter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="method">
+<dt id="django.views.debug.ExceptionReporter.get_traceback_data">
+<code class="descname">get_traceback_data</code>()<a class="headerlink" href="#django.views.debug.ExceptionReporter.get_traceback_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un dictionnaire contenant les informations de trace d’erreur.</p>
+<p>Il s’agit du point d’extension principal pour la personnalisation des rapports d’exception, par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.debug</span> <span class="k">import</span> <span class="n">ExceptionReporter</span>
+
+
+<span class="k">class</span> <span class="nc">CustomExceptionReporter</span><span class="p">(</span><span class="n">ExceptionReporter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_traceback_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_traceback_data</span><span class="p">()</span>
+        <span class="c1"># ... remove/add something here ...</span>
+        <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.debug.ExceptionReporter.get_traceback_html">
+<code class="descname">get_traceback_html</code>()<a class="headerlink" href="#django.views.debug.ExceptionReporter.get_traceback_html" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une version HTML du rapport d’exception.</p>
+<p>Utilisé pour la version HTML de la page d’erreur HTTP 500 de débogage.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.debug.ExceptionReporter.get_traceback_text">
+<code class="descname">get_traceback_text</code>()<a class="headerlink" href="#django.views.debug.ExceptionReporter.get_traceback_text" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une version en texte brut du rapport d’exception.</p>
+<p>Utilisé pour la version texte brut de la page d’erreur HTTP 500 de débogage et pour les rapports envoyés par courriel.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Comme avec la classe de filtre, vous pouvez contrôler quelle classe de rapporteur d’exception utiliser dans une vue donnée en définissant l’attribut <code class="docutils literal notranslate"><span class="pre">exception_reporter_class</span></code> de <code class="docutils literal notranslate"><span class="pre">HttpRequest</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">:</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">exception_reporter_class</span> <span class="o">=</span> <span class="n">CustomExceptionReporter</span><span class="p">()</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Il est aussi imaginable de personnaliser les rapports d’erreurs en écrivant un <a class="reference internal" href="../topics/http/middleware.html#exception-middleware"><span class="std std-ref">middleware d’exception</span></a> approprié. Dans ce cas, il est conseillé d’imiter la gestion d’erreur intégrée dans Django et de ne notifier les erreurs que dans le cas où <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Signalement d’erreurs</a><ul>
+<li><a class="reference internal" href="#email-reports">Rapports par messagerie</a><ul>
+<li><a class="reference internal" href="#server-errors">Erreurs de serveur</a></li>
+<li><a class="reference internal" href="#errors">Erreurs 404</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#filtering-error-reports">Filtrage de rapports d’erreur</a><ul>
+<li><a class="reference internal" href="#filtering-sensitive-information">Filtrage des informations sensibles</a></li>
+<li><a class="reference internal" href="#custom-error-reports">Rapports d’erreur personnalisés</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="upgrade-version.html"
+                        title="Chapitre précédent">Mise à jour de Django à une version plus récente</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="initial-data.html"
+                        title="Chapitre suivant">Données initiales pour les modèles</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/howto/error-reporting.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="upgrade-version.html" title="Mise à jour de Django à une version plus récente">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="initial-data.html" title="Données initiales pour les modèles">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

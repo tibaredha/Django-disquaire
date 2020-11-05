@@ -1,0 +1,317 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Contraintes de bases de données spécifiques à PostgreSQL &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Champs de modèles spécifiques à PostgreSQL" href="fields.html" />
+    <link rel="prev" title="Fonctions d’agrégation spécifiques à PostgreSQL" href="aggregates.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="aggregates.html" title="Fonctions d’agrégation spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="fields.html" title="Champs de modèles spécifiques à PostgreSQL">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-postgres-constraints">
+            
+  <div class="section" id="s-module-django.contrib.postgres.constraints">
+<span id="s-postgresql-specific-database-constraints"></span><span id="module-django.contrib.postgres.constraints"></span><span id="postgresql-specific-database-constraints"></span><h1>Contraintes de bases de données spécifiques à PostgreSQL<a class="headerlink" href="#module-django.contrib.postgres.constraints" title="Lien permanent vers ce titre">¶</a></h1>
+<p>PostgreSQL offre des contraintes d’intégrité de données supplémentaires dans le module <code class="docutils literal notranslate"><span class="pre">django.contrib.postgres.constraints</span></code>. Elles sont ajoutées dans l’option <a class="reference internal" href="../../models/options.html#django.db.models.Options.constraints" title="django.db.models.Options.constraints"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Meta.constraints</span></code></a> des modèles.</p>
+<div class="section" id="s-exclusionconstraint">
+<span id="exclusionconstraint"></span><h2><code class="docutils literal notranslate"><span class="pre">ExclusionConstraint</span></code><a class="headerlink" href="#exclusionconstraint" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="versionadded">
+<span class="title">New in Django 3.0.</span> </div>
+<dl class="class">
+<dt id="django.contrib.postgres.constraints.ExclusionConstraint">
+<em class="property">class </em><code class="descname">ExclusionConstraint</code>(<em>*</em>, <em>name</em>, <em>expressions</em>, <em>index_type=None</em>, <em>condition=None</em>, <em>deferrable=None</em>)<a class="headerlink" href="#django.contrib.postgres.constraints.ExclusionConstraint" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée une contrainte d’exclusion dans la base de données. En interne, PostgreSQL implémente les contraintes d’exclusion par des index. Le type d’index par défaut est <a class="reference external" href="https://www.postgresql.org/docs/current/gist.html">GiST</a>. Pour les utiliser, vous devez activer <a class="reference external" href="https://www.postgresql.org/docs/current/btree-gist.html">l’extension btree_gist</a> dans PostgreSQL. Vous pouvez installer l’extension par une opération de migration <a class="reference internal" href="operations.html#django.contrib.postgres.operations.BtreeGistExtension" title="django.contrib.postgres.operations.BtreeGistExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">BtreeGistExtension</span></code></a>.</p>
+<p>Si vous essayez d’insérer une nouvelle ligne qui entre en conflit avec une ligne existante, une erreur <a class="reference internal" href="../../exceptions.html#django.db.IntegrityError" title="django.db.IntegrityError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IntegrityError</span></code></a> se produit. De même lorsqu’un conflit survient lors d’une mise à jour.</p>
+</dd></dl>
+
+<div class="section" id="s-name">
+<span id="name"></span><h3><code class="docutils literal notranslate"><span class="pre">name</span></code><a class="headerlink" href="#name" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.contrib.postgres.constraints.ExclusionConstraint.name">
+<code class="descclassname">ExclusionConstraint.</code><code class="descname">name</code><a class="headerlink" href="#django.contrib.postgres.constraints.ExclusionConstraint.name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Le nom de la contrainte.</p>
+</div>
+<div class="section" id="s-expressions">
+<span id="expressions"></span><h3><code class="docutils literal notranslate"><span class="pre">expressions</span></code><a class="headerlink" href="#expressions" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.contrib.postgres.constraints.ExclusionConstraint.expressions">
+<code class="descclassname">ExclusionConstraint.</code><code class="descname">expressions</code><a class="headerlink" href="#django.contrib.postgres.constraints.ExclusionConstraint.expressions" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Un itérable de tuples binaires. Le premier élément est une expression ou une chaîne. Le second élément est un opérateur SQL sous forme de chaîne. Pour éviter les erreurs syntaxiques, vous pouvez utiliser <a class="reference internal" href="fields.html#django.contrib.postgres.fields.RangeOperators" title="django.contrib.postgres.fields.RangeOperators"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeOperators</span></code></a> qui fait correspondre les opérateurs à des chaînes. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">expressions</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;timespan&#39;</span><span class="p">,</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">ADJACENT_TO</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">F</span><span class="p">(</span><span class="s1">&#39;room&#39;</span><span class="p">),</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">EQUAL</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition-restrictions-on-operators admonition">
+<p class="first admonition-title">Restrictions sur les opérateurs.</p>
+<p class="last">Seuls des opérateurs commutatifs peuvent être utilisés dans des contraintes d’exclusion.</p>
+</div>
+</div>
+<div class="section" id="s-index-type">
+<span id="index-type"></span><h3><code class="docutils literal notranslate"><span class="pre">index_type</span></code><a class="headerlink" href="#index-type" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.contrib.postgres.constraints.ExclusionConstraint.index_type">
+<code class="descclassname">ExclusionConstraint.</code><code class="descname">index_type</code><a class="headerlink" href="#django.contrib.postgres.constraints.ExclusionConstraint.index_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Le type d’index de la contrainte. La valeurs admises sont <code class="docutils literal notranslate"><span class="pre">GIST</span></code> ou <code class="docutils literal notranslate"><span class="pre">SPGIST</span></code>. Les correspondances ne tiennent pas compte de la casse. En cas d’absence, le type d’index par défaut est <code class="docutils literal notranslate"><span class="pre">GIST</span></code>.</p>
+</div>
+<div class="section" id="s-condition">
+<span id="condition"></span><h3><code class="docutils literal notranslate"><span class="pre">condition</span></code><a class="headerlink" href="#condition" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.contrib.postgres.constraints.ExclusionConstraint.condition">
+<code class="descclassname">ExclusionConstraint.</code><code class="descname">condition</code><a class="headerlink" href="#django.contrib.postgres.constraints.ExclusionConstraint.condition" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Un objet <a class="reference internal" href="../../models/querysets.html#django.db.models.Q" title="django.db.models.Q"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q</span></code></a> qui indique la condition de restriction d’une contrainte à un sous-ensemble de lignes. Par exemple, <code class="docutils literal notranslate"><span class="pre">condition=Q(annule=False)</span></code>.</p>
+<p>Ces conditions sont soumises aux mêmes restrictions de base de données que <a class="reference internal" href="../../models/indexes.html#django.db.models.Index.condition" title="django.db.models.Index.condition"><code class="xref py py-attr docutils literal notranslate"><span class="pre">django.db.models.Index.condition</span></code></a>.</p>
+</div>
+<div class="section" id="s-deferrable">
+<span id="deferrable"></span><h3><code class="docutils literal notranslate"><span class="pre">deferrable</span></code><a class="headerlink" href="#deferrable" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.contrib.postgres.constraints.ExclusionConstraint.deferrable">
+<code class="descclassname">ExclusionConstraint.</code><code class="descname">deferrable</code><a class="headerlink" href="#django.contrib.postgres.constraints.ExclusionConstraint.deferrable" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Définissez ce paramètre pour créer une contrainte d’exclusion différable. Les valeurs acceptées sont <code class="docutils literal notranslate"><span class="pre">Deferrable.DEFERRED</span></code> ou <code class="docutils literal notranslate"><span class="pre">Deferrable.IMMEDIATE</span></code>. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.constraints</span> <span class="k">import</span> <span class="n">ExclusionConstraint</span>
+<span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">RangeOperators</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Deferrable</span>
+
+
+<span class="n">ExclusionConstraint</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;exclude_overlapping_deferred&#39;</span><span class="p">,</span>
+    <span class="n">expressions</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;timespan&#39;</span><span class="p">,</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">OVERLAPS</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="n">deferrable</span><span class="o">=</span><span class="n">Deferrable</span><span class="o">.</span><span class="n">DEFERRED</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Par défaut, les contraintes ne sont pas différées. Une contrainte différée ne sera pas appliquée avant la fin de la transaction. Une contrainte immédiate sera appliquée immédiatement après chaque commande.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Les contraintes d’exclusion différées peuvent amener à des <a class="reference external" href="https://www.postgresql.org/docs/current/sql-createtable.html#id-1.9.3.85.9.4">performances réduites</a>.</p>
+</div>
+</div>
+<div class="section" id="s-examples">
+<span id="examples"></span><h3>Exemples<a class="headerlink" href="#examples" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’exemple suivant évite les chevauchements de réservations d’une même salle, sans tenir compte des réservations annulées</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.constraints</span> <span class="k">import</span> <span class="n">ExclusionConstraint</span>
+<span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="n">DateTimeRangeField</span><span class="p">,</span> <span class="n">RangeOperators</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Q</span>
+
+<span class="k">class</span> <span class="nc">Room</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">Reservation</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">room</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;Room&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">timespan</span> <span class="o">=</span> <span class="n">DateTimeRangeField</span><span class="p">()</span>
+    <span class="n">cancelled</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ExclusionConstraint</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;exclude_overlapping_reservations&#39;</span><span class="p">,</span>
+                <span class="n">expressions</span><span class="o">=</span><span class="p">[</span>
+                    <span class="p">(</span><span class="s1">&#39;timespan&#39;</span><span class="p">,</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">OVERLAPS</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;room&#39;</span><span class="p">,</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">EQUAL</span><span class="p">),</span>
+                <span class="p">],</span>
+                <span class="n">condition</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="n">cancelled</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+<p>Dans le cas où un modèle définit un intervalle avec deux champs, au lieu des types d’intervalle natifs de PostgreSQL, vous devriez écrire une expression qui utilise la fonction équivalente (par ex.  <code class="docutils literal notranslate"><span class="pre">TsTzRange()</span></code>), et utiliser les délimiteurs du champ. La plupart du temps, les délimiteurs seront <code class="docutils literal notranslate"><span class="pre">'[)'</span></code>, ce qui signifie que la limite inférieure est inclusive et la limite supérieure exclusive. Vous pouvez utiliser <a class="reference internal" href="fields.html#django.contrib.postgres.fields.RangeBoundary" title="django.contrib.postgres.fields.RangeBoundary"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeBoundary</span></code></a> qui fournit des correspondances d’expression pour les <a class="reference external" href="https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-INCLUSIVITY">limites d’intervalle</a>. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.postgres.constraints</span> <span class="k">import</span> <span class="n">ExclusionConstraint</span>
+<span class="kn">from</span> <span class="nn">django.contrib.postgres.fields</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">DateTimeRangeField</span><span class="p">,</span>
+    <span class="n">RangeBoundary</span><span class="p">,</span>
+    <span class="n">RangeOperators</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Func</span><span class="p">,</span> <span class="n">Q</span>
+
+
+<span class="k">class</span> <span class="nc">TsTzRange</span><span class="p">(</span><span class="n">Func</span><span class="p">):</span>
+    <span class="n">function</span> <span class="o">=</span> <span class="s1">&#39;TSTZRANGE&#39;</span>
+    <span class="n">output_field</span> <span class="o">=</span> <span class="n">DateTimeRangeField</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">Reservation</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">room</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;Room&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">()</span>
+    <span class="n">cancelled</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ExclusionConstraint</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s1">&#39;exclude_overlapping_reservations&#39;</span><span class="p">,</span>
+                <span class="n">expressions</span><span class="o">=</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">TsTzRange</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="n">RangeBoundary</span><span class="p">()),</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">OVERLAPS</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s1">&#39;room&#39;</span><span class="p">,</span> <span class="n">RangeOperators</span><span class="o">.</span><span class="n">EQUAL</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">condition</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="n">cancelled</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contraintes de bases de données spécifiques à PostgreSQL</a><ul>
+<li><a class="reference internal" href="#exclusionconstraint"><code class="docutils literal notranslate"><span class="pre">ExclusionConstraint</span></code></a><ul>
+<li><a class="reference internal" href="#name"><code class="docutils literal notranslate"><span class="pre">name</span></code></a></li>
+<li><a class="reference internal" href="#expressions"><code class="docutils literal notranslate"><span class="pre">expressions</span></code></a></li>
+<li><a class="reference internal" href="#index-type"><code class="docutils literal notranslate"><span class="pre">index_type</span></code></a></li>
+<li><a class="reference internal" href="#condition"><code class="docutils literal notranslate"><span class="pre">condition</span></code></a></li>
+<li><a class="reference internal" href="#deferrable"><code class="docutils literal notranslate"><span class="pre">deferrable</span></code></a></li>
+<li><a class="reference internal" href="#examples">Exemples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="aggregates.html"
+                        title="Chapitre précédent">Fonctions d’agrégation spécifiques à PostgreSQL</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="fields.html"
+                        title="Chapitre suivant">Champs de modèles spécifiques à PostgreSQL</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/postgres/constraints.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="aggregates.html" title="Fonctions d’agrégation spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="fields.html" title="Champs de modèles spécifiques à PostgreSQL">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1221 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>L’API des formulaires &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Champs de formulaires" href="fields.html" />
+    <link rel="prev" title="Formulaires" href="index.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="index.html" title="Formulaires">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="fields.html" title="Champs de formulaires">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-forms-api">
+            
+  <div class="section" id="s-module-django.forms">
+<span id="s-the-forms-api"></span><span id="module-django.forms"></span><span id="the-forms-api"></span><h1>L’API des formulaires<a class="headerlink" href="#module-django.forms" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="admonition-about-this-document admonition">
+<p class="first admonition-title">À propos de ce document</p>
+<p class="last">Ce document aborde en détails l’API des formulaires de Django. Il est recommandé de lire d’abord l”<a class="reference internal" href="../../topics/forms/index.html"><span class="doc">introduction à l’utilisation des formulaires</span></a>.</p>
+</div>
+<div class="section" id="s-bound-and-unbound-forms">
+<span id="s-ref-forms-api-bound-unbound"></span><span id="bound-and-unbound-forms"></span><span id="ref-forms-api-bound-unbound"></span><h2>Formulaires liés et non liés<a class="headerlink" href="#bound-and-unbound-forms" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> est soit <strong>liée</strong> (bound) à un jeu de données, soit <strong>non liée</strong> (unbound).</p>
+<ul class="simple">
+<li>Si elle est <strong>liée</strong> à un jeu de données, elle est capable de valider ces données et d’afficher un formulaire en HTML en y incluant les données.</li>
+<li>Si elle est <strong>non liée</strong>, elle ne peut pas procéder à la validation (car il n’y a aucune donnée à valider&nbsp;!), mais elle peut tout de même afficher un formulaire HTML vierge.</li>
+</ul>
+<dl class="class">
+<dt id="django.forms.Form">
+<em class="property">class </em><code class="descname">Form</code><a class="headerlink" href="#django.forms.Form" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Pour créer une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> non liée, instanciez la classe&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Pour lier des données au formulaire, transmettez ces données sous forme de dictionnaire comme premier paramètre au constructeur de la classe <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dans ce dictionnaire, les clés sont les noms de champs qui correspondent aux attributs de la classe <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a>. Les valeurs sont les données que vous souhaitez valider. Il s’agit en principe de chaînes de caractères, mais ce n’est pas une obligation. Le type des données transmises dépend du champ <a class="reference internal" href="fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>, comme nous allons le voir dans un moment.</p>
+<dl class="attribute">
+<dt id="django.forms.Form.is_bound">
+<code class="descclassname">Form.</code><code class="descname">is_bound</code><a class="headerlink" href="#django.forms.Form.is_bound" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si vous avez besoin de faire la différence entre des instances de formulaires liés et non liés au moment de l’exécution, vous pouvez vous baser sur l’attribut <a class="reference internal" href="#django.forms.Form.is_bound" title="django.forms.Form.is_bound"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_bound</span></code></a> du formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_bound</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">({</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_bound</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Notez que le fait de transmettre un dictionnaire vide crée un formulaire <em>lié</em> avec des données vides&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">({})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_bound</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Si vous souhaitez modifier d’une quelconque manière les données d’une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> liée ou si vous aimeriez lier une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> non liée à certaines données, créez une nouvelle instance de <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a>. Il n’est pas possible de modifier les données dans une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a>. Dès qu’une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> a été créée, ses données doivent être considérées comme immuables, que les données existent ou non.</p>
+</div>
+<div class="section" id="s-using-forms-to-validate-data">
+<span id="using-forms-to-validate-data"></span><h2>Utilisation de formulaires pour valider des données<a class="headerlink" href="#using-forms-to-validate-data" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="method">
+<dt id="django.forms.Form.clean">
+<code class="descclassname">Form.</code><code class="descname">clean</code>()<a class="headerlink" href="#django.forms.Form.clean" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>L’implémentation d’une méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> pour un formulaire se justifie lorsque de la validation personnalisée est nécessaire pour des champs interdépendants. Voir <a class="reference internal" href="validation.html#validating-fields-with-clean"><span class="std std-ref">Nettoyage et validation de champs qui dépendent l’un de l’autre</span></a> pour des exemples d’utilisation.</p>
+<dl class="method">
+<dt id="django.forms.Form.is_valid">
+<code class="descclassname">Form.</code><code class="descname">is_valid</code>()<a class="headerlink" href="#django.forms.Form.is_valid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>La tâche principale d’un objet <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> est de valider des données. Disposant d’une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> liée, appelez la méthode <a class="reference internal" href="#django.forms.Form.is_valid" title="django.forms.Form.is_valid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid()</span></code></a> pour procéder à la validation et renvoyer une valeur booléenne indiquant si les données sont valides&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Essayons avec certaines données non valides. Dans ce cas, <code class="docutils literal notranslate"><span class="pre">subject</span></code> est vide (ce qui constitue une erreur, car tous les champs sont obligatoires par défaut) et <code class="docutils literal notranslate"><span class="pre">sender</span></code> n’est pas une adresse électronique valable&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;invalid email address&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.forms.Form.errors">
+<code class="descclassname">Form.</code><code class="descname">errors</code><a class="headerlink" href="#django.forms.Form.errors" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Accédez à l’attribut <a class="reference internal" href="#django.forms.Form.errors" title="django.forms.Form.errors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code></a> pour obtenir un dictionnaire des messages d’erreur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">errors</span>
+<span class="go">{&#39;sender&#39;: [&#39;Enter a valid email address.&#39;], &#39;subject&#39;: [&#39;This field is required.&#39;]}</span>
+</pre></div>
+</div>
+<p>Dans ce dictionnaire, les clés correspondent aux noms de champs et les valeurs à des listes de chaînes représentant les messages d’erreur. Ceux-ci sont stockés dans des listes car un champ peut générer plusieurs messages d’erreur.</p>
+<p>Vous pouvez accéder à <a class="reference internal" href="#django.forms.Form.errors" title="django.forms.Form.errors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code></a> sans devoir appeler d’abord <a class="reference internal" href="#django.forms.Form.is_valid" title="django.forms.Form.is_valid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid()</span></code></a>. Les données du formulaire seront validées lors du premier appel à <a class="reference internal" href="#django.forms.Form.is_valid" title="django.forms.Form.is_valid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid()</span></code></a> ou du premier accès à <a class="reference internal" href="#django.forms.Form.errors" title="django.forms.Form.errors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code></a>.</p>
+<p>Les routines de validation ne sont appelées qu’une seule fois, même si vous appelez plusieurs fois <a class="reference internal" href="#django.forms.Form.is_valid" title="django.forms.Form.is_valid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid()</span></code></a> ou que vous accédez plusieurs fois à <a class="reference internal" href="#django.forms.Form.errors" title="django.forms.Form.errors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code></a>. Cela signifie que si la validation provoque des effets de bord, ceux-ci ne sont produits qu’une seule fois.</p>
+<dl class="method">
+<dt id="django.forms.Form.errors.as_data">
+<code class="descclassname">Form.errors.</code><code class="descname">as_data</code>()<a class="headerlink" href="#django.forms.Form.errors.as_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie un dictionnaire faisant correspondre les champs à leur instance <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> originale.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">as_data</span><span class="p">()</span>
+<span class="go">{&#39;sender&#39;: [ValidationError([&#39;Enter a valid email address.&#39;])],</span>
+<span class="go">&#39;subject&#39;: [ValidationError([&#39;This field is required.&#39;])]}</span>
+</pre></div>
+</div>
+<p>Utilisez cette méthode chaque fois qu’il y a besoin d’identifier une erreur par son <code class="docutils literal notranslate"><span class="pre">code</span></code>. Cela permet des choses telles que la réécriture du message d’erreur ou l’écriture d’une logique personnalisée dans une vue lorsqu’une erreur donnée est présente. Elle peut également être utilisée pour sérialiser les erreurs dans un format personnalisé (par ex. XML)&nbsp;; par exemple, <a class="reference internal" href="#django.forms.Form.errors.as_json" title="django.forms.Form.errors.as_json"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_json()</span></code></a> se base sur <code class="docutils literal notranslate"><span class="pre">as_data()</span></code>.</p>
+<p>La nécessité de la méthode <code class="docutils literal notranslate"><span class="pre">as_data()</span></code> s’explique par la rétrocompatibilité. Précédemment, les instances <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> étaient perdues dès le moment où leurs messages d’erreur étaient ajoutés dans leur état <strong>rendu</strong> au dictionnaire <code class="docutils literal notranslate"><span class="pre">Form.errors</span></code>. Idéalement, <code class="docutils literal notranslate"><span class="pre">Form.errors</span></code> aurait dû stocker les instances <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> et des méthodes préfixées par <code class="docutils literal notranslate"><span class="pre">as_</span></code> auraient pu produire leur rendu final, mais il a fallu procéder d’une manière inverse afin de ne pas casser du code qui s’attendait à trouver des messages d’erreur «&nbsp;finaux&nbsp;» dans <code class="docutils literal notranslate"><span class="pre">Form.errors</span></code>.</p>
+<dl class="method">
+<dt id="django.forms.Form.errors.as_json">
+<code class="descclassname">Form.errors.</code><code class="descname">as_json</code>(<em>escape_html=False</em>)<a class="headerlink" href="#django.forms.Form.errors.as_json" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie les erreurs sérialisées en JSON.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">as_json</span><span class="p">()</span>
+<span class="go">{&quot;sender&quot;: [{&quot;message&quot;: &quot;Enter a valid email address.&quot;, &quot;code&quot;: &quot;invalid&quot;}],</span>
+<span class="go">&quot;subject&quot;: [{&quot;message&quot;: &quot;This field is required.&quot;, &quot;code&quot;: &quot;required&quot;}]}</span>
+</pre></div>
+</div>
+<p>Par défaut, <code class="docutils literal notranslate"><span class="pre">as_json()</span></code> n’échappe pas son contenu. Si vous l’utilisez dans un contexte comme des requêtes AJAX vers une vue de formulaire où le client interprète la réponse et insère les erreurs dans la page, il faut vous assurer de bien échapper le contenu du côté client pour éviter l’éventualité d’une attaque de script intersite. Vous pouvez le faire en JavaScript avec <code class="docutils literal notranslate"><span class="pre">element.textContent</span> <span class="pre">=</span> <span class="pre">errorText</span></code> ou en jQuery avec <code class="docutils literal notranslate"><span class="pre">$(el).text(errorText)</span></code> (plutôt que sa fonction <code class="docutils literal notranslate"><span class="pre">.html()</span></code>).</p>
+<p>Si pour une raison précise vous ne souhaitez pas utiliser l’échappement du côté client, vous pouvez aussi définir <code class="docutils literal notranslate"><span class="pre">escape_html=True</span></code> et les messages d’erreur seront échappés afin de pouvoir les utiliser directement en HTML.</p>
+<dl class="method">
+<dt id="django.forms.Form.errors.get_json_data">
+<code class="descclassname">Form.errors.</code><code class="descname">get_json_data</code>(<em>escape_html=False</em>)<a class="headerlink" href="#django.forms.Form.errors.get_json_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie les erreurs sous forme de dictionnaire prêt à être sérialisé en JSON. <a class="reference internal" href="#django.forms.Form.errors.as_json" title="django.forms.Form.errors.as_json"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.errors.as_json()</span></code></a> renvoie du JSON sérialisé, alors que cette methode renvoie les données d’erreur avant leur sérialisation.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">escape_html</span></code> possède le même comportement que pour <a class="reference internal" href="#django.forms.Form.errors.as_json" title="django.forms.Form.errors.as_json"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.errors.as_json()</span></code></a>.</p>
+<dl class="method">
+<dt id="django.forms.Form.add_error">
+<code class="descclassname">Form.</code><code class="descname">add_error</code>(<em>field</em>, <em>error</em>)<a class="headerlink" href="#django.forms.Form.add_error" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette méthode permet d’ajouter des erreurs à des champs spécifiques depuis la méthode <code class="docutils literal notranslate"><span class="pre">Form.clean()</span></code> elle-même ou carrément depuis l’extérieur du formulaire, par exemple depuis une vue.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">field</span></code> est le nom du champ auquel les erreurs seront attribuées. Si sa valeur est <code class="docutils literal notranslate"><span class="pre">None</span></code>, l’erreur est traitée comme une erreur non liée à un champ, et fera partie des erreurs renvoyées par <a class="reference internal" href="#django.forms.Form.non_field_errors" title="django.forms.Form.non_field_errors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.non_field_errors()</span></code></a>.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">error</span></code> peut être une chaîne ou de préférence une instance de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>. Consultez <a class="reference internal" href="validation.html#raising-validation-error"><span class="std std-ref">Génération de ValidationError</span></a> pour des conseils de bonnes pratiques lors de la définition d’erreurs de formulaire.</p>
+<p>Notez que <code class="docutils literal notranslate"><span class="pre">Form.add_error()</span></code> enlève automatiquement les champs correspondants du dictionnaire <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>.</p>
+<dl class="method">
+<dt id="django.forms.Form.has_error">
+<code class="descclassname">Form.</code><code class="descname">has_error</code>(<em>field</em>, <em>code=None</em>)<a class="headerlink" href="#django.forms.Form.has_error" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette méthode renvoie une valeur booléenne indiquant si un champ contient une erreur avec un <code class="docutils literal notranslate"><span class="pre">code</span></code> d’erreur spécifique. Si <code class="docutils literal notranslate"><span class="pre">code</span></code> vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>, la méthode renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si le champ contient n’importe quelle erreur.</p>
+<p>Pour vérifier la présence d’erreurs non liées aux champs, indiquez <a class="reference internal" href="../exceptions.html#django.core.exceptions.NON_FIELD_ERRORS" title="django.core.exceptions.NON_FIELD_ERRORS"><code class="xref py py-data docutils literal notranslate"><span class="pre">NON_FIELD_ERRORS</span></code></a> dans le paramètre <code class="docutils literal notranslate"><span class="pre">field</span></code>.</p>
+<dl class="method">
+<dt id="django.forms.Form.non_field_errors">
+<code class="descclassname">Form.</code><code class="descname">non_field_errors</code>()<a class="headerlink" href="#django.forms.Form.non_field_errors" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette méthode renvoie la liste des erreurs dans <a class="reference internal" href="#django.forms.Form.errors" title="django.forms.Form.errors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Form.errors</span></code></a> qui ne sont pas associées à un champ particulier. Cela comprend les erreurs <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> qui sont générées dans <a class="reference internal" href="#django.forms.Form.clean" title="django.forms.Form.clean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.clean()</span></code></a> et les erreurs ajoutées par <a class="reference internal" href="#django.forms.Form.add_error" title="django.forms.Form.add_error"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.add_error(None,</span> <span class="pre">&quot;...&quot;)</span></code></a>.</p>
+<div class="section" id="s-behavior-of-unbound-forms">
+<span id="behavior-of-unbound-forms"></span><h3>Comportement des formulaires non liés<a class="headerlink" href="#behavior-of-unbound-forms" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il n’y a pas de raison de vouloir valider un formulaire sans données, mais pour que cela soit dit, voici ce qui se passe avec des formulaires non liés&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">errors</span>
+<span class="go">{}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-dynamic-initial-values">
+<span id="dynamic-initial-values"></span><h2>Valeurs initiales dynamiques<a class="headerlink" href="#dynamic-initial-values" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="attribute">
+<dt id="django.forms.Form.initial">
+<code class="descclassname">Form.</code><code class="descname">initial</code><a class="headerlink" href="#django.forms.Form.initial" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Le paramètre <a class="reference internal" href="#django.forms.Form.initial" title="django.forms.Form.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a> permet de déclarer des valeurs initiales des champs de formulaire au moment de l’exécution. Par exemple, il peut être intéressant de pré-remplir un champ <code class="docutils literal notranslate"><span class="pre">username</span></code> avec le nom d’utilisateur de la session en cours.</p>
+<p>Pour faire cela, utilisez le paramètre <a class="reference internal" href="#django.forms.Form.initial" title="django.forms.Form.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a> d’une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a>. Quand il est présent, ce paramètre doit être un dictionnaire faisant correspondre des noms de champs à des valeurs initiales. N’incluez que les champs pour lesquels une valeur initiale existe&nbsp;; il n’est pas nécessaire d’inclure tous les champs du formulaire. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there!&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Ces valeurs ne sont affichées que pour les formulaires non liés et elles ne servent pas à fournir des valeurs par défaut si un champ particulier n’est pas renseigné.</p>
+<p>Si un champ <a class="reference internal" href="fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> définit <a class="reference internal" href="fields.html#django.forms.Field.initial" title="django.forms.Field.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a> <em>et</em> que vous incluez <a class="reference internal" href="#django.forms.Form.initial" title="django.forms.Form.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a> lors de la création du formulaire, c’est ce dernier qui prend le dessus. Dans cet exemple, <code class="docutils literal notranslate"><span class="pre">initial</span></code> est renseigné à la fois au niveau du champ et au niveau de l’instance de formulaire, et c’est ce dernier qui a la priorité&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">CommentForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="s1">&#39;class&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">url</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">URLField</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">comment</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">CommentForm</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;instance&#39;</span><span class="p">},</span> <span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Name:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;name&quot; value=&quot;instance&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Url:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;url&quot; name=&quot;url&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Comment:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;comment&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="django.forms.Form.get_initial_for_field">
+<code class="descclassname">Form.</code><code class="descname">get_initial_for_field</code>(<em>field</em>, <em>field_name</em>)<a class="headerlink" href="#django.forms.Form.get_initial_for_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Utilisez <a class="reference internal" href="#django.forms.Form.get_initial_for_field" title="django.forms.Form.get_initial_for_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_initial_for_field()</span></code></a> pour récupérer les données initiales d’un champ de formulaire. Les données sont prises dans <a class="reference internal" href="#django.forms.Form.initial" title="django.forms.Form.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Form.initial</span></code></a> et <a class="reference internal" href="fields.html#django.forms.Field.initial" title="django.forms.Field.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Field.initial</span></code></a>, dans cet ordre, et évalue toute valeur initiale exécutable, le cas échéant.</p>
+</div>
+<div class="section" id="s-checking-which-form-data-has-changed">
+<span id="checking-which-form-data-has-changed"></span><h2>Contrôle des données de formulaires modifiées<a class="headerlink" href="#checking-which-form-data-has-changed" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="method">
+<dt id="django.forms.Form.has_changed">
+<code class="descclassname">Form.</code><code class="descname">has_changed</code>()<a class="headerlink" href="#django.forms.Form.has_changed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Lorsque vous avez besoin de savoir quelles données de formulaire ont été modifiées en référence aux données initiales, utilisez la méthode <code class="docutils literal notranslate"><span class="pre">has_changed()</span></code> du formulaire.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">has_changed</span><span class="p">()</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>Lorsque le formulaire est envoyé, il est reconstruit et les données d’origine sont fournies afin que la comparaison puisse être faite&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">has_changed</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">has_changed()</span></code> renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si les données de <code class="docutils literal notranslate"><span class="pre">request.POST</span></code> diffèrent de celles qui ont été fournies dans <a class="reference internal" href="#django.forms.Form.initial" title="django.forms.Form.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a>, sinon elle renvoie <code class="docutils literal notranslate"><span class="pre">False</span></code>. Le résultat est produit en appelant <a class="reference internal" href="fields.html#django.forms.Field.has_changed" title="django.forms.Field.has_changed"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Field.has_changed()</span></code></a> pour chaque champ du formulaire.</p>
+<dl class="attribute">
+<dt id="django.forms.Form.changed_data">
+<code class="descclassname">Form.</code><code class="descname">changed_data</code><a class="headerlink" href="#django.forms.Form.changed_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>L’attribut <code class="docutils literal notranslate"><span class="pre">changed_data</span></code> renvoie une liste des noms de champs dont les valeurs dans les données liées au formulaire (habituellement <code class="docutils literal notranslate"><span class="pre">request.POST</span></code>) diffèrent de celles fournies initialement dans <a class="reference internal" href="#django.forms.Form.initial" title="django.forms.Form.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a>. La liste renvoyée est vide si les données sont parfaitement identiques.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">initial</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">has_changed</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The following fields changed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">changed_data</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">changed_data</span>
+<span class="go">[&#39;subject&#39;, &#39;message&#39;]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-accessing-the-fields-from-the-form">
+<span id="accessing-the-fields-from-the-form"></span><h2>Accès aux champs depuis le formulaire<a class="headerlink" href="#accessing-the-fields-from-the-form" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="attribute">
+<dt id="django.forms.Form.fields">
+<code class="descclassname">Form.</code><code class="descname">fields</code><a class="headerlink" href="#django.forms.Form.fields" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Vous pouvez accéder aux champs d’une instance de <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> depuis son attribut <code class="docutils literal notranslate"><span class="pre">fields</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span> <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">&lt;django.forms.fields.CharField object at 0x7ffaac632510&gt;</span>
+<span class="go">&lt;django.forms.fields.URLField object at 0x7ffaac632f90&gt;</span>
+<span class="go">&lt;django.forms.fields.CharField object at 0x7ffaac3aa050&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+<span class="go">&lt;django.forms.fields.CharField object at 0x7ffaac6324d0&gt;</span>
+</pre></div>
+</div>
+<p>Vous pouvez modifier un champ d’une instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> pour changer la façon dont il sera affiché dans le formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&#39;&lt;tr&gt;&lt;th&gt;Name:&lt;/th&gt;&lt;td&gt;&lt;input name=&quot;name&quot; type=&quot;text&quot; value=&quot;instance&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Username&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&#39;&lt;tr&gt;&lt;th&gt;Username:&lt;/th&gt;&lt;td&gt;&lt;input name=&quot;name&quot; type=&quot;text&quot; value=&quot;instance&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+</pre></div>
+</div>
+<p>Faites attention de ne pas modifier l’attribut <code class="docutils literal notranslate"><span class="pre">base_fields</span></code> car cette modification influencerait toutes les instances <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code> suivantes à l’intérieur du même processus Python&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">base_fields</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Username&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">another_f</span> <span class="o">=</span> <span class="n">CommentForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">another_f</span><span class="o">.</span><span class="n">as_table</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&#39;&lt;tr&gt;&lt;th&gt;Username:&lt;/th&gt;&lt;td&gt;&lt;input name=&quot;name&quot; type=&quot;text&quot; value=&quot;class&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-accessing-clean-data">
+<span id="accessing-clean-data"></span><h2>Accès aux données «&nbsp;nettoyées&nbsp;»<a class="headerlink" href="#accessing-clean-data" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="attribute">
+<dt id="django.forms.Form.cleaned_data">
+<code class="descclassname">Form.</code><code class="descname">cleaned_data</code><a class="headerlink" href="#django.forms.Form.cleaned_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Chaque champ d’une classe <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> a non seulement la responsabilité de valider ses données, mais aussi de les «&nbsp;nettoyer&nbsp;», c’est-à-dire les normaliser dans un format cohérent. C’est une fonction bien utile, parce que cela permet de saisir les données d’un champ de plusieurs manières, tout en conservant une cohérence au niveau de la donnée résultante.</p>
+<p>Par exemple, <a class="reference internal" href="fields.html#django.forms.DateField" title="django.forms.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a> normalise les saisies en un objet Python <code class="docutils literal notranslate"><span class="pre">datetime.date</span></code>. Que le contenu transmis soit une chaîne au format <code class="docutils literal notranslate"><span class="pre">'1994-07-15'</span></code>, un objet <code class="docutils literal notranslate"><span class="pre">datetime.date</span></code> ou un autre format encore, <code class="docutils literal notranslate"><span class="pre">DateField</span></code> transformera toujours ce contenu en objet <code class="docutils literal notranslate"><span class="pre">datetime.date</span></code>, pour autant qu’il soit valide.</p>
+<p>Après avoir créé une instance de <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> avec un jeu de données et l’avoir validé, il est possible d’accéder aux données nettoyées par son attribut <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">cleaned_data</span>
+<span class="go">{&#39;cc_myself&#39;: True, &#39;message&#39;: &#39;Hi there&#39;, &#39;sender&#39;: &#39;foo@example.com&#39;, &#39;subject&#39;: &#39;hello&#39;}</span>
+</pre></div>
+</div>
+<p>Notez que tout champ basé sur du texte, tel que <code class="docutils literal notranslate"><span class="pre">CharField</span></code> ou <code class="docutils literal notranslate"><span class="pre">EmailField</span></code>, nettoie toujours le contenu saisi pour en faire une chaîne de caractères. Nous aborderons les implications du codage plus loin dans ce document.</p>
+<p>Si vos données ne sont <em>pas</em> toutes valides, le dictionnaire <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> ne contient que les champs valides&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;invalid email address&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">cleaned_data</span>
+<span class="go">{&#39;cc_myself&#39;: True, &#39;message&#39;: &#39;Hi there&#39;}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> ne contient toujours que des clés correspondant à des champs définis dans le formulaire, même si vous lui transmettez des données supplémentaires lors de la création du formulaire. Dans cet exemple, nous transmettons des données de champs supplémentaires au constructeur de <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code>, mais <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> ne contient que les données correspondant aux champs du formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;extra_field_1&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;extra_field_2&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;extra_field_3&#39;</span><span class="p">:</span> <span class="s1">&#39;baz&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">cleaned_data</span> <span class="c1"># Doesn&#39;t contain extra_field_1, etc.</span>
+<span class="go">{&#39;cc_myself&#39;: True, &#39;message&#39;: &#39;Hi there&#39;, &#39;sender&#39;: &#39;foo@example.com&#39;, &#39;subject&#39;: &#39;hello&#39;}</span>
+</pre></div>
+</div>
+<p>Lorsque le formulaire est valide, <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> inclut une clé et une valeur pour <em>tous</em> ses champs, même si les données ne contenaient pas de valeur pour certains champs facultatifs. Dans cet exemple, le dictionnaire de données ne contient pas de valeur pour le champ <code class="docutils literal notranslate"><span class="pre">nick_name</span></code>, mais <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> l’intègre tout de même, avec une valeur vide&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">OptionalPersonForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">first_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">last_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">nick_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;first_name&#39;</span><span class="p">:</span> <span class="s1">&#39;John&#39;</span><span class="p">,</span> <span class="s1">&#39;last_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Lennon&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">OptionalPersonForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">cleaned_data</span>
+<span class="go">{&#39;nick_name&#39;: &#39;&#39;, &#39;first_name&#39;: &#39;John&#39;, &#39;last_name&#39;: &#39;Lennon&#39;}</span>
+</pre></div>
+</div>
+<p>Dans l’exemple ci-dessus, la valeur <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> de <code class="docutils literal notranslate"><span class="pre">nick_name</span></code> correspond à une chaîne vide, car <code class="docutils literal notranslate"><span class="pre">nick_name</span></code>  est un champ <code class="docutils literal notranslate"><span class="pre">CharField</span></code>, et ces champs considèrent la chaîne vide comme une valeur vide. Chaque type de champ connaît sa valeur vide, par exemple <code class="docutils literal notranslate"><span class="pre">DateField</span></code> emploie <code class="docutils literal notranslate"><span class="pre">None</span></code> au lieu de la chaîne vide. Pour plus de détails sur le comportement de chaque champ dans ce cas de figure, consultez la rubrique «&nbsp;Valeur vide&nbsp;» de chaque champ dans la section «&nbsp;Classes <code class="docutils literal notranslate"><span class="pre">Field</span></code> intégrées&nbsp;» ci-dessous.</p>
+<p>Il est possible d’écrire du code pour effectuer la validation de certains champs de formulaires (en fonction de leur nom) ou pour le formulaire entier (prenant en compte la combinaison de différents champs). Vous trouverez davantage d’informations à ce sujet dans <a class="reference internal" href="validation.html"><span class="doc">La validation de formulaires et de champs</span></a>.</p>
+</div>
+<div class="section" id="s-outputting-forms-as-html">
+<span id="s-ref-forms-api-outputting-html"></span><span id="outputting-forms-as-html"></span><span id="ref-forms-api-outputting-html"></span><h2>Affichage des formulaires en HTML<a class="headerlink" href="#outputting-forms-as-html" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La seconde tâche d’un objet <code class="docutils literal notranslate"><span class="pre">Form</span></code> est de s’afficher lui-même au format HTML. Pour faire cela, affichez-le avec <code class="docutils literal notranslate"><span class="pre">print</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+</pre></div>
+</div>
+<p>Si le formulaire est lié à des données, le résultat HTML contiendra ces données comme il se doit. Par exemple, si un champ est représenté par un composant <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;text&quot;&gt;</span></code>, les données figureront dans l’attribut <code class="docutils literal notranslate"><span class="pre">value</span></code>. Si un champ est représenté par un composant <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;checkbox&quot;&gt;</span></code>, le HTML produit contiendra <code class="docutils literal notranslate"><span class="pre">checked</span></code> le cas échéant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; value=&quot;hello&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; value=&quot;Hi there&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; value=&quot;foo@example.com&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot; checked&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+</pre></div>
+</div>
+<p>Ce résultat par défaut est un tableau HTML à deux colonnes, avec une ligne <code class="docutils literal notranslate"><span class="pre">&lt;tr&gt;</span></code> par champ. Notez ceci&nbsp;:</p>
+<ul class="simple">
+<li>Pour des raisons d’agilité, le résultat ne contient <em>pas</em> les balises <code class="docutils literal notranslate"><span class="pre">&lt;table&gt;</span></code> et <code class="docutils literal notranslate"><span class="pre">&lt;/table&gt;</span></code>, ni les balises <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;/form&gt;</span></code> ou <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;submit&quot;&gt;</span></code>. C’est à vous de les fournir.</li>
+<li>Chaque type de champ possède une représentation HTML par défaut. <code class="docutils literal notranslate"><span class="pre">CharField</span></code> est représenté par <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;text&quot;&gt;</span></code> et <code class="docutils literal notranslate"><span class="pre">EmailField</span></code> par <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;email&quot;&gt;</span></code>. <code class="docutils literal notranslate"><span class="pre">BooleanField(null=False)</span></code> est représenté par <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;checkbox&quot;&gt;</span></code>. Notez qu’il ne s’agit que de valeurs par défaut raisonnables&nbsp;; il est possible de définir le code HTML produit par un champ spécifique en utilisant des composants, ce que nous expliquerons tout à l’heure.</li>
+<li>Le nom <code class="docutils literal notranslate"><span class="pre">name</span></code> HTML de chaque balise est directement dérivé de son nom d’attribut dans la classe <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code>.</li>
+<li>L’étiquette textuelle de chaque champ (par ex. <code class="docutils literal notranslate"><span class="pre">'Subject:'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Message:'</span></code> et <code class="docutils literal notranslate"><span class="pre">'Cc</span> <span class="pre">myself:'</span></code>) est généré à partir du nom de champ en convertissant tous les soulignements en espaces et en mettant en majuscule la première lettre. Encore une fois, il ne s’agit que de valeurs par défaut plus ou moins adéquates&nbsp;; vous pouvez aussi définir ces étiquettes manuellement.</li>
+<li>Chaque étiquette textuelle est intégrée dans une balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> qui se réfère à son champ de formulaire par son attribut <code class="docutils literal notranslate"><span class="pre">id</span></code>. La valeur de celui-ci est générée en ajoutant le préfixe <code class="docutils literal notranslate"><span class="pre">'id_'</span></code> au nom du champ. Les attributs <code class="docutils literal notranslate"><span class="pre">id</span></code> et les balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> sont compris dans le HTML produit par défaut pour être conforme aux bonnes pratiques, mais vous pouvez modifier ce comportement.</li>
+<li>Le résultat utilise la syntaxe HTML5, avec l’en-tête <code class="docutils literal notranslate"><span class="pre">&lt;!DOCTYPE</span> <span class="pre">html&gt;</span></code>. Par exemple, les attributs booléens tels que <code class="docutils literal notranslate"><span class="pre">checked</span></code> sont préférés au style XHTML <code class="docutils literal notranslate"><span class="pre">checked='checked'</span></code>.</li>
+</ul>
+<p>Bien que le résultat sous forme de <code class="docutils literal notranslate"><span class="pre">&lt;table&gt;</span></code> soit le style de résultat par défaut lorsqu’on affiche un formulaire avec <code class="docutils literal notranslate"><span class="pre">print</span></code>, d’autres styles de résultat sont disponibles. Chaque style est disponible par une méthode de l’objet formulaire et chaque méthode de rendu renvoie une chaîne.</p>
+<div class="section" id="s-as-p">
+<span id="as-p"></span><h3><code class="docutils literal notranslate"><span class="pre">as_p()</span></code><a class="headerlink" href="#as-p" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.forms.Form.as_p">
+<code class="descclassname">Form.</code><code class="descname">as_p</code>()<a class="headerlink" href="#django.forms.Form.as_p" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">as_p()</span></code> produit le formulaire par une série de balises <code class="docutils literal notranslate"><span class="pre">&lt;p&gt;</span></code>, chacune contenant un champ&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">()</span>
+<span class="go">&#39;&lt;p&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;\n&lt;p&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/p&gt;\n&lt;p&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/p&gt;\n&lt;p&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/p&gt;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">())</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/p&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-as-ul">
+<span id="as-ul"></span><h3><code class="docutils literal notranslate"><span class="pre">as_ul()</span></code><a class="headerlink" href="#as-ul" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.forms.Form.as_ul">
+<code class="descclassname">Form.</code><code class="descname">as_ul</code>()<a class="headerlink" href="#django.forms.Form.as_ul" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">as_ul()</span></code> produit le formulaire par une série de balises <code class="docutils literal notranslate"><span class="pre">&lt;li&gt;</span></code>, chacune contenant un champ. Les balises <code class="docutils literal notranslate"><span class="pre">&lt;ul&gt;</span></code> et <code class="docutils literal notranslate"><span class="pre">&lt;/ul&gt;</span></code> ne sont pas comprises, ce qui vous donne la flexibilité de définir vous-même des attributs à la balise <code class="docutils literal notranslate"><span class="pre">&lt;ul&gt;</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">()</span>
+<span class="go">&#39;&lt;li&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;\n&lt;li&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/li&gt;\n&lt;li&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/li&gt;\n&lt;li&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/li&gt;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/li&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-as-table">
+<span id="as-table"></span><h3><code class="docutils literal notranslate"><span class="pre">as_table()</span></code><a class="headerlink" href="#as-table" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.forms.Form.as_table">
+<code class="descclassname">Form.</code><code class="descname">as_table</code>()<a class="headerlink" href="#django.forms.Form.as_table" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Pour terminer, <code class="docutils literal notranslate"><span class="pre">as_table()</span></code> produit le formulaire dans une balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;table&gt;</span></code>. C’est le même résultat qu’en l’affichant avec <code class="docutils literal notranslate"><span class="pre">print</span></code>. En fait, lorsqu’un objet formulaire est affiché avec <code class="docutils literal notranslate"><span class="pre">print</span></code>, c’est sa méthode <code class="docutils literal notranslate"><span class="pre">as_table()</span></code> qui est appelée en arrière-plan&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">()</span>
+<span class="go">&#39;&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;\n&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-styling-required-or-erroneous-form-rows">
+<span id="s-ref-forms-api-styling-form-rows"></span><span id="styling-required-or-erroneous-form-rows"></span><span id="ref-forms-api-styling-form-rows"></span><h3>Ajout de styles aux lignes de formulaire obligatoires ou erronées<a class="headerlink" href="#styling-required-or-erroneous-form-rows" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.forms.Form.error_css_class">
+<code class="descclassname">Form.</code><code class="descname">error_css_class</code><a class="headerlink" href="#django.forms.Form.error_css_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.Form.required_css_class">
+<code class="descclassname">Form.</code><code class="descname">required_css_class</code><a class="headerlink" href="#django.forms.Form.required_css_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Il est assez fréquent de devoir définir des styles particuliers s’appliquant aux lignes et champs de formulaire qui sont obligatoires ou qui contiennent des erreurs. Par exemple, on pourrait afficher en gras les lignes de formulaire obligatoires et afficher les erreurs en rouge.</p>
+<p>La classe <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> offre plusieurs points d’entrée permettant d’ajouter des attributs <code class="docutils literal notranslate"><span class="pre">class</span></code> aux lignes obligatoires ou aux lignes avec des erreurs&nbsp;: complétez les attributs <a class="reference internal" href="#django.forms.Form.error_css_class" title="django.forms.Form.error_css_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Form.error_css_class</span></code></a> et <a class="reference internal" href="#django.forms.Form.required_css_class" title="django.forms.Form.required_css_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Form.required_css_class</span></code></a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">ContactForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">error_css_class</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+    <span class="n">required_css_class</span> <span class="o">=</span> <span class="s1">&#39;required&#39;</span>
+
+    <span class="c1"># ... and the rest of your fields here</span>
+</pre></div>
+</div>
+<p>Après avoir fait cela, les classes <code class="docutils literal notranslate"><span class="pre">&quot;error&quot;</span></code> et <code class="docutils literal notranslate"><span class="pre">&quot;required&quot;</span></code> seront attribuées aux lignes correspondantes. Le code HTML ressemblera à quelque chose comme&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">())</span>
+<span class="go">&lt;tr class=&quot;required&quot;&gt;&lt;th&gt;&lt;label class=&quot;required&quot; for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt;    ...</span>
+<span class="go">&lt;tr class=&quot;required&quot;&gt;&lt;th&gt;&lt;label class=&quot;required&quot; for=&quot;id_message&quot;&gt;Message:&lt;/label&gt;    ...</span>
+<span class="go">&lt;tr class=&quot;required error&quot;&gt;&lt;th&gt;&lt;label class=&quot;required&quot; for=&quot;id_sender&quot;&gt;Sender:&lt;/label&gt;      ...</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_cc_myself&quot;&gt;Cc myself:&lt;label&gt; ...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">label_tag</span><span class="p">()</span>
+<span class="go">&lt;label class=&quot;required&quot; for=&quot;id_subject&quot;&gt;Subject:&lt;/label&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">label_tag</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">})</span>
+<span class="go">&lt;label for=&quot;id_subject&quot; class=&quot;foo required&quot;&gt;Subject:&lt;/label&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-configuring-form-elements-html-id-attributes-and-label-tags">
+<span id="s-ref-forms-api-configuring-label"></span><span id="configuring-form-elements-html-id-attributes-and-label-tags"></span><span id="ref-forms-api-configuring-label"></span><h3>Configuration des attributs <code class="docutils literal notranslate"><span class="pre">id</span></code> et des balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> dans le code HTML des formulaires<a class="headerlink" href="#configuring-form-elements-html-id-attributes-and-label-tags" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.forms.Form.auto_id">
+<code class="descclassname">Form.</code><code class="descname">auto_id</code><a class="headerlink" href="#django.forms.Form.auto_id" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Par défaut, les méthodes de rendu HTML des formulaires comprennent&nbsp;:</p>
+<ul class="simple">
+<li>Les attributs HTML <code class="docutils literal notranslate"><span class="pre">id</span></code> des éléments de formulaire.</li>
+<li>Les balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> autour des étiquettes de champ. Une balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> détermine quel texte descriptif est associé à un élément de formulaire. Cette petite amélioration rend les formulaires plus conviviaux et mieux adaptés aux techniques d’accessibilité. Il est recommandé de toujours utiliser des balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code>.</li>
+</ul>
+<p>Les valeurs d’attribut <code class="docutils literal notranslate"><span class="pre">id</span></code> sont générées en préfixant les noms de champ de formulaire par <code class="docutils literal notranslate"><span class="pre">id_</span></code>. Ce mécanisme peut cependant être configuré si vous souhaitez modifier la convention <code class="docutils literal notranslate"><span class="pre">id</span></code> ou supprimer complètement les attributs HTML <code class="docutils literal notranslate"><span class="pre">id</span></code> ou les balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code>.</p>
+<p>Utilisez le paramètre <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> du constructeur de <code class="docutils literal notranslate"><span class="pre">Form</span></code> pour contrôler le comportement <code class="docutils literal notranslate"><span class="pre">id</span></code> et <code class="docutils literal notranslate"><span class="pre">label</span></code>. Ce paramètre doit valoir <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code> ou contenir une chaîne.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, le rendu HTML du formulaire ne contiendra par de balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> ni d’attributs <code class="docutils literal notranslate"><span class="pre">id</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">())</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Subject:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Message:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Sender:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Cc myself:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;Subject: &lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Message: &lt;input type=&quot;text&quot; name=&quot;message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Sender: &lt;input type=&quot;email&quot; name=&quot;sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Cc myself: &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/li&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">())</span>
+<span class="go">&lt;p&gt;Subject: &lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Message: &lt;input type=&quot;text&quot; name=&quot;message&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Sender: &lt;input type=&quot;email&quot; name=&quot;sender&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Cc myself: &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/p&gt;</span>
+</pre></div>
+</div>
+<p>Si <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>, le rendu HTML du formulaire <em>contiendra</em> des balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> et utilisera le nom du champ comme identifiant <code class="docutils literal notranslate"><span class="pre">id</span></code> pour chaque champ de formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">())</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;subject&quot;&gt;Subject:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;message&quot;&gt;Message:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;message&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;sender&quot;&gt;Sender:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;sender&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;cc_myself&quot;&gt;Cc myself:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;cc_myself&quot;&gt;&lt;/li&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">())</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;message&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;sender&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;cc_myself&quot;&gt;&lt;/p&gt;</span>
+</pre></div>
+</div>
+<p>Si <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> est défini à une chaîne contenant le caractère de format <code class="docutils literal notranslate"><span class="pre">'%s'</span></code>, le rendu HTML du formulaire contiendra des balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> et produira des attributs <code class="docutils literal notranslate"><span class="pre">id</span></code> en fonction de la chaîne de format. Par exemple, compte tenu d’une chaîne de format <code class="docutils literal notranslate"><span class="pre">'champ_%s'</span></code>, l’attribut <code class="docutils literal notranslate"><span class="pre">id</span></code> d’un champ nommé``sujet``  sera <code class="docutils literal notranslate"><span class="pre">'champ_sujet'</span></code>. En poursuivant notre exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="s1">&#39;id_for_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">())</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_for_subject&quot;&gt;Subject:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_for_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_for_message&quot;&gt;Message:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_for_message&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_for_sender&quot;&gt;Sender:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_for_sender&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_for_cc_myself&quot;&gt;Cc myself:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_for_cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;id_for_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_for_message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_for_sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_for_cc_myself&quot;&gt;&lt;/li&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">())</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_for_subject&quot;&gt;Subject:&lt;/label&gt; &lt;input id=&quot;id_for_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_for_message&quot;&gt;Message:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_for_message&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_for_sender&quot;&gt;Sender:&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_for_sender&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;label for=&quot;id_for_cc_myself&quot;&gt;Cc myself:&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_for_cc_myself&quot;&gt;&lt;/p&gt;</span>
+</pre></div>
+</div>
+<p>Si <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> est défini à toute autre valeur évaluée à la valeur «&nbsp;vrai&nbsp;», comme par exemple une chaîne ne contenant pas de <code class="docutils literal notranslate"><span class="pre">%s</span></code>, la bibliothèque va considérer que <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Par défaut, <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> contient la valeur <code class="docutils literal notranslate"><span class="pre">'id_%s'</span></code>.</p>
+<dl class="attribute">
+<dt id="django.forms.Form.label_suffix">
+<code class="descclassname">Form.</code><code class="descname">label_suffix</code><a class="headerlink" href="#django.forms.Form.label_suffix" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Une chaîne traduisible (en anglais, la valeur par défaut est deux-points (<code class="docutils literal notranslate"><span class="pre">:</span></code>)) qui sera ajoutée à chaque nom d’étiquette lors du rendu HTML d’un formulaire.</p>
+<p>Il est possible de personnaliser ce caractère ou de l’omettre entièrement en utilisant le paramètre <code class="docutils literal notranslate"><span class="pre">label_suffix</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="s1">&#39;id_for_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">label_suffix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_subject&quot;&gt;Subject&lt;/label&gt; &lt;input id=&quot;id_for_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_message&quot;&gt;Message&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_for_message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_sender&quot;&gt;Sender&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_for_sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_cc_myself&quot;&gt;Cc myself&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_for_cc_myself&quot;&gt;&lt;/li&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="s1">&#39;id_for_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">label_suffix</span><span class="o">=</span><span class="s1">&#39; -&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_subject&quot;&gt;Subject -&gt;&lt;/label&gt; &lt;input id=&quot;id_for_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_message&quot;&gt;Message -&gt;&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_for_message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_sender&quot;&gt;Sender -&gt;&lt;/label&gt; &lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_for_sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_for_cc_myself&quot;&gt;Cc myself -&gt;&lt;/label&gt; &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_for_cc_myself&quot;&gt;&lt;/li&gt;</span>
+</pre></div>
+</div>
+<p>Notez que le suffixe d’étiquette n’est ajouté que si le dernier caractère de l’étiquette n’est pas un caractère de ponctuation (en anglais, il s’agit de <code class="docutils literal notranslate"><span class="pre">.</span></code>, <code class="docutils literal notranslate"><span class="pre">!</span></code>, <code class="docutils literal notranslate"><span class="pre">?</span></code> ou <code class="docutils literal notranslate"><span class="pre">:</span></code>).</p>
+<p>Les champs peuvent aussi définir leur propre <a class="reference internal" href="fields.html#django.forms.Field.label_suffix" title="django.forms.Field.label_suffix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">label_suffix</span></code></a>. Cette définition a la priorité sur <a class="reference internal" href="#django.forms.Form.label_suffix" title="django.forms.Form.label_suffix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Form.label_suffix</span></code></a>. Le suffixe peut aussi être surchargé au cours de l’exécution en utilisant le paramètre <code class="docutils literal notranslate"><span class="pre">label_suffix</span></code> de <a class="reference internal" href="#django.forms.BoundField.label_tag" title="django.forms.BoundField.label_tag"><code class="xref py py-meth docutils literal notranslate"><span class="pre">label_tag()</span></code></a>.</p>
+<dl class="attribute">
+<dt id="django.forms.Form.use_required_attribute">
+<code class="descclassname">Form.</code><code class="descname">use_required_attribute</code><a class="headerlink" href="#django.forms.Form.use_required_attribute" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si défini à <code class="docutils literal notranslate"><span class="pre">True</span></code> (par défaut), les champs de formulaire obligatoires possèdent l’attribut HTML <code class="docutils literal notranslate"><span class="pre">required</span></code>.</p>
+<p>Les <a class="reference internal" href="../../topics/forms/formsets.html"><span class="doc">formulaires groupés</span></a> créent leurs formulaires avec <code class="docutils literal notranslate"><span class="pre">use_required_attribute=False</span></code> pour éviter la validation incorrecte des navigateurs lors de l’ajout ou de la suppression de formulaires dans des formulaires groupés.</p>
+</div>
+<div class="section" id="s-configuring-the-rendering-of-a-form-s-widgets">
+<span id="configuring-the-rendering-of-a-form-s-widgets"></span><h3>Configuration du rendu des composants de formulaires<a class="headerlink" href="#configuring-the-rendering-of-a-form-s-widgets" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.forms.Form.default_renderer">
+<code class="descclassname">Form.</code><code class="descname">default_renderer</code><a class="headerlink" href="#django.forms.Form.default_renderer" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Indique le <a class="reference internal" href="renderers.html"><span class="doc">moteur de rendu</span></a> à utiliser pour le formulaire. Vaut <code class="docutils literal notranslate"><span class="pre">None</span></code> par défaut, ce qui signifie que le moteur de rendu par défaut défini dans le réglage <a class="reference internal" href="../settings.html#std:setting-FORM_RENDERER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">FORM_RENDERER</span></code></a> sera utilisé.</p>
+<p>Vous pouvez le définir comme attribut de classe lors de la déclaration du formulaire ou utiliser le paramètre <code class="docutils literal notranslate"><span class="pre">renderer</span></code> de <code class="docutils literal notranslate"><span class="pre">Form.__init__()</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">MyForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">default_renderer</span> <span class="o">=</span> <span class="n">MyRenderer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>ou&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">form</span> <span class="o">=</span> <span class="n">MyForm</span><span class="p">(</span><span class="n">renderer</span><span class="o">=</span><span class="n">MyRenderer</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-notes-on-field-ordering">
+<span id="notes-on-field-ordering"></span><h3>Notes sur le tri des champs<a class="headerlink" href="#notes-on-field-ordering" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Dans les raccourcis <code class="docutils literal notranslate"><span class="pre">as_p()</span></code>, <code class="docutils literal notranslate"><span class="pre">as_ul()</span></code> et <code class="docutils literal notranslate"><span class="pre">as_table()</span></code>, les champs sont affichés dans l’ordre de leur définition dans la classe de formulaire. Par exemple, dans l’exemple de <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code>, les champs sont définis dans l’ordre <code class="docutils literal notranslate"><span class="pre">subject</span></code>, <code class="docutils literal notranslate"><span class="pre">message</span></code>, <code class="docutils literal notranslate"><span class="pre">sender</span></code>, <code class="docutils literal notranslate"><span class="pre">cc_myself</span></code>. Pour changer cet ordre dans le résultat HTML, modifiez l’ordre dans lequel ces champs apparaissent dans la classe.</p>
+<p>Il existe plusieurs autres manières de personnaliser cet ordre&nbsp;:</p>
+<dl class="attribute">
+<dt id="django.forms.Form.field_order">
+<code class="descclassname">Form.</code><code class="descname">field_order</code><a class="headerlink" href="#django.forms.Form.field_order" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Par défaut, <code class="docutils literal notranslate"><span class="pre">Form.field_order=None</span></code>, ce qui conserve l’ordre dans lequel les champs sont définis dans la classe de formulaire. Si <code class="docutils literal notranslate"><span class="pre">field_order</span></code> est une liste de noms de champs, les champs sont ordonnés en fonction de cette liste et les champs restants sont ajoutés selon l’ordre par défaut. Les noms de champs de la liste qui sont inconnus sont ignorés. Cela permet de désactiver un champ dans une sous-classe en le définissant à <code class="docutils literal notranslate"><span class="pre">None</span></code> sans avoir à redéfinir l’ordre.</p>
+<p>Il est également possible d’utiliser le paramètre <code class="docutils literal notranslate"><span class="pre">Form.field_order</span></code> d’une classe <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> pour remplacer l’ordre des champs. Si un formulaire <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> définit <a class="reference internal" href="#django.forms.Form.field_order" title="django.forms.Form.field_order"><code class="xref py py-attr docutils literal notranslate"><span class="pre">field_order</span></code></a> <em>et</em> que <code class="docutils literal notranslate"><span class="pre">field_order</span></code> est inclus lors de l’instanciation de <code class="docutils literal notranslate"><span class="pre">Form</span></code>, c’est ce dernier <code class="docutils literal notranslate"><span class="pre">field_order</span></code> qui a la priorité.</p>
+<dl class="method">
+<dt id="django.forms.Form.order_fields">
+<code class="descclassname">Form.</code><code class="descname">order_fields</code>(<em>field_order</em>)<a class="headerlink" href="#django.forms.Form.order_fields" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Vous pouvez réorganiser les champs à tout moment en utilisant <code class="docutils literal notranslate"><span class="pre">order_fields()</span></code> avec une liste de noms de champs comme dans <a class="reference internal" href="#django.forms.Form.field_order" title="django.forms.Form.field_order"><code class="xref py py-attr docutils literal notranslate"><span class="pre">field_order</span></code></a>.</p>
+</div>
+<div class="section" id="s-how-errors-are-displayed">
+<span id="how-errors-are-displayed"></span><h3>Affichage des erreurs<a class="headerlink" href="#how-errors-are-displayed" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque vous affichez un objet <code class="docutils literal notranslate"><span class="pre">Form</span></code> lié à des données, le fait de l’afficher va automatiquement procéder à la validation du formulaire s’il ne l’a pas encore été, et le résultat HTML contiendra les erreurs de validation sous forme d’une section <code class="docutils literal notranslate"><span class="pre">&lt;ul</span> <span class="pre">class=&quot;errorlist&quot;&gt;</span></code> à côté du champ. Le positionnement précis des messages d’erreur dépend de la méthode de rendu HTML utilisée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;invalid email address&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_table</span><span class="p">())</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Subject:&lt;/th&gt;&lt;td&gt;&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;This field is required.&lt;/li&gt;&lt;/ul&gt;&lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Message:&lt;/th&gt;&lt;td&gt;&lt;input type=&quot;text&quot; name=&quot;message&quot; value=&quot;Hi there&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Sender:&lt;/th&gt;&lt;td&gt;&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;Enter a valid email address.&lt;/li&gt;&lt;/ul&gt;&lt;input type=&quot;email&quot; name=&quot;sender&quot; value=&quot;invalid email address&quot; required&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;Cc myself:&lt;/th&gt;&lt;td&gt;&lt;input checked type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;This field is required.&lt;/li&gt;&lt;/ul&gt;Subject: &lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Message: &lt;input type=&quot;text&quot; name=&quot;message&quot; value=&quot;Hi there&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;Enter a valid email address.&lt;/li&gt;&lt;/ul&gt;Sender: &lt;input type=&quot;email&quot; name=&quot;sender&quot; value=&quot;invalid email address&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Cc myself: &lt;input checked type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/li&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">())</span>
+<span class="go">&lt;p&gt;&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;This field is required.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Subject: &lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Message: &lt;input type=&quot;text&quot; name=&quot;message&quot; value=&quot;Hi there&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;Enter a valid email address.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Sender: &lt;input type=&quot;email&quot; name=&quot;sender&quot; value=&quot;invalid email address&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Cc myself: &lt;input checked type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/p&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-customizing-the-error-list-format">
+<span id="s-ref-forms-error-list-format"></span><span id="customizing-the-error-list-format"></span><span id="ref-forms-error-list-format"></span><h3>Personnalisation du format de la liste d’erreurs<a class="headerlink" href="#customizing-the-error-list-format" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, les formulaires utilisent <code class="docutils literal notranslate"><span class="pre">django.forms.utils.ErrorList</span></code> pour mettre en forme les erreurs de validation. Si vous aimeriez utiliser une autre classe pour afficher les erreurs, vous pouvez l’indiquer au moment de la construction du formulaire</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms.utils</span> <span class="k">import</span> <span class="n">ErrorList</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">DivErrorList</span><span class="p">(</span><span class="n">ErrorList</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_divs</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">as_divs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s1">&#39;&lt;div class=&quot;errorlist&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;&lt;div class=&quot;error&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/div&gt;&#39;</span> <span class="o">%</span> <span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">error_class</span><span class="o">=</span><span class="n">DivErrorList</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">as_p</span><span class="p">()</span>
+<span class="go">&lt;div class=&quot;errorlist&quot;&gt;&lt;div class=&quot;error&quot;&gt;This field is required.&lt;/div&gt;&lt;/div&gt;</span>
+<span class="go">&lt;p&gt;Subject: &lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Message: &lt;input type=&quot;text&quot; name=&quot;message&quot; value=&quot;Hi there&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;div class=&quot;errorlist&quot;&gt;&lt;div class=&quot;error&quot;&gt;Enter a valid email address.&lt;/div&gt;&lt;/div&gt;</span>
+<span class="go">&lt;p&gt;Sender: &lt;input type=&quot;email&quot; name=&quot;sender&quot; value=&quot;invalid email address&quot; required&gt;&lt;/p&gt;</span>
+<span class="go">&lt;p&gt;Cc myself: &lt;input checked type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/p&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-more-granular-output">
+<span id="more-granular-output"></span><h2>Un affichage plus fin<a class="headerlink" href="#more-granular-output" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les méthodes <code class="docutils literal notranslate"><span class="pre">as_p()</span></code>, <code class="docutils literal notranslate"><span class="pre">as_ul()</span></code> et <code class="docutils literal notranslate"><span class="pre">as_table()</span></code> sont des raccourcis, ce ne sont pas les seules façons d’afficher une objet formulaire.</p>
+<dl class="class">
+<dt id="django.forms.BoundField">
+<em class="property">class </em><code class="descname">BoundField</code><a class="headerlink" href="#django.forms.BoundField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilisé pour afficher en HTML un champ unique d’une instance de <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> ou pour accéder à ses attributs.</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">__str__()</span></code> de cet objet affiche le code HTML du champ.</p>
+</dd></dl>
+
+<p>Pour récupérer un seul <code class="docutils literal notranslate"><span class="pre">BoundField</span></code>, employez la syntaxe de consultation de dictionnaire sur le formulaire en utilisant le nom du champ comme clé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">])</span>
+<span class="go">&lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;</span>
+</pre></div>
+</div>
+<p>Pour obtenir tous les objets <code class="docutils literal notranslate"><span class="pre">BoundField</span></code>, faites une boucle sur le formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">boundfield</span> <span class="ow">in</span> <span class="n">form</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">boundfield</span><span class="p">)</span>
+<span class="go">&lt;input id=&quot;id_subject&quot; type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;</span>
+<span class="go">&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;</span>
+<span class="go">&lt;input type=&quot;email&quot; name=&quot;sender&quot; id=&quot;id_sender&quot; required&gt;</span>
+<span class="go">&lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot; id=&quot;id_cc_myself&quot;&gt;</span>
+</pre></div>
+</div>
+<p>Le résultat HTML spécifique de chaque champ respecte le réglage <code class="docutils literal notranslate"><span class="pre">auto_id</span></code> de l’objet formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
+<span class="go">&lt;input type=&quot;text&quot; name=&quot;message&quot; required&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="s1">&#39;id_</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
+<span class="go">&lt;input type=&quot;text&quot; name=&quot;message&quot; id=&quot;id_message&quot; required&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="s-attributes-of-boundfield">
+<span id="attributes-of-boundfield"></span><h3>Attributs de <code class="docutils literal notranslate"><span class="pre">BoundField</span></code><a class="headerlink" href="#attributes-of-boundfield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.forms.BoundField.auto_id">
+<code class="descclassname">BoundField.</code><code class="descname">auto_id</code><a class="headerlink" href="#django.forms.BoundField.auto_id" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’attribut HTML ID de cet objet <code class="docutils literal notranslate"><span class="pre">BoundField</span></code>. Renvoie une chaîne vide si <a class="reference internal" href="#django.forms.Form.auto_id" title="django.forms.Form.auto_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Form.auto_id</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.data">
+<code class="descclassname">BoundField.</code><code class="descname">data</code><a class="headerlink" href="#django.forms.BoundField.data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette propriété renvoie les données de cet objet <a class="reference internal" href="#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a> extraites par la méthode de composant <a class="reference internal" href="widgets.html#django.forms.Widget.value_from_datadict" title="django.forms.Widget.value_from_datadict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">value_from_datadict()</span></code></a>, ou <code class="docutils literal notranslate"><span class="pre">None</span></code> si elle n’a pas été indiquée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">unbound_form</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">unbound_form</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bound_form</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;My Subject&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bound_form</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="go">My Subject</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.errors">
+<code class="descclassname">BoundField.</code><code class="descname">errors</code><a class="headerlink" href="#django.forms.BoundField.errors" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un <a class="reference internal" href="#ref-forms-error-list-format"><span class="std std-ref">objet apparenté à une liste</span></a> qui s’affiche par une section <code class="docutils literal notranslate"><span class="pre">&lt;ul</span> <span class="pre">class=&quot;errorlist&quot;&gt;</span></code> lorsqu’il est affiché en HTML&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hi&#39;</span><span class="p">,</span> <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span>
+<span class="go">&lt;input type=&quot;text&quot; name=&quot;message&quot; required&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">errors</span>
+<span class="go">[&#39;This field is required.&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+<span class="go">&lt;ul class=&quot;errorlist&quot;&gt;&lt;li&gt;This field is required.&lt;/li&gt;&lt;/ul&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">errors</span>
+<span class="go">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+<span class="go">&#39;&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.field">
+<code class="descclassname">BoundField.</code><code class="descname">field</code><a class="headerlink" href="#django.forms.BoundField.field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’instance <a class="reference internal" href="fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> de la classe de formulaire que cet objet <a class="reference internal" href="#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a> adapte.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.form">
+<code class="descclassname">BoundField.</code><code class="descname">form</code><a class="headerlink" href="#django.forms.BoundField.form" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’instance <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> à laquelle est lié cet objet <a class="reference internal" href="#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.help_text">
+<code class="descclassname">BoundField.</code><code class="descname">help_text</code><a class="headerlink" href="#django.forms.BoundField.help_text" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le texte d’aide <a class="reference internal" href="fields.html#django.forms.Field.help_text" title="django.forms.Field.help_text"><code class="xref py py-attr docutils literal notranslate"><span class="pre">help_text</span></code></a> du champ.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.html_name">
+<code class="descclassname">BoundField.</code><code class="descname">html_name</code><a class="headerlink" href="#django.forms.BoundField.html_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le nom qui sera utilisé dans l’attribut <code class="docutils literal notranslate"><span class="pre">name</span></code> du code HTML du composant. Il prend en compte la valeur <a class="reference internal" href="#django.forms.Form.prefix" title="django.forms.Form.prefix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code></a> du formulaire.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.id_for_label">
+<code class="descclassname">BoundField.</code><code class="descname">id_for_label</code><a class="headerlink" href="#django.forms.BoundField.id_for_label" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilisez cette propriété pour produire l’identifiant de ce champ. Par exemple, si vous construisez manuellement une balise <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> dans un gabarit (sans tenir compte que <a class="reference internal" href="#django.forms.BoundField.label_tag" title="django.forms.BoundField.label_tag"><code class="xref py py-meth docutils literal notranslate"><span class="pre">label_tag()</span></code></a> le ferait très bien à votre place)&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">form.my_field.id_for_label</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span>...<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">my_field</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+<p>Par défaut, il s’agira du nom du champ préfixé par <code class="docutils literal notranslate"><span class="pre">id_</span></code> («&nbsp;<code class="docutils literal notranslate"><span class="pre">id_my_field</span></code>&nbsp;» dans l’exemple ci-dessus). Il est possible de modifier cet identifiant en renseignant <a class="reference internal" href="widgets.html#django.forms.Widget.attrs" title="django.forms.Widget.attrs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">attrs</span></code></a> pour le composant du champ. Par exemple, en définissant un champ comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_field</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">TextInput</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;myFIELD&#39;</span><span class="p">}))</span>
+</pre></div>
+</div>
+<p>et en utilisant le gabarit ci-dessus, le résultat affiché donnera quelque chose comme&nbsp;:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;myFIELD&quot;</span><span class="p">&gt;</span>...<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;&lt;</span><span class="nt">input</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;myFIELD&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;my_field&quot;</span> <span class="na">required</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.is_hidden">
+<code class="descclassname">BoundField.</code><code class="descname">is_hidden</code><a class="headerlink" href="#django.forms.BoundField.is_hidden" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si le composant de cet objet <a class="reference internal" href="#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a> est invisible.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.label">
+<code class="descclassname">BoundField.</code><code class="descname">label</code><a class="headerlink" href="#django.forms.BoundField.label" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’étiquette <a class="reference internal" href="fields.html#django.forms.Field.label" title="django.forms.Field.label"><code class="xref py py-attr docutils literal notranslate"><span class="pre">label</span></code></a> du champ. Utilisée dans la méthode <a class="reference internal" href="#django.forms.BoundField.label_tag" title="django.forms.BoundField.label_tag"><code class="xref py py-meth docutils literal notranslate"><span class="pre">label_tag()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.name">
+<code class="descclassname">BoundField.</code><code class="descname">name</code><a class="headerlink" href="#django.forms.BoundField.name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le nom de ce champ dans le formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="go">subject</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="go">message</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.BoundField.widget_type">
+<code class="descclassname">BoundField.</code><code class="descname">widget_type</code><a class="headerlink" href="#django.forms.BoundField.widget_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Renvoie le nom de classe en minuscules du composant du champ enveloppé, sans un éventuel suffixe <code class="docutils literal notranslate"><span class="pre">input</span></code> ou <code class="docutils literal notranslate"><span class="pre">widget</span></code>. Cela peut être utilisé lors de la construction de formulaires lorsque la disposition est dépendante du type de composant. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">form</span> <span class="o">%</span><span class="p">}</span>
+    <span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">widget_type</span> <span class="o">==</span> <span class="s1">&#39;checkbox&#39;</span> <span class="o">%</span><span class="p">}</span>
+        <span class="c1"># render one way</span>
+    <span class="p">{</span><span class="o">%</span> <span class="k">else</span> <span class="o">%</span><span class="p">}</span>
+        <span class="c1"># render another way</span>
+    <span class="p">{</span><span class="o">%</span> <span class="n">endif</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endfor</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-methods-of-boundfield">
+<span id="methods-of-boundfield"></span><h3>Méthodes de <code class="docutils literal notranslate"><span class="pre">BoundField</span></code><a class="headerlink" href="#methods-of-boundfield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.forms.BoundField.as_hidden">
+<code class="descclassname">BoundField.</code><code class="descname">as_hidden</code>(<em>attrs=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.forms.BoundField.as_hidden" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une chaîne HTML pour représenter le champ sous forme de <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;hidden&quot;&gt;</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> est retransmis à <a class="reference internal" href="#django.forms.BoundField.as_widget" title="django.forms.BoundField.as_widget"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_widget()</span></code></a>.</p>
+<p>Cette méthode est essentiellement utilisée en interne. Il est préférable d’utiliser plutôt un composant (<code class="docutils literal notranslate"><span class="pre">widget</span></code>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.forms.BoundField.as_widget">
+<code class="descclassname">BoundField.</code><code class="descname">as_widget</code>(<em>widget=None</em>, <em>attrs=None</em>, <em>only_initial=False</em>)<a class="headerlink" href="#django.forms.BoundField.as_widget" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Produit l’affichage du champ en s’appuyant sur le composant <code class="docutils literal notranslate"><span class="pre">widget</span></code> transmis, et en ajoutant d’éventuels attributs HTML transmis dans <code class="docutils literal notranslate"><span class="pre">attrs</span></code>. Si aucun composant n’est fourni, c’est le composant par défaut du champ qui sera utilisé.</p>
+<p><code class="docutils literal notranslate"><span class="pre">only_initial</span></code> est utilisé en interne par Django et ne devrait pas être défini explicitement.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.forms.BoundField.css_classes">
+<code class="descclassname">BoundField.</code><code class="descname">css_classes</code>(<em>extra_classes=None</em>)<a class="headerlink" href="#django.forms.BoundField.css_classes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Lorsque vous utilisez les raccourcis d’affichage de Django, les classes CSS sont utilisées pour indiquer les champs de formulaire obligatoires ou les champs contenant des erreurs. Si vous affichez manuellement les champs de formulaire, ces classes CSS sont disponibles par la méthode <code class="docutils literal notranslate"><span class="pre">css_classes</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">css_classes</span><span class="p">()</span>
+<span class="go">&#39;required&#39;</span>
+</pre></div>
+</div>
+<p>Si vous souhaitez fournir des classes supplémentaires en plus des classes liées aux erreurs et aux champs obligatoires, il est possible d’indiquer ces classes en paramètre&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">css_classes</span><span class="p">(</span><span class="s1">&#39;foo bar&#39;</span><span class="p">)</span>
+<span class="go">&#39;foo bar required&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.forms.BoundField.label_tag">
+<code class="descclassname">BoundField.</code><code class="descname">label_tag</code>(<em>contents=None</em>, <em>attrs=None</em>, <em>label_suffix=None</em>)<a class="headerlink" href="#django.forms.BoundField.label_tag" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Pour afficher séparément la balise <code class="docutils literal notranslate"><span class="pre">label</span></code> d’un champ de formulaire, on peut appeler sa méthode <code class="docutils literal notranslate"><span class="pre">label_tag()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">label_tag</span><span class="p">())</span>
+<span class="go">&lt;label for=&quot;id_message&quot;&gt;Message:&lt;/label&gt;</span>
+</pre></div>
+</div>
+<p>Il est possible de fournir le paramètre <code class="docutils literal notranslate"><span class="pre">contents</span></code> qui remplacera la balise <code class="docutils literal notranslate"><span class="pre">label</span></code> générée automatiquement. Un dictionnaire <code class="docutils literal notranslate"><span class="pre">attrs</span></code> peut contenir des attributs supplémentaires de la balise <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code>.</p>
+<p>Le code HTML produit inclut la valeur <a class="reference internal" href="#django.forms.Form.label_suffix" title="django.forms.Form.label_suffix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">label_suffix</span></code></a> du formulaire (un caractère deux-points par défaut) ou, s’il est défini, la valeur <a class="reference internal" href="fields.html#django.forms.Field.label_suffix" title="django.forms.Field.label_suffix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">label_suffix</span></code></a> du champ spécifique. Le paramètre <code class="docutils literal notranslate"><span class="pre">label_suffix</span></code> facultatif permet de surcharger tout suffixe défini précédemment. Par exemple, vous pouvez utiliser une chaîne vide pour masquer l’étiquette pour certains champs précis. Si vous avez besoin de le faire dans un gabarit, il est possible d’écrire un filtre personnalisé afin de pouvoir passer des paramètres à <code class="docutils literal notranslate"><span class="pre">label_tag</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.forms.BoundField.value">
+<code class="descclassname">BoundField.</code><code class="descname">value</code>()<a class="headerlink" href="#django.forms.BoundField.value" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilisez cette méthode pour afficher la valeur brute d’un champ telle qu’elle serait contenue dans un composant <code class="docutils literal notranslate"><span class="pre">Widget</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">initial</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;welcome&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unbound_form</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="n">initial</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bound_form</span> <span class="o">=</span> <span class="n">ContactForm</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hi&#39;</span><span class="p">},</span> <span class="n">initial</span><span class="o">=</span><span class="n">initial</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">unbound_form</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+<span class="go">welcome</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bound_form</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+<span class="go">hi</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-customizing-boundfield">
+<span id="customizing-boundfield"></span><h2>Personnalisation de <code class="docutils literal notranslate"><span class="pre">BoundField</span></code><a class="headerlink" href="#customizing-boundfield" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous avez besoin d’accéder à certaines informations supplémentaires d’un champ de formulaire dans un gabarit et que l’utilisation d’une sous-classe de <a class="reference internal" href="fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> ne suffit pas, envisagez également la personnalisation de <a class="reference internal" href="#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a>.</p>
+<p>Un champ de formulaire personnalisé peut remplacer <code class="docutils literal notranslate"><span class="pre">get_bound_field()</span></code>:</p>
+<dl class="method">
+<dt id="django.forms.Field.get_bound_field">
+<code class="descclassname">Field.</code><code class="descname">get_bound_field</code>(<em>form</em>, <em>field_name</em>)<a class="headerlink" href="#django.forms.Field.get_bound_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Accepte une instance de <a class="reference internal" href="#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> et le nom du champ. La valeur renvoyée sera utilisée pour accéder au champ dans un gabarit. Il s’agira très probablement d’une instance d’une sous-classe de <a class="reference internal" href="#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a>.</p>
+</dd></dl>
+
+<p>Si par exemple vous avez un champ <code class="docutils literal notranslate"><span class="pre">GPSCoordinatesField</span></code> et que vous souhaitez pouvoir accéder à des informations supplémentaires sur les coordonnées dans un gabarit, cela pourrait être implémenté de cette façon&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">GPSCoordinatesBoundField</span><span class="p">(</span><span class="n">BoundField</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">country</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the country the coordinates lie in or None if it can&#39;t be</span>
+<span class="sd">        determined.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">get_country_from_coordinates</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">class</span> <span class="nc">GPSCoordinatesField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_bound_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">GPSCoordinatesBoundField</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Il est maintenant possible d’accéder au pays dans un gabarit avec <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.coordinates.country</span> <span class="pre">}}</span></code>.</p>
+</div>
+<div class="section" id="s-binding-uploaded-files-to-a-form">
+<span id="s-binding-uploaded-files"></span><span id="binding-uploaded-files-to-a-form"></span><span id="binding-uploaded-files"></span><h2>Liaison de fichiers téléversés avec un formulaire<a class="headerlink" href="#binding-uploaded-files-to-a-form" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsqu’on a affaire à des champs de formulaire de type <code class="docutils literal notranslate"><span class="pre">FileField</span></code> ou <code class="docutils literal notranslate"><span class="pre">ImageField</span></code>, les choses se compliquent un peu plus.</p>
+<p>Premièrement, pour pouvoir envoyer des fichiers, il est important que la balise <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code> du formulaire définisse correctement son attribut <code class="docutils literal notranslate"><span class="pre">enctype</span></code> à <code class="docutils literal notranslate"><span class="pre">&quot;multipart/form-data&quot;</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">form</span> <span class="n">enctype</span><span class="o">=</span><span class="s2">&quot;multipart/form-data&quot;</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;post&quot;</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;/foo/&quot;</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Deuxièmement, au moment d’instancier le formulaire, il faut lier les données de type fichier. Ces données sont traitées de manière distincte des données habituelles de formulaire, ce qui fait que quand un formulaire contient un champ <code class="docutils literal notranslate"><span class="pre">FileField</span></code> ou <code class="docutils literal notranslate"><span class="pre">ImageField</span></code>, il doit recevoir un second paramètre au moment de faire la liaison entre le formulaire et les données. Ainsi, si nous étendons notre <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code> pour qu’il contienne un champ <code class="docutils literal notranslate"><span class="pre">ImageField</span></code> nommé <code class="docutils literal notranslate"><span class="pre">mugshot</span></code>, nous devons lier les données de fichier contenant l’image <code class="docutils literal notranslate"><span class="pre">mugshot</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bound form with an image field</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.core.files.uploadedfile</span> <span class="k">import</span> <span class="n">SimpleUploadedFile</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;subject&#39;</span><span class="p">:</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span>
+<span class="o">...</span>         <span class="s1">&#39;message&#39;</span><span class="p">:</span> <span class="s1">&#39;Hi there&#39;</span><span class="p">,</span>
+<span class="o">...</span>         <span class="s1">&#39;sender&#39;</span><span class="p">:</span> <span class="s1">&#39;foo@example.com&#39;</span><span class="p">,</span>
+<span class="o">...</span>         <span class="s1">&#39;cc_myself&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">file_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;mugshot&#39;</span><span class="p">:</span> <span class="n">SimpleUploadedFile</span><span class="p">(</span><span class="s1">&#39;face.jpg&#39;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">file</span> <span class="n">data</span><span class="o">&gt;</span><span class="p">)}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">ContactFormWithMugshot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>En pratique, vous allez généralement indiquer <code class="docutils literal notranslate"><span class="pre">request.FILES</span></code> comme source des données de fichier (comme pour <code class="docutils literal notranslate"><span class="pre">request.POST</span></code> représentant la source des données de formulaire)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bound form with an image field, data from the request</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">ContactFormWithMugshot</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La construction d’un formulaire non lié ne change pas, il suffit d’omettre aussi bien les données de formulaire que les données de fichier&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unbound form with an image field</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">ContactFormWithMugshot</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="s-testing-for-multipart-forms">
+<span id="testing-for-multipart-forms"></span><h3>Détection des formulaires composites<a class="headerlink" href="#testing-for-multipart-forms" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.forms.Form.is_multipart">
+<code class="descclassname">Form.</code><code class="descname">is_multipart</code>()<a class="headerlink" href="#django.forms.Form.is_multipart" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si vous écrivez des vues ou des gabarits réutilisables, il peut arriver que l’on ne sache pas à l’avance si un formulaire est composite. La méthode <code class="docutils literal notranslate"><span class="pre">is_multipart()</span></code> indique si le formulaire nécessite un codage composite lors de son envoi&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactFormWithMugshot</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">is_multipart</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Voici un exemple de la façon d’utiliser cette méthode dans un gabarit&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_multipart</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">form</span> <span class="n">enctype</span><span class="o">=</span><span class="s2">&quot;multipart/form-data&quot;</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;post&quot;</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;/foo/&quot;</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="k">else</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">form</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;post&quot;</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;/foo/&quot;</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endif</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{{</span> <span class="n">form</span> <span class="p">}}</span>
+<span class="o">&lt;/</span><span class="n">form</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-subclassing-forms">
+<span id="subclassing-forms"></span><h2>Formulaires et sous-classes<a class="headerlink" href="#subclassing-forms" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous avez plusieurs classes <code class="docutils literal notranslate"><span class="pre">Form</span></code> dont les champs sont partagés, il est possible d’utiliser l’héritage pour éviter la redondance.</p>
+<p>Lorsque vous héritez d’une classe <code class="docutils literal notranslate"><span class="pre">Form</span></code> personnalisée, la sous-classe résultante inclut tous les champs des ses classes parentes, suivis des champs définis dans la sous-classe.</p>
+<p>Dans cet exemple, <code class="docutils literal notranslate"><span class="pre">ContactFormWithPriority</span></code> contient tous les champs de <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code> plus un champ supplémentaire, <code class="docutils literal notranslate"><span class="pre">priority</span></code>. Les champs de <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code> apparaissent en premier&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">ContactFormWithPriority</span><span class="p">(</span><span class="n">ContactForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">priority</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ContactFormWithPriority</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;Subject: &lt;input type=&quot;text&quot; name=&quot;subject&quot; maxlength=&quot;100&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Message: &lt;input type=&quot;text&quot; name=&quot;message&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Sender: &lt;input type=&quot;email&quot; name=&quot;sender&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Cc myself: &lt;input type=&quot;checkbox&quot; name=&quot;cc_myself&quot;&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Priority: &lt;input type=&quot;text&quot; name=&quot;priority&quot; required&gt;&lt;/li&gt;</span>
+</pre></div>
+</div>
+<p>Il est possible d’hériter de plusieurs formulaires, en considérant ces formulaires comme des «&nbsp;mixins&nbsp;». Dans cet exemple, <code class="docutils literal notranslate"><span class="pre">BeatleForm</span></code> hérite à la fois de <code class="docutils literal notranslate"><span class="pre">PersonForm</span></code> et de <code class="docutils literal notranslate"><span class="pre">InstrumentForm</span></code> (dans cet ordre), et sa liste de champs contient les champs de ses classes parentes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PersonForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">first_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">last_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">InstrumentForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">instrument</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">BeatleForm</span><span class="p">(</span><span class="n">InstrumentForm</span><span class="p">,</span> <span class="n">PersonForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">haircut_type</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">BeatleForm</span><span class="p">(</span><span class="n">auto_id</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;First name: &lt;input type=&quot;text&quot; name=&quot;first_name&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Last name: &lt;input type=&quot;text&quot; name=&quot;last_name&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Instrument: &lt;input type=&quot;text&quot; name=&quot;instrument&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;Haircut type: &lt;input type=&quot;text&quot; name=&quot;haircut_type&quot; required&gt;&lt;/li&gt;</span>
+</pre></div>
+</div>
+<p>Il est possible d’enlever de manière déclarative un champ <code class="docutils literal notranslate"><span class="pre">Field</span></code> hérité d’une classe parente en définissant son nom à <code class="docutils literal notranslate"><span class="pre">None</span></code> dans la sous-classe. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">ParentForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">age</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">ChildForm</span><span class="p">(</span><span class="n">ParentForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">list</span><span class="p">(</span><span class="n">ChildForm</span><span class="p">()</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+<span class="go">[&#39;age&#39;]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-prefixes-for-forms">
+<span id="s-form-prefix"></span><span id="prefixes-for-forms"></span><span id="form-prefix"></span><h2>Préfixes de formulaires<a class="headerlink" href="#prefixes-for-forms" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="attribute">
+<dt id="django.forms.Form.prefix">
+<code class="descclassname">Form.</code><code class="descname">prefix</code><a class="headerlink" href="#django.forms.Form.prefix" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Une balise <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code> peut contenir plusieurs formulaires Django. Afin que chaque formulaire possède son propre espace de noms, utilisez le paramètre nommé <code class="docutils literal notranslate"><span class="pre">prefix</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mother</span> <span class="o">=</span> <span class="n">PersonForm</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;mother&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">father</span> <span class="o">=</span> <span class="n">PersonForm</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;father&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mother</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_mother-first_name&quot;&gt;First name:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;mother-first_name&quot; id=&quot;id_mother-first_name&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_mother-last_name&quot;&gt;Last name:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;mother-last_name&quot; id=&quot;id_mother-last_name&quot; required&gt;&lt;/li&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">father</span><span class="o">.</span><span class="n">as_ul</span><span class="p">())</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_father-first_name&quot;&gt;First name:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;father-first_name&quot; id=&quot;id_father-first_name&quot; required&gt;&lt;/li&gt;</span>
+<span class="go">&lt;li&gt;&lt;label for=&quot;id_father-last_name&quot;&gt;Last name:&lt;/label&gt; &lt;input type=&quot;text&quot; name=&quot;father-last_name&quot; id=&quot;id_father-last_name&quot; required&gt;&lt;/li&gt;</span>
+</pre></div>
+</div>
+<p>Le préfixe peut aussi être défini au niveau de la classe de formulaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PersonForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="o">...</span>
+<span class="gp">... </span>    <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;person&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">L’API des formulaires</a><ul>
+<li><a class="reference internal" href="#bound-and-unbound-forms">Formulaires liés et non liés</a></li>
+<li><a class="reference internal" href="#using-forms-to-validate-data">Utilisation de formulaires pour valider des données</a><ul>
+<li><a class="reference internal" href="#behavior-of-unbound-forms">Comportement des formulaires non liés</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamic-initial-values">Valeurs initiales dynamiques</a></li>
+<li><a class="reference internal" href="#checking-which-form-data-has-changed">Contrôle des données de formulaires modifiées</a></li>
+<li><a class="reference internal" href="#accessing-the-fields-from-the-form">Accès aux champs depuis le formulaire</a></li>
+<li><a class="reference internal" href="#accessing-clean-data">Accès aux données «&nbsp;nettoyées&nbsp;»</a></li>
+<li><a class="reference internal" href="#outputting-forms-as-html">Affichage des formulaires en HTML</a><ul>
+<li><a class="reference internal" href="#as-p"><code class="docutils literal notranslate"><span class="pre">as_p()</span></code></a></li>
+<li><a class="reference internal" href="#as-ul"><code class="docutils literal notranslate"><span class="pre">as_ul()</span></code></a></li>
+<li><a class="reference internal" href="#as-table"><code class="docutils literal notranslate"><span class="pre">as_table()</span></code></a></li>
+<li><a class="reference internal" href="#styling-required-or-erroneous-form-rows">Ajout de styles aux lignes de formulaire obligatoires ou erronées</a></li>
+<li><a class="reference internal" href="#configuring-form-elements-html-id-attributes-and-label-tags">Configuration des attributs <code class="docutils literal notranslate"><span class="pre">id</span></code> et des balises <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> dans le code HTML des formulaires</a></li>
+<li><a class="reference internal" href="#configuring-the-rendering-of-a-form-s-widgets">Configuration du rendu des composants de formulaires</a></li>
+<li><a class="reference internal" href="#notes-on-field-ordering">Notes sur le tri des champs</a></li>
+<li><a class="reference internal" href="#how-errors-are-displayed">Affichage des erreurs</a></li>
+<li><a class="reference internal" href="#customizing-the-error-list-format">Personnalisation du format de la liste d’erreurs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-granular-output">Un affichage plus fin</a><ul>
+<li><a class="reference internal" href="#attributes-of-boundfield">Attributs de <code class="docutils literal notranslate"><span class="pre">BoundField</span></code></a></li>
+<li><a class="reference internal" href="#methods-of-boundfield">Méthodes de <code class="docutils literal notranslate"><span class="pre">BoundField</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#customizing-boundfield">Personnalisation de <code class="docutils literal notranslate"><span class="pre">BoundField</span></code></a></li>
+<li><a class="reference internal" href="#binding-uploaded-files-to-a-form">Liaison de fichiers téléversés avec un formulaire</a><ul>
+<li><a class="reference internal" href="#testing-for-multipart-forms">Détection des formulaires composites</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#subclassing-forms">Formulaires et sous-classes</a></li>
+<li><a class="reference internal" href="#prefixes-for-forms">Préfixes de formulaires</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="index.html"
+                        title="Chapitre précédent">Formulaires</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="fields.html"
+                        title="Chapitre suivant">Champs de formulaires</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/forms/api.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="index.html" title="Formulaires">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="fields.html" title="Champs de formulaires">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

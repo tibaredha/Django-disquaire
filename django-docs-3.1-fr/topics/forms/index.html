@@ -1,0 +1,673 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Utilisation des formulaires &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Formulaires groupés" href="formsets.html" />
+    <link rel="prev" title="Utilisation des sessions" href="../http/sessions.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="../http/sessions.html" title="Utilisation des sessions">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="formsets.html" title="Formulaires groupés">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-forms-index">
+            
+  <div class="section" id="s-working-with-forms">
+<span id="working-with-forms"></span><h1>Utilisation des formulaires<a class="headerlink" href="#working-with-forms" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="admonition-about-this-document admonition">
+<p class="first admonition-title">À propos de ce document</p>
+<p class="last">Ce document présente une introduction aux bases des formulaires web et à la manière dont ils sont traités par Django. Pour plus de détails sur des aspects spécifiques de l’API des formulaires, consultez <a class="reference internal" href="../../ref/forms/api.html"><span class="doc">L’API des formulaires</span></a>, <a class="reference internal" href="../../ref/forms/fields.html"><span class="doc">Champs de formulaires</span></a>, et <a class="reference internal" href="../../ref/forms/validation.html"><span class="doc">La validation de formulaires et de champs</span></a>.</p>
+</div>
+<p>À moins que vous n’ayez l’intention de construire des sites Web et des applications qui ne font rien d’autre que de publier du contenu, et n’acceptant aucune saisie de la part de ses visiteurs, vous allez avoir besoin de comprendre et d’utiliser des formulaires.</p>
+<p>Django fournit un certain nombre d’outils et de bibliothèques pour vous aider à créer des formulaires de saisie pour les visiteurs du site, puis pour aider à traiter et à répondre à ces saisies.</p>
+<div class="section" id="s-html-forms">
+<span id="html-forms"></span><h2>Formulaires HTML<a class="headerlink" href="#html-forms" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En HTML, un formulaire est un ensemble d’éléments à l’intérieur des balises <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;...&lt;/form&gt;</span></code> qui permettent à un visiteur d’effectuer des actions comme saisir du texte, sélectionner des options, manipuler des objets ou des contrôles, et ainsi de suite, puis d’envoyer ces informations au serveur.</p>
+<p>Certains de ces éléments d’interface de formulaires - boîtes de saisie de texte ou cases à cocher - sont intégrés à HTML. D’autres éléments sont beaucoup plus complexes&nbsp;; une interface qui affiche un sélecteur de date ou qui permet de déplacer un curseur ou de contrôler un autre élément graphique utilise généralement du code JavaScript et CSS, ainsi que des éléments <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code> de formulaires HTML pour produire ce genre d’effets.</p>
+<p>En plus de ses éléments <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code>, un formulaire doit préciser deux choses&nbsp;:</p>
+<ul class="simple">
+<li><em>où</em>&nbsp;: l’URL vers laquelle les données correspondant à la saisie de l’utilisateur doivent être renvoyées</li>
+<li><em>comment</em>&nbsp;: la méthode HTTP utilisée pour renvoyer les données</li>
+</ul>
+<p>Par exemple, le formulaire de connexion pour l’administration de Django contient plusieurs éléments <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code>: un de <code class="docutils literal notranslate"><span class="pre">type=&quot;text&quot;</span></code> pour le nom d’utilisateur, un de <code class="docutils literal notranslate"><span class="pre">type=&quot;password&quot;</span></code> pour le mot de passe, et un de <code class="docutils literal notranslate"><span class="pre">type=&quot;submit&quot;</span></code> pour le bouton «&nbsp;Connexion&nbsp;». Il contient également des champs de texte cachés que l’utilisateur ne voit pas, mais que Django utilise pour déterminer ce qu’il faut faire après la connexion.</p>
+<p>Il indique également au navigateur que les données du formulaire doivent être envoyées à l’URL spécifiée dans l’attribut <code class="docutils literal notranslate"><span class="pre">action</span></code>  de la balise <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code> (<code class="docutils literal notranslate"><span class="pre">/admin/</span></code>) et qu’elles doivent être envoyées en utilisant le mécanisme HTTP spécifié par l’attribut <code class="docutils literal notranslate"><span class="pre">method</span></code> (<code class="docutils literal notranslate"><span class="pre">post</span></code>).</p>
+<p>Lorsque le bouton <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;submit&quot;</span> <span class="pre">value=&quot;Connexion&quot;&gt;</span></code> est déclenché, les données sont renvoyées à <code class="docutils literal notranslate"><span class="pre">/admin/</span></code>.</p>
+<div class="section" id="s-get-and-post">
+<span id="get-and-post"></span><h3><code class="docutils literal notranslate"><span class="pre">GET</span></code> et <code class="docutils literal notranslate"><span class="pre">POST</span></code><a class="headerlink" href="#get-and-post" title="Lien permanent vers ce titre">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span></code> et <code class="docutils literal notranslate"><span class="pre">POST</span></code> sont les seules méthodes HTTP à utiliser dans les formulaires.</p>
+<p>Le formulaire de connexion de Django est renvoyé en utilisant la méthode <code class="docutils literal notranslate"><span class="pre">POST</span></code>, par laquelle le navigateur regroupe les données du formulaire, les encode pour la transmission, les envoie au serveur, puis reçoit la réponse en retour.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span></code>, en revanche, regroupe les données fournies dans une chaîne et l’utilise pour composer une URL. L’URL contient l’adresse à laquelle les données doivent être envoyées, ainsi que les clés et les valeurs fournies. Vous pouvez en voir un exemple si vous effectuez une recherche dans la documentation de Django, car cela va produire une URL de la forme <code class="docutils literal notranslate"><span class="pre">https://docs.djangoproject.com/search/?q=forms&amp;release=1</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span></code> et <code class="docutils literal notranslate"><span class="pre">POST</span></code> sont généralement utilisées à des fins différentes.</p>
+<p>Toute requête pouvant être utilisée pour modifier l’état du système, par exemple une requête qui applique des changements en base de données, devrait utiliser <code class="docutils literal notranslate"><span class="pre">POST</span></code>. <code class="docutils literal notranslate"><span class="pre">GET</span></code> ne devrait être employée que pour des requêtes qui n’affectent pas l’état du système.</p>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span></code> ne conviendrait pas non plus pour un formulaire de changement de mot de passe, car le mot de passe apparaîtrait en clair dans l’URL ainsi que dans l’historique du navigateur et les journaux du serveur. Elle ne conviendrait pas non plus pour des données volumineuses ou pour des données binaires telles que pour une image. Une application Web utilisant des requêtes <code class="docutils literal notranslate"><span class="pre">GET</span></code> pour des formulaires administratifs ne serait pas sécurisée&nbsp;: il est facile pour un attaquant de simuler une requête de formulaire pour obtenir l’accès à des parties sensibles du système. Les requêtes <code class="docutils literal notranslate"><span class="pre">POST</span></code> accompagnées par d’autres protections comme la <a class="reference internal" href="../../ref/csrf.html"><span class="doc">protection CSRF</span></a> de Django offrent un bien meilleur contrôle sur les accès.</p>
+<p>D’autre part, <code class="docutils literal notranslate"><span class="pre">GET</span></code> convient pour des interfaces comme un formulaire de recherche Web, car les URL qui représentent une requête <code class="docutils literal notranslate"><span class="pre">GET</span></code> peuvent être facilement conservées dans un signet, partagées ou ré-envoyées.</p>
+</div>
+</div>
+<div class="section" id="s-django-s-role-in-forms">
+<span id="django-s-role-in-forms"></span><h2>Le rôle de Django dans les formulaires<a class="headerlink" href="#django-s-role-in-forms" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La gestion des formulaires est une affaire complexe. Considérez l’application d’administration de Django où de nombreuses données de différents types doivent être préparées pour être affichées dans un formulaire, produites en HTML, éditées par une interface conviviale, renvoyées vers le serveur, validées et nettoyées, et finalement enregistrées ou transmises pour traitement ultérieur.</p>
+<p>La fonctionnalité des formulaires de Django peut simplifier et automatiser de larges portions de ce travail et peut aussi le faire de manière plus sécurisée que la plupart des programmeurs ne pourraient le faire en écrivant leur propre code.</p>
+<p>Django gère trois parties distinctes du travail induit par les formulaires&nbsp;:</p>
+<ul class="simple">
+<li>préparation et restructuration des données en vue de leur présentation</li>
+<li>création des formulaires HTML pour les données</li>
+<li>réception et traitement des formulaires et des données envoyés par le client</li>
+</ul>
+<p>Il est <em>possible</em> d’écrire du code qui fait tout cela manuellement, mais Django peut s’en charger à votre place.</p>
+</div>
+<div class="section" id="s-forms-in-django">
+<span id="forms-in-django"></span><h2>Les formulaires dans Django<a class="headerlink" href="#forms-in-django" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Nous avons brièvement décrit les formulaires HTML, mais un objet HTML <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code> n’est qu’un élément de la machinerie nécessaire.</p>
+<p>Dans le contexte d’une application Web, «&nbsp;formulaire&nbsp;» peut se référer à cette balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code>, à la classe <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> de Django qui la produit, aux données structurées renvoyées lorsque le formulaire est soumis, ou encore au fonctionnement de bout en bout de ces différentes parties.</p>
+<div class="section" id="s-the-django-form-class">
+<span id="the-django-form-class"></span><h3>La classe <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> de Django<a class="headerlink" href="#the-django-form-class" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La classe <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> de Django se situe au cœur de ce système de composants. De la même façon qu’un modèle Django décrit la structure logique d’un objet, son comportement et la manière dont ses parties nous sont présentées, une classe <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> décrit un formulaire et détermine son fonctionnement et son apparence.</p>
+<p>De la même façon que les champs d’une classe de modèle correspondent à des champs de base de données, les champs d’une classe de formulaire correspondent aux éléments <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code> d’un formulaire HTML (un <a class="reference internal" href="modelforms.html#django.forms.ModelForm" title="django.forms.ModelForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></a> fait correspondre les champs d’une classe de modèle à des éléments <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code> d’un formulaire HTML via un formulaire <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a>; cela constitue la base de l’interface d’administration de Django).</p>
+<p>Les champs d’un formulaire sont eux-mêmes des classes&nbsp;; elles gèrent les données de formulaire et s’occupent de la validation lorsque des données de formulaires sont reçues. Un champ <a class="reference internal" href="../../ref/forms/fields.html#django.forms.DateField" title="django.forms.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a> et un champ <a class="reference internal" href="../../ref/forms/fields.html#django.forms.FileField" title="django.forms.FileField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileField</span></code></a> gèrent des types de données très différents et doivent procéder à des actions différentes.</p>
+<p>Un champ de formulaire est présenté dans une interface de navigateur sous forme de «&nbsp;composant&nbsp;» HTML, un élément d’interface utilisateur. Chaque type de champ contient une <a class="reference internal" href="../../ref/forms/widgets.html"><span class="doc">classe Widget</span></a> appropriée par défaut, mais celles-ci peuvent être remplacées au besoin.</p>
+</div>
+<div class="section" id="s-instantiating-processing-and-rendering-forms">
+<span id="instantiating-processing-and-rendering-forms"></span><h3>Instanciation, traitement et rendu des formulaires<a class="headerlink" href="#instantiating-processing-and-rendering-forms" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lors du rendu d’un objet Django pour son affichage, il s’agit généralement de&nbsp;:</p>
+<ol class="arabic simple">
+<li>obtenir l’élément dans la vue (le récupérer à partir de la base de données, par exemple)</li>
+<li>le transmettre au contexte de gabarit</li>
+<li>le transformer en balisage HTML en utilisant des variables de gabarit</li>
+</ol>
+<p>L’affichage d’un formulaire dans un gabarit suit à peu près le même processus que pour tout autre type d’objet, mais il y a tout de même certaines différences notables.</p>
+<p>Dans le cas d’une instance de modèle ne contenant aucune donnée, il n’y aura pas beaucoup de sens d’en faire quoi que ce soit dans un gabarit. En revanche, il est totalement raisonnable de vouloir afficher un formulaire vierge, c’est ce qu’il faut faire lorsqu’on veut que quelqu’un le remplisse.</p>
+<p>Ainsi, lorsque nous manipulons une instance de modèle dans une vue, nous la récupérons typiquement à partir de la base de données. Lorsque nous manipulons un formulaire, nous en créons typiquement une instance dans la vue.</p>
+<p>Lors de la création d’une instance de formulaire, on peut choisir de le laisser vide ou de le pré-remplir, par exemple avec&nbsp;:</p>
+<ul class="simple">
+<li>des données provenant d’une instance de modèle enregistrée (comme dans le cas des formulaires d’administration pour l’édition)</li>
+<li>des données que nous avons obtenues à partir d’autres sources</li>
+<li>des données reçues d’un envoi de formulaire HTML</li>
+</ul>
+<p>Le dernier de ces cas est le plus intéressant, car c’est ce qui permet aux utilisateurs de ne pas seulement lire un site Web, mais aussi de renvoyer des informations aux sites Web.</p>
+</div>
+</div>
+<div class="section" id="s-building-a-form">
+<span id="building-a-form"></span><h2>Construction d’un formulaire<a class="headerlink" href="#building-a-form" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-the-work-that-needs-to-be-done">
+<span id="the-work-that-needs-to-be-done"></span><h3>Le travail à effectuer<a class="headerlink" href="#the-work-that-needs-to-be-done" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Supposons que vous vouliez créer un formulaire simple sur votre site dans le but d’obtenir le nom de l’utilisateur. Voici ce qu’il faudrait obtenir dans le navigateur&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/your-name/&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;your_name&quot;</span><span class="p">&gt;</span>Your name: <span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;your_name&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;your_name&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">current_name</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;OK&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Le navigateur saura alors qu’il doit renvoyer les données du formulaire vers l’URL <code class="docutils literal notranslate"><span class="pre">/your-name/</span></code>, en utilisant la méthode <code class="docutils literal notranslate"><span class="pre">POST</span></code>. Il affichera un champ de texte libellé «&nbsp;Your name:&nbsp;» et un bouton intitulé «&nbsp;OK&nbsp;». Si le contexte de gabarit contient une variable <code class="docutils literal notranslate"><span class="pre">current_name</span></code>, celle-ci sera utilisée pour pré-remplir le champ <code class="docutils literal notranslate"><span class="pre">your_name</span></code>.</p>
+<p>Il faudra une vue qui produit le gabarit contenant le formulaire HTML et qui puisse fournir le champ <code class="docutils literal notranslate"><span class="pre">current_name</span></code> si nécessaire.</p>
+<p>Lorsque le formulaire aura été envoyé, la requête <code class="docutils literal notranslate"><span class="pre">POST</span></code> envoyée au serveur contiendra les données du formulaire.</p>
+<p>Mais il sera également nécessaire d’avoir une vue répondant à l’URL <code class="docutils literal notranslate"><span class="pre">/your-name/</span></code> qui se chargera de trouver les paires clé-valeur dans la requête, puis de les traiter.</p>
+<p>Il s’agit d’un formulaire très simple. En pratique, un formulaire peut contenir des dizaines ou centaines de champs, dont beaucoup peuvent être pré-remplis, et il est possible que l’utilisateur doive passer par plusieurs cycles d’envoi/édition avant que l’opération globale ne soit terminée.</p>
+<p>On peut attendre du navigateur qu’il s’occupe d’une partie de la validation, même avant que le formulaire ne soit envoyé. Peut-être que certains champs seront bien plus complexes, permettant par exemple de choisir des dates dans un calendrier.</p>
+<p>Compte tenu de tout ceci, il est bien plus avantageux que Django se charge lui-même de la plupart du travail.</p>
+</div>
+<div class="section" id="s-building-a-form-in-django">
+<span id="building-a-form-in-django"></span><h3>Construction d’un formulaire dans Django<a class="headerlink" href="#building-a-form-in-django" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="section" id="s-the-form-class">
+<span id="the-form-class"></span><h4>La classe <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a><a class="headerlink" href="#the-form-class" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Nous savons déjà à quoi notre formulaire HTML doit ressembler. Notre point de départ dans Django est le suivant&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">forms.py</span><a class="headerlink" href="#id1" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">NameForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">your_name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Your name&#39;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Cela définit une classe <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> comportant un seul champ (<code class="docutils literal notranslate"><span class="pre">your_name</span></code>). Nous avons attribué une étiquette conviviale à ce champ&nbsp;; celle-ci apparaîtra dans la balise <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> au moment de l’affichage (bien que dans ce cas, le contenu indiqué dans <a class="reference internal" href="../../ref/forms/fields.html#django.forms.Field.label" title="django.forms.Field.label"><code class="xref py py-attr docutils literal notranslate"><span class="pre">label</span></code></a> est en réalité identique à celui qui aurait été généré automatiquement si nous n’avions rien fait).</p>
+<p>La longueur maximale du champ est définie par <a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField.max_length" title="django.forms.CharField.max_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_length</span></code></a>. Cela fait deux choses&nbsp;: la balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code> reçoit l’attribut <code class="docutils literal notranslate"><span class="pre">maxlength=&quot;100&quot;</span></code> (afin que le navigateur empêche lui-même la saisie d’un plus grand nombre de caractères), et ultérieurement lorsque Django reçoit en retour les données de formulaire, il valide que les données respectent cette longueur.</p>
+<p>Une instance de <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> possède une méthode <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form.is_valid" title="django.forms.Form.is_valid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid()</span></code></a> qui procède aux routines de validation pour tous ses champs. Lorsque la méthode est appelée et que tous les champs contiennent des données valables, celle-ci&nbsp;:</p>
+<ul class="simple">
+<li>renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code>;</li>
+<li>insère les données du formulaire dans l’attribut <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form.cleaned_data" title="django.forms.Form.cleaned_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">cleaned_data</span></code></a>.</li>
+</ul>
+<p>Le formulaire complet, lorsqu’il est affiché pour la première fois, ressemble à ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;your_name&quot;</span><span class="p">&gt;</span>Your name: <span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">input</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;your_name&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;your_name&quot;</span> <span class="na">maxlength</span><span class="o">=</span><span class="s">&quot;100&quot;</span> <span class="na">required</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Notez qu’il n’inclut <strong>pas</strong> les balises <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code> ni de bouton d’envoi. Ces éléments doivent être ajoutés par celui qui rédige le gabarit.</p>
+</div>
+<div class="section" id="s-the-view">
+<span id="s-using-a-form-in-a-view"></span><span id="the-view"></span><span id="using-a-form-in-a-view"></span><h4>La vue<a class="headerlink" href="#the-view" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les données de formulaire renvoyés à un site Web Django sont traitées par une vue, en principe la même qui a servi à produire le formulaire. Cela permet de réutiliser une partie de la même logique.</p>
+<p>Pour traiter le formulaire, nous devons en créer une instance dans la vue à destination de l’URL à laquelle il doit apparaître&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">views.py</span><a class="headerlink" href="#id2" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="kn">import</span> <span class="n">NameForm</span>
+
+<span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="c1"># if this is a POST request we need to process the form data</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="c1"># create a form instance and populate it with data from the request:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">NameForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="c1"># check whether it&#39;s valid:</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="c1"># process the data in form.cleaned_data as required</span>
+            <span class="c1"># ...</span>
+            <span class="c1"># redirect to a new URL:</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s1">&#39;/thanks/&#39;</span><span class="p">)</span>
+
+    <span class="c1"># if a GET (or any other method) we&#39;ll create a blank form</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">NameForm</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;name.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<p>Si nous arrivons dans cette vue avec une requête <code class="docutils literal notranslate"><span class="pre">GET</span></code>, la vue crée une instance de formulaire vierge et la place dans le contexte de gabarit en vue de son affichage. C’est à quoi l’on peut s’attendre lors du premier accès à l’URL en question.</p>
+<p>Si le formulaire est envoyé par une requête <code class="docutils literal notranslate"><span class="pre">POST</span></code>, la vue crée également une instance de formulaire et la complète avec les données reçues à partir de la requête&nbsp;: <code class="docutils literal notranslate"><span class="pre">form</span> <span class="pre">=</span> <span class="pre">NameForm(request.POST)</span></code>. C’est ce qu’on appelle «&nbsp;lier les données au formulaire&nbsp;» (il s’agit maintenant d’un formulaire <em>lié</em>, «&nbsp;bound&nbsp;» en anglais).</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> est appelée&nbsp;; si elle ne renvoie pas <code class="docutils literal notranslate"><span class="pre">True</span></code>, on se retrouve au stade du gabarit contenant le formulaire. Mais cette fois, le formulaire n’est plus vierge (<em>non lié</em> ou <em>unbound</em>) ce qui fait que le formulaire HTML sera rempli avec les données saisies précédemment, données qui peuvent être modifiées et corrigées selon les besoins.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code>, toutes les données validées du formulaire sont alors accessibles dans l’attribut <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>. Ces données peuvent être utilisées pour mettre à jour la base de données ou effectuer d’autres opérations avant de renvoyer au navigateur une redirection HTTP lui indiquant l’URL à recharger.</p>
+</div>
+<div class="section" id="s-the-template">
+<span id="s-topics-forms-index-basic-form-template"></span><span id="the-template"></span><span id="topics-forms-index-basic-form-template"></span><h4>Le gabarit<a class="headerlink" href="#the-template" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Il n’y a pas grand chose à faire dans le gabarit <code class="docutils literal notranslate"><span class="pre">name.html</span></code>:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">action</span><span class="o">=</span><span class="s">&quot;/your-name/&quot;</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">csrf_token</span> <span class="cp">%}</span>
+    <span class="cp">{{</span> <span class="nv">form</span> <span class="cp">}}</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;Submit&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Tous les champs de formulaire et leurs attributs seront convertis en balises HTML à partir de <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form</span> <span class="pre">}}</span></code> par le langage de gabarit de Django.</p>
+<div class="admonition-forms-and-cross-site-request-forgery-protection admonition">
+<p class="first admonition-title">Formulaires et protection contre le «&nbsp;Cross site request forgery&nbsp;» (CSRF)</p>
+<p class="last">Django est livré avec une protection simple d’emploi <a class="reference internal" href="../../ref/csrf.html"><span class="doc">contre les attaques de type Cross Site Request Forgeries</span></a>. Lors de l’envoi d’un formulaire par la méthode <code class="docutils literal notranslate"><span class="pre">POST</span></code> et la protection CSRF active, vous devez utiliser la balise de gabarit <a class="reference internal" href="../../ref/templates/builtins.html#std:templatetag-csrf_token"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">csrf_token</span></code></a> comme dans l’exemple précédent. Cependant, comme la protection CSRF n’est pas directement liée aux formulaires dans les gabarits, cette balise est omise dans les exemples suivants de ce document.</p>
+</div>
+<div class="admonition-html5-input-types-and-browser-validation admonition">
+<p class="first admonition-title">Types de composants HTML5 et validation par le navigateur</p>
+<p class="last">Si un formulaire contient un champ de type <a class="reference internal" href="../../ref/forms/fields.html#django.forms.URLField" title="django.forms.URLField"><code class="xref py py-class docutils literal notranslate"><span class="pre">URLField</span></code></a>, <a class="reference internal" href="../../ref/forms/fields.html#django.forms.EmailField" title="django.forms.EmailField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailField</span></code></a> ou tout type de champ nombre entier, Django fait appel aux composants HTML5 (input) de type <code class="docutils literal notranslate"><span class="pre">url</span></code>, <code class="docutils literal notranslate"><span class="pre">email</span></code> et <code class="docutils literal notranslate"><span class="pre">number</span></code>. Par défaut, les navigateurs appliquent souvent leur propre validation de ces champs, qui peut être plus stricte que celle de Django. Si vous voulez échapper à cette validation, ajoutez l’attribut <code class="docutils literal notranslate"><span class="pre">novalidate</span></code> sur la balise <code class="docutils literal notranslate"><span class="pre">form</span></code> ou définissez un autre composant de formulaire pour le champ, comme par exemple <a class="reference internal" href="../../ref/forms/widgets.html#django.forms.TextInput" title="django.forms.TextInput"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextInput</span></code></a>.</p>
+</div>
+<p>Nous possédons maintenant un formulaire Web fonctionnel, défini par une instance <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> de Django, traité par une vue et affiché sous forme de balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code>.</p>
+<p>C’est tout ce dont vous avez besoin pour commencer, mais l’infrastructure des formulaires a beaucoup plus à vous offrir. À partir du moment où vous comprenez les bases du processus décrit ci-dessus, il est bon de connaître les autres fonctionnalités mises à disposition par le système des formulaires et d’en savoir un peu plus au sujet de la machinerie sous-jacente.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-more-about-django-form-classes">
+<span id="more-about-django-form-classes"></span><h2>Plus de détails sur les classes <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">Form</span></code></a> de Django<a class="headerlink" href="#more-about-django-form-classes" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Toutes les classes de formulaires sont créées comme sous-classes de <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form" title="django.forms.Form"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.forms.Form</span></code></a> ou de <a class="reference internal" href="modelforms.html#django.forms.ModelForm" title="django.forms.ModelForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.forms.ModelForm</span></code></a>. <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> peut être considéré comme une sous-classe de <code class="docutils literal notranslate"><span class="pre">Form</span></code>. <code class="docutils literal notranslate"><span class="pre">Form</span></code> et <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> héritent effectivement de comportements communs provenant de la classe (privée) <code class="docutils literal notranslate"><span class="pre">BaseForm</span></code>, mais ce détail d’implémentation est rarement significatif.</p>
+<div class="admonition-models-and-forms admonition">
+<p class="first admonition-title">Modèles et formulaires</p>
+<p class="last">En fait, si un formulaire est destiné à ajouter ou modifier directement un modèle Django, un formulaire <a class="reference internal" href="modelforms.html"><span class="doc">ModelForm</span></a> peut vous économiser beaucoup de temps, d’effort et de code, car il s’occupe de construire un formulaire avec tous les champs et attributs appropriés à partir d’une classe <code class="docutils literal notranslate"><span class="pre">Model</span></code>.</p>
+</div>
+<div class="section" id="s-bound-and-unbound-form-instances">
+<span id="bound-and-unbound-form-instances"></span><h3>Instances de formulaires liées et non liées<a class="headerlink" href="#bound-and-unbound-form-instances" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La distinction entre <a class="reference internal" href="../../ref/forms/api.html#ref-forms-api-bound-unbound"><span class="std std-ref">Formulaires liés et non liés</span></a> est importante&nbsp;:</p>
+<ul class="simple">
+<li>Un formulaire non renseigné n’a aucune donnée associée. Lorsqu’il est présenté à l’utilisateur, il sera vide ou ne contiendra que des valeurs par défaut.</li>
+<li>Un formulaire renseigné contient des données envoyées et il est donc possible de lui demander si ces données sont valides. Si un formulaire renseigné non valide est affiché, il peut contenir des messages d’erreur intégrés indiquant à l’utilisateur quelles sont les données à corriger.</li>
+</ul>
+<p>L’attribut <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form.is_bound" title="django.forms.Form.is_bound"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_bound</span></code></a> d’un formulaire indique si des données ont été liées au formulaire ou pas.</p>
+</div>
+<div class="section" id="s-more-on-fields">
+<span id="more-on-fields"></span><h3>Plus de détails sur les champs<a class="headerlink" href="#more-on-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Voici un formulaire un peu plus utile que notre exemple minimal ci-dessus, que nous pourrions utiliser pour implémenter une fonctionnalité «&nbsp;Contactez-moi&nbsp;» sur un site Web personnel&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">forms.py</span><a class="headerlink" href="#id3" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">ContactForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Textarea</span><span class="p">)</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">EmailField</span><span class="p">()</span>
+    <span class="n">cc_myself</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Le formulaire précédent comportait un seul champ, <code class="docutils literal notranslate"><span class="pre">your_name</span></code>, de type <a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField" title="django.forms.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a>. Dans ce cas, le formulaire possède quatre champs&nbsp;:  <code class="docutils literal notranslate"><span class="pre">subject</span></code>, <code class="docutils literal notranslate"><span class="pre">message</span></code>, <code class="docutils literal notranslate"><span class="pre">sender</span></code> et <code class="docutils literal notranslate"><span class="pre">cc_myself</span></code>. <a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField" title="django.forms.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a>, <a class="reference internal" href="../../ref/forms/fields.html#django.forms.EmailField" title="django.forms.EmailField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailField</span></code></a> et <a class="reference internal" href="../../ref/forms/fields.html#django.forms.BooleanField" title="django.forms.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a> ne sont que trois des types de champs disponibles&nbsp;; une liste complète se trouve dans <a class="reference internal" href="../../ref/forms/fields.html"><span class="doc">Champs de formulaires</span></a>.</p>
+<div class="section" id="s-widgets">
+<span id="widgets"></span><h4>Composants de formulaires («&nbsp;widgets&nbsp;»)<a class="headerlink" href="#widgets" title="Lien permanent vers ce titre">¶</a></h4>
+<p>À chaque champ de formulaire correspond une <a class="reference internal" href="../../ref/forms/widgets.html"><span class="doc">classe Widget</span></a>, qui elle-même se réfère à un composant de formulaire HTML comme par exemple  <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;text&quot;&gt;</span></code>.</p>
+<p>Dans la plupart des cas, le composant par défaut du champ convient bien. Par exemple, le composant par défaut du champ <a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField" title="django.forms.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a> est <a class="reference internal" href="../../ref/forms/widgets.html#django.forms.TextInput" title="django.forms.TextInput"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextInput</span></code></a>, qui produit une balise <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;text&quot;&gt;</span></code> en HTML. Si au contraire vous aviez souhaité une balise <code class="docutils literal notranslate"><span class="pre">&lt;textarea&gt;</span></code>, il aurait fallu définir le composant approprié lors de la définition du champ de formulaire, comme nous l’avons fait pour le champ <code class="docutils literal notranslate"><span class="pre">message</span></code>.</p>
+</div>
+<div class="section" id="s-field-data">
+<span id="field-data"></span><h4>Données de champ<a class="headerlink" href="#field-data" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Quelles que soient les données envoyées avec un formulaire, au moment où elles ont été validées avec succès suite à l’appel de <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> (et que <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> a renvoyé <code class="docutils literal notranslate"><span class="pre">True</span></code>), les données de formulaire validées se trouvent dans le dictionnaire <code class="docutils literal notranslate"><span class="pre">form.cleaned_data</span></code>. Ces données auront été gracieusement converties en types Python pour vous.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">À ce stade, vous pouvez toujours accéder directement aux données non validées dans <code class="docutils literal notranslate"><span class="pre">request.POST</span></code>, mais les données validées sont plus adéquates.</p>
+</div>
+<p>Dans l’exemple ci-dessus du formulaire de contact, <code class="docutils literal notranslate"><span class="pre">cc_myself</span></code> sera une valeur booléenne. De la même manière, des champs de type <a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a> et <a class="reference internal" href="../../ref/forms/fields.html#django.forms.FloatField" title="django.forms.FloatField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatField</span></code></a> convertissent les valeurs en types Python <code class="docutils literal notranslate"><span class="pre">int</span></code> et <code class="docutils literal notranslate"><span class="pre">float</span></code>, respectivement.</p>
+<p>Voici comment les données de formulaire pourraient être traitées dans la vue qui gère ce formulaire&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">views.py</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="kn">import</span> <span class="n">send_mail</span>
+
+<span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;subject&#39;</span><span class="p">]</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">]</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;sender&#39;</span><span class="p">]</span>
+    <span class="n">cc_myself</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;cc_myself&#39;</span><span class="p">]</span>
+
+    <span class="n">recipients</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;info@example.com&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">cc_myself</span><span class="p">:</span>
+        <span class="n">recipients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
+
+    <span class="n">send_mail</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">sender</span><span class="p">,</span> <span class="n">recipients</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s1">&#39;/thanks/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="first admonition-title">Astuce</p>
+<p class="last">Pour en savoir plus sur l’envoi de courriels à partir de Django, consultez <a class="reference internal" href="../email.html"><span class="doc">Envoi de messages électroniques</span></a>.</p>
+</div>
+<p>Certains types de champ ont besoin de traitement supplémentaire. Par exemple, les fichiers téléversés via un formulaire doivent être traités différemment (ils sont accessibles par <code class="docutils literal notranslate"><span class="pre">request.FILES</span></code>, et non pas par <code class="docutils literal notranslate"><span class="pre">request.POST</span></code>). Pour plus de détails sur la façon de gérer des téléversements de fichiers avec un formulaire, consultez <a class="reference internal" href="../../ref/forms/api.html#binding-uploaded-files"><span class="std std-ref">Liaison de fichiers téléversés avec un formulaire</span></a>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-working-with-form-templates">
+<span id="working-with-form-templates"></span><h2>Formulaires et gabarits<a class="headerlink" href="#working-with-form-templates" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Tout ce qui est nécessaire pour qu’un formulaire soit inclus dans un gabarit est de placer l’instance de formulaire dans le contexte du gabarit. Ainsi, si le formulaire est appelé <code class="docutils literal notranslate"><span class="pre">form</span></code> dans le contexte, <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form</span> <span class="pre">}}</span></code> suffira à afficher ses éléments <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> et <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code> de manière appropriée.</p>
+<div class="section" id="s-form-rendering-options">
+<span id="form-rendering-options"></span><h3>Options d’affichage des formulaires<a class="headerlink" href="#form-rendering-options" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="admonition-additional-form-template-furniture admonition">
+<p class="first admonition-title">Compléments HTML pour les formulaires dans les gabarits</p>
+<p class="last">N’oubliez pas que le rendu HTML d’un formulaire n’inclut <em>pas</em> la balise <code class="docutils literal notranslate"><span class="pre">&lt;form&gt;</span></code> englobante, ni le composant <code class="docutils literal notranslate"><span class="pre">submit</span></code> pour l’envoi du formulaire. C’est à vous d’ajouter ces éléments.</p>
+</div>
+<p>Il existe toutefois d’autres options pour les paires <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code>/<code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code>:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.as_table</span> <span class="pre">}}</span></code> affiche les composants sous forme de cellules de tableau à l’intérieur de balises <code class="docutils literal notranslate"><span class="pre">&lt;tr&gt;</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.as_p</span> <span class="pre">}}</span></code> affiche les composants dans des balises <code class="docutils literal notranslate"><span class="pre">&lt;p&gt;</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.as_ul</span> <span class="pre">}}</span></code> affiche les composants dans des balises <code class="docutils literal notranslate"><span class="pre">&lt;li&gt;</span></code></li>
+</ul>
+<p>Notez que vous devrez ajouter vous-même les éléments <code class="docutils literal notranslate"><span class="pre">&lt;table&gt;</span></code> ou <code class="docutils literal notranslate"><span class="pre">&lt;ul&gt;</span></code> autour du contenu produit.</p>
+<p>Voici ce qu’affiche <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.as_p</span> <span class="pre">}}</span></code> pour notre instance de <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code>:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;id_subject&quot;</span><span class="p">&gt;</span>Subject:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;id_subject&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;subject&quot;</span> <span class="na">maxlength</span><span class="o">=</span><span class="s">&quot;100&quot;</span> <span class="na">required</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;id_message&quot;</span><span class="p">&gt;</span>Message:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">textarea</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;message&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;id_message&quot;</span> <span class="na">required</span><span class="p">&gt;&lt;/</span><span class="nt">textarea</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;id_sender&quot;</span><span class="p">&gt;</span>Sender:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;email&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;sender&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;id_sender&quot;</span> <span class="na">required</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;id_cc_myself&quot;</span><span class="p">&gt;</span>Cc myself:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;checkbox&quot;</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;cc_myself&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;id_cc_myself&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Notez que chaque champ de formulaire reçoit un attribut ID défini à <code class="docutils literal notranslate"><span class="pre">id_&lt;nom-de-champ&gt;</span></code> qui est référencé par la balise <code class="docutils literal notranslate"><span class="pre">label</span></code> correspondante. C’est important pour garantir que les formulaires sont accessibles aux aides techniques du genre logiciel de lecture d’écran. Vous pouvez aussi <a class="reference internal" href="../../ref/forms/api.html#ref-forms-api-configuring-label"><span class="std std-ref">personnaliser la façon dont les éléments label et id sont générés</span></a>.</p>
+<p>Voir <a class="reference internal" href="../../ref/forms/api.html#ref-forms-api-outputting-html"><span class="std std-ref">Affichage des formulaires en HTML</span></a> pour plus d’informations à ce sujet.</p>
+</div>
+<div class="section" id="s-rendering-fields-manually">
+<span id="rendering-fields-manually"></span><h3>Affichage manuel des champs<a class="headerlink" href="#rendering-fields-manually" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Laisser Django afficher un à un les champs du formulaire n’est pas la seule possibilité&nbsp;; on peut tout à fait afficher soi-même les champs (par exemple pour changer leur ordre d’apparition). Chaque champ est accessible en tant qu’attribut du formulaire avec la syntaxe <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.nom_du_champ</span> <span class="pre">}}</span></code>, ce qui, dans un gabarit Django, produira son affichage de manière appropriée. Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">form.non_field_errors</span> <span class="cp">}}</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.subject.errors</span> <span class="cp">}}</span>
+    <span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">form.subject.id_for_label</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span>Email subject:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.subject</span> <span class="cp">}}</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.message.errors</span> <span class="cp">}}</span>
+    <span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">form.message.id_for_label</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span>Your message:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.message</span> <span class="cp">}}</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.sender.errors</span> <span class="cp">}}</span>
+    <span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">form.sender.id_for_label</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span>Your email address:<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.sender</span> <span class="cp">}}</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.cc_myself.errors</span> <span class="cp">}}</span>
+    <span class="p">&lt;</span><span class="nt">label</span> <span class="na">for</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">form.cc_myself.id_for_label</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span>CC yourself?<span class="p">&lt;/</span><span class="nt">label</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.cc_myself</span> <span class="cp">}}</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Une balise <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> complète peut aussi être générée au moyen de <a class="reference internal" href="../../ref/forms/api.html#django.forms.BoundField.label_tag" title="django.forms.BoundField.label_tag"><code class="xref py py-meth docutils literal notranslate"><span class="pre">label_tag()</span></code></a>. Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">form.subject.errors</span> <span class="cp">}}</span>
+    <span class="cp">{{</span> <span class="nv">form.subject.label_tag</span> <span class="cp">}}</span>
+    <span class="cp">{{</span> <span class="nv">form.subject</span> <span class="cp">}}</span>
+<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="s-rendering-form-error-messages">
+<span id="rendering-form-error-messages"></span><h4>Affichage des messages d’erreur de formulaires<a class="headerlink" href="#rendering-form-error-messages" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le prix de cette flexibilité est un effort un peu plus grand. Jusqu’à ce stade, nous n’avions pas à nous préoccuper de l’affichage des erreurs du formulaire, car cela se faisait automatiquement. Dans cet exemple, il a fallu s’assurer que les erreurs de chaque champ et les erreurs globales du formulaire soient effectivement affichées. Remarquez <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.non_field_errors</span> <span class="pre">}}</span></code> au sommet du formulaire ainsi que l’expression de gabarit concernant les erreurs de chaque champ.</p>
+<p>La syntaxe <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.nom_du_champ.errors</span> <span class="pre">}}</span></code> affiche une liste des erreurs du formulaire, sous forme de liste non ordonnée. Cela pourrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;errorlist&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Sender is required.<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>La liste possède une classe CSS <code class="docutils literal notranslate"><span class="pre">errorlist</span></code> pour vous permettre de mettre en forme son apparence. Si vous souhaitez personnaliser davantage l’affichage des erreurs, vous pouvez le faire par une boucle&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">form.subject.errors</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">ol</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">for</span> <span class="nv">error</span> <span class="k">in</span> <span class="nv">form.subject.errors</span> <span class="cp">%}</span>
+        <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">strong</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">error</span><span class="o">|</span><span class="nf">escape</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">strong</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+    <span class="p">&lt;/</span><span class="nt">ol</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Les erreurs non liées à un champ (ou les erreurs de champs cachés qui sont affichées au sommet du formulaire lorsqu’on utilise des utilitaires comme <code class="docutils literal notranslate"><span class="pre">form.as_p()</span></code>) seront dotées d’une classe supplémentaire <code class="docutils literal notranslate"><span class="pre">nonfield</span></code> pour aider à faire la distinction avec les erreurs spécifiques à un champ. Par exemple, <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.non_field_errors</span> <span class="pre">}}</span></code> ressemblerait à&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;errorlist nonfield&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Generic validation error<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="../../ref/forms/api.html"><span class="doc">L’API des formulaires</span></a> pour plus de détails sur les erreurs, la mise en forme et la manipulation des attributs de formulaire dans les gabarits.</p>
+</div>
+</div>
+<div class="section" id="s-looping-over-the-form-s-fields">
+<span id="looping-over-the-form-s-fields"></span><h3>Boucles sur champs de formulaires<a class="headerlink" href="#looping-over-the-form-s-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous utilisez le même code HTML pour tous vos champs de formulaire, vous pouvez réduire la duplication de code en effectuant une boucle sur chaque champ en utilisant l’opérateur <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">for</span> <span class="pre">%}</span></code>:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">field</span> <span class="k">in</span> <span class="nv">form</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+        <span class="cp">{{</span> <span class="nv">field.errors</span> <span class="cp">}}</span>
+        <span class="cp">{{</span> <span class="nv">field.label_tag</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">field</span> <span class="cp">}}</span>
+        <span class="cp">{%</span> <span class="k">if</span> <span class="nv">field.help_text</span> <span class="cp">%}</span>
+        <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;help&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">field.help_text</span><span class="o">|</span><span class="nf">safe</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+        <span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Voici quelques attributs de champ utiles&nbsp;:</p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.label</span> <span class="pre">}}</span></code></dt>
+<dd>L’étiquette du champ, par exemple  <code class="docutils literal notranslate"><span class="pre">Adresse</span> <span class="pre">de</span> <span class="pre">courriel</span></code>.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.label_tag</span> <span class="pre">}}</span></code></dt>
+<dd><p class="first">L’intitulé du champ placé dans la balise HTML <code class="docutils literal notranslate"><span class="pre">&lt;label&gt;</span></code> appropriée. Cela comprend le paramètre <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form.label_suffix" title="django.forms.Form.label_suffix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">label_suffix</span></code></a> du formulaire. Par exemple, la valeur <code class="docutils literal notranslate"><span class="pre">label_suffix</span></code> par défaut est un caractère deux-points&nbsp;:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">label</span> <span class="k">for</span><span class="o">=</span><span class="s2">&quot;id_email&quot;</span><span class="o">&gt;</span><span class="n">Email</span> <span class="n">address</span><span class="p">:</span><span class="o">&lt;/</span><span class="n">label</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.id_for_label</span> <span class="pre">}}</span></code></dt>
+<dd>L’attribut <code class="docutils literal notranslate"><span class="pre">id</span></code> utilisé pour ce champ (<code class="docutils literal notranslate"><span class="pre">id_email</span></code> dans l’exemple ci-dessus). Si vous construisez vous-même l’étiquette du champ, il peut être avantageux d’utiliser ceci à la place de <code class="docutils literal notranslate"><span class="pre">label_tag</span></code>. C’est aussi utile par exemple si vous avez du code JavaScript en ligne et que vous vouliez éviter de figer l’identifiant du champ.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.value</span> <span class="pre">}}</span></code></dt>
+<dd>La valeur du champ, par exemple <code class="docutils literal notranslate"><span class="pre">quelqu-un&#64;example.com</span></code>.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.html_name</span> <span class="pre">}}</span></code></dt>
+<dd>Le nom du champ tel qu’il sera utilisé dans le nom de champ de la balise <code class="docutils literal notranslate"><span class="pre">input</span></code>. Il prend en compte le préfixe de formulaire, si celui-ci est défini.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.help_text</span> <span class="pre">}}</span></code></dt>
+<dd>Tout texte d’aide associé au champ.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.errors</span> <span class="pre">}}</span></code></dt>
+<dd>Affiche une liste <code class="docutils literal notranslate"><span class="pre">&lt;ul</span> <span class="pre">class=&quot;errorlist&quot;&gt;</span></code> contenant toute erreur de validation correspondant à ce champ. Vous pouvez personnaliser la présentation des erreurs avec une boucle <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">for</span> <span class="pre">error</span> <span class="pre">in</span> <span class="pre">field.errors</span> <span class="pre">%}</span></code>. Dans ce cas, chaque objet de la boucle est une chaîne de caractères contenant le message d’erreur.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.is_hidden</span> <span class="pre">}}</span></code></dt>
+<dd>Cet attribut vaut <code class="docutils literal notranslate"><span class="pre">True</span></code> si le champ de formulaire est un champ masqué, sinon il vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>. Ce n’est pas particulièrement utile comme variable de gabarit, mais pourrait être utile dans des tests conditionnels tels que&nbsp;:</dd>
+</dl>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">field.is_hidden</span> <span class="cp">%}</span>
+   <span class="c">{# Do something special #}</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">field.field</span> <span class="pre">}}</span></code></dt>
+<dd>L’instance <a class="reference internal" href="../../ref/forms/fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> de la classe de formulaire que cet objet <a class="reference internal" href="../../ref/forms/api.html#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a> adapte. Vous pouvez l’utiliser pour accéder aux attributs de <a class="reference internal" href="../../ref/forms/fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>, par exemple <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">char_field.field.max_length</span> <span class="pre">}}</span></code>.</dd>
+</dl>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Pour une liste complète des attributs et méthodes, voir <a class="reference internal" href="../../ref/forms/api.html#django.forms.BoundField" title="django.forms.BoundField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundField</span></code></a>.</p>
+</div>
+<div class="section" id="s-looping-over-hidden-and-visible-fields">
+<span id="looping-over-hidden-and-visible-fields"></span><h4>Boucles sur les champs masqués et visibles<a class="headerlink" href="#looping-over-hidden-and-visible-fields" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Si vous affichez manuellement un formulaire dans un gabarit, sans faire appel à l’affichage par défaut des formulaires de Django, il peut être nécessaire de traiter différemment les champs <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;hidden&quot;&gt;</span></code> des autres champs non masqués. Par exemple, comme les champs masqués ne produisent pas de contenu visible, l’affichage de messages d’erreur «&nbsp;à côté&nbsp;» du champ pourrait générer de la confusion pour les utilisateurs&nbsp;; il faut donc gérer différemment les erreurs de ce type de champ.</p>
+<p>Django fournit deux méthodes qui permettent de tourner en boucle indépendamment sur les champs visibles et masqués&nbsp;: <code class="docutils literal notranslate"><span class="pre">hidden_fields()</span></code> et <code class="docutils literal notranslate"><span class="pre">visible_fields()</span></code>. Voici une modification d’un exemple précédent en utilisant ces deux méthodes&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="c">{# Include the hidden fields #}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">hidden</span> <span class="k">in</span> <span class="nv">form.hidden_fields</span> <span class="cp">%}</span>
+<span class="cp">{{</span> <span class="nv">hidden</span> <span class="cp">}}</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="c">{# Include the visible fields #}</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">field</span> <span class="k">in</span> <span class="nv">form.visible_fields</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+        <span class="cp">{{</span> <span class="nv">field.errors</span> <span class="cp">}}</span>
+        <span class="cp">{{</span> <span class="nv">field.label_tag</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">field</span> <span class="cp">}}</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Cet exemple ne gère pas du tout les erreurs des champs masqués. En principe, une erreur dans un champ masqué est un signe de manipulation abusive d’un formulaire, puisque l’interaction normale avec un formulaire ne les modifie pas. Cependant, vous pourriez facilement ajouter aussi une forme d’affichage pour ces erreurs de formulaire.</p>
+</div>
+</div>
+<div class="section" id="s-reusable-form-templates">
+<span id="reusable-form-templates"></span><h3>Gabarits de formulaire réutilisables<a class="headerlink" href="#reusable-form-templates" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si votre site utilise la même logique d’affichage des formulaires à plusieurs endroits, vous pouvez réduire la duplication en enregistrant la boucle de formulaire dans un gabarit autonome et en employant la balise <a class="reference internal" href="../../ref/templates/builtins.html#std:templatetag-include"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">include</span></code></a> afin de réutiliser ce contenu dans d’autres gabarits&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span># In your form template:
+<span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;form_snippet.html&quot;</span> <span class="cp">%}</span>
+
+# In form_snippet.html:
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">field</span> <span class="k">in</span> <span class="nv">form</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;fieldWrapper&quot;</span><span class="p">&gt;</span>
+        <span class="cp">{{</span> <span class="nv">field.errors</span> <span class="cp">}}</span>
+        <span class="cp">{{</span> <span class="nv">field.label_tag</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">field</span> <span class="cp">}}</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Si l’objet formulaire transmis au gabarit possède un nom différent dans le contexte, vous pouvez lui donner un alias en utilisant le paramètre <code class="docutils literal notranslate"><span class="pre">with</span></code> de la balise <a class="reference internal" href="../../ref/templates/builtins.html#std:templatetag-include"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">include</span></code></a>:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">include</span> <span class="s2">&quot;form_snippet.html&quot;</span> <span class="k">with</span> <span class="nv">form</span><span class="o">=</span><span class="nv">comment_form</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Si vous constatez que vous reproduisez souvent ce même code, il vous faut peut-être envisager la création d’une <a class="reference internal" href="../../howto/custom-template-tags.html#howto-custom-template-tags-inclusion-tags"><span class="std std-ref">balise d’inclusion</span></a> personnalisée.</p>
+</div>
+</div>
+<div class="section" id="s-further-topics">
+<span id="further-topics"></span><h2>Sujets complémentaires<a class="headerlink" href="#further-topics" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Cette page aborde les généralités, mais les formulaires peuvent faire bien d’autres choses encore&nbsp;:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="formsets.html">Formulaires groupés</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#using-initial-data-with-a-formset">Données initiales pour les formulaires groupés</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#limiting-the-maximum-number-of-forms">Restriction du nombre maximum de formulaires</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#formset-validation">Validation des formulaires groupés</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#validating-the-number-of-forms-in-a-formset">Validation du nombre de formulaires dans les formulaires groupés</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#dealing-with-ordering-and-deletion-of-forms">Tri et suppression de formulaires</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#adding-additional-fields-to-a-formset">Ajout de champs supplémentaires à des formulaires groupés</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#passing-custom-parameters-to-formset-forms">Transmission de paramètres personnalisés aux formulaires de jeux de formulaires</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#customizing-a-formset-s-prefix">Personnalisation du préfixe d’un jeu de formulaires</a></li>
+<li class="toctree-l2"><a class="reference internal" href="formsets.html#using-a-formset-in-views-and-templates">Utilisation des formulaires groupés dans les vues et les gabarits</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modelforms.html">Création de formulaires à partir de modèles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modelforms.html#modelform"><code class="docutils literal notranslate"><span class="pre">ModelForm</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelforms.html#model-formsets">Formulaires groupés de modèles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modelforms.html#inline-formsets">Sous-formulaires groupés</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="media.html">Fichiers annexes de formulaire (classe <code class="docutils literal notranslate"><span class="pre">Media</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="media.html#assets-as-a-static-definition">Fichiers annexes définis statiquement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="media.html#media-as-a-dynamic-property"><code class="docutils literal notranslate"><span class="pre">Media</span></code> comme propriété dynamique</a></li>
+<li class="toctree-l2"><a class="reference internal" href="media.html#paths-in-asset-definitions">Chemins dans les définitions de fichiers annexes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="media.html#media-objects">Objets <code class="docutils literal notranslate"><span class="pre">Media</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="media.html#media-on-forms"><code class="docutils literal notranslate"><span class="pre">Media</span></code> pour les formulaires</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="../../ref/forms/index.html"><span class="doc">La référence des formulaires</span></a></dt>
+<dd>Contient la référence d’API complète, y compris les champs de formulaire, les composants de formulaire et la validation des champs et des formulaires.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Utilisation des formulaires</a><ul>
+<li><a class="reference internal" href="#html-forms">Formulaires HTML</a><ul>
+<li><a class="reference internal" href="#get-and-post"><code class="docutils literal notranslate"><span class="pre">GET</span></code> et <code class="docutils literal notranslate"><span class="pre">POST</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#django-s-role-in-forms">Le rôle de Django dans les formulaires</a></li>
+<li><a class="reference internal" href="#forms-in-django">Les formulaires dans Django</a><ul>
+<li><a class="reference internal" href="#the-django-form-class">La classe <code class="docutils literal notranslate"><span class="pre">Form</span></code> de Django</a></li>
+<li><a class="reference internal" href="#instantiating-processing-and-rendering-forms">Instanciation, traitement et rendu des formulaires</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building-a-form">Construction d’un formulaire</a><ul>
+<li><a class="reference internal" href="#the-work-that-needs-to-be-done">Le travail à effectuer</a></li>
+<li><a class="reference internal" href="#building-a-form-in-django">Construction d’un formulaire dans Django</a><ul>
+<li><a class="reference internal" href="#the-form-class">La classe <code class="docutils literal notranslate"><span class="pre">Form</span></code></a></li>
+<li><a class="reference internal" href="#the-view">La vue</a></li>
+<li><a class="reference internal" href="#the-template">Le gabarit</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#more-about-django-form-classes">Plus de détails sur les classes <code class="docutils literal notranslate"><span class="pre">Form</span></code> de Django</a><ul>
+<li><a class="reference internal" href="#bound-and-unbound-form-instances">Instances de formulaires liées et non liées</a></li>
+<li><a class="reference internal" href="#more-on-fields">Plus de détails sur les champs</a><ul>
+<li><a class="reference internal" href="#widgets">Composants de formulaires («&nbsp;widgets&nbsp;»)</a></li>
+<li><a class="reference internal" href="#field-data">Données de champ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#working-with-form-templates">Formulaires et gabarits</a><ul>
+<li><a class="reference internal" href="#form-rendering-options">Options d’affichage des formulaires</a></li>
+<li><a class="reference internal" href="#rendering-fields-manually">Affichage manuel des champs</a><ul>
+<li><a class="reference internal" href="#rendering-form-error-messages">Affichage des messages d’erreur de formulaires</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#looping-over-the-form-s-fields">Boucles sur champs de formulaires</a><ul>
+<li><a class="reference internal" href="#looping-over-hidden-and-visible-fields">Boucles sur les champs masqués et visibles</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reusable-form-templates">Gabarits de formulaire réutilisables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#further-topics">Sujets complémentaires</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="../http/sessions.html"
+                        title="Chapitre précédent">Utilisation des sessions</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="formsets.html"
+                        title="Chapitre suivant">Formulaires groupés</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/forms/index.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="../http/sessions.html" title="Utilisation des sessions">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="formsets.html" title="Formulaires groupés">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

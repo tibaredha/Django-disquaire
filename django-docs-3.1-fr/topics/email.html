@@ -1,0 +1,590 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Envoi de messages électroniques &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Internationalisation et régionalisation" href="i18n/index.html" />
+    <link rel="prev" title="Signatures cryptographiques" href="signing.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="signing.html" title="Signatures cryptographiques">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="i18n/index.html" title="Internationalisation et régionalisation">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-email">
+            
+  <div class="section" id="s-module-django.core.mail">
+<span id="s-sending-email"></span><span id="module-django.core.mail"></span><span id="sending-email"></span><h1>Envoi de messages électroniques<a class="headerlink" href="#module-django.core.mail" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Même si Python fournit une interface d’envoi de courriels via le module <a class="reference external" href="https://docs.python.org/3/library/smtplib.html#module-smtplib" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">smtplib</span></code></a>, Django propose quelques adaptateur légers supplémentaires. Ces adaptateurs sont fournis pour rendre encore plus direct l’envoi de courriels, pour faciliter le test d’envoi de courriels durant le développement et pour fournir la prise en charge sur les plates-formes qui ne peuvent pas utiliser SMTP.</p>
+<p>Le code se trouve dans le module <code class="docutils literal notranslate"><span class="pre">django.core.mail</span></code>.</p>
+<div class="section" id="s-quick-example">
+<span id="quick-example"></span><h2>Exemple rapide<a class="headerlink" href="#quick-example" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En deux lignes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="k">import</span> <span class="n">send_mail</span>
+
+<span class="n">send_mail</span><span class="p">(</span>
+    <span class="s1">&#39;Subject here&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Here is the message.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;to@example.com&#39;</span><span class="p">],</span>
+    <span class="n">fail_silently</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Les messages sont envoyés en utilisant l’hôte et le port indiqués dans les réglages <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST</span></code></a> et <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_PORT</span></code></a>. Les réglages <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_USER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_USER</span></code></a> et <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_PASSWORD"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_PASSWORD</span></code></a>, si définis, sont utilisés pour s’authentifier auprès du serveur SMTP, et les réglages <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_USE_TLS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_USE_TLS</span></code></a> et <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_USE_SSL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_USE_SSL</span></code></a> indiquent si l’utilisation d’une connexion sécurisée est nécessaire.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Le jeu de caractères des messages envoyés par <code class="docutils literal notranslate"><span class="pre">django.core.mail</span></code> est défini par la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_CHARSET"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_CHARSET</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="s-send-mail">
+<span id="send-mail"></span><h2><code class="docutils literal notranslate"><span class="pre">send_mail()</span></code><a class="headerlink" href="#send-mail" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.core.mail.send_mail">
+<code class="descname">send_mail</code>(<em>subject</em>, <em>message</em>, <em>from_email</em>, <em>recipient_list</em>, <em>fail_silently=False</em>, <em>auth_user=None</em>, <em>auth_password=None</em>, <em>connection=None</em>, <em>html_message=None</em>)<a class="headerlink" href="#django.core.mail.send_mail" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Dans la plupart des cas, vous pouvez envoyer des courriels avec <code class="docutils literal notranslate"><span class="pre">django.core.mail.send_mail()</span></code>.</p>
+<p>Les paramètres <code class="docutils literal notranslate"><span class="pre">subject</span></code>, <code class="docutils literal notranslate"><span class="pre">message</span></code>, <code class="docutils literal notranslate"><span class="pre">from_email</span></code> et <code class="docutils literal notranslate"><span class="pre">recipient_list</span></code> sont obligatoires.</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">subject</span></code>: une chaîne de caractères.</li>
+<li><code class="docutils literal notranslate"><span class="pre">message</span></code>: une chaîne de caractères.</li>
+<li><code class="docutils literal notranslate"><span class="pre">from_email</span></code>: une chaîne. Si <code class="docutils literal notranslate"><span class="pre">None</span></code>, Django utilise la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_FROM_EMAIL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_FROM_EMAIL</span></code></a>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">recipient_list</span></code>: une liste de chaînes de caractères, chacune étant une adresse électronique. Chaque personne dans <code class="docutils literal notranslate"><span class="pre">recipient_list</span></code> verra les autres destinataires dans le champ «&nbsp;To:&nbsp;» du courriel.</li>
+<li><code class="docutils literal notranslate"><span class="pre">fail_silently</span></code>: une valeur booléenne. Avec la valeur <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">send_mail()</span></code> lève une exception <a class="reference external" href="https://docs.python.org/3/library/smtplib.html#smtplib.SMTPException" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">smtplib.SMTPException</span></code></a> en cas d’erreur. Consultez la liste des exceptions possibles dans la documentation de <a class="reference external" href="https://docs.python.org/3/library/smtplib.html#module-smtplib" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">smtplib</span></code></a>; elles sont toutes des sous-classes de <a class="reference external" href="https://docs.python.org/3/library/smtplib.html#smtplib.SMTPException" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SMTPException</span></code></a>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">auth_user</span></code>: le nom d’utilisateur facultatif utilisé pour s’authentifier auprès du serveur SMTP. Si ce paramètre est absent, c’est la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_USER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_USER</span></code></a> qui sera utilisée.</li>
+<li><code class="docutils literal notranslate"><span class="pre">auth_password</span></code>: le mot de passe facultatif utilisé pour s’authentifier auprès du serveur SMTP. Si ce paramètre est absent, c’est la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_PASSWORD"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_PASSWORD</span></code></a> qui sera utilisée.</li>
+<li><code class="docutils literal notranslate"><span class="pre">connection</span></code>: le moteur de messagerie facultatif utilisé pour envoyer le message. Si ce paramètre est absent, c’est une instance du moteur par défaut qui sera utilisée. Consultez la documentation sur les <a class="reference internal" href="#topic-email-backends"><span class="std std-ref">moteurs de messagerie</span></a> pour plus de détails.</li>
+<li><code class="docutils literal notranslate"><span class="pre">html_message</span></code>: si <code class="docutils literal notranslate"><span class="pre">html_message</span></code> est indiqué, le courriel produit sera un courriel <em class="mimetype">multipart/alternative</em>, avec <code class="docutils literal notranslate"><span class="pre">message</span></code> comme type de contenu <em class="mimetype">text/plain</em> et <code class="docutils literal notranslate"><span class="pre">html_message</span></code> comme type de contenu <em class="mimetype">text/html</em> .</li>
+</ul>
+<p>La valeur renvoyée correspond au nombre de messages livrés avec succès (qui ne peut être que <code class="docutils literal notranslate"><span class="pre">0</span></code> ou <code class="docutils literal notranslate"><span class="pre">1</span></code> puisqu’elle ne peut envoyer qu’un message).</p>
+</div>
+<div class="section" id="s-send-mass-mail">
+<span id="send-mass-mail"></span><h2><code class="docutils literal notranslate"><span class="pre">send_mass_mail()</span></code><a class="headerlink" href="#send-mass-mail" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.core.mail.send_mass_mail">
+<code class="descname">send_mass_mail</code>(<em>datatuple</em>, <em>fail_silently=False</em>, <em>auth_user=None</em>, <em>auth_password=None</em>, <em>connection=None</em>)<a class="headerlink" href="#django.core.mail.send_mass_mail" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">django.core.mail.send_mass_mail()</span></code> est prévu pour envoyer des courriels en masse.</p>
+<p><code class="docutils literal notranslate"><span class="pre">datatuple</span></code> est un tuple dans lequel chaque élément suit le format suivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">from_email</span><span class="p">,</span> <span class="n">recipient_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">fail_silently</span></code>, <code class="docutils literal notranslate"><span class="pre">auth_user</span></code> et <code class="docutils literal notranslate"><span class="pre">auth_password</span></code> jouent le même rôle que dans <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a>.</p>
+<p>Chaque élément de <code class="docutils literal notranslate"><span class="pre">datatuple</span></code> produit un courriel séparé. Comme dans <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a>, les destinataires de la même <code class="docutils literal notranslate"><span class="pre">recipient_list</span></code> verront les autres adresses dans le champ «&nbsp;To:&nbsp;» des courriels.</p>
+<p>Par exemple, le code suivant envoie deux messages différents à deux ensembles différents de destinataires&nbsp;; cependant, une seule connexion est ouverte vers le serveur de messagerie&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">message1</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Subject here&#39;</span><span class="p">,</span> <span class="s1">&#39;Here is the message&#39;</span><span class="p">,</span> <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;first@example.com&#39;</span><span class="p">,</span> <span class="s1">&#39;other@example.com&#39;</span><span class="p">])</span>
+<span class="n">message2</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Another Subject&#39;</span><span class="p">,</span> <span class="s1">&#39;Here is another message&#39;</span><span class="p">,</span> <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;second@test.com&#39;</span><span class="p">])</span>
+<span class="n">send_mass_mail</span><span class="p">((</span><span class="n">message1</span><span class="p">,</span> <span class="n">message2</span><span class="p">),</span> <span class="n">fail_silently</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La valeur renvoyée correspond au nombre de messages livrés avec succès.</p>
+<div class="section" id="s-send-mass-mail-vs-send-mail">
+<span id="send-mass-mail-vs-send-mail"></span><h3><code class="docutils literal notranslate"><span class="pre">send_mass_mail()</span></code> vs. <code class="docutils literal notranslate"><span class="pre">send_mail()</span></code><a class="headerlink" href="#send-mass-mail-vs-send-mail" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La différence principale entre <a class="reference internal" href="#django.core.mail.send_mass_mail" title="django.core.mail.send_mass_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mass_mail()</span></code></a> et <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a> est que <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a> ouvre une connexion vers le serveur de messagerie lors de chaque exécution, alors que <a class="reference internal" href="#django.core.mail.send_mass_mail" title="django.core.mail.send_mass_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mass_mail()</span></code></a> utilise une seule connexion pour tous ses messages. <a class="reference internal" href="#django.core.mail.send_mass_mail" title="django.core.mail.send_mass_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mass_mail()</span></code></a> est donc un peu plus efficace.</p>
+</div>
+</div>
+<div class="section" id="s-mail-admins">
+<span id="mail-admins"></span><h2><code class="docutils literal notranslate"><span class="pre">mail_admins()</span></code><a class="headerlink" href="#mail-admins" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.core.mail.mail_admins">
+<code class="descname">mail_admins</code>(<em>subject</em>, <em>message</em>, <em>fail_silently=False</em>, <em>connection=None</em>, <em>html_message=None</em>)<a class="headerlink" href="#django.core.mail.mail_admins" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">django.core.mail.mail_admins()</span></code> est un raccourci pour envoyer un courriel aux administrateurs du site, tels qu’ils apparaissent dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-ADMINS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ADMINS</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mail_admins()</span></code> préfixe le sujet avec la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_SUBJECT_PREFIX"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_SUBJECT_PREFIX</span></code></a> («&nbsp;[Django]&nbsp;» par défaut).</p>
+<p>L’en-tête «&nbsp;From:&nbsp;» du courriel correspond à la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-SERVER_EMAIL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SERVER_EMAIL</span></code></a>.</p>
+<p>Cette méthode existe par commodité et pour une meilleure lisibilité.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">html_message</span></code> est indiqué, le courriel produit sera un courriel <em class="mimetype">multipart/alternative</em>, avec <code class="docutils literal notranslate"><span class="pre">message</span></code> comme type de contenu <em class="mimetype">text/plain</em> et <code class="docutils literal notranslate"><span class="pre">html_message</span></code> comme type de contenu <em class="mimetype">text/html</em> .</p>
+</div>
+<div class="section" id="s-mail-managers">
+<span id="mail-managers"></span><h2><code class="docutils literal notranslate"><span class="pre">mail_managers()</span></code><a class="headerlink" href="#mail-managers" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.core.mail.mail_managers">
+<code class="descname">mail_managers</code>(<em>subject</em>, <em>message</em>, <em>fail_silently=False</em>, <em>connection=None</em>, <em>html_message=None</em>)<a class="headerlink" href="#django.core.mail.mail_managers" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">django.core.mail.mail_managers()</span></code> est équivalent à <code class="docutils literal notranslate"><span class="pre">mail_admins()</span></code>, excepté le fait qu’il envoie un courriel aux gestionnaires du site tels que définis dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-MANAGERS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MANAGERS</span></code></a>.</p>
+</div>
+<div class="section" id="s-examples">
+<span id="examples"></span><h2>Exemples<a class="headerlink" href="#examples" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ceci envoie un courriel unique à <a class="reference external" href="mailto:john&#37;&#52;&#48;example&#46;com">john<span>&#64;</span>example<span>&#46;</span>com</a> et <a class="reference external" href="mailto:jane&#37;&#52;&#48;example&#46;com">jane<span>&#64;</span>example<span>&#46;</span>com</a>, les deux apparaissant dans le champ «&nbsp;To:&nbsp;»&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">send_mail</span><span class="p">(</span>
+    <span class="s1">&#39;Subject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Message.&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;john@example.com&#39;</span><span class="p">,</span> <span class="s1">&#39;jane@example.com&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Ceci envoie un courriel à <a class="reference external" href="mailto:john&#37;&#52;&#48;example&#46;com">john<span>&#64;</span>example<span>&#46;</span>com</a> et <a class="reference external" href="mailto:jane&#37;&#52;&#48;example&#46;com">jane<span>&#64;</span>example<span>&#46;</span>com</a>, les deux recevant un courriel séparé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">datatuple</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="s1">&#39;Message.&#39;</span><span class="p">,</span> <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;john@example.com&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Subject&#39;</span><span class="p">,</span> <span class="s1">&#39;Message.&#39;</span><span class="p">,</span> <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;jane@example.com&#39;</span><span class="p">]),</span>
+<span class="p">)</span>
+<span class="n">send_mass_mail</span><span class="p">(</span><span class="n">datatuple</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-preventing-header-injection">
+<span id="preventing-header-injection"></span><h2>Prévention de l’injection d’en-têtes<a class="headerlink" href="#preventing-header-injection" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L”<a class="reference external" href="http://www.nyphp.org/phundamentals/8_Preventing-Email-Header-Injection">injection d’en-têtes</a> est une faille de sécurité dans laquelle un attaquant insère des en-têtes de courriel supplémentaires pour contrôler les champs «&nbsp;To:&nbsp;» et «&nbsp;From:&nbsp;» des courriels que vos scripts produisent.</p>
+<p>Les fonctions de messagerie de Django décrites ci-dessus protègent toutes contre l’injection d’en-têtes en interdisant les sauts de ligne dans les valeurs d’en-têtes. Si l’un des paramètres  <code class="docutils literal notranslate"><span class="pre">subject</span></code>, <code class="docutils literal notranslate"><span class="pre">from_email</span></code> ou <code class="docutils literal notranslate"><span class="pre">recipient_list</span></code> contient un saut de ligne (que ce soit du style Unix, Windows ou Mac), la fonction de messagerie (par ex. <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a>) lève une exception <code class="docutils literal notranslate"><span class="pre">django.core.mail.BadHeaderError</span></code> (une sous-classe de <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>) et de ce fait, n’envoie pas le courriel. Il est de votre responsabilité de valider toutes les données avant de les transmettre aux fonctions de messagerie.</p>
+<p>Si un <code class="docutils literal notranslate"><span class="pre">message</span></code> contient des en-têtes en début de chaîne, les en-têtes seront affichés en première partie du contenu du courriel.</p>
+<p>Voici un exemple de vue qui récupère les valeurs <code class="docutils literal notranslate"><span class="pre">subject</span></code>, <code class="docutils literal notranslate"><span class="pre">message</span></code> et <code class="docutils literal notranslate"><span class="pre">from_email</span></code> à partir de données POST de la requête, envoie cela à <a class="reference external" href="mailto:admin&#37;&#52;&#48;example&#46;com">admin<span>&#64;</span>example<span>&#46;</span>com</a> et redirige vers «&nbsp;/contact/thanks/&nbsp;» quand c’est fait&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="k">import</span> <span class="n">BadHeaderError</span><span class="p">,</span> <span class="n">send_mail</span>
+<span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponse</span><span class="p">,</span> <span class="n">HttpResponseRedirect</span>
+
+<span class="k">def</span> <span class="nf">send_email</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">from_email</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_email&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subject</span> <span class="ow">and</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">from_email</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">send_mail</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">from_email</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;admin@example.com&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="n">BadHeaderError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;Invalid header found.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s1">&#39;/contact/thanks/&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># In reality we&#39;d use a form class</span>
+        <span class="c1"># to get proper validation errors.</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;Make sure all fields are entered and valid.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-the-emailmessage-class">
+<span id="s-emailmessage-and-smtpconnection"></span><span id="the-emailmessage-class"></span><span id="emailmessage-and-smtpconnection"></span><h2>La classe <code class="docutils literal notranslate"><span class="pre">EmailMessage</span></code><a class="headerlink" href="#the-emailmessage-class" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les fonctions  <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a> et <a class="reference internal" href="#django.core.mail.send_mass_mail" title="django.core.mail.send_mass_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mass_mail()</span></code></a> de Django sont en réalité de légers adaptateurs qui utilisent la classe <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a>.</p>
+<p>Seule une partie des fonctionnalités de la classe <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> sont exposées par <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a> et les autres fonctions adaptatrices liées. Si vous voulez utiliser des fonctionnalités avancées, telles que les destinataires en copie cachée, les fichiers joints ou les courriels multi-parties, vous devrez créer directement des instances de <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Cette conception est volontaire. <a class="reference internal" href="#django.core.mail.send_mail" title="django.core.mail.send_mail"><code class="xref py py-meth docutils literal notranslate"><span class="pre">send_mail()</span></code></a> et les fonctions liées étaient au départ la seule interface proposée par Django. Cependant, la liste des paramètres acceptés ne cessait de s’accroître avec le temps. Il était donc logique de passer à un concept plus orienté objet pour les courriels et ne conserver les fonctions originales que par rétrocompatibilité.</p>
+</div>
+<p><a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> est responsable de créer le courriel lui-même. Le <a class="reference internal" href="#topic-email-backends"><span class="std std-ref">moteur de messagerie</span></a> est ensuite responsable d’envoyer le courriel.</p>
+<p>Par commodité, <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> propose une méthode <code class="docutils literal notranslate"><span class="pre">send()</span></code> pour envoyer un courriel unique. Si vous devez envoyer plusieurs messages, l’API du moteur de messagerie <a class="reference internal" href="#topics-sending-multiple-emails"><span class="std std-ref">offre une alternative</span></a>.</p>
+<div class="section" id="s-emailmessage-objects">
+<span id="emailmessage-objects"></span><h3>Les objets <code class="docutils literal notranslate"><span class="pre">EmailMessage</span></code><a class="headerlink" href="#emailmessage-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.mail.EmailMessage">
+<em class="property">class </em><code class="descname">EmailMessage</code><a class="headerlink" href="#django.core.mail.EmailMessage" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>La classe <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> est initialisée avec les paramètres suivants (dans l’ordre donné, si des paramètres positionnels sont utilisés). Tous les paramètres sont facultatifs et peuvent être définis à tout moment précédant l’appel à la méthode <code class="docutils literal notranslate"><span class="pre">send()</span></code>.</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">subject</span></code>: la ligne sujet du courriel.</li>
+<li><code class="docutils literal notranslate"><span class="pre">body</span></code>: le texte du corps. Cela doit être un message texte brut.</li>
+<li><code class="docutils literal notranslate"><span class="pre">from_email</span></code>: l’adresse de l’expéditeur. Les deux formes <code class="docutils literal notranslate"><span class="pre">fred&#64;example.com</span></code> et <code class="docutils literal notranslate"><span class="pre">&quot;Fred&quot;</span> <span class="pre">&lt;fred&#64;example.com&gt;</span></code> sont acceptées. Si le paramètre est absent, c’est le réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_FROM_EMAIL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_FROM_EMAIL</span></code></a> qui est utilisé.</li>
+<li><code class="docutils literal notranslate"><span class="pre">to</span></code>: une liste ou un tuple d’adresses de destination.</li>
+<li><code class="docutils literal notranslate"><span class="pre">bcc</span></code>: une liste ou un tuple d’adresses à placer dans l’en-tête «&nbsp;Bcc&nbsp;» au moment d’envoyer le courriel.</li>
+<li><code class="docutils literal notranslate"><span class="pre">connection</span></code>: une instance de moteur de messagerie. Utilisez ce paramètre si vous voulez utiliser la même connexion pour plusieurs messages. Si ce paramètre est absent, une nouvelle connexion est initiée lorsque <code class="docutils literal notranslate"><span class="pre">send()</span></code> est appelée.</li>
+<li><code class="docutils literal notranslate"><span class="pre">attachments</span></code>: une liste de pièces jointes à placer dans le message. Elles peuvent être soit des instances de <a class="reference external" href="https://docs.python.org/3/library/email.mime.html#email.mime.base.MIMEBase" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MIMEBase</span></code></a>, soit des triplets <code class="docutils literal notranslate"><span class="pre">(nom</span> <span class="pre">de</span> <span class="pre">fichier,</span> <span class="pre">contenu,</span> <span class="pre">type</span> <span class="pre">mime)</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">headers</span></code>: un dictionnaire d’en-têtes à ajouter au message. Les clés sont les noms d’en-têtes, les valeurs sont les valeurs d’en-têtes. C’est à l’appelant de s’assurer que les noms et les valeurs d’en-têtes soient dans un format correct pour les courriels. L’attribut correspondant est <code class="docutils literal notranslate"><span class="pre">extra_headers</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">cc</span></code>: une liste ou un tuple d’adresses de destination utilisées dans l’en-tête «&nbsp;Cc&nbsp;» lors de l’envoi du courriel.</li>
+<li><code class="docutils literal notranslate"><span class="pre">reply_to</span></code>: une liste ou un tuple d’adresses de destination utilisées dans l’en-tête «&nbsp;reply_to&nbsp;» lors de l’envoi du courriel.</li>
+</ul>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="k">import</span> <span class="n">EmailMessage</span>
+
+<span class="n">email</span> <span class="o">=</span> <span class="n">EmailMessage</span><span class="p">(</span>
+    <span class="s1">&#39;Hello&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Body goes here&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;to1@example.com&#39;</span><span class="p">,</span> <span class="s1">&#39;to2@example.com&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;bcc@example.com&#39;</span><span class="p">],</span>
+    <span class="n">reply_to</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;another@example.com&#39;</span><span class="p">],</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Message-ID&#39;</span><span class="p">:</span> <span class="s1">&#39;foo&#39;</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>La classe possède les méthodes suivantes&nbsp;:</p>
+<ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">send(fail_silently=False)</span></code> envoie le message. Si une connexion a été indiquée au moment où le courriel a été construit, c’est cette connexion qui sera utilisée. Sinon, c’est une instance du moteur par défaut qui sera utilisée. Si le paramètre nommé <code class="docutils literal notranslate"><span class="pre">fail_silently</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, les exceptions générées lors de l’envoi du message seront ignorées. Une liste de destinataires vide ne génère pas d’exception.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">message()</span></code> construit un objet <code class="docutils literal notranslate"><span class="pre">django.core.mail.SafeMIMEText</span></code> (une sous-classe de la classe Python <a class="reference external" href="https://docs.python.org/3/library/email.mime.html#email.mime.text.MIMEText" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MIMEText</span></code></a>) ou un objet <code class="docutils literal notranslate"><span class="pre">django.core.mail.SafeMIMEMultipart</span></code> contenant le message à envoyer. S’il vous arrivait de devoir étendre la classe <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a>, il sera probablement nécessaire de surcharger cette méthode pour pouvoir placer le contenu souhaité dans l’objet MIME.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">recipients()</span></code> renvoie une liste de tous les destinataires du message, quel que soit le champ où ils se trouvent (<code class="docutils literal notranslate"><span class="pre">to</span></code>, <code class="docutils literal notranslate"><span class="pre">cc</span></code> ou <code class="docutils literal notranslate"><span class="pre">bcc</span></code>). C’est aussi une méthode qu’il peut être utile de surcharger lors de l’écriture d’une sous-classe, car le serveur SMTP doit recevoir la liste complète des destinataires au moment de l’envoi du message. Si vous ajoutez une autre façon d’indiquer les destinataires dans votre classe, ceux-ci doivent aussi être renvoyés par cette méthode.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">attach()</span></code> crée une nouvelle pièce jointe et l’ajoute au message. Il y a deux façons d’appeler <code class="docutils literal notranslate"><span class="pre">attach()</span></code>:</p>
+<ul>
+<li><p class="first">Vous pouvez lui passer un seul paramètre qui est une instance de <a class="reference external" href="https://docs.python.org/3/library/email.mime.html#email.mime.base.MIMEBase" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MIMEBase</span></code></a>. Elle sera directement insérée dans le message résultant.</p>
+</li>
+<li><p class="first">Il est aussi possible de passer trois paramètres à <code class="docutils literal notranslate"><span class="pre">attach()</span></code>: <code class="docutils literal notranslate"><span class="pre">filename</span></code>, <code class="docutils literal notranslate"><span class="pre">content</span></code> et <code class="docutils literal notranslate"><span class="pre">mimetype</span></code>. <code class="docutils literal notranslate"><span class="pre">filename</span></code> est le nom de la pièce jointe tel qu’il apparaîtra dans le courriel, <code class="docutils literal notranslate"><span class="pre">content</span></code> contient les données qui formeront la pièce jointe et <code class="docutils literal notranslate"><span class="pre">mimetype</span></code> est le type MIME facultatif de la pièce jointe. Si vous omettez <code class="docutils literal notranslate"><span class="pre">mimetype</span></code>, le type de contenu MIME sera déduit du nom de fichier de la pièce jointe.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">message</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="s1">&#39;design.png&#39;</span><span class="p">,</span> <span class="n">img_data</span><span class="p">,</span> <span class="s1">&#39;image/png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Si vous indiquez <em class="mimetype">message/rfc822</em> comme <code class="docutils literal notranslate"><span class="pre">mimetype</span></code>, la méthode accepte aussi les classes <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.mail.EmailMessage</span></code></a> et <a class="reference external" href="https://docs.python.org/3/library/email.compat32-message.html#email.message.Message" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">email.message.Message</span></code></a>.</p>
+<p>Pour un <code class="docutils literal notranslate"><span class="pre">mimetype</span></code> commençant par <em class="mimetype">text/</em>, le contenu attendu est une chaîne. Les données binaires sont décodées en utilisant UTF-8 et en cas d’échec, le type MIME sera transformé en <em class="mimetype">application/octet-stream</em> et les données seront jointes telles quelles.</p>
+<p>De plus, les pièces jointes <em class="mimetype">message/rfc822</em> ne sont plus codées en base64, ce qui contrevient à la <span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2046.html#section-5.2.1"><strong>RFC 2046#section-5.2.1</strong></a> et qui peut poser des problèmes d’affichage des pièces jointes dans <a class="reference external" href="https://bugzilla.gnome.org/show_bug.cgi?id=651197">Evolution</a> et <a class="reference external" href="https://bugzilla.mozilla.org/show_bug.cgi?id=333880">Thunderbird</a>.</p>
+</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">attach_file()</span></code> crée une nouvelle pièce jointe à partir d’un fichier du système de fichiers. Appelez-la avec le chemin du fichier à joindre et, facultativement, le type MIME à utiliser pour ce fichier. Si vous omettez le type MIME, il sera déduit du nom de fichier. Voici comment l’utiliser&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">message</span><span class="o">.</span><span class="n">attach_file</span><span class="p">(</span><span class="s1">&#39;/images/weather_map.png&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pour les types MIME commençant par <em class="mimetype">text/</em>, les données binaires sont traitées comme pour <code class="docutils literal notranslate"><span class="pre">attach()</span></code>.</p>
+</li>
+</ul>
+<div class="section" id="s-sending-alternative-content-types">
+<span id="sending-alternative-content-types"></span><h4>Envoi d’autres types de contenus<a class="headerlink" href="#sending-alternative-content-types" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Il peut être utile d’inclure plusieurs versions d’un contenu dans un courriel&nbsp;; l’exemple classique est d’envoyer à la fois des versions texte brut et HTML d’un message. Avec la bibliothèque de messagerie de Django, vous pouvez le faire en utilisant la classe <code class="docutils literal notranslate"><span class="pre">EmailMultiAlternatives</span></code>. Cette sous-classe de <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> possède une méthode <code class="docutils literal notranslate"><span class="pre">attach_alternative()</span></code> pour inclure des versions supplémentaires du corps d’un message dans le courriel. Toutes les autres méthodes (y compris l’initialisation de la classe) sont directement héritées de <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a>.</p>
+<p>Pour envoyer une combinaison de texte et de HTML, vous pourriez écrire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.mail</span> <span class="k">import</span> <span class="n">EmailMultiAlternatives</span>
+
+<span class="n">subject</span><span class="p">,</span> <span class="n">from_email</span><span class="p">,</span> <span class="n">to</span> <span class="o">=</span> <span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span> <span class="s1">&#39;to@example.com&#39;</span>
+<span class="n">text_content</span> <span class="o">=</span> <span class="s1">&#39;This is an important message.&#39;</span>
+<span class="n">html_content</span> <span class="o">=</span> <span class="s1">&#39;&lt;p&gt;This is an &lt;strong&gt;important&lt;/strong&gt; message.&lt;/p&gt;&#39;</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="n">EmailMultiAlternatives</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">text_content</span><span class="p">,</span> <span class="n">from_email</span><span class="p">,</span> <span class="p">[</span><span class="n">to</span><span class="p">])</span>
+<span class="n">msg</span><span class="o">.</span><span class="n">attach_alternative</span><span class="p">(</span><span class="n">html_content</span><span class="p">,</span> <span class="s2">&quot;text/html&quot;</span><span class="p">)</span>
+<span class="n">msg</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Par défaut, le type MIME du paramètre <code class="docutils literal notranslate"><span class="pre">body</span></code> d’un <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> est <code class="docutils literal notranslate"><span class="pre">&quot;text/plain&quot;</span></code>. Il est recommandé de le laisser tel quel, car il garantit que tout destinataire sera capable de lire le courriel, quel que soit son client de messagerie. Cependant, si vous savez que vos destinataires savent gérer un autre type de contenu, vous pouvez utiliser l’attribut <code class="docutils literal notranslate"><span class="pre">content_subtype</span></code> de la classe <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> pour modifier le type de contenu principal. Le type primaire sera toujours <code class="docutils literal notranslate"><span class="pre">&quot;text&quot;</span></code>, mais vous pouvez modifier le sous-type. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">msg</span> <span class="o">=</span> <span class="n">EmailMessage</span><span class="p">(</span><span class="n">subject</span><span class="p">,</span> <span class="n">html_content</span><span class="p">,</span> <span class="n">from_email</span><span class="p">,</span> <span class="p">[</span><span class="n">to</span><span class="p">])</span>
+<span class="n">msg</span><span class="o">.</span><span class="n">content_subtype</span> <span class="o">=</span> <span class="s2">&quot;html&quot;</span>  <span class="c1"># Main content is now text/html</span>
+<span class="n">msg</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-email-backends">
+<span id="s-topic-email-backends"></span><span id="email-backends"></span><span id="topic-email-backends"></span><h2>Moteurs de messagerie<a class="headerlink" href="#email-backends" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’envoi réel d’un courriel est géré par le moteur de messagerie.</p>
+<p>La classe du moteur de messagerie possède les méthodes suivantes&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">open()</span></code> instancie une connexion persistante d’envoi de messages.</li>
+<li><code class="docutils literal notranslate"><span class="pre">close()</span></code> ferme la connexion actuelle vers le système d’envoi de messages.</li>
+<li><code class="docutils literal notranslate"><span class="pre">send_messages(email_messages)</span></code> envoie une liste d’objets <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a>. Si la connexion n’est pas ouverte, cet appel ouvrira implicitement la connexion, puis la fermera à la fin de l’opération. Si la connexion est déjà ouverte, elle sera conservée ouverte après l’envoi des messages.</li>
+</ul>
+<p>Il peut aussi être utilisé comme gestionnaire de contexte, ce qui appellera automatiquement les méthodes <code class="docutils literal notranslate"><span class="pre">open()</span></code> et <code class="docutils literal notranslate"><span class="pre">close()</span></code> nécessaires&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core</span> <span class="k">import</span> <span class="n">mail</span>
+
+<span class="k">with</span> <span class="n">mail</span><span class="o">.</span><span class="n">get_connection</span><span class="p">()</span> <span class="k">as</span> <span class="n">connection</span><span class="p">:</span>
+    <span class="n">mail</span><span class="o">.</span><span class="n">EmailMessage</span><span class="p">(</span>
+        <span class="n">subject1</span><span class="p">,</span> <span class="n">body1</span><span class="p">,</span> <span class="n">from1</span><span class="p">,</span> <span class="p">[</span><span class="n">to1</span><span class="p">],</span>
+        <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+    <span class="n">mail</span><span class="o">.</span><span class="n">EmailMessage</span><span class="p">(</span>
+        <span class="n">subject2</span><span class="p">,</span> <span class="n">body2</span><span class="p">,</span> <span class="n">from2</span><span class="p">,</span> <span class="p">[</span><span class="n">to2</span><span class="p">],</span>
+        <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">send</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="s-obtaining-an-instance-of-an-email-backend">
+<span id="obtaining-an-instance-of-an-email-backend"></span><h3>Obtention d’une instance d’un moteur de messagerie<a class="headerlink" href="#obtaining-an-instance-of-an-email-backend" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La fonction <a class="reference internal" href="#django.core.mail.get_connection" title="django.core.mail.get_connection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_connection()</span></code></a> de <code class="docutils literal notranslate"><span class="pre">django.core.mail</span></code> renvoie une instance utilisable du moteur de messagerie.</p>
+<dl class="function">
+<dt id="django.core.mail.get_connection">
+<code class="descname">get_connection</code>(<em>backend=None</em>, <em>fail_silently=False</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.core.mail.get_connection" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Par défaut, une appel à <code class="docutils literal notranslate"><span class="pre">get_connection()</span></code> renvoie une instance du moteur de messagerie indiqué dans <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_BACKEND"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_BACKEND</span></code></a>. Si vous indiquez le paramètre <code class="docutils literal notranslate"><span class="pre">backend</span></code>, une instance de ce moteur sera créée.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">fail_silently</span></code> contrôle la gestion d’erreurs dans le moteur. Si <code class="docutils literal notranslate"><span class="pre">fail_silently</span></code> vaut True, les exceptions survenant durant le processus d’envoi de messages seront ignorées en silence.</p>
+<p>Tous les autres paramètres sont directement transmis au constructeur du moteur de messagerie.</p>
+<p>Django est livré avec plusieurs moteurs de messagerie. À l’exception du moteur SMTP (moteur par défaut), ces moteurs ne sont utiles que pour les tests et le développement. Si vous avez des contraintes particulières dans l’envoi de messages, vous pouvez <a class="reference internal" href="#topic-custom-email-backend"><span class="std std-ref">écrire votre propre moteur de messagerie</span></a>.</p>
+<div class="section" id="s-smtp-backend">
+<span id="s-topic-email-smtp-backend"></span><span id="smtp-backend"></span><span id="topic-email-smtp-backend"></span><h4>Le moteur SMTP<a class="headerlink" href="#smtp-backend" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="class">
+<dt id="django.core.mail.backends.smtp.EmailBackend">
+<em class="property">class </em><code class="descclassname">backends.smtp.</code><code class="descname">EmailBackend</code>(<em>host=None</em>, <em>port=None</em>, <em>username=None</em>, <em>password=None</em>, <em>use_tls=None</em>, <em>fail_silently=False</em>, <em>use_ssl=None</em>, <em>timeout=None</em>, <em>ssl_keyfile=None</em>, <em>ssl_certfile=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.core.mail.backends.smtp.EmailBackend" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>C’est le moteur par défaut. Les courriels seront envoyés par un serveur SMTP.</p>
+<p>La valeur de chaque paramètre est récupérée à partir du réglage correspondant si le paramètre vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">host</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">port</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_PORT</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">username</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_USER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_USER</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">password</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST_PASSWORD"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST_PASSWORD</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">use_tls</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_USE_TLS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_USE_TLS</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">use_ssl</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_USE_SSL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_USE_SSL</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">timeout</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_TIMEOUT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_TIMEOUT</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">ssl_keyfile</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_SSL_KEYFILE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_SSL_KEYFILE</span></code></a></li>
+<li><code class="docutils literal notranslate"><span class="pre">ssl_certfile</span></code>: <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_SSL_CERTFILE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_SSL_CERTFILE</span></code></a></li>
+</ul>
+<p>Le moteur SMTP est la configuration par défaut héritée par Django. Si vous voulez la définir explicitement, mettez ce qui suit dans vos réglages&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EMAIL_BACKEND</span> <span class="o">=</span> <span class="s1">&#39;django.core.mail.backends.smtp.EmailBackend&#39;</span>
+</pre></div>
+</div>
+<p>Si elle n’est pas indiquée, la valeur par défaut de <code class="docutils literal notranslate"><span class="pre">timeout</span></code> correspondra à la valeur fournie par <a class="reference external" href="https://docs.python.org/3/library/socket.html#socket.getdefaulttimeout" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">socket.getdefaulttimeout()</span></code></a> dont la valeur par défaut est <code class="docutils literal notranslate"><span class="pre">None</span></code> (pas d’expiration).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-console-backend">
+<span id="s-topic-email-console-backend"></span><span id="console-backend"></span><span id="topic-email-console-backend"></span><h4>Le moteur console<a class="headerlink" href="#console-backend" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Au lieu d’envoyer vraiment des courriels, le moteur console ne fait qu’afficher sur la sortie standard les courriels qui auraient dû être envoyés. Par défaut, le moteur console écrit dans <code class="docutils literal notranslate"><span class="pre">stdout</span></code>. Vous pouvez utiliser un autre objet de type flux en indiquant le paramètre <code class="docutils literal notranslate"><span class="pre">stream</span></code> au moment de construire la connexion.</p>
+<p>Pour utiliser ce moteur, mettez ce qui suit dans vos réglages&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EMAIL_BACKEND</span> <span class="o">=</span> <span class="s1">&#39;django.core.mail.backends.console.EmailBackend&#39;</span>
+</pre></div>
+</div>
+<p>Ce moteur n’est pas conçu pour être utilisé en production, il n’est fourni que par commodité et destiné à être utilisé durant le développement.</p>
+</div>
+<div class="section" id="s-file-backend">
+<span id="s-topic-email-file-backend"></span><span id="file-backend"></span><span id="topic-email-file-backend"></span><h4>Le moteur fichier<a class="headerlink" href="#file-backend" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le moteur fichier écrit les courriels dans un fichier. Un nouveau fichier est créé pour chaque nouvelle session ouverte avec ce moteur. Le répertoire dans lequel les fichiers sont écrits correspond soit au réglage <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_FILE_PATH"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_FILE_PATH</span></code></a>, soit au mot-clé <code class="docutils literal notranslate"><span class="pre">file_path</span></code> transmis lors de la création de la connexion avec <a class="reference internal" href="#django.core.mail.get_connection" title="django.core.mail.get_connection"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_connection()</span></code></a>.</p>
+<p>Pour utiliser ce moteur, mettez ce qui suit dans vos réglages&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EMAIL_BACKEND</span> <span class="o">=</span> <span class="s1">&#39;django.core.mail.backends.filebased.EmailBackend&#39;</span>
+<span class="n">EMAIL_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;/tmp/app-messages&#39;</span> <span class="c1"># change this to a proper location</span>
+</pre></div>
+</div>
+<p>Ce moteur n’est pas conçu pour être utilisé en production, il n’est fourni que par commodité et destiné à être utilisé durant le développement.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des chemins de type <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a> a été ajoutée.</p>
+</div>
+</div>
+<div class="section" id="s-in-memory-backend">
+<span id="s-topic-email-memory-backend"></span><span id="in-memory-backend"></span><span id="topic-email-memory-backend"></span><h4>Le moteur mémoire<a class="headerlink" href="#in-memory-backend" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le moteur <code class="docutils literal notranslate"><span class="pre">'locmem'</span></code> stocke les messages dans un attribut spécial du module <code class="docutils literal notranslate"><span class="pre">django.core.mail</span></code>. L’attribut <code class="docutils literal notranslate"><span class="pre">outbox</span></code> est créé au moment de l’envoi du premier message. C’est une liste contenant une instance de <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> pour chaque message qui aurait été envoyé.</p>
+<p>Pour utiliser ce moteur, mettez ce qui suit dans vos réglages&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EMAIL_BACKEND</span> <span class="o">=</span> <span class="s1">&#39;django.core.mail.backends.locmem.EmailBackend&#39;</span>
+</pre></div>
+</div>
+<p>Ce moteur n’est pas conçu pour être utilisé en production, il n’est fourni que par commodité et destiné à être utilisé durant le développement et les tests.</p>
+<p>L’exécuteur de tests de Django <a class="reference internal" href="testing/tools.html#topics-testing-email"><span class="std std-ref">utilise automatiquement ce moteur pour les tests</span></a>.</p>
+</div>
+<div class="section" id="s-dummy-backend">
+<span id="s-topic-email-dummy-backend"></span><span id="dummy-backend"></span><span id="topic-email-dummy-backend"></span><h4>Le moteur bidon<a class="headerlink" href="#dummy-backend" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Comme son nom l’indique, le moteur bidon («&nbsp;dummy&nbsp;») ne fait rien des messages reçus. Pour définir ce moteur, mettez ce qui suit dans vos réglages&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">EMAIL_BACKEND</span> <span class="o">=</span> <span class="s1">&#39;django.core.mail.backends.dummy.EmailBackend&#39;</span>
+</pre></div>
+</div>
+<p>Ce moteur n’est pas conçu pour être utilisé en production, il n’est fourni que par commodité et destiné à être utilisé durant le développement.</p>
+</div>
+</div>
+<div class="section" id="s-defining-a-custom-email-backend">
+<span id="s-topic-custom-email-backend"></span><span id="defining-a-custom-email-backend"></span><span id="topic-custom-email-backend"></span><h3>Définition d’un moteur de messagerie personnalisé<a class="headerlink" href="#defining-a-custom-email-backend" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous devez modifier la façon dont les courriels sont envoyés, vous pouvez écrire votre propre moteur de messagerie. Le réglage <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_BACKEND"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_BACKEND</span></code></a> de votre fichier de réglages contiendra alors le chemin d’importation Python vers votre classe de moteur.</p>
+<p>Les moteurs de messagerie personnalisés doivent hériter de <code class="docutils literal notranslate"><span class="pre">BaseEmailBackend</span></code> qui se trouve dans le module <code class="docutils literal notranslate"><span class="pre">django.core.mail.backends.base</span></code>. Un moteur de messagerie personnalisé doit implémenter la méthode <code class="docutils literal notranslate"><span class="pre">send_messages(email_messages)</span></code>. Celle-ci reçoit une liste d’instances <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> et renvoie le nombre de message délivrés avec succès. Si votre moteur contient la notion de session ou connexion persistente, vous devriez aussi implémenter les méthodes <code class="docutils literal notranslate"><span class="pre">open()</span></code> et <code class="docutils literal notranslate"><span class="pre">close()</span></code>. Référez-vous à <code class="docutils literal notranslate"><span class="pre">smtp.EmailBackend</span></code> pour une implémentation de référence.</p>
+</div>
+<div class="section" id="s-sending-multiple-emails">
+<span id="s-topics-sending-multiple-emails"></span><span id="sending-multiple-emails"></span><span id="topics-sending-multiple-emails"></span><h3>Envoi de plusieurs courriels<a class="headerlink" href="#sending-multiple-emails" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’établissement et la fermeture d’une connexion SMTP (ou de toute autre connexion réseau, en fait) est un processus coûteux. Si vous avez beaucoup de courriels à envoyer, il est logique de recycler une connexion SMTP plutôt que de créer puis détruire une connexion lors de chaque envoi de message.</p>
+<p>Il existe deux manières d’indiquer à un moteur de messagerie qu’il doit réutiliser une connexion.</p>
+<p>Premièrement, vous pouvez utiliser la méthode <code class="docutils literal notranslate"><span class="pre">send_messages()</span></code>. Celle-ci accepte une liste d’instances <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> (ou de ses sous-classes) et les envoie tous en utilisant une même connexion.</p>
+<p>Par exemple, si vous aviez une fonction appelée <code class="docutils literal notranslate"><span class="pre">get_notification_email()</span></code> qui renvoie une liste d’objets <a class="reference internal" href="#django.core.mail.EmailMessage" title="django.core.mail.EmailMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailMessage</span></code></a> représentant des courriels que vous souhaitez envoyer périodiquement, vous pourriez envoyer ces courriels en utilisant un seul appel à <code class="docutils literal notranslate"><span class="pre">send_messages</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core</span> <span class="k">import</span> <span class="n">mail</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">mail</span><span class="o">.</span><span class="n">get_connection</span><span class="p">()</span>   <span class="c1"># Use default email connection</span>
+<span class="n">messages</span> <span class="o">=</span> <span class="n">get_notification_email</span><span class="p">()</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">send_messages</span><span class="p">(</span><span class="n">messages</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, l’appel à <code class="docutils literal notranslate"><span class="pre">send_messages()</span></code> ouvre une connexion au moteur, envoie la liste des messages et ferme à nouveau la connexion.</p>
+<p>La seconde approche est d’utiliser les méthodes <code class="docutils literal notranslate"><span class="pre">open()</span></code> et <code class="docutils literal notranslate"><span class="pre">close()</span></code> du moteur de messagerie pour contrôler manuellement la connexion. <code class="docutils literal notranslate"><span class="pre">send_messages()</span></code> n’ouvre ou ne ferme pas manuellement de connexion si il y en a déjà une ouverte, ce qui fait qu’en ouvrant manuellement la connexion, vous contrôlez aussi quand elle sera fermée. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core</span> <span class="k">import</span> <span class="n">mail</span>
+<span class="n">connection</span> <span class="o">=</span> <span class="n">mail</span><span class="o">.</span><span class="n">get_connection</span><span class="p">()</span>
+
+<span class="c1"># Manually open the connection</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+<span class="c1"># Construct an email message that uses the connection</span>
+<span class="n">email1</span> <span class="o">=</span> <span class="n">mail</span><span class="o">.</span><span class="n">EmailMessage</span><span class="p">(</span>
+    <span class="s1">&#39;Hello&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Body goes here&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;to1@example.com&#39;</span><span class="p">],</span>
+    <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">email1</span><span class="o">.</span><span class="n">send</span><span class="p">()</span> <span class="c1"># Send the email</span>
+
+<span class="c1"># Construct two more messages</span>
+<span class="n">email2</span> <span class="o">=</span> <span class="n">mail</span><span class="o">.</span><span class="n">EmailMessage</span><span class="p">(</span>
+    <span class="s1">&#39;Hello&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Body goes here&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;to2@example.com&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">email3</span> <span class="o">=</span> <span class="n">mail</span><span class="o">.</span><span class="n">EmailMessage</span><span class="p">(</span>
+    <span class="s1">&#39;Hello&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Body goes here&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;from@example.com&#39;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s1">&#39;to3@example.com&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="c1"># Send the two emails in a single call -</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">send_messages</span><span class="p">([</span><span class="n">email2</span><span class="p">,</span> <span class="n">email3</span><span class="p">])</span>
+<span class="c1"># The connection was already open so send_messages() doesn&#39;t close it.</span>
+<span class="c1"># We need to manually close the connection.</span>
+<span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-configuring-email-for-development">
+<span id="configuring-email-for-development"></span><h2>Configuration de la messagerie pour le développement<a class="headerlink" href="#configuring-email-for-development" title="Lien permanent vers ce titre">¶</a></h2>
+<p>À certains moments, vous ne voulez absolument pas que que Django envoie des courriels. Par exemple, pendant le développement d’un site Web, vous ne voulez certainement pas envoyer des milliers de courriels, mais vous voulez peut-être valider que ces courriels seraient envoyés aux bonnes personnes et aux bonnes conditions, et que leur contenu est correct.</p>
+<p>La manière la plus simple de configurer la messagerie électronique lors du développement local est d’utiliser le moteur de messagerie <a class="reference internal" href="#topic-email-console-backend"><span class="std std-ref">console</span></a>. Ce moteur redirige tous les courriels vers la sortie standard <code class="docutils literal notranslate"><span class="pre">stdout</span></code>, ce qui permet d’inspecter leur contenu.</p>
+<p>Le moteur de messagerie <a class="reference internal" href="#topic-email-file-backend"><span class="std std-ref">fichier</span></a> peut aussi être utile durant le développement&nbsp;; ce moteur redirige le contenu de chaque connexion SMTP dans un fichier qui peut ensuite être examiné à souhait.</p>
+<p>Une autre approche est d’utiliser un serveur SMTP «&nbsp;stupide&nbsp;» qui reçoit localement les courriels et les affiche dans le terminal, mais n’envoie rien plus loin. Python possède une manière intégrée de faire cela par une commande unique&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">smtpd</span> <span class="o">-</span><span class="n">n</span> <span class="o">-</span><span class="n">c</span> <span class="n">DebuggingServer</span> <span class="n">localhost</span><span class="p">:</span><span class="mi">1025</span>
+</pre></div>
+</div>
+<p>Cette commande lance un serveur SMTP minimal écoutant sur le port 1025 de localhost. Ce serveur affiche sur la sortie standard tous les en-têtes des courriels ainsi que leur corps. Il ne vous reste plus qu’à définir adéquatement les réglages <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_HOST</span></code></a> et <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_PORT</span></code></a>. Pour une discussion plus détaillée au sujet des options de serveur SMTP, consultez la documentation Python du module <a class="reference external" href="https://docs.python.org/3/library/smtpd.html#module-smtpd" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">smtpd</span></code></a>.</p>
+<p>Pour plus d’informations sur les tests unitaires impliquant l’envoi de courriels par votre application, consultez la section <a class="reference internal" href="testing/tools.html#topics-testing-email"><span class="std std-ref">Services de messagerie</span></a> de la documentation sur les tests.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Envoi de messages électroniques</a><ul>
+<li><a class="reference internal" href="#quick-example">Exemple rapide</a></li>
+<li><a class="reference internal" href="#send-mail"><code class="docutils literal notranslate"><span class="pre">send_mail()</span></code></a></li>
+<li><a class="reference internal" href="#send-mass-mail"><code class="docutils literal notranslate"><span class="pre">send_mass_mail()</span></code></a><ul>
+<li><a class="reference internal" href="#send-mass-mail-vs-send-mail"><code class="docutils literal notranslate"><span class="pre">send_mass_mail()</span></code> vs. <code class="docutils literal notranslate"><span class="pre">send_mail()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mail-admins"><code class="docutils literal notranslate"><span class="pre">mail_admins()</span></code></a></li>
+<li><a class="reference internal" href="#mail-managers"><code class="docutils literal notranslate"><span class="pre">mail_managers()</span></code></a></li>
+<li><a class="reference internal" href="#examples">Exemples</a></li>
+<li><a class="reference internal" href="#preventing-header-injection">Prévention de l’injection d’en-têtes</a></li>
+<li><a class="reference internal" href="#the-emailmessage-class">La classe <code class="docutils literal notranslate"><span class="pre">EmailMessage</span></code></a><ul>
+<li><a class="reference internal" href="#emailmessage-objects">Les objets <code class="docutils literal notranslate"><span class="pre">EmailMessage</span></code></a><ul>
+<li><a class="reference internal" href="#sending-alternative-content-types">Envoi d’autres types de contenus</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#email-backends">Moteurs de messagerie</a><ul>
+<li><a class="reference internal" href="#obtaining-an-instance-of-an-email-backend">Obtention d’une instance d’un moteur de messagerie</a><ul>
+<li><a class="reference internal" href="#smtp-backend">Le moteur SMTP</a></li>
+<li><a class="reference internal" href="#console-backend">Le moteur console</a></li>
+<li><a class="reference internal" href="#file-backend">Le moteur fichier</a></li>
+<li><a class="reference internal" href="#in-memory-backend">Le moteur mémoire</a></li>
+<li><a class="reference internal" href="#dummy-backend">Le moteur bidon</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-a-custom-email-backend">Définition d’un moteur de messagerie personnalisé</a></li>
+<li><a class="reference internal" href="#sending-multiple-emails">Envoi de plusieurs courriels</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuring-email-for-development">Configuration de la messagerie pour le développement</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="signing.html"
+                        title="Chapitre précédent">Signatures cryptographiques</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="i18n/index.html"
+                        title="Chapitre suivant">Internationalisation et régionalisation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/topics/email.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="signing.html" title="Signatures cryptographiques">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="i18n/index.html" title="Internationalisation et régionalisation">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

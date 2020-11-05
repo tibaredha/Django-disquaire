@@ -1,0 +1,266 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Mise à jour de Django à une version plus récente &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Signalement d’erreurs" href="error-reporting.html" />
+    <link rel="prev" title="Liste de contrôle de déploiement" href="deployment/checklist.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="deployment/checklist.html" title="Liste de contrôle de déploiement">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="error-reporting.html" title="Signalement d’erreurs">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-upgrade-version">
+            
+  <div class="section" id="s-upgrading-django-to-a-newer-version">
+<span id="upgrading-django-to-a-newer-version"></span><h1>Mise à jour de Django à une version plus récente<a class="headerlink" href="#upgrading-django-to-a-newer-version" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Même si le processus peut être parfois un peu complexe, la mise à jour de Django à sa dernière version présente plusieurs avantages&nbsp;:</p>
+<ul class="simple">
+<li>De nouvelles fonctionnalités et améliorations ont été ajoutées.</li>
+<li>Des bogues ont été corrigés.</li>
+<li>Les versions plus anciennes de Django ne reçoivent plus de mises à jour de sécurité après un certain temps (voir <a class="reference internal" href="../internals/release-process.html#supported-versions-policy"><span class="std std-ref">Versions prises en charge</span></a>).</li>
+<li>En mettant à jour Django lors de chaque nouvelle publication, vous vous facilitez le travail sur les mises à jour suivantes car votre code reste toujours à jour.</li>
+</ul>
+<p>Voici quelques éléments à considérer pour rendre le processus de migration aussi agréable que possible.</p>
+<div class="section" id="s-required-reading">
+<span id="required-reading"></span><h2>Lecture conseillée<a class="headerlink" href="#required-reading" title="Lien permanent vers ce titre">¶</a></h2>
+<p>S’il s’agit de votre première mise à jour, il est utile de lire le <a class="reference internal" href="../internals/release-process.html"><span class="doc">guide sur les différents processus de publication</span></a>.</p>
+<p>Après cela, nous vous suggérons de vous familiariser avec les modifications qui ont été apportées dans la nouvelle version de Django&nbsp;:</p>
+<ul class="simple">
+<li>Lisez les <a class="reference internal" href="../releases/index.html"><span class="doc">notes de publication</span></a> de chaque version «&nbsp;finale&nbsp;» suivant votre version actuelle de Django, jusqu’à la version vers laquelle vous pensez effectuer la mise à jour.</li>
+<li>Examinez la <a class="reference internal" href="../internals/deprecation.html"><span class="doc">planification d’obsolescence</span></a> pour les versions concernées.</li>
+</ul>
+<p>Prêtez une attention particulière aux modifications non rétrocompatibles pour avoir une bonne vision de ce qui sera nécessaire pour une mise à jour réussie.</p>
+<p>Si vous mettez à jour en sautant plus d’une version majeure (par ex. 2.0 vers 2.2), il est généralement plus simple de mettre à jour en passant par chaque version majeure intermédiaire (2.0 vers 2.1, puis vers 2.2) plutôt que d’effectuer d’un coup tous les changements nécessaire pour toutes les versions majeures. Pour chacune des versions intermédiaires, utilisez la dernière publication corrective (par ex. pour 2.1, utilisez 2.1.15).</p>
+<p>La même approche de mise à jour incrémentale est recommandée lors de la mise à jour d’une version LTS vers la suivante.</p>
+</div>
+<div class="section" id="s-dependencies">
+<span id="dependencies"></span><h2>Dépendances<a class="headerlink" href="#dependencies" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Dans la plupart des cas, il sera aussi nécessaire de mettre à jour à la dernière version des dépendances Django. Si la version de Django a été publiée récemment ou si certaines de vos dépendances ne sont pas bien maintenues, il est possible que certaines dépendances ne prennent pas encore en charge la nouvelle version de Django. Dans ce cas, il se peut que vous deviez patienter jusqu’à ce que de nouvelles versions de vos dépendances aient été publiées.</p>
+</div>
+<div class="section" id="s-resolving-deprecation-warnings">
+<span id="resolving-deprecation-warnings"></span><h2>Résolution des avertissements d’obsolescence<a class="headerlink" href="#resolving-deprecation-warnings" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Avant de mettre à niveau, il est recommandé de résoudre les avertissements d’obsolescence générés par votre projet avec la version actuelle de Django. La correction de ces avertissements avant la mise à niveau garantit que vous soyez informés au sujet des bouts de code qui ont besoin d’être modifiés.</p>
+<p>En Python, les avertissements d’obsolescence sont silencieux par défaut. Vous devez les activer par l’option de ligne de commande Python <code class="docutils literal notranslate"><span class="pre">-Wa</span></code> ou avec la variable d’environnement <span class="target" id="index-2"></span><a class="reference external" href="https://docs.python.org/3/using/cmdline.html#envvar-PYTHONWARNINGS" title="(disponible dans Python v3.9)"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONWARNINGS</span></code></a>. Par exemple, pour afficher les avertissements lors du lancement des tests&nbsp;:</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -Wa manage.py <span class="nb">test</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -Wa manage.py test
+</pre></div>
+</section>
+</div>
+<p>Si vous n’utilisez pas l’exécuteur de tests de Django, il se peut que vous deviez aussi contrôler que la sortie console n’est pas capturée, ce qui masquerait les avertissements d’obsolescence. Par exemple, si vous utilisez <a class="reference external" href="https://pytest.org/">pytest</a>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nv">PYTHONWARNINGS</span><span class="o">=</span>always pytest tests --capture<span class="o">=</span>no
+</pre></div>
+</div>
+<p>Résolvez tout avertissement d’obsolescence avec votre version actuelle de Django avant de continuer le processus de mise à niveau.</p>
+<p>Les applications tierces peuvent utiliser des API obsolètes dans le but de prendre en charge plusieurs versions de Django. Des avertissements provenant de ces paquets installés ne signifient pas toujours qu’il y a un vrai problème. Si un paquet ne prend pas en charge la dernière version de Django, prenez le temps de créer un rapport d’anomalie ou d’envoyer un correctif pour ce problème.</p>
+</div>
+<div class="section" id="s-installation">
+<span id="installation"></span><h2>Installation<a class="headerlink" href="#installation" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Quand vous êtes prêt, c’est le moment d”<a class="reference internal" href="../topics/install.html"><span class="doc">installer la nouvelle version de Django</span></a>. Si vous utilisez un <a class="reference external" href="https://docs.python.org/3/library/venv.html#module-venv" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">environnement</span> <span class="pre">virtuel</span></code></a> et qu’il s’agit d’une mise à jour majeure, il peut être souhaitable de créer d’abord un nouvel environnement contenant toutes les dépendances.</p>
+<p>Si vous avez installé Django avec <a class="reference external" href="https://pip.pypa.io/">pip</a>, vous pouvez indiquer l’option <code class="docutils literal notranslate"><span class="pre">--upgrade</span></code> ou <code class="docutils literal notranslate"><span class="pre">-U</span></code>:</p>
+<div class="console-block" id="console-block-1">
+<input class="c-tab-unix" id="c-tab-1-unix" type="radio" name="console-1" checked>
+<label for="c-tab-1-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-1-win" type="radio" name="console-1">
+<label for="c-tab-1-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-1-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m pip install -U Django
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-1-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -m pip install -U Django
+</pre></div>
+</section>
+</div>
+</div>
+<div class="section" id="s-testing">
+<span id="testing"></span><h2>Tests<a class="headerlink" href="#testing" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque le nouvel environnement est installé, <a class="reference internal" href="../topics/testing/overview.html"><span class="doc">lancez la suite de tests complète</span></a> de votre application. Encore une fois, il est utile d’activer ces avertissements d’obsolescence pour qu’ils apparaissent dans les résultats des tests (vous pouvez aussi utiliser le drapeau si vous testez votre application manuellement avec <code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">runserver</span></code>)&nbsp;:</p>
+<div class="console-block" id="console-block-2">
+<input class="c-tab-unix" id="c-tab-2-unix" type="radio" name="console-2" checked>
+<label for="c-tab-2-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-2-win" type="radio" name="console-2">
+<label for="c-tab-2-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-2-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -Wa manage.py <span class="nb">test</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-2-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -Wa manage.py test
+</pre></div>
+</section>
+</div>
+<p>Après avoir exécuté les tests, corrigez les éventuelles erreurs. Un conseil&nbsp;: profitez du fait que les notes de publication sont encore fraîches dans votre mémoire pour mettre à jour votre code en tirant avantage des nouvelles fonctionnalités de Django et en éliminant ainsi d’éventuels avertissements d’obsolescence.</p>
+</div>
+<div class="section" id="s-deployment">
+<span id="deployment"></span><h2>Déploiement<a class="headerlink" href="#deployment" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous êtes suffisamment confiant dans le bon fonctionnement de votre application avec la nouvelle version de Django, vous êtes prêt à aller de l’avant et à <a class="reference internal" href="deployment/index.html"><span class="doc">déployer</span></a> votre projet Django mis à jour.</p>
+<p>Si vous utilisez de la mémoire tampon (cache) fournie par Django, il est conseillé de vider cette mémoire après la mise à jour. Sinon, des problèmes peuvent apparaître. Par exemple, si des objets bruts («&nbsp;pickled&nbsp;») sont en mémoire tampon, il n’est pas garanti que ces objets puissent être reconstruits, car ce format brut n’est pas toujours compatible d’une version de Django à une autre. Un problème d’incompatibilité connu du passé concernait les objets bruts <a class="reference internal" href="../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> en mémoire tampon, directement ou indirectement via le décorateur <a class="reference internal" href="../topics/cache.html#django.views.decorators.cache.cache_page" title="django.views.decorators.cache.cache_page"><code class="xref py py-func docutils literal notranslate"><span class="pre">cache_page()</span></code></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Mise à jour de Django à une version plus récente</a><ul>
+<li><a class="reference internal" href="#required-reading">Lecture conseillée</a></li>
+<li><a class="reference internal" href="#dependencies">Dépendances</a></li>
+<li><a class="reference internal" href="#resolving-deprecation-warnings">Résolution des avertissements d’obsolescence</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#testing">Tests</a></li>
+<li><a class="reference internal" href="#deployment">Déploiement</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="deployment/checklist.html"
+                        title="Chapitre précédent">Liste de contrôle de déploiement</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="error-reporting.html"
+                        title="Chapitre suivant">Signalement d’erreurs</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/howto/upgrade-version.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="deployment/checklist.html" title="Liste de contrôle de déploiement">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="error-reporting.html" title="Signalement d’erreurs">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

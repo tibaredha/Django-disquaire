@@ -1,0 +1,401 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Champs et composants de formulaires spécifiques à PostgreSQL &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Fonctions de bases de données spécifiques à PostgreSQL" href="functions.html" />
+    <link rel="prev" title="Champs de modèles spécifiques à PostgreSQL" href="fields.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="fields.html" title="Champs de modèles spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="functions.html" title="Fonctions de bases de données spécifiques à PostgreSQL">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-postgres-forms">
+            
+  <div class="section" id="s-postgresql-specific-form-fields-and-widgets">
+<span id="postgresql-specific-form-fields-and-widgets"></span><h1>Champs et composants de formulaires spécifiques à PostgreSQL<a class="headerlink" href="#postgresql-specific-form-fields-and-widgets" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Tous ces champs et composants sont disponibles dans le module <code class="docutils literal notranslate"><span class="pre">django.contrib.postgres.forms</span></code>.</p>
+<div class="section" id="s-fields">
+<span id="fields"></span><h2>Champs<a class="headerlink" href="#fields" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-simplearrayfield">
+<span id="simplearrayfield"></span><h3><code class="docutils literal notranslate"><span class="pre">SimpleArrayField</span></code><a class="headerlink" href="#simplearrayfield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.SimpleArrayField">
+<em class="property">class </em><code class="descname">SimpleArrayField</code>(<em>base_field</em>, <em>delimiter='</em>, <em>'</em>, <em>max_length=None</em>, <em>min_length=None</em>)<a class="headerlink" href="#django.contrib.postgres.forms.SimpleArrayField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un champ qui correspond à un tableau. Il est représenté par un élément HTML <code class="docutils literal notranslate"><span class="pre">&lt;input&gt;</span></code>.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SimpleArrayField.base_field">
+<code class="descname">base_field</code><a class="headerlink" href="#django.contrib.postgres.forms.SimpleArrayField.base_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce paramètre est obligatoire.</p>
+<p>Il définit le champ de formulaire de base du tableau. Ceci n’est pas utilisé pour produire du code HTML, mais pour traiter les données envoyées et les valider. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.forms</span> <span class="k">import</span> <span class="n">SimpleArrayField</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">NumberListForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">numbers</span> <span class="o">=</span> <span class="n">SimpleArrayField</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">())</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">NumberListForm</span><span class="p">({</span><span class="s1">&#39;numbers&#39;</span><span class="p">:</span> <span class="s1">&#39;1,2,3&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span>
+<span class="go">{&#39;numbers&#39;: [1, 2, 3]}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">NumberListForm</span><span class="p">({</span><span class="s1">&#39;numbers&#39;</span><span class="p">:</span> <span class="s1">&#39;1,2,a&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SimpleArrayField.delimiter">
+<code class="descname">delimiter</code><a class="headerlink" href="#django.contrib.postgres.forms.SimpleArrayField.delimiter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Il s’agit d’un paramètre facultatif dont la valeur par défaut est une virgule&nbsp;: <code class="docutils literal notranslate"><span class="pre">,</span></code>. Cette valeur est utilisée pour séparer les données envoyées. Elle permet d’enchaîner des champs <code class="docutils literal notranslate"><span class="pre">SimpleArrayField</span></code> pour des données à plusieurs dimensions&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.forms</span> <span class="k">import</span> <span class="n">SimpleArrayField</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">GridForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">places</span> <span class="o">=</span> <span class="n">SimpleArrayField</span><span class="p">(</span><span class="n">SimpleArrayField</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">()),</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">GridForm</span><span class="p">({</span><span class="s1">&#39;places&#39;</span><span class="p">:</span> <span class="s1">&#39;1,2|2,1|4,3&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span>
+<span class="go">{&#39;places&#39;: [[1, 2], [2, 1], [4, 3]]}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Le champ ne permet pas d’échapper le caractère de délimitation, soyez donc prudent dans les cas où le délimiteur est un caractère valable du champ sous-jacent. Le délimiteur ne doit pas forcément se limiter à un seul caractère.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SimpleArrayField.max_length">
+<code class="descname">max_length</code><a class="headerlink" href="#django.contrib.postgres.forms.SimpleArrayField.max_length" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>C’est un paramètre facultatif qui valide que le tableau ne dépasse pas la longueur indiquée.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SimpleArrayField.min_length">
+<code class="descname">min_length</code><a class="headerlink" href="#django.contrib.postgres.forms.SimpleArrayField.min_length" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>C’est un paramètre facultatif qui valide que le tableau atteint au moins la longueur indiquée.</p>
+</dd></dl>
+
+<div class="admonition-user-friendly-forms admonition">
+<p class="first admonition-title">Formulaires conviviaux</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">SimpleArrayField</span></code> n’est pas particulièrement convivial dans la plupart des cas, mais il s’agit toutefois d’une manière utile de mettre en forme des données à partir d’un composant client pour les envoyer vers le serveur.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-splitarrayfield">
+<span id="splitarrayfield"></span><h3><code class="docutils literal notranslate"><span class="pre">SplitArrayField</span></code><a class="headerlink" href="#splitarrayfield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.SplitArrayField">
+<em class="property">class </em><code class="descname">SplitArrayField</code>(<em>base_field</em>, <em>size</em>, <em>remove_trailing_nulls=False</em>)<a class="headerlink" href="#django.contrib.postgres.forms.SplitArrayField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce champ se charge des tableaux en reproduisant le champ de base un nombre défini de fois.</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SplitArrayField.base_field">
+<code class="descname">base_field</code><a class="headerlink" href="#django.contrib.postgres.forms.SplitArrayField.base_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Il s’agit d’un paramètre obligatoire. Il définit le champ de formulaire à répéter.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SplitArrayField.size">
+<code class="descname">size</code><a class="headerlink" href="#django.contrib.postgres.forms.SplitArrayField.size" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le nombre de fois que le champ de base va être utilisé.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.SplitArrayField.remove_trailing_nulls">
+<code class="descname">remove_trailing_nulls</code><a class="headerlink" href="#django.contrib.postgres.forms.SplitArrayField.remove_trailing_nulls" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Par défaut, cette valeur vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>. Dans ce cas, chaque valeur des champs répétés est stockée. Quand la valeur vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, toute valeur en fin de tableau qui reste vierge est supprimée du résultat. Si le champ de base possède <code class="docutils literal notranslate"><span class="pre">required=True</span></code> mais que <code class="docutils literal notranslate"><span class="pre">remove_trailing_nulls</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, les valeurs nulles ne sont permises qu’à la fin et elles seront ignorées.</p>
+<p>Quelques exemples&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SplitArrayField</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">remove_trailing_nulls</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2, 3]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; ValidationError - third entry required.</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; ValidationError - second entry required.</span>
+<span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; ValidationError - first and third entries required.</span>
+
+<span class="n">SplitArrayField</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">remove_trailing_nulls</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2, 3]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2, None]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, None, 3]</span>
+<span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [None, 2, None]</span>
+
+<span class="n">SplitArrayField</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">remove_trailing_nulls</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2, 3]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; ValidationError - second entry required.</span>
+<span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; ValidationError - first entry required.</span>
+
+<span class="n">SplitArrayField</span><span class="p">(</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">remove_trailing_nulls</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2, 3]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, 2]</span>
+<span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [1, None, 3]</span>
+<span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>  <span class="c1"># -&gt; [None, 2]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-hstorefield">
+<span id="hstorefield"></span><h3><code class="docutils literal notranslate"><span class="pre">HStoreField</span></code><a class="headerlink" href="#hstorefield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.HStoreField">
+<em class="property">class </em><code class="descname">HStoreField</code><a class="headerlink" href="#django.contrib.postgres.forms.HStoreField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un champ qui accepte des données codées en JSON pour un champ <a class="reference internal" href="fields.html#django.contrib.postgres.fields.HStoreField" title="django.contrib.postgres.fields.HStoreField"><code class="xref py py-class docutils literal notranslate"><span class="pre">HStoreField</span></code></a>. Il force toutes les valeurs (sauf la valeur nulle) à des chaînes. En HTML, il est représenté par une balise <code class="docutils literal notranslate"><span class="pre">&lt;textarea&gt;</span></code>.</p>
+<div class="admonition-user-friendly-forms admonition">
+<p class="first admonition-title">Formulaires conviviaux</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">HStoreField</span></code> n’est pas particulièrement convivial dans la plupart des cas, il s’agit cependant d’une manière utile de mettre en forme des données d’un composant côté client en vue de son envoi vers le serveur.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Parfois, il est utile de pouvoir limiter les clés admises comme valides pour un champ donné. Cela peut se faire à l’aide de <a class="reference internal" href="validators.html#django.contrib.postgres.validators.KeysValidator" title="django.contrib.postgres.validators.KeysValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">KeysValidator</span></code></a>.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-jsonfield">
+<span id="jsonfield"></span><h3><code class="docutils literal notranslate"><span class="pre">JSONField</span></code><a class="headerlink" href="#jsonfield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.JSONField">
+<em class="property">class </em><code class="descname">JSONField</code><a class="headerlink" href="#django.contrib.postgres.forms.JSONField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un champ qui accepte des données codées en JSON pour un champ <a class="reference internal" href="../../models/fields.html#django.db.models.JSONField" title="django.db.models.JSONField"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONField</span></code></a>. En HTML, il est représenté par une balise <code class="docutils literal notranslate"><span class="pre">&lt;textarea&gt;</span></code>.</p>
+<div class="admonition-user-friendly-forms admonition">
+<p class="first admonition-title">Formulaires conviviaux</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">JSONField</span></code> n’est pas particulièrement convivial dans la plupart des cas, il s’agit cependant d’une manière utile de mettre en forme des données d’un composant côté client en vue de son envoi vers le serveur.</p>
+</div>
+<div class="deprecated">
+<p><span class="versionmodified">Obsolète depuis la version 3.1: </span>Utilisez plutôt <a class="reference internal" href="../../forms/fields.html#django.forms.JSONField" title="django.forms.JSONField"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.forms.JSONField</span></code></a>.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-range-fields">
+<span id="range-fields"></span><h3>Champs d’intervalle<a class="headerlink" href="#range-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ce groupe de champs partage des fonctionnalités identiques pour accepter des données d’intervalle. Ils sont basés sur <a class="reference internal" href="../../forms/fields.html#django.forms.MultiValueField" title="django.forms.MultiValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiValueField</span></code></a>. Ils traitent une valeur omise comme un intervalle illimité. Ils valident aussi que la limite inférieure n’est pas plus grande que la limite supérieure. Tous ces champs utilisent le composant <a class="reference internal" href="#django.contrib.postgres.forms.RangeWidget" title="django.contrib.postgres.forms.RangeWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeWidget</span></code></a>.</p>
+<div class="section" id="s-integerrangefield">
+<span id="integerrangefield"></span><h4><code class="docutils literal notranslate"><span class="pre">IntegerRangeField</span></code><a class="headerlink" href="#integerrangefield" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.IntegerRangeField">
+<em class="property">class </em><code class="descname">IntegerRangeField</code><a class="headerlink" href="#django.contrib.postgres.forms.IntegerRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Basé sur <a class="reference internal" href="../../forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a> et traduit la valeur saisie en intervalle <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.NumericRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericRange</span></code></a>. Champ de formulaire par défaut pour <a class="reference internal" href="fields.html#django.contrib.postgres.fields.IntegerRangeField" title="django.contrib.postgres.fields.IntegerRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerRangeField</span></code></a> et <a class="reference internal" href="fields.html#django.contrib.postgres.fields.BigIntegerRangeField" title="django.contrib.postgres.fields.BigIntegerRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigIntegerRangeField</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-decimalrangefield">
+<span id="decimalrangefield"></span><h4><code class="docutils literal notranslate"><span class="pre">DecimalRangeField</span></code><a class="headerlink" href="#decimalrangefield" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.DecimalRangeField">
+<em class="property">class </em><code class="descname">DecimalRangeField</code><a class="headerlink" href="#django.contrib.postgres.forms.DecimalRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Basé sur <a class="reference internal" href="../../forms/fields.html#django.forms.DecimalField" title="django.forms.DecimalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalField</span></code></a> et traduit la valeur saisie en intervalle <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.NumericRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumericRange</span></code></a>. Champ de formulaire par défaut pour <a class="reference internal" href="fields.html#django.contrib.postgres.fields.DecimalRangeField" title="django.contrib.postgres.fields.DecimalRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalRangeField</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-datetimerangefield">
+<span id="datetimerangefield"></span><h4><code class="docutils literal notranslate"><span class="pre">DateTimeRangeField</span></code><a class="headerlink" href="#datetimerangefield" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.DateTimeRangeField">
+<em class="property">class </em><code class="descname">DateTimeRangeField</code><a class="headerlink" href="#django.contrib.postgres.forms.DateTimeRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Basé sur <a class="reference internal" href="../../forms/fields.html#django.forms.DateTimeField" title="django.forms.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a> et traduit la valeur saisie en intervalle <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.DateTimeTZRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeTZRange</span></code></a>. Champ de formulaire par défaut pour <a class="reference internal" href="fields.html#django.contrib.postgres.fields.DateTimeRangeField" title="django.contrib.postgres.fields.DateTimeRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeRangeField</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-daterangefield">
+<span id="daterangefield"></span><h4><code class="docutils literal notranslate"><span class="pre">DateRangeField</span></code><a class="headerlink" href="#daterangefield" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.DateRangeField">
+<em class="property">class </em><code class="descname">DateRangeField</code><a class="headerlink" href="#django.contrib.postgres.forms.DateRangeField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Basé sur <a class="reference internal" href="../../forms/fields.html#django.forms.DateField" title="django.forms.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a> et traduit la valeur saisie en intervalle <a class="reference external" href="https://www.psycopg.org/docs/extras.html#psycopg2.extras.DateRange" title="(disponible dans Psycopg v2.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateRange</span></code></a>. Champ de formulaire par défaut pour <a class="reference internal" href="fields.html#django.contrib.postgres.fields.DateRangeField" title="django.contrib.postgres.fields.DateRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateRangeField</span></code></a>.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="s-widgets">
+<span id="widgets"></span><h2>Composants de formulaires («&nbsp;widgets&nbsp;»)<a class="headerlink" href="#widgets" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-rangewidget">
+<span id="rangewidget"></span><h3><code class="docutils literal notranslate"><span class="pre">RangeWidget</span></code><a class="headerlink" href="#rangewidget" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.forms.RangeWidget">
+<em class="property">class </em><code class="descname">RangeWidget</code>(<em>base_widget</em>, <em>attrs=None</em>)<a class="headerlink" href="#django.contrib.postgres.forms.RangeWidget" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Composant utilisé par tous les champs d’intervalle. Basé sur <a class="reference internal" href="../../forms/widgets.html#django.forms.MultiWidget" title="django.forms.MultiWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiWidget</span></code></a>.</p>
+<p><a class="reference internal" href="#django.contrib.postgres.forms.RangeWidget" title="django.contrib.postgres.forms.RangeWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeWidget</span></code></a> requiert un paramètre obligatoire&nbsp;:</p>
+<dl class="attribute">
+<dt id="django.contrib.postgres.forms.RangeWidget.base_widget">
+<code class="descname">base_widget</code><a class="headerlink" href="#django.contrib.postgres.forms.RangeWidget.base_widget" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un intervalle <a class="reference internal" href="#django.contrib.postgres.forms.RangeWidget" title="django.contrib.postgres.forms.RangeWidget"><code class="xref py py-class docutils literal notranslate"><span class="pre">RangeWidget</span></code></a> composé d’un tuple binaire de <code class="docutils literal notranslate"><span class="pre">base_widget</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.postgres.forms.RangeWidget.decompress">
+<code class="descname">decompress</code>(<em>value</em>)<a class="headerlink" href="#django.contrib.postgres.forms.RangeWidget.decompress" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Accepte une valeur «&nbsp;compressée&nbsp;» unique d’un champ, par exemple un intervalle <a class="reference internal" href="fields.html#django.contrib.postgres.fields.DateRangeField" title="django.contrib.postgres.fields.DateRangeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateRangeField</span></code></a>, et renvoie un tuple représentant les limites inférieure et supérieure.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Champs et composants de formulaires spécifiques à PostgreSQL</a><ul>
+<li><a class="reference internal" href="#fields">Champs</a><ul>
+<li><a class="reference internal" href="#simplearrayfield"><code class="docutils literal notranslate"><span class="pre">SimpleArrayField</span></code></a></li>
+<li><a class="reference internal" href="#splitarrayfield"><code class="docutils literal notranslate"><span class="pre">SplitArrayField</span></code></a></li>
+<li><a class="reference internal" href="#hstorefield"><code class="docutils literal notranslate"><span class="pre">HStoreField</span></code></a></li>
+<li><a class="reference internal" href="#jsonfield"><code class="docutils literal notranslate"><span class="pre">JSONField</span></code></a></li>
+<li><a class="reference internal" href="#range-fields">Champs d’intervalle</a><ul>
+<li><a class="reference internal" href="#integerrangefield"><code class="docutils literal notranslate"><span class="pre">IntegerRangeField</span></code></a></li>
+<li><a class="reference internal" href="#decimalrangefield"><code class="docutils literal notranslate"><span class="pre">DecimalRangeField</span></code></a></li>
+<li><a class="reference internal" href="#datetimerangefield"><code class="docutils literal notranslate"><span class="pre">DateTimeRangeField</span></code></a></li>
+<li><a class="reference internal" href="#daterangefield"><code class="docutils literal notranslate"><span class="pre">DateRangeField</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#widgets">Composants de formulaires («&nbsp;widgets&nbsp;»)</a><ul>
+<li><a class="reference internal" href="#rangewidget"><code class="docutils literal notranslate"><span class="pre">RangeWidget</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="fields.html"
+                        title="Chapitre précédent">Champs de modèles spécifiques à PostgreSQL</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="functions.html"
+                        title="Chapitre suivant">Fonctions de bases de données spécifiques à PostgreSQL</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/postgres/forms.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="fields.html" title="Champs de modèles spécifiques à PostgreSQL">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="functions.html" title="Fonctions de bases de données spécifiques à PostgreSQL">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,324 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Gestion des fichiers &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Les tests dans Django" href="testing/index.html" />
+    <link rel="prev" title="Migrations" href="migrations.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="migrations.html" title="Migrations">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="testing/index.html" title="Les tests dans Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-files">
+            
+  <div class="section" id="s-managing-files">
+<span id="managing-files"></span><h1>Gestion des fichiers<a class="headerlink" href="#managing-files" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document décrit l’API Django d’accès aux fichiers adaptée par exemple aux fichiers envoyés par les utilisateurs. Les API de plus bas niveau sont assez générales pour pouvoir être utilisées dans d’autres buts. Si vous souhaitez gérer les «&nbsp;fichiers statiques&nbsp;» (JS, CSS, etc.), consultez <a class="reference internal" href="../howto/static-files/index.html"><span class="doc">Gestion des fichiers statiques (par ex. images, JavaScript, CSS)</span></a>.</p>
+<p>Par défaut, Django stocke les fichiers localement, en fonction des réglages <a class="reference internal" href="../ref/settings.html#std:setting-MEDIA_ROOT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MEDIA_ROOT</span></code></a> et <a class="reference internal" href="../ref/settings.html#std:setting-MEDIA_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MEDIA_URL</span></code></a>. Les exemples ci-dessous partent du principe que vous utilisez ces valeurs par défaut.</p>
+<p>Cependant, Django permet d’écrire des <a class="reference internal" href="#file-storage">systèmes de stockage de fichiers</a> spécialisés permettant de personnaliser complètement l’endroit et la façon dont Django stocke les fichiers. La deuxième partie de ce document décrit le fonctionnement des ces systèmes de stockage.</p>
+<div class="section" id="s-using-files-in-models">
+<span id="using-files-in-models"></span><h2>Utilisation des fichiers dans les modèles<a class="headerlink" href="#using-files-in-models" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Quand vous utilisez un <a class="reference internal" href="../ref/models/fields.html#django.db.models.FileField" title="django.db.models.FileField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileField</span></code></a> ou un <a class="reference internal" href="../ref/models/fields.html#django.db.models.ImageField" title="django.db.models.ImageField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageField</span></code></a>, Django fournit un ensemble d’API pour pouvoir manipuler le fichier correspondant.</p>
+<p>Considérez le modèle suivant qui utilise un <a class="reference internal" href="../ref/models/fields.html#django.db.models.ImageField" title="django.db.models.ImageField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageField</span></code></a> pour stocker une photo&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Car</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span><span class="n">max_digits</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">photo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ImageField</span><span class="p">(</span><span class="n">upload_to</span><span class="o">=</span><span class="s1">&#39;cars&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Toute instance de <code class="docutils literal notranslate"><span class="pre">Car</span></code> possède un attribut <code class="docutils literal notranslate"><span class="pre">photo</span></code> qu’il est possible d’utiliser pour obtenir les détails de la photo jointe&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">car</span> <span class="o">=</span> <span class="n">Car</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;57 Chevy&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span>
+<span class="go">&lt;ImageFieldFile: cars/chevy.jpg&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">name</span>
+<span class="go">&#39;cars/chevy.jpg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">path</span>
+<span class="go">&#39;/media/cars/chevy.jpg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">url</span>
+<span class="go">&#39;http://media.example.com/cars/chevy.jpg&#39;</span>
+</pre></div>
+</div>
+<p>Cet objet (<code class="docutils literal notranslate"><span class="pre">car.photo</span></code> dans l’exemple) est un objet <code class="docutils literal notranslate"><span class="pre">File</span></code>, ce qui signifie qu’il possède toutes les méthodes et les attributs documentés ci-dessous.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Le fichier est enregistré durant la phase d’enregistrement du modèle dans la base de données, il n’est donc pas possible de se baser sur le nom de fichier réel sur le disque tant que le modèle lui-même n’a pas été enregistré.</p>
+</div>
+<p>Par exemple, vous pouvez modifier le nom de fichier en définissant l’attribut <a class="reference internal" href="../ref/files/file.html#django.core.files.File.name" title="django.core.files.File.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a> du fichier à un chemin relatif à l’emplacement de stockage des fichiers (<a class="reference internal" href="../ref/settings.html#std:setting-MEDIA_ROOT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MEDIA_ROOT</span></code></a> si vous utilisez le <a class="reference internal" href="../ref/files/storage.html#django.core.files.storage.FileSystemStorage" title="django.core.files.storage.FileSystemStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSystemStorage</span></code></a> par défaut)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="k">import</span> <span class="n">settings</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_path</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;cars/chevy_ii.jpg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_path</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEDIA_ROOT</span> <span class="o">+</span> <span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Move the file on the filesystem</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">initial_path</span><span class="p">,</span> <span class="n">new_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">path</span>
+<span class="go">&#39;/media/cars/chevy_ii.jpg&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="n">new_path</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Bien que les attributs de données « non image » du champ <a class="reference internal" href="../ref/models/fields.html#django.db.models.ImageField" title="django.db.models.ImageField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageField</span></code></a>, tels que <code class="docutils literal notranslate"><span class="pre">height</span></code>, <code class="docutils literal notranslate"><span class="pre">width</span></code> et <code class="docutils literal notranslate"><span class="pre">size</span></code> (hauteur, largeur et taille), sont disponibles sur l’instance, les données d’image sous-jacente ne peuvent pas être utilisées sans réouvrir l’image. Par exemple</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span> <span class="o">=</span> <span class="n">Car</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;57 Chevy&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">width</span>
+<span class="go">191</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">height</span>
+<span class="go">287</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="p">)</span>
+<span class="go"># Raises ValueError: seek of closed file.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+<span class="go">&lt;ImageFieldFile: cars/chevy.jpg&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">car</span><span class="o">.</span><span class="n">photo</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span>
+<span class="go">&lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=191x287 at 0x7F99A94E9048&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-the-file-object">
+<span id="the-file-object"></span><h2>L’objet<a class="headerlink" href="#the-file-object" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En interne, Django utilise une instance de <a class="reference internal" href="../ref/files/file.html#django.core.files.File" title="django.core.files.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.files.File</span></code></a> chaque fois qu’il a besoin de représenter un fichier.</p>
+<p>La plupart du temps, vous utiliserez l’objet <code class="docutils literal notranslate"><span class="pre">File</span></code> que Django vous transmet (par exemple un fichier joint à un modèle comme ci-dessus ou peut-être un fichier téléversé).</p>
+<p>Si vous avez besoin de construire vous-même un objet <code class="docutils literal notranslate"><span class="pre">File</span></code>, la façon la plus simple est de le créer en utilisant un objet <code class="docutils literal notranslate"><span class="pre">file</span></code> de Python&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.core.files</span> <span class="k">import</span> <span class="n">File</span>
+
+<span class="go"># Create a Python file object using open()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/path/to/hello.world&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myfile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Il est maintenant possible d’utiliser les attributs et les méthodes documentés de la classe <a class="reference internal" href="../ref/files/file.html#django.core.files.File" title="django.core.files.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">File</span></code></a>.</p>
+<p>Il faut savoir que les fichiers créés de cette façon ne sont pas fermés automatiquement. L’approche suivante peut être employée pour fermer automatiquement les fichiers&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.core.files</span> <span class="k">import</span> <span class="n">File</span>
+
+<span class="go"># Create a Python file object using open() and the with statement</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/path/to/hello.world&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">myfile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">myfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Hello World&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myfile</span><span class="o">.</span><span class="n">closed</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">closed</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>La fermeture des fichiers est particulièrement importante lors de l’accès en boucle à des champs fichier pour un grand nombre d’objets. Si les fichiers ne sont pas fermés manuellement après les avoir lus, il y a un risque d’épuisement des descripteurs de fichiers. Cela peut amener à l’erreur suivante&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">OSError</span><span class="p">:</span> <span class="p">[</span><span class="n">Errno</span> <span class="mi">24</span><span class="p">]</span> <span class="n">Too</span> <span class="n">many</span> <span class="nb">open</span> <span class="n">files</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-file-storage">
+<span id="file-storage"></span><h2>Stockage des fichiers<a class="headerlink" href="#file-storage" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En arrière-plan, Django délègue les décisions au sujet des emplacements des fichiers et de la manière de les stocker à un système de stockage de fichiers. C’est cet objet qui s’occupe réellement des systèmes de fichiers, de l’ouverture et de la lecture des fichiers, etc.</p>
+<p>Le stockage de fichiers par défaut de Django est défini par le réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEFAULT_FILE_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEFAULT_FILE_STORAGE</span></code></a>&nbsp;; si vous ne fournissez pas explicitement de système de stockage, c’est celui-là qui sera utilisé.</p>
+<p>Lisez ci-dessous pour obtenir des détails sur le système de stockage de fichiers intégré par défaut et lisez <a class="reference internal" href="../howto/custom-file-storage.html"><span class="doc">Écriture d’un système de stockage personnalisé</span></a> pour plus d’informations sur l’écriture de son propre système de stockage de fichiers.</p>
+<div class="section" id="s-storage-objects">
+<span id="storage-objects"></span><h3>Objets de stockage<a class="headerlink" href="#storage-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Bien que la plupart du temps il soit plus opportun de manipuler un objet  <code class="docutils literal notranslate"><span class="pre">File</span></code> (qui délègue au stockage adapté pour ce fichier), il est possible d’utiliser directement un stockage de fichiers. Vous pouvez créer une instance d’une classe de stockage de fichiers personnalisé ou, plus souvent utile, vous pouvez utiliser le système de stockage global par défaut&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.core.files.base</span> <span class="k">import</span> <span class="n">ContentFile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.core.files.storage</span> <span class="k">import</span> <span class="n">default_storage</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">default_storage</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;path/to/file&#39;</span><span class="p">,</span> <span class="n">ContentFile</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;new content&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span>
+<span class="go">&#39;path/to/file&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_storage</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="go">11</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_storage</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="go">b&#39;new content&#39;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_storage</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_storage</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="../ref/files/storage.html"><span class="doc">API de stockage des fichiers</span></a> concernant l’API de stockage de fichiers.</p>
+</div>
+<div class="section" id="s-the-built-in-filesystem-storage-class">
+<span id="s-builtin-fs-storage"></span><span id="the-built-in-filesystem-storage-class"></span><span id="builtin-fs-storage"></span><h3>La classe de Django pour le stockage sur système de fichiers<a class="headerlink" href="#the-built-in-filesystem-storage-class" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django fournit une classe <a class="reference internal" href="../ref/files/storage.html#django.core.files.storage.FileSystemStorage" title="django.core.files.storage.FileSystemStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.core.files.storage.FileSystemStorage</span></code></a> qui implémente les éléments de base du stockage de fichiers sur un système de fichiers.</p>
+<p>Par exemple, le code suivant stocke les fichiers téléversés dans <code class="docutils literal notranslate"><span class="pre">/media/photos</span></code> quelle que soit la valeur du réglage <a class="reference internal" href="../ref/settings.html#std:setting-MEDIA_ROOT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MEDIA_ROOT</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.files.storage</span> <span class="k">import</span> <span class="n">FileSystemStorage</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="n">fs</span> <span class="o">=</span> <span class="n">FileSystemStorage</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="s1">&#39;/media/photos&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Car</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="n">photo</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ImageField</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="n">fs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Les <a class="reference internal" href="../howto/custom-file-storage.html"><span class="doc">systèmes de stockage personnalisés</span></a> fonctionnent de la même manière&nbsp;: vous pouvez les transmettre comme paramètre <code class="docutils literal notranslate"><span class="pre">storage</span></code> d’un champ <a class="reference internal" href="../ref/models/fields.html#django.db.models.FileField" title="django.db.models.FileField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileField</span></code></a>.</p>
+</div>
+<div class="section" id="s-using-a-callable">
+<span id="using-a-callable"></span><h3>Utilisation d’un exécutable<a class="headerlink" href="#using-a-callable" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Vous pouvez transmettre un objet exécutable comme paramètre <a class="reference internal" href="../ref/models/fields.html#django.db.models.FileField.storage" title="django.db.models.FileField.storage"><code class="xref py py-attr docutils literal notranslate"><span class="pre">storage</span></code></a> de <a class="reference internal" href="../ref/models/fields.html#django.db.models.FileField" title="django.db.models.FileField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileField</span></code></a> ou de <a class="reference internal" href="../ref/models/fields.html#django.db.models.ImageField" title="django.db.models.ImageField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageField</span></code></a>. Cela permet de modifier le stockage utilisé au moment de l’exécution, choisissant par exemple différents stockages en fonction de l’environnement.</p>
+<p>L’exécutable sera évalué au moment où les classes de modèles sont chargées et doit renvoyer une instance de <a class="reference internal" href="../ref/files/storage.html#django.core.files.storage.Storage" title="django.core.files.storage.Storage"><code class="xref py py-class docutils literal notranslate"><span class="pre">Storage</span></code></a>.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="k">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">.storages</span> <span class="k">import</span> <span class="n">MyLocalStorage</span><span class="p">,</span> <span class="n">MyRemoteStorage</span>
+
+
+<span class="k">def</span> <span class="nf">select_storage</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">MyLocalStorage</span><span class="p">()</span> <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">else</span> <span class="n">MyRemoteStorage</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">my_file</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FileField</span><span class="p">(</span><span class="n">storage</span><span class="o">=</span><span class="n">select_storage</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Gestion des fichiers</a><ul>
+<li><a class="reference internal" href="#using-files-in-models">Utilisation des fichiers dans les modèles</a></li>
+<li><a class="reference internal" href="#the-file-object">L’objet</a></li>
+<li><a class="reference internal" href="#file-storage">Stockage des fichiers</a><ul>
+<li><a class="reference internal" href="#storage-objects">Objets de stockage</a></li>
+<li><a class="reference internal" href="#the-built-in-filesystem-storage-class">La classe de Django pour le stockage sur système de fichiers</a></li>
+<li><a class="reference internal" href="#using-a-callable">Utilisation d’un exécutable</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="migrations.html"
+                        title="Chapitre précédent">Migrations</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="testing/index.html"
+                        title="Chapitre suivant">Les tests dans Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/topics/files.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="migrations.html" title="Migrations">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="testing/index.html" title="Les tests dans Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

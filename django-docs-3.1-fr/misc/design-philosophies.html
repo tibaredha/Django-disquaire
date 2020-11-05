@@ -1,0 +1,372 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Approches conceptuelles &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Distributions tierces de Django" href="distributions.html" />
+    <link rel="prev" title="Stabilité de l’API" href="api-stability.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="api-stability.html" title="Stabilité de l’API">previous</a>
+     |
+    <a href="index.html" title="Méta documentation et divers" accesskey="U">up</a>
+   |
+    <a href="distributions.html" title="Distributions tierces de Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="misc-design-philosophies">
+            
+  <div class="section" id="s-design-philosophies">
+<span id="design-philosophies"></span><h1>Approches conceptuelles<a class="headerlink" href="#design-philosophies" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document explique certains concepts fondamentaux que les développeurs de Django ont utilisés lors de la création du système. Son objectif est d’expliquer le passé et d’orienter l’avenir.</p>
+<div class="section" id="s-overall">
+<span id="overall"></span><h2>Vue d’ensemble<a class="headerlink" href="#overall" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-loose-coupling">
+<span id="s-id1"></span><span id="loose-coupling"></span><span id="id1"></span><h3>Couplage faible<a class="headerlink" href="#loose-coupling" title="Lien permanent vers ce titre">¶</a></h3>
+<p id="index-0">Un objectif fondamental de la pile Django est le <a class="reference external" href="http://wiki.c2.com/?CouplingAndCohesion">couplage faible et la cohésion forte</a>. Les différentes couches du système ne doivent rien «&nbsp;connaître&nbsp;» les unes des autres à moins que cela ne soit absolument nécessaire.</p>
+<p>Par exemple, le système de gabarit ne sait rien des requêtes Web, la couche de base de données ne sait rien à propos de l’affichage des données et le système de vue ne se soucie guère du système de gabarit qu’un programmeur utilise.</p>
+<p>Bien que Django soit livré avec une pile complète pour plus de commodité, les pièces de la pile sont indépendantes les unes des autres autant que possible.</p>
+</div>
+<div class="section" id="s-less-code">
+<span id="s-id2"></span><span id="less-code"></span><span id="id2"></span><h3>Moins de code<a class="headerlink" href="#less-code" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les applications Django doivent utiliser le moins de code possible&nbsp;; elles doivent être exemptes de code répétitif. Django devrait tirer pleinement parti des capacités dynamiques de Python, comme l’introspection.</p>
+</div>
+<div class="section" id="s-quick-development">
+<span id="s-id3"></span><span id="quick-development"></span><span id="id3"></span><h3>Développement rapide<a class="headerlink" href="#quick-development" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le but d’un système Web au 21ème siècle est de rendre rapide les aspects fastidieux du développement Web. Django devrait permettre un développement Web incroyablement rapide.</p>
+</div>
+<div class="section" id="s-don-t-repeat-yourself-dry">
+<span id="s-dry"></span><span id="don-t-repeat-yourself-dry"></span><span id="dry"></span><h3>Ne vous répétez pas (DRY)<a class="headerlink" href="#don-t-repeat-yourself-dry" title="Lien permanent vers ce titre">¶</a></h3>
+<p id="index-1">Chaque concept/portion de données distinct devrait résider en un et un seul endroit. La redondance est mauvaise. La normalisation est bonne.</p>
+<p>Le système, dans la limite du raisonnable, doit déduire autant que possible d’aussi peu que possible.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">La <a class="reference external" href="http://wiki.c2.com/?DontRepeatYourself">discussion à propos de DRY sur le Portland Pattern Repository</a></p>
+</div>
+</div>
+<div class="section" id="s-explicit-is-better-than-implicit">
+<span id="s-id5"></span><span id="explicit-is-better-than-implicit"></span><span id="id5"></span><h3>Explicite est meilleur qu’implicite<a class="headerlink" href="#explicit-is-better-than-implicit" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il s’agit d’un principe de base de Python figurant dans <span class="target" id="index-6"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0020"><strong>PEP 20</strong></a>, et cela signifie que Django ne devrait pas faire trop de «&nbsp;magie&nbsp;». La magie ne devrait se produire que s’il y a une très bonne raison pour cela. La magie est intéressante uniquement quand elle crée un confort considérable inaccessible par d’autres moyens, et quand elle est appliquée d’une manière qui ne perturbe pas les développeurs qui cherchent à apprendre à utiliser la fonction.</p>
+</div>
+<div class="section" id="s-consistency">
+<span id="s-id6"></span><span id="consistency"></span><span id="id6"></span><h3>Cohérence<a class="headerlink" href="#consistency" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système doit être cohérent à tous les niveaux. La cohérence s’applique au tout, du bas niveau (le style de codage utilisé par Python) au haut niveau (l”«&nbsp;expérience&nbsp;» d’utilisation de Django).</p>
+</div>
+</div>
+<div class="section" id="s-models">
+<span id="models"></span><h2>Modèles<a class="headerlink" href="#models" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-id7">
+<span id="id7"></span><h3>Explicite est meilleur qu’implicite<a class="headerlink" href="#id7" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les champs ne doivent pas supposer certains comportements basés uniquement sur le nom du champ. Cela nécessite trop de connaissance du système et est sujet à des erreurs. Au lieu de cela, les comportements doivent être basés sur des paramètres nommés et, dans certains cas, sur le type de champ.</p>
+</div>
+<div class="section" id="s-include-all-relevant-domain-logic">
+<span id="include-all-relevant-domain-logic"></span><h3>Inclure toute logique de domaine concerné<a class="headerlink" href="#include-all-relevant-domain-logic" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les modèles doivent encapsuler tous les aspects d’un «&nbsp;objet&nbsp;», suivant le modèle de conception <a class="reference external" href="https://www.martinfowler.com/eaaCatalog/activeRecord.html">Active Record</a> de Martin Fowler.</p>
+<p>C’est pourquoi aussi bien les données représentées par un modèle que les informations à son sujet (son nom lisible, des options comme le tri par défaut, etc.) sont définies dans la classe du modèle&nbsp;; toutes les informations nécessaires pour comprendre un modèle donné doivent être stockées <em>dans</em> le modèle.</p>
+</div>
+</div>
+<div class="section" id="s-database-api">
+<span id="database-api"></span><h2>API de base de données<a class="headerlink" href="#database-api" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les objectifs de base de l’API de base de données sont les suivants&nbsp;:</p>
+<div class="section" id="s-sql-efficiency">
+<span id="sql-efficiency"></span><h3>Efficacité SQL<a class="headerlink" href="#sql-efficiency" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les instructions SQL doivent être exécutées le moins souvent possible, et les instructions doivent être optimisées en interne.</p>
+<p>C’est pourquoi les développeurs doivent appeler <code class="docutils literal notranslate"><span class="pre">save()</span></code> explicitement, au lieu de se baser sur un enregistrement silencieux et en arrière-plan par le système.</p>
+<p>C’est aussi pourquoi la méthode <code class="docutils literal notranslate"><span class="pre">select_related()</span></code> de <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> existe. C’est une optimisation facultative des performances pour le cas courant de sélection de «&nbsp;tout objet lié&nbsp;».</p>
+</div>
+<div class="section" id="s-terse-powerful-syntax">
+<span id="terse-powerful-syntax"></span><h3>Syntaxe succincte mais puissante<a class="headerlink" href="#terse-powerful-syntax" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’API de base de données devrait permettre l’utilisation d’instructions riches et expressives en aussi peu de syntaxe que possible. Elle ne devrait pas compter sur l’importation d’autres modules ou objets utilitaires.</p>
+<p>Les jointures doivent être effectuées automatiquement, en arrière-plan, le cas échéant.</p>
+<p>Chaque objet doit être en mesure d’accéder à tous les objets liés, dans tout le système. Cet accès devrait fonctionner dans les deux sens.</p>
+</div>
+<div class="section" id="s-option-to-drop-into-raw-sql-easily-when-needed">
+<span id="option-to-drop-into-raw-sql-easily-when-needed"></span><h3>Option pour utiliser facilement du SQL brut, en cas de besoin<a class="headerlink" href="#option-to-drop-into-raw-sql-easily-when-needed" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’API de base de données devrait se rendre compte qu’elle est un raccourci, mais pas nécessairement pleine et entière. Le système devrait rendre facile l’écriture du SQL sur mesure – des instructions complètes ou simplement des clauses <code class="docutils literal notranslate"><span class="pre">WHERE</span></code> sur mesure en tant que paramètres personnalisés dans les appels d’API.</p>
+</div>
+</div>
+<div class="section" id="s-url-design">
+<span id="url-design"></span><h2>Conception des URL<a class="headerlink" href="#url-design" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-id8">
+<span id="id8"></span><h3>Couplage faible<a class="headerlink" href="#id8" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les URL dans une application Django ne devraient pas être couplées au code Python sous-jacent. Lier des URL à des noms de fonctions Python est une mauvaise pratique.</p>
+<p>Sur le même principe, le système d’URL de Django devrait permettre aux URL d’une même application d’être différentes dans des contextes différents. Par exemple, un site pourrait placer des articles sous <code class="docutils literal notranslate"><span class="pre">/stories/</span></code>, tandis qu’un autre pourrait préférer <code class="docutils literal notranslate"><span class="pre">/news/</span></code>.</p>
+</div>
+<div class="section" id="s-infinite-flexibility">
+<span id="infinite-flexibility"></span><h3>Flexibilité infinie<a class="headerlink" href="#infinite-flexibility" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les URL devraient être aussi souples que possible. Toute conception d’URL imaginable devrait être possible.</p>
+</div>
+<div class="section" id="s-encourage-best-practices">
+<span id="encourage-best-practices"></span><h3>Encourager les bonnes pratiques<a class="headerlink" href="#encourage-best-practices" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système devrait rendre tout aussi facile (voire même plus facile) pour un développeur de concevoir de belles URL que des vilaines.</p>
+<p>Les extensions de fichier dans les URL de pages Web devraient être évitées.</p>
+<p>L’utilisation abusive de virgules dans les URL devrait être sévèrement punie.</p>
+</div>
+<div class="section" id="s-definitive-urls">
+<span id="s-id9"></span><span id="definitive-urls"></span><span id="id9"></span><h3>URL définitives<a class="headerlink" href="#definitive-urls" title="Lien permanent vers ce titre">¶</a></h3>
+<p id="index-3">Techniquement, <code class="docutils literal notranslate"><span class="pre">foo.com/bar</span></code> et <code class="docutils literal notranslate"><span class="pre">foo.com/bar/</span></code> sont deux URL différentes, et les robots des moteurs de recherche (et quelques outils d’analyse de trafic Web) les traitent comme des pages distinctes. Django devrait faire un effort pour «&nbsp;normaliser&nbsp;» les URL afin de ne pas semer la confusion pour les robots des moteurs de recherche.</p>
+<p>Tel est le raisonnement derrière le réglage <a class="reference internal" href="../ref/settings.html#std:setting-APPEND_SLASH"><code class="xref std std-setting docutils literal notranslate"><span class="pre">APPEND_SLASH</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="s-template-system">
+<span id="template-system"></span><h2>Système de gabarit<a class="headerlink" href="#template-system" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-separate-logic-from-presentation">
+<span id="s-separation-of-logic-and-presentation"></span><span id="separate-logic-from-presentation"></span><span id="separation-of-logic-and-presentation"></span><h3>Séparation de la logique et de la présentation<a class="headerlink" href="#separate-logic-from-presentation" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Nous imaginons un système de gabarit comme un outil qui contrôle la présentation et la logique liée à la présentation – et c’est tout. Le système de gabarit ne devrait pas prendre en charge une fonctionnalité qui va au-delà de cet objectif de base.</p>
+</div>
+<div class="section" id="s-discourage-redundancy">
+<span id="discourage-redundancy"></span><h3>Prévention de la redondance<a class="headerlink" href="#discourage-redundancy" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La majorité des sites Web dynamiques utilise des parties entières et communes au design du site – un en-tête, un pied de page, une barre de navigation, etc. Le système de gabarit de Django devrait faciliter le stockage de ces éléments en un lieu unique, éliminant la duplication de code.</p>
+<p>Telle est la philosophie derrière l”<a class="reference internal" href="../ref/templates/language.html#template-inheritance"><span class="std std-ref">héritage de gabarit</span></a>.</p>
+</div>
+<div class="section" id="s-be-decoupled-from-html">
+<span id="be-decoupled-from-html"></span><h3>Découplement du HTML<a class="headerlink" href="#be-decoupled-from-html" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système de gabarit ne doit pas être conçu de sorte qu’il ne puisse produire que du HTML. Il devrait être tout aussi bon pour la génération d’autres formats texte, ou même du texte brut.</p>
+</div>
+<div class="section" id="s-xml-should-not-be-used-for-template-languages">
+<span id="xml-should-not-be-used-for-template-languages"></span><h3>XML ne devrait pas être utilisé pour les langages de gabarit<a class="headerlink" href="#xml-should-not-be-used-for-template-languages" title="Lien permanent vers ce titre">¶</a></h3>
+<p id="index-4">L’utilisation d’un moteur XML pour analyser les gabarits introduit un vaste potentiel de nouvelles erreurs humaines lors de la modification des gabarits – et entraîne un niveau inacceptable de surcharge dans le traitement du gabarit.</p>
+</div>
+<div class="section" id="s-assume-designer-competence">
+<span id="assume-designer-competence"></span><h3>Confiance dans la compétence du concepteur<a class="headerlink" href="#assume-designer-competence" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système de gabarit ne doit pas être conçu de sorte que les gabarits soient nécessairement et convenablement rendus dans les éditeurs WYSIWYG tels que Dreamweaver. C’est une restriction trop importante et ne permettrait pas à la syntaxe d’être aussi agréable qu’elle le devrait. Django pré-suppose que les auteurs de gabarit sont à l’aise avec l’édition directe de HTML.</p>
+</div>
+<div class="section" id="s-treat-whitespace-obviously">
+<span id="treat-whitespace-obviously"></span><h3>Traitement naturel des espaces<a class="headerlink" href="#treat-whitespace-obviously" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système de gabarit ne doit pas faire de magie avec les espaces. Si un gabarit contient des espaces, le système devrait traiter l’espace blanc comme il traite le texte&nbsp;: tout simplement l’afficher. Tout espace qui n’est pas dans une balise de gabarit doit être affiché.</p>
+</div>
+<div class="section" id="s-don-t-invent-a-programming-language">
+<span id="don-t-invent-a-programming-language"></span><h3>Ne pas inventer un langage de programmation<a class="headerlink" href="#don-t-invent-a-programming-language" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le but n’est pas d’inventer un langage de programmation. L’objectif est d’offrir une fonctionnalité juste assez programmatique, comme les conditions et les boucles, ce qui est essentiel pour la prise de décision liée à la présentation. Le <a class="reference internal" href="../topics/templates.html#template-language-intro"><span class="std std-ref">langage de gabarit de Django (DTL)</span></a> vise à éviter toute logique avancée.</p>
+<p>Le système de gabarit de Django postule que les gabarits sont le plus souvent écrits par les <em>concepteurs</em> et non par les <em>programmeurs</em>, et ne devraient donc pas présumer de connaissances en Python.</p>
+</div>
+<div class="section" id="s-safety-and-security">
+<span id="safety-and-security"></span><h3>Sûreté et sécurité<a class="headerlink" href="#safety-and-security" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Nativement, le système de gabarit devrait interdire l’inclusion de code malveillant – comme les commandes qui suppriment des enregistrements en base de données.</p>
+<p>C’est une raison supplémentaire pour laquelle le système de gabarit ne permet pas d’écrire du code Python arbitraire.</p>
+</div>
+<div class="section" id="s-extensibility">
+<span id="extensibility"></span><h3>Extensibilité<a class="headerlink" href="#extensibility" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système de gabarit devrait admettre que les experts en rédaction de gabarits souhaitent vouloir étendre sa technologie.</p>
+<p>Telle est la philosophie derrière les balises de gabarit et les filtres personnalisés.</p>
+</div>
+</div>
+<div class="section" id="s-views">
+<span id="views"></span><h2>Vues<a class="headerlink" href="#views" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-simplicity">
+<span id="simplicity"></span><h3>Simplicité<a class="headerlink" href="#simplicity" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La rédaction d’une vue devrait être aussi simple que d’écrire une fonction Python. Les développeurs ne devraient pas avoir besoin d’instancier une classe quand une fonction suffit.</p>
+</div>
+<div class="section" id="s-use-request-objects">
+<span id="use-request-objects"></span><h3>Utilisation des objets de requête<a class="headerlink" href="#use-request-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les vues devraient avoir accès à un objet de requête&nbsp;: un objet qui stocke les métadonnées sur la requête actuelle. L’objet doit être transmis directement à une fonction de vue, et ce n’est pas à la fonction de vue de devoir accéder aux données de la requête depuis une variable globale. Ceci permet de tester les vues de manière légère, propre et facile en leur passant des objets de requête « artificiels ».</p>
+</div>
+<div class="section" id="s-id10">
+<span id="id10"></span><h3>Couplage faible<a class="headerlink" href="#id10" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Une vue ne devrait pas se soucier du système de gabarit utilisé par le développeur, ni même si un système de gabarit est réellement utilisé.</p>
+</div>
+<div class="section" id="s-differentiate-between-get-and-post">
+<span id="differentiate-between-get-and-post"></span><h3>Différence entre GET et POST<a class="headerlink" href="#differentiate-between-get-and-post" title="Lien permanent vers ce titre">¶</a></h3>
+<p>GET et POST sont distincts&nbsp;; les développeurs doivent explicitement utiliser l’un ou l’autre. Le système devrait faciliter la distinction entre les données GET et POST.</p>
+</div>
+</div>
+<div class="section" id="s-cache-framework">
+<span id="s-cache-design-philosophy"></span><span id="cache-framework"></span><span id="cache-design-philosophy"></span><h2>L’infrastructure de cache<a class="headerlink" href="#cache-framework" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les buts principaux de l”<a class="reference internal" href="../topics/cache.html"><span class="doc">infrastructure de cache</span></a> de Django sont&nbsp;:</p>
+<div class="section" id="s-id11">
+<span id="id11"></span><h3>Moins de code<a class="headerlink" href="#id11" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Un cache devrait être aussi rapide que possible. En conséquence, tout le code écrit autour du moteur de cache se doit de se limiter au strict minimum, particulièrement pour les opérations <code class="docutils literal notranslate"><span class="pre">get()</span></code>.</p>
+</div>
+<div class="section" id="s-id12">
+<span id="id12"></span><h3>Cohérence<a class="headerlink" href="#id12" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’API de cache vise à fournir une interface unifiée s’appliquant aux différents moteurs de cache.</p>
+</div>
+<div class="section" id="s-id13">
+<span id="id13"></span><h3>Extensibilité<a class="headerlink" href="#id13" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’API de cache doit être extensible au niveau applicatif en fonction des besoins des développeurs (par exemple, voir <a class="reference internal" href="../topics/cache.html#cache-key-transformation"><span class="std std-ref">Transformation de clé de cache</span></a>).</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Approches conceptuelles</a><ul>
+<li><a class="reference internal" href="#overall">Vue d’ensemble</a><ul>
+<li><a class="reference internal" href="#loose-coupling">Couplage faible</a></li>
+<li><a class="reference internal" href="#less-code">Moins de code</a></li>
+<li><a class="reference internal" href="#quick-development">Développement rapide</a></li>
+<li><a class="reference internal" href="#don-t-repeat-yourself-dry">Ne vous répétez pas (DRY)</a></li>
+<li><a class="reference internal" href="#explicit-is-better-than-implicit">Explicite est meilleur qu’implicite</a></li>
+<li><a class="reference internal" href="#consistency">Cohérence</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#models">Modèles</a><ul>
+<li><a class="reference internal" href="#id7">Explicite est meilleur qu’implicite</a></li>
+<li><a class="reference internal" href="#include-all-relevant-domain-logic">Inclure toute logique de domaine concerné</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#database-api">API de base de données</a><ul>
+<li><a class="reference internal" href="#sql-efficiency">Efficacité SQL</a></li>
+<li><a class="reference internal" href="#terse-powerful-syntax">Syntaxe succincte mais puissante</a></li>
+<li><a class="reference internal" href="#option-to-drop-into-raw-sql-easily-when-needed">Option pour utiliser facilement du SQL brut, en cas de besoin</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#url-design">Conception des URL</a><ul>
+<li><a class="reference internal" href="#id8">Couplage faible</a></li>
+<li><a class="reference internal" href="#infinite-flexibility">Flexibilité infinie</a></li>
+<li><a class="reference internal" href="#encourage-best-practices">Encourager les bonnes pratiques</a></li>
+<li><a class="reference internal" href="#definitive-urls">URL définitives</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#template-system">Système de gabarit</a><ul>
+<li><a class="reference internal" href="#separate-logic-from-presentation">Séparation de la logique et de la présentation</a></li>
+<li><a class="reference internal" href="#discourage-redundancy">Prévention de la redondance</a></li>
+<li><a class="reference internal" href="#be-decoupled-from-html">Découplement du HTML</a></li>
+<li><a class="reference internal" href="#xml-should-not-be-used-for-template-languages">XML ne devrait pas être utilisé pour les langages de gabarit</a></li>
+<li><a class="reference internal" href="#assume-designer-competence">Confiance dans la compétence du concepteur</a></li>
+<li><a class="reference internal" href="#treat-whitespace-obviously">Traitement naturel des espaces</a></li>
+<li><a class="reference internal" href="#don-t-invent-a-programming-language">Ne pas inventer un langage de programmation</a></li>
+<li><a class="reference internal" href="#safety-and-security">Sûreté et sécurité</a></li>
+<li><a class="reference internal" href="#extensibility">Extensibilité</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#views">Vues</a><ul>
+<li><a class="reference internal" href="#simplicity">Simplicité</a></li>
+<li><a class="reference internal" href="#use-request-objects">Utilisation des objets de requête</a></li>
+<li><a class="reference internal" href="#id10">Couplage faible</a></li>
+<li><a class="reference internal" href="#differentiate-between-get-and-post">Différence entre GET et POST</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cache-framework">L’infrastructure de cache</a><ul>
+<li><a class="reference internal" href="#id11">Moins de code</a></li>
+<li><a class="reference internal" href="#id12">Cohérence</a></li>
+<li><a class="reference internal" href="#id13">Extensibilité</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="api-stability.html"
+                        title="Chapitre précédent">Stabilité de l’API</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="distributions.html"
+                        title="Chapitre suivant">Distributions tierces de Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/misc/design-philosophies.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="api-stability.html" title="Stabilité de l’API">previous</a>
+     |
+    <a href="index.html" title="Méta documentation et divers" accesskey="U">up</a>
+   |
+    <a href="distributions.html" title="Distributions tierces de Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1415 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API GEOS &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="API de GDAL" href="gdal.html" />
+    <link rel="prev" title="Objets de mesure" href="measure.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="measure.html" title="Objets de mesure">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="gdal.html" title="API de GDAL">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-gis-geos">
+            
+  <div class="section" id="s-module-django.contrib.gis.geos">
+<span id="s-geos-api"></span><span id="module-django.contrib.gis.geos"></span><span id="geos-api"></span><h1>API GEOS<a class="headerlink" href="#module-django.contrib.gis.geos" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-background">
+<span id="background"></span><h2>Contexte<a class="headerlink" href="#background" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-what-is-geos">
+<span id="what-is-geos"></span><h3>Qu’est-ce que GEOS&nbsp;?<a class="headerlink" href="#what-is-geos" title="Lien permanent vers ce titre">¶</a></h3>
+<p><a class="reference external" href="https://trac.osgeo.org/geos/">GEOS</a> signifie <strong>Geometry Engine - Open Source</strong>. C’est une bibliothèque C++ dérivée de <a class="reference external" href="https://sourceforge.net/projects/jts-topo-suite/">Java Topology Suite</a>. GEOS implémente les prédicats et les opérateurs spatiaux de la spécification OpenGIS <a class="reference external" href="https://www.opengeospatial.org/standards/sfs">Simple Features for SQL</a>. GEOS, dorénavant un projet OSGeo, a été initialement développée et maintenue par <a class="reference external" href="http://www.refractions.net/">Refractions Research</a> (Victoria, Canada).</p>
+</div>
+<div class="section" id="s-features">
+<span id="features"></span><h3>Fonctionnalités<a class="headerlink" href="#features" title="Lien permanent vers ce titre">¶</a></h3>
+<p>GeoDjango implémente une adaptation Python de haut niveau de la bibliothèque GEOS. Ses fonctionnalités comprennent notamment&nbsp;:</p>
+<ul class="simple">
+<li>Une interface sous licence BSD des routines géométriques GEOS, implémentées purement en Python à l’aide de <code class="docutils literal notranslate"><span class="pre">ctypes</span></code>.</li>
+<li>Faiblement couplé à GeoDjango. Par exemple, les objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> peuvent être utilisés en dehors d’un projet Django. En d’autres termes, il n’est pas nécessaire que <span class="target" id="index-3"></span><a class="reference internal" href="../../../topics/settings.html#envvar-DJANGO_SETTINGS_MODULE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">DJANGO_SETTINGS_MODULE</span></code></a> ou une base de données soient définis.</li>
+<li>Mutabilité&nbsp;: les objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> peuvent être modifiés.</li>
+<li>Multiplateforme et testé&nbsp;; compatible avec les plateformes Windows, Linux, Solaris et macOS.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="s-tutorial">
+<span id="s-geos-tutorial"></span><span id="tutorial"></span><span id="geos-tutorial"></span><h2>Tutoriel<a class="headerlink" href="#tutorial" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Cette section contient une brève introduction à l’utilisation des objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a>.</p>
+<div class="section" id="s-creating-a-geometry">
+<span id="creating-a-geometry"></span><h3>Création d’un objet géométrique<a class="headerlink" href="#creating-a-geometry" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> peuvent être créés de plusieurs façons. La première est de simplement créer une instance avec du contenu spatial. Les exemples suivants montrent comment créer le même objet géométrique avec du contenu WKT, HEX, WKB et GeoJSON&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">GEOSGeometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POINT(5 23)&#39;</span><span class="p">)</span> <span class="c1"># WKT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;010100000000000000000014400000000000003740&#39;</span><span class="p">)</span> <span class="c1"># HEX</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="n">buffer</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x14</span><span class="s1">@</span><span class="se">\x00\x00\x00\x00\x00\x00</span><span class="s1">7@&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;{ &quot;type&quot;: &quot;Point&quot;, &quot;coordinates&quot;: [ 5.000000, 23.000000 ] }&#39;</span><span class="p">)</span> <span class="c1"># GeoJSON</span>
+</pre></div>
+</div>
+<p>Un autre option est d’utiliser le constructeur correspondant au type d’objet géométrique que vous souhaitez créer. Par exemple un objet <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a> peut être créé en passant des coordonnées X et Y à son constructeur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">23</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Tous ces constructeurs acceptent le paramètre nommé <code class="docutils literal notranslate"><span class="pre">srid</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">GEOSGeometry</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">Point</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POINT (0 0)&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">))</span>
+<span class="go">SRID=4326;POINT (0 0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">LineString</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">))</span>
+<span class="go">SRID=4326;LINESTRING (0 0, 1 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">32140</span><span class="p">))</span>
+<span class="go">SRID=32140;POINT (0 0)</span>
+</pre></div>
+</div>
+<p>Pour terminer, il existe la méthode de fabrication <a class="reference internal" href="#django.contrib.gis.geos.fromfile" title="django.contrib.gis.geos.fromfile"><code class="xref py py-func docutils literal notranslate"><span class="pre">fromfile()</span></code></a> qui renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> à partir d’un fichier&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">fromfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">fromfile</span><span class="p">(</span><span class="s1">&#39;/path/to/pnt.wkt&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">fromfile</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/path/to/pnt.wkt&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="admonition-my-logs-are-filled-with-geos-related-errors admonition" id="geos-exceptions-in-logfile">
+<p class="first admonition-title">Mes journaux sont remplis par des erreurs liées à GEOS</p>
+<p class="last">Vous découvrez de nombreuses exceptions <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> ou <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> remplissant les journaux de votre serveur Web. Cela signifie généralement que vous créez des objets GEOS au premier niveau de certains de vos modules Python. Ensuite, en raison d’un conflit de concurrence dans le récupérateur de mémoire, la mémoire de votre module est recyclée avant l’objet GEOS. Pour empêcher cela, créez les objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> dans la portée locale de vos fonctions ou méthodes.</p>
+</div>
+</div>
+<div class="section" id="s-geometries-are-pythonic">
+<span id="geometries-are-pythonic"></span><h3>Les objets géométriques sont «&nbsp;pythonesques&nbsp;»<a class="headerlink" href="#geometries-are-pythonic" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> sont «&nbsp;pythonesques&nbsp;», ce qui signifie qu’il est possible d’accéder, de modifier ou de passer en boucle leurs composants à l’aide des conventions Python standards. Par exemple, voici comment parcourir les coordonnées d’un <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a> en boucle&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">23</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">coord</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">pnt</span><span class="p">]</span>
+<span class="go">[5.0, 23.0]</span>
+</pre></div>
+</div>
+<p>Avec n’importe quel objet géométrique, la propriété <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.coords" title="django.contrib.gis.geos.GEOSGeometry.coords"><code class="xref py py-attr docutils literal notranslate"><span class="pre">GEOSGeometry.coords</span></code></a> peut être utilisée pour obtenir les coordonnées géométriques sous forme de tuple Python&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span><span class="o">.</span><span class="n">coords</span>
+<span class="go">(5.0, 23.0)</span>
+</pre></div>
+</div>
+<p>Il est possible d’obtenir et de définir les éléments des objets géométriques par des techniques d’indices Python standard. Cependant, les valeurs renvoyées dépendent du type d’objet géométrique. Par exemple, l’application d’un indice sur une ligne <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> renvoie un tuple de coordonnées&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">LineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">(0.0, 0.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="go">(50.0, 0.0)</span>
+</pre></div>
+</div>
+<p>Alors que l’application d’un indice sur un <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> renvoie un anneau (un objet <a class="reference internal" href="#django.contrib.gis.geos.LinearRing" title="django.contrib.gis.geos.LinearRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRing</span></code></a>) correspondant à l’indice&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span> <span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">50.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">&lt;LinearRing object at 0x1044395b0&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># second-to-last coordinate of external ring</span>
+<span class="go">(50.0, 0.0)</span>
+</pre></div>
+</div>
+<p>De plus, les coordonnées et les composants d’un objet géométrique peuvent être complétés ou modifiés de manière similaire à une liste Python&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+<span class="go">(0.0, 0.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">line</span><span class="o">.</span><span class="n">coords</span>
+<span class="go">((1.0, 1.0), (0.0, 50.0), (50.0, 50.0), (50.0, 0.0), (1.0, 1.0))</span>
+</pre></div>
+</div>
+<p>Les objets géométriques prennent en charge les opérateurs d’ensembles (<code class="docutils literal notranslate"><span class="pre">set</span></code>)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">LineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls1</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls2</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ls1</span> <span class="o">|</span> <span class="n">ls2</span><span class="p">)</span>  <span class="c1"># equivalent to `ls1.union(ls2)`</span>
+<span class="go">MULTILINESTRING ((0 0, 1 1), (1 1, 2 2), (2 2, 3 3))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ls1</span> <span class="o">&amp;</span> <span class="n">ls2</span><span class="p">)</span>  <span class="c1"># equivalent to `ls1.intersection(ls2)`</span>
+<span class="go">LINESTRING (1 1, 2 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ls1</span> <span class="o">-</span> <span class="n">ls2</span><span class="p">)</span>  <span class="c1"># equivalent to `ls1.difference(ls2)`</span>
+<span class="go">LINESTRING(0 0, 1 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ls1</span> <span class="o">^</span> <span class="n">ls2</span><span class="p">)</span>  <span class="c1"># equivalent to `ls1.sym_difference(ls2)`</span>
+<span class="go">MULTILINESTRING ((0 0, 1 1), (2 2, 3 3))</span>
+</pre></div>
+</div>
+<div class="admonition-equality-operator-doesn-t-check-spatial-equality admonition">
+<p class="first admonition-title">L’opérateur d’égalité ne vérifie pas l’égalité spatiale</p>
+<p>L’opérateur d’égalité de <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> utilise <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.equals_exact" title="django.contrib.gis.geos.GEOSGeometry.equals_exact"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equals_exact()</span></code></a>, et non pas <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.equals" title="django.contrib.gis.geos.GEOSGeometry.equals"><code class="xref py py-meth docutils literal notranslate"><span class="pre">equals()</span></code></a>, c’est-à-dire que l’égalité dépend de coordonnées identiques, dans la même position et avec les mêmes SRID&nbsp;:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">LineString</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls1</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls2</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls3</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls1</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">ls2</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls1</span> <span class="o">==</span> <span class="n">ls2</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls3</span> <span class="o">==</span> <span class="n">ls2</span>  <span class="c1"># different SRIDs</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-geometry-objects">
+<span id="geometry-objects"></span><h2>Objets géométriques<a class="headerlink" href="#geometry-objects" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-geosgeometry">
+<span id="geosgeometry"></span><h3><code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code><a class="headerlink" href="#geosgeometry" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.GEOSGeometry">
+<em class="property">class </em><code class="descname">GEOSGeometry</code>(<em>geo_input</em>, <em>srid=None</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Paramètres:</th><td class="field-body"><ul class="first last simple">
+<li><strong>geo_input</strong> – Valeur d’entrée géométrique (chaîne ou tampon)</li>
+<li><strong>srid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(disponible dans Python v3.9)"><em>int</em></a>) – identifiant de référence spatiale</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Il s’agit de la classe de base de tous les objets géométriques GEOS. Elle s’initialise en fonction du paramètre <code class="docutils literal notranslate"><span class="pre">geo_input</span></code> donné, puis en déduit la sous-classe géométrique appropriée (par ex. <code class="docutils literal notranslate"><span class="pre">GEOSGeometry('POINT(1</span> <span class="pre">1)')</span></code> crée un objet <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a>).</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">srid</span></code>, s’il est présent, est défini comme le SRID de l’objet géométrique créé si <code class="docutils literal notranslate"><span class="pre">geo_input</span></code> ne possède pas de SRID. Si les valeurs de SRID entre les paramètres <code class="docutils literal notranslate"><span class="pre">geo_input</span></code> et <code class="docutils literal notranslate"><span class="pre">srid</span></code> diffèrent, une erreur <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> est produite</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">GEOSGeometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POINT EMPTY&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span><span class="o">.</span><span class="n">ewkt</span>
+<span class="go">&#39;SRID=4326;POINT EMPTY&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;SRID=4326;POINT EMPTY&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span><span class="o">.</span><span class="n">ewkt</span>
+<span class="go">&#39;SRID=4326;POINT EMPTY&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;SRID=1;POINT EMPTY&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">ValueError</span>: <span class="n">Input geometry already has SRID: 1.</span>
+</pre></div>
+</div>
+<p>Les formats de valeurs d’entrée suivants, ainsi que leur type Python correspondant, sont acceptés&nbsp;:</p>
+<table class="docutils">
+<colgroup>
+<col width="70%" />
+<col width="30%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Type en entrée</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>WKT / EWKT</td>
+<td><code class="docutils literal notranslate"><span class="pre">str</span></code></td>
+</tr>
+<tr class="row-odd"><td>HEX / HEXEWKB</td>
+<td><code class="docutils literal notranslate"><span class="pre">str</span></code></td>
+</tr>
+<tr class="row-even"><td>WKB / EWKB</td>
+<td><code class="docutils literal notranslate"><span class="pre">buffer</span></code></td>
+</tr>
+<tr class="row-odd"><td><span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7946.html"><strong>GeoJSON</strong></a></td>
+<td><code class="docutils literal notranslate"><span class="pre">str</span></code></td>
+</tr>
+</tbody>
+</table>
+<p>Pour le format GeoJSON, le SRID est défini sur la base du membre <code class="docutils literal notranslate"><span class="pre">crs</span></code>. SI <code class="docutils literal notranslate"><span class="pre">crs</span></code> n’est pas fourni, le SRID par défaut est 4326.</p>
+<dl class="classmethod">
+<dt id="django.contrib.gis.geos.GEOSGeometry.from_gml">
+<em class="property">classmethod </em><code class="descclassname">GEOSGeometry.</code><code class="descname">from_gml</code>(<em>gml_string</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.from_gml" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Construit un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> à partir de la chaîne GML donnée.</p>
+</dd></dl>
+
+<div class="section" id="s-properties">
+<span id="properties"></span><h4>Propriétés<a class="headerlink" href="#properties" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.coords">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">coords</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.coords" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie les coordonnées de l’objet géométrique sous forme de tuple.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.dims">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">dims</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.dims" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la dimension de l’objet géométrique&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">0</span></code> pour les <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a>s et les <a class="reference internal" href="#django.contrib.gis.geos.MultiPoint" title="django.contrib.gis.geos.MultiPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPoint</span></code></a>s</li>
+<li><code class="docutils literal notranslate"><span class="pre">1</span></code> pour les <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a>s et les <a class="reference internal" href="#django.contrib.gis.geos.MultiLineString" title="django.contrib.gis.geos.MultiLineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiLineString</span></code></a>s</li>
+<li><code class="docutils literal notranslate"><span class="pre">2</span></code> pour les <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a>s et les <a class="reference internal" href="#django.contrib.gis.geos.MultiPolygon" title="django.contrib.gis.geos.MultiPolygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPolygon</span></code></a>s</li>
+<li><code class="docutils literal notranslate"><span class="pre">-1</span></code> pour les <a class="reference internal" href="#django.contrib.gis.geos.GeometryCollection" title="django.contrib.gis.geos.GeometryCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryCollection</span></code></a>s vides</li>
+<li>la dimension maximale de ses éléments pour les <a class="reference internal" href="#django.contrib.gis.geos.GeometryCollection" title="django.contrib.gis.geos.GeometryCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryCollection</span></code></a>s non vides</li>
+</ul>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.empty">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">empty</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.empty" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une valeur booléenne indiquant si l’ensemble des points de l’objet géométrique est vide.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.geom_type">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">geom_type</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.geom_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une chaîne correspondant au type de l’objet géométrique. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POINT(5 23)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span><span class="o">.</span><span class="n">geom_type</span>
+<span class="go">&#39;Point&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.geom_typeid">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">geom_typeid</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.geom_typeid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le numéro d’identification du type géométrique GEOS. Le tableau suivant expose la valeur correspondant à chaque type géométrique&nbsp;:</p>
+<table class="docutils">
+<colgroup>
+<col width="77%" />
+<col width="23%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Objet géométrique</th>
+<th class="head">ID</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a></td>
+<td>0</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a></td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#django.contrib.gis.geos.LinearRing" title="django.contrib.gis.geos.LinearRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRing</span></code></a></td>
+<td>2</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a></td>
+<td>3</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#django.contrib.gis.geos.MultiPoint" title="django.contrib.gis.geos.MultiPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPoint</span></code></a></td>
+<td>4</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#django.contrib.gis.geos.MultiLineString" title="django.contrib.gis.geos.MultiLineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiLineString</span></code></a></td>
+<td>5</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#django.contrib.gis.geos.MultiPolygon" title="django.contrib.gis.geos.MultiPolygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPolygon</span></code></a></td>
+<td>6</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#django.contrib.gis.geos.GeometryCollection" title="django.contrib.gis.geos.GeometryCollection"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryCollection</span></code></a></td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.num_coords">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">num_coords</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.num_coords" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nombre de coordonnées de l’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.num_geom">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">num_geom</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.num_geom" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nombre d’objets géométriques dans cet objet. En d’autres termes, le résultat sera 1 pour toute autre chose que les collections d’objets géométriques.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.hasz">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">hasz</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.hasz" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une valeur booléenne indiquant si l’objet géométrique est en trois dimensions.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.ring">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">ring</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.ring" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une valeur booléenne indiquant si l’objet géométrique est un <code class="docutils literal notranslate"><span class="pre">LinearRing</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.simple">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">simple</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.simple" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une valeur booléenne indiquant si l’objet géométrique est «&nbsp;simple&nbsp;». Un objet géométrique est simple si et seulement s’il n’a pas d’intersection avec lui-même (excepté aux points limites). Par exemple, un objet <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> n’est pas simple si sa ligne se croise elle-même. Par définition les objets <a class="reference internal" href="#django.contrib.gis.geos.LinearRing" title="django.contrib.gis.geos.LinearRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRing</span></code></a> et <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> sont toujours simples car ils ne peuvent pas avoir d’intersections avec eux-mêmes.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.valid">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">valid</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.valid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une valeur booléenne indiquant si l’objet géométrique est valide.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.valid_reason">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">valid_reason</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.valid_reason" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une chaîne décrivant la raison pour laquelle un objet géométrique n’est pas valable.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.srid">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">srid</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.srid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Propriété pouvant être utilisée pour récupérer ou définir le SRID associé à l’objet. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">23</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">pnt</span><span class="o">.</span><span class="n">srid</span><span class="p">)</span>
+<span class="go">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span><span class="o">.</span><span class="n">srid</span> <span class="o">=</span> <span class="mi">4326</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span><span class="o">.</span><span class="n">srid</span>
+<span class="go">4326</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-output-properties">
+<span id="output-properties"></span><h4>Propriétés en sortie<a class="headerlink" href="#output-properties" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les propriétés de cette section exportent l’objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> sous une forme différente. Cette forme peut être une chaîne, un tampon mémoire ou même un autre objet.</p>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.ewkt">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">ewkt</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.ewkt" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le format WKT (Well-Known Text) étendu de l’objet géométrique. Cette représentation est spécifique à PostGIS et constitue un sur-ensemble du standard WKT OGC <a class="footnote-reference" href="#fnogc" id="id5">[1]</a>. En bref, la représentation WKT est préfixée par le code SRID, par exemple <code class="docutils literal notranslate"><span class="pre">SRID=4326;POINT(5</span> <span class="pre">23)</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Le résultat de cette propriété n’inclut pas les informations 3dm, 3dz ou 4d que PostGIS prend en charge dans ses représentations EWKT.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.hex">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">hex</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.hex" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la représentation WKB de cet objet géométrique sous forme hexadécimale. Notez que la valeur SRID n’est pas incluse dans cette représentation car elle ne fait pas partie de la spécification OGC (utilisez plutôt la propriété <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.hexewkb" title="django.contrib.gis.geos.GEOSGeometry.hexewkb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">GEOSGeometry.hexewkb</span></code></a>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.hexewkb">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">hexewkb</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.hexewkb" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la représentation EWKB de cet objet géométrique sous forme hexadécimale. Il s’agit d’une extension de la spécification WKB incluant la valeur SRID correspondant à l’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.json">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">json</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.json" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la représentation GeoJSON de l’objet géométrique. Notez que le résultat ne constitue pas une structure GeoJSON complète, mais seulement le contenu de la clé <code class="docutils literal notranslate"><span class="pre">geometry</span></code> d’une structure GeoJSON. Voir aussi <a class="reference internal" href="serializers.html"><span class="doc">Sérialisation GeoJSON</span></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.geojson">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">geojson</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.geojson" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Alias de <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.json" title="django.contrib.gis.geos.GEOSGeometry.json"><code class="xref py py-attr docutils literal notranslate"><span class="pre">GEOSGeometry.json</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.kml">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">kml</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.kml" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une représentation <a class="reference external" href="https://developers.google.com/kml/documentation/">KML</a> (Keyhole Markup Language) de cet objet géométrique. Ceci ne devrait être utilisé que pour des objets géométriques ayant le SRID 4326 (WGS84), mais cette restriction n’est pas forcée.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.ogr">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">ogr</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.ogr" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.OGRGeometry" title="django.contrib.gis.gdal.OGRGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">OGRGeometry</span></code></a> équivalent à l’objet géométrique GEOS.</p>
+</dd></dl>
+
+<span class="target" id="wkb"></span><dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.wkb">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">wkb</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.wkb" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la représentation WKB (Well-Known Binary) de cet objet géométrique sous forme de tampon Python (buffer). La valeur SRID n’est pas incluse. Si vous le souhaitez, utilisez plutôt la propriété <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.ewkb" title="django.contrib.gis.geos.GEOSGeometry.ewkb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">GEOSGeometry.ewkb</span></code></a>.</p>
+</dd></dl>
+
+<span class="target" id="ewkb"></span><dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.ewkb">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">ewkb</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.ewkb" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la représentation EWKB de cet objet géométrique sous forme de tampon Python (buffer). Il s’agit d’une extension de la spécification WKB qui inclut toute valeur SRID faisant partie de cet objet.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.wkt">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">wkt</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.wkt" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la représentation WKT (Well-Known Text) de cet objet géométrique (un standard OGC).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-spatial-predicate-methods">
+<span id="spatial-predicate-methods"></span><h4>Méthodes de prédicats spatiaux<a class="headerlink" href="#spatial-predicate-methods" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Toutes les méthodes de prédicats spatiaux ci-après acceptent en paramètre une autre instance <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> (<code class="docutils literal notranslate"><span class="pre">other</span></code>) et renvoient une valeur booléenne.</p>
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.contains">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">contains</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.contains" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.within" title="django.contrib.gis.geos.GEOSGeometry.within"><code class="xref py py-meth docutils literal notranslate"><span class="pre">other.within(this)</span></code></a> renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.covers">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">covers</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.covers" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si cet objet géométrique recouvre l’objet géométrique donné.</p>
+<p>Le prédicat <code class="docutils literal notranslate"><span class="pre">covers</span></code> possède les définitions équivalentes suivantes&nbsp;:</p>
+<ul class="simple">
+<li>Chaque point de l’autre objet géométrique est un point de cet objet géométrique.</li>
+<li>La matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">T*****FF*</span></code>, <code class="docutils literal notranslate"><span class="pre">*T****FF*</span></code>, <code class="docutils literal notranslate"><span class="pre">***T**FF*</span></code> ou <code class="docutils literal notranslate"><span class="pre">****T*FF*</span></code>.</li>
+</ul>
+<p>Si l’un des objets géométriques est vide, renvoie <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Ce prédicat est semblable à <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.contains" title="django.contrib.gis.geos.GEOSGeometry.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GEOSGeometry.contains()</span></code></a>, mais est plus inclusif (c’est-à-dire qu’il renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> dans plus de cas). En particulier, au contraire de <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.contains" title="django.contrib.gis.geos.GEOSGeometry.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a>, il ne distingue pas entre les points à la limite et ceux à l’intérieur de l’objet géométrique. Dans la plupart des situations, <code class="docutils literal notranslate"><span class="pre">covers()</span></code> devrait être préféré à <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.contains" title="django.contrib.gis.geos.GEOSGeometry.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a>. Comme bénéfice supplémentaire, <code class="docutils literal notranslate"><span class="pre">covers()</span></code> est plus sujet à l’optimisation et devrait donc être bien plus performant que <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.contains" title="django.contrib.gis.geos.GEOSGeometry.contains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">contains()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.crosses">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">crosses</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.crosses" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">T*T******</span></code> (pour un point et une courbe, un point et une aire ou une ligne et une aire), ou <code class="docutils literal notranslate"><span class="pre">0********</span></code> (pour deux courbes).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.disjoint">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">disjoint</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.disjoint" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">FF*FF****</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.equals">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">equals</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.equals" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">T*F**FFF*</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.equals_exact">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">equals_exact</code>(<em>other</em>, <em>tolerance=0</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.equals_exact" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si les deux objets géométriques sont exactement égaux, jusqu’à une certaine tolérance. La valeur de <code class="docutils literal notranslate"><span class="pre">tolerance</span></code> doit être un nombre à virgule représentant la tolérance d’erreur dans la comparaison. Par exemple, <code class="docutils literal notranslate"><span class="pre">poly1.equals_exact(poly2,</span> <span class="pre">0.001)</span></code> compare l’égalité jusqu’à un millième d’unité.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.intersects">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">intersects</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.intersects" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.disjoint" title="django.contrib.gis.geos.GEOSGeometry.disjoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GEOSGeometry.disjoint()</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.overlaps">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">overlaps</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.overlaps" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">T*T***T**</span></code> (pour deux points ou deux surfaces), ou <code class="docutils literal notranslate"><span class="pre">1*T***T**</span></code> (pour deux courbes).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.relate_pattern">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">relate_pattern</code>(<em>other</em>, <em>pattern</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.relate_pattern" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques correspond au motif <code class="docutils literal notranslate"><span class="pre">pattern</span></code> donné, une chaîne de neuf caractères dans l’alphabet {<code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">0</span></code>}.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.touches">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">touches</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.touches" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">FT*******</span></code>, <code class="docutils literal notranslate"><span class="pre">F**T*****</span></code> ou <code class="docutils literal notranslate"><span class="pre">F***T****</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.within">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">within</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.within" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si la matrice d’intersection DE-9IM des deux objets géométriques est <code class="docutils literal notranslate"><span class="pre">T*F**F***</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-topological-methods">
+<span id="topological-methods"></span><h4>Méthodes topologiques<a class="headerlink" href="#topological-methods" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.buffer">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">buffer</code>(<em>width</em>, <em>quadsegs=8</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.buffer" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> représentant tous les points dont la distance à cet objet géométrique est plus petit ou égal à la longueur <code class="docutils literal notranslate"><span class="pre">width</span></code> donnée. Le paramètre facultatif <code class="docutils literal notranslate"><span class="pre">quadsegs</span></code> définit le nombre de segments utilisés pour faire l’approximation d’un quart de cercle (8 par défaut).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.buffer_with_style">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">buffer_with_style</code>(<em>width</em>, <em>quadsegs=8</em>, <em>end_cap_style=1</em>, <em>join_style=1</em>, <em>mitre_limit=5.0</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.buffer_with_style" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Identique à <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.buffer" title="django.contrib.gis.geos.GEOSGeometry.buffer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">buffer()</span></code></a>, mais permet de personnaliser le style du tampon.</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">end_cap_style</span></code> peut être rond (<code class="docutils literal notranslate"><span class="pre">1</span></code>), plat (<code class="docutils literal notranslate"><span class="pre">2</span></code>) ou carré (<code class="docutils literal notranslate"><span class="pre">3</span></code>).</li>
+<li><code class="docutils literal notranslate"><span class="pre">join_style</span></code> peut être rond (<code class="docutils literal notranslate"><span class="pre">1</span></code>), onglet (<code class="docutils literal notranslate"><span class="pre">2</span></code>) ou biseau (<code class="docutils literal notranslate"><span class="pre">3</span></code>).</li>
+<li>La limite de taux d’onglet (<code class="docutils literal notranslate"><span class="pre">mitre_limit</span></code>) n’affecte que le style de jointure par onglet.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.difference">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">difference</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.difference" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> représentant les points composants cet objet géométrique qui ne composent pas l’autre objet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.interpolate">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">interpolate</code>(<em>distance</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.interpolate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.interpolate_normalized">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">interpolate_normalized</code>(<em>distance</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.interpolate_normalized" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Étant donné une distance (nombre à virgule), renvoie le point (ou le point le plus proche) de l’objet géométrique (<a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> ou <a class="reference internal" href="#django.contrib.gis.geos.MultiLineString" title="django.contrib.gis.geos.MultiLineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiLineString</span></code></a>) à cette distance. La version normalisée accepte une distance sous forme d’un nombre à virgule entre 0 (origine) et 1 (point terminal).</p>
+<p>Inverse de <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.project" title="django.contrib.gis.geos.GEOSGeometry.project"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GEOSGeometry.project()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.intersection">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">intersection</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.intersection" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> représentant les points partagés entre cet objet géométrique et l’objet <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.project">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">project</code>(<em>point</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.project" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.project_normalized">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">project_normalized</code>(<em>point</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.project_normalized" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la distance (nombre à virgule) à partir de l’origine de l’objet géométrique (<a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> ou <a class="reference internal" href="#django.contrib.gis.geos.MultiLineString" title="django.contrib.gis.geos.MultiLineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiLineString</span></code></a>) jusqu’au point projeté sur la géométrie (c’est-à-dire le point de la ligne le plus proche du point donné). La version normalisée renvoie la distance sous forme d’un nombre à virgule entre 0 (origine) et 1 (point terminal).</p>
+<p>Inverse de <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.interpolate" title="django.contrib.gis.geos.GEOSGeometry.interpolate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GEOSGeometry.interpolate()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.relate">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">relate</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.relate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la matrice d’intersection DE-9IM (une chaîne) représentant la relation topologique entre cet objet géométrique et l’objet en paramètre.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.simplify">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">simplify</code>(<em>tolerance=0.0</em>, <em>preserve_topology=False</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.simplify" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un nouvel objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a>, simplifié à la tolérance indiquée en utilisant l’algorithme Douglas-Peucker. Une plus haute valeur de tolérance produit moins de points dans le résultat. Si aucune tolérance n’est fournie, la valeur par défaut est 0.</p>
+<p>Par défaut, cette fonction ne préserve pas la topologie. Par exemple, les objets <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> peuvent être divisés, être fusionnés pour former des lignes ou carrément disparaître. Des trous de <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> peuvent apparaître ou disparaître et des lignes peuvent se croiser. En définissant <code class="docutils literal notranslate"><span class="pre">preserve_topology=True</span></code>, le résultat aura les mêmes dimensions et le même nombre de composants que l’objet de départ&nbsp;; la fonction est cependant nettement plus lente.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.sym_difference">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">sym_difference</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.sym_difference" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> formé des points de cet objet géométrique qui ne sont pas dans l’objet en paramètre, ainsi que des points dans l’objet en paramètre qui ne sont pas dans cet objet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.union">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">union</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.union" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> représentant tous les points de cet objet géométrique additionnés de ceux de l’objet en paramètre.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-topological-properties">
+<span id="topological-properties"></span><h4>Propriétés topologiques<a class="headerlink" href="#topological-properties" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.boundary">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">boundary</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.boundary" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie les limites sous forme d’une nouvelle instance d’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.centroid">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">centroid</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.centroid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a> représentant le centre géométrique de l’objet. Le point n’est pas assuré d’être à l’intérieur de l’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.convex_hull">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">convex_hull</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.convex_hull" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le plus petit <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> contenant tous les points de l’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.envelope">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">envelope</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.envelope" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> qui représente l’enveloppe englobante de cet objet géométrique. Notez qu’un <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a> peut aussi être renvoyé si l’objet en entrée est lui-même un point.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.point_on_surface">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">point_on_surface</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.point_on_surface" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Calcule et renvoie un <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a> assuré d’être à l’intérieur de l’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.unary_union">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">unary_union</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.unary_union" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Calcule l’union de tous les éléments de cet objet géométrique.</p>
+<p>Le résultat respecte le contrat suivant&nbsp;:</p>
+<ul class="simple">
+<li>L’union d’un ensemble de <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> procède à leur complète mise en nœuds et à la dissolution des lignes.</li>
+<li>L’union d’un ensemble de <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> renvoie toujours un objet géométrique <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> ou <a class="reference internal" href="#django.contrib.gis.geos.MultiPolygon" title="django.contrib.gis.geos.MultiPolygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiPolygon</span></code></a> (au contraire de <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.union" title="django.contrib.gis.geos.GEOSGeometry.union"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GEOSGeometry.union()</span></code></a> qui peut renvoyer des géométries de plus faible dimension si un conflit de topologie se produit).</li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="s-other-properties-methods">
+<span id="other-properties-methods"></span><h4>Autres propriétés et méthodes<a class="headerlink" href="#other-properties-methods" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.area">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">area</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.area" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette propriété renvoie l’aire de l’objet géométrique.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.extent">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">extent</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.extent" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette propriété renvoie l’étendue de cet objet géométrique sous forme d’un tuple à 4 éléments, formé de <code class="docutils literal notranslate"><span class="pre">(xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax)</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.clone">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">clone</code>()<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.clone" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette méthode renvoie un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> clone de l’original.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.distance">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">distance</code>(<em>geom</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.distance" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la distance entre les points les plus proches de cet objet géométrique et l’objet <code class="docutils literal notranslate"><span class="pre">geom</span></code> (un autre objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a>).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Les calculs de distance GEOS sont linéaires&nbsp;; en d’autres termes, GEOS n’effectue pas de calculs sphériques même si le SRID définit un système de coordonnées géographique.</p>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.length">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">length</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.length" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la longueur de cet objet géométrique (par ex. 0 pour un <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a>, la longueur d’une ligne <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> ou la circonférence d’un <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.prepared">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">prepared</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.prepared" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet GEOS <code class="docutils literal notranslate"><span class="pre">PreparedGeometry</span></code> relatif au contenu de cet objet géométrique. Les objets <code class="docutils literal notranslate"><span class="pre">PreparedGeometry</span></code> sont optimisés pour les opérations contains, intersects, covers, crosses, disjoint, overlaps, touches et within. Référez-vous à la documentation <a class="reference internal" href="#prepared-geometries"><span class="std std-ref">Objets géométriques préparés</span></a> pour plus d’informations.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.GEOSGeometry.srs">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">srs</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.srs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.SpatialReference" title="django.contrib.gis.gdal.SpatialReference"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialReference</span></code></a> correspondant au SRID de l’objet géométrique ou .</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.transform">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">transform</code>(<em>ct</em>, <em>clone=False</em>)<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.transform" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Transforme l’objet géométrique en fonction du paramètre de transformation de coordonnées donné (<code class="docutils literal notranslate"><span class="pre">ct</span></code>), qui peut être un numéro de SRID, une chaîne de référence spatiale WKT, une chaîne PROJ.4, un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.SpatialReference" title="django.contrib.gis.gdal.SpatialReference"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialReference</span></code></a> ou un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.CoordTransform" title="django.contrib.gis.gdal.CoordTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoordTransform</span></code></a>. Par défaut, l’objet géométrique est transformé lui-même et rien n’est renvoyé. Cependant, quand le paramètre <code class="docutils literal notranslate"><span class="pre">clone</span></code> est défini, l’objet géométrique n’est pas modifié et c’est un clone transformé de l’objet géométrique qui est renvoyé.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Génère une exception <a class="reference internal" href="#django.contrib.gis.geos.GEOSException" title="django.contrib.gis.geos.GEOSException"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSException</span></code></a> si GDAL n’est pas disponible ou si la valeur SRID de l’objet géométrique est <code class="docutils literal notranslate"><span class="pre">None</span></code> ou plus petite que 0. Aucune contrainte n’est imposée pour le code SRID de l’objet géométrique quand elle est appelée avec un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.CoordTransform" title="django.contrib.gis.gdal.CoordTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoordTransform</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.GEOSGeometry.normalize">
+<code class="descclassname">GEOSGeometry.</code><code class="descname">normalize</code>()<a class="headerlink" href="#django.contrib.gis.geos.GEOSGeometry.normalize" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit cet objet géométrique sous sa forme canonique&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">MultiPoint</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="go">MULTIPOINT (0 0, 2 2, 1 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="go">MULTIPOINT (2 2, 1 1, 0 0)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-point">
+<span id="point"></span><h3><code class="docutils literal notranslate"><span class="pre">Point</span></code><a class="headerlink" href="#point" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.Point">
+<em class="property">class </em><code class="descname">Point</code>(<em>x=None</em>, <em>y=None</em>, <em>z=None</em>, <em>srid=None</em>)<a class="headerlink" href="#django.contrib.gis.geos.Point" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">Point</span></code> sont créés en utilisant des paramètres représentant les composantes de coordonnées du point ou une suite unique de coordonnées. Par exemple, les lignes suivantes sont équivalentes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">23</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">23</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Des objets <code class="docutils literal notranslate"><span class="pre">Point</span></code> vides peuvent être instanciés en ne passant aucun paramètre ou une liste vide. Ces lignes sont équivalentes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">([])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-linestring">
+<span id="linestring"></span><h3><code class="docutils literal notranslate"><span class="pre">LineString</span></code><a class="headerlink" href="#linestring" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.LineString">
+<em class="property">class </em><code class="descname">LineString</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.LineString" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">LineString</span></code> sont créés en utilisant des paramètres représentant une suite de coordonnées ou une suite d’objets <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a>. Par exemple, les lignes suivantes sont équivalentes</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>De plus, les objets <code class="docutils literal notranslate"><span class="pre">LineString</span></code> peuvent aussi être créés en passant une seule liste de coordonnées ou d’objets <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Des objets <code class="docutils literal notranslate"><span class="pre">LineString</span></code> vides peuvent être instanciés en ne passant aucun paramètre ou une liste vide. Ces lignes sont équivalentes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([])</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.LineString.closed">
+<code class="descname">closed</code><a class="headerlink" href="#django.contrib.gis.geos.LineString.closed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Indique si cette ligne <code class="docutils literal notranslate"><span class="pre">LineString</span></code> est fermée.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-linearring">
+<span id="linearring"></span><h3><code class="docutils literal notranslate"><span class="pre">LinearRing</span></code><a class="headerlink" href="#linearring" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.LinearRing">
+<em class="property">class </em><code class="descname">LinearRing</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.LinearRing" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">LinearRing</span></code> sont construits de la même manière que les objets <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a>. Cependant, les coordonnées doivent être <em>fermées</em>, c’est-à-dire que la première et la dernière coordonnée doivent être identiques. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LinearRing</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Remarquez que <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0)</span></code> est à la fois la première et la dernière coordonnée&nbsp;; si elles ne sont pas égales, une erreur est générée.</p>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.LinearRing.is_counterclockwise">
+<code class="descname">is_counterclockwise</code><a class="headerlink" href="#django.contrib.gis.geos.LinearRing.is_counterclockwise" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Indique si cet objet <code class="docutils literal notranslate"><span class="pre">LinearRing</span></code> est orienté dans le sens antihoraire.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-polygon">
+<span id="polygon"></span><h3><code class="docutils literal notranslate"><span class="pre">Polygon</span></code><a class="headerlink" href="#polygon" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.Polygon">
+<em class="property">class </em><code class="descname">Polygon</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.Polygon" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> peuvent être créés en passant des paramètres représentant les segments du polygone. Les paramètres doivent être soit des instances de segments <a class="reference internal" href="#django.contrib.gis.geos.LinearRing" title="django.contrib.gis.geos.LinearRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRing</span></code></a>, soit une suite d’éléments pouvant être utilisée pour construire un segment <a class="reference internal" href="#django.contrib.gis.geos.LinearRing" title="django.contrib.gis.geos.LinearRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearRing</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ext_coords</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">int_coords</span> <span class="o">=</span> <span class="p">((</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">ext_coords</span><span class="p">,</span> <span class="n">int_coords</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">LinearRing</span><span class="p">(</span><span class="n">ext_coords</span><span class="p">),</span> <span class="n">LinearRing</span><span class="p">(</span><span class="n">int_coords</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="classmethod">
+<dt id="django.contrib.gis.geos.Polygon.from_bbox">
+<em class="property">classmethod </em><code class="descname">from_bbox</code>(<em>bbox</em>)<a class="headerlink" href="#django.contrib.gis.geos.Polygon.from_bbox" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet polygone à partir du rectangle englobant donné, un tuple à 4 éléments comprenant <code class="docutils literal notranslate"><span class="pre">(xmin,</span> <span class="pre">ymin,</span> <span class="pre">xmax,</span> <span class="pre">ymax)</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.Polygon.num_interior_rings">
+<code class="descname">num_interior_rings</code><a class="headerlink" href="#django.contrib.gis.geos.Polygon.num_interior_rings" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nombre de segments intérieurs de cet objet géométrique.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="admonition-comparing-polygons admonition">
+<p class="first admonition-title">Comparaison de polygones</p>
+<p>Notez qu’il est possible de comparer des objets <code class="docutils literal notranslate"><span class="pre">Polygon</span></code> directement avec <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> or <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, mais comme la comparaison se fait à travers les segments <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> du polygone, cela n’a pas grande signification (mais c’est cohérent et rapide). Vous pouvez toujours forcer la comparaison avec la propriété <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.area" title="django.contrib.gis.geos.GEOSGeometry.area"><code class="xref py py-attr docutils literal notranslate"><span class="pre">area</span></code></a>:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">if</span> <span class="n">poly_1</span><span class="o">.</span><span class="n">area</span> <span class="o">&gt;</span> <span class="n">poly_2</span><span class="o">.</span><span class="n">area</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="s-geometry-collections">
+<span id="geometry-collections"></span><h2>Collections géométriques<a class="headerlink" href="#geometry-collections" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-multipoint">
+<span id="multipoint"></span><h3><code class="docutils literal notranslate"><span class="pre">MultiPoint</span></code><a class="headerlink" href="#multipoint" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.MultiPoint">
+<em class="property">class </em><code class="descname">MultiPoint</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.MultiPoint" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">MultiPoint</span></code> peuvent être créés en passant des objets <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a> en paramètres ou une seule liste d’objets <a class="reference internal" href="#django.contrib.gis.geos.Point" title="django.contrib.gis.geos.Point"><code class="xref py py-class docutils literal notranslate"><span class="pre">Point</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mp</span> <span class="o">=</span> <span class="n">MultiPoint</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mp</span> <span class="o">=</span> <span class="n">MultiPoint</span><span class="p">(</span> <span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-multilinestring">
+<span id="multilinestring"></span><h3><code class="docutils literal notranslate"><span class="pre">MultiLineString</span></code><a class="headerlink" href="#multilinestring" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.MultiLineString">
+<em class="property">class </em><code class="descname">MultiLineString</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.MultiLineString" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">MultiLineString</span></code> peuvent être créés en passant des objets <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> en paramètres ou une seule liste d’objets <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ls1</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls2</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mls</span> <span class="o">=</span> <span class="n">MultiLineString</span><span class="p">(</span><span class="n">ls1</span><span class="p">,</span> <span class="n">ls2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mls</span> <span class="o">=</span> <span class="n">MultiLineString</span><span class="p">([</span><span class="n">ls1</span><span class="p">,</span> <span class="n">ls2</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.MultiLineString.merged">
+<code class="descname">merged</code><a class="headerlink" href="#django.contrib.gis.geos.MultiLineString.merged" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une ligne <a class="reference internal" href="#django.contrib.gis.geos.LineString" title="django.contrib.gis.geos.LineString"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineString</span></code></a> représentant la fusion de tous les composants de cet objet</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.MultiLineString.closed">
+<code class="descname">closed</code><a class="headerlink" href="#django.contrib.gis.geos.MultiLineString.closed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si et seulement si tous les éléments sont fermés. Nécessite GEOS 3.5.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-multipolygon">
+<span id="multipolygon"></span><h3><code class="docutils literal notranslate"><span class="pre">MultiPolygon</span></code><a class="headerlink" href="#multipolygon" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.MultiPolygon">
+<em class="property">class </em><code class="descname">MultiPolygon</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.MultiPolygon" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">MultiPolygon</span></code> peuvent être créés en passant des objets <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a> en paramètres ou une seule liste d’objets <a class="reference internal" href="#django.contrib.gis.geos.Polygon" title="django.contrib.gis.geos.Polygon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Polygon</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p1</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p2</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span> <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mp</span> <span class="o">=</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mp</span> <span class="o">=</span> <span class="n">MultiPolygon</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-geometrycollection">
+<span id="geometrycollection"></span><h3><code class="docutils literal notranslate"><span class="pre">GeometryCollection</span></code><a class="headerlink" href="#geometrycollection" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.GeometryCollection">
+<em class="property">class </em><code class="descname">GeometryCollection</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.contrib.gis.geos.GeometryCollection" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les objets <code class="docutils literal notranslate"><span class="pre">GeometryCollection</span></code> peuvent être créés en passant des objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> en paramètres ou une seule liste d’objets <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gc</span> <span class="o">=</span> <span class="n">GeometryCollection</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">MultiPoint</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">poly</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gc</span> <span class="o">=</span> <span class="n">GeometryCollection</span><span class="p">((</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">MultiPoint</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">poly</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-prepared-geometries">
+<span id="s-id7"></span><span id="prepared-geometries"></span><span id="id7"></span><h2>Objets géométriques préparés<a class="headerlink" href="#prepared-geometries" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour obtenir un objet géométrique préparé, accédez à la propriété <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry.prepared" title="django.contrib.gis.geos.GEOSGeometry.prepared"><code class="xref py py-attr docutils literal notranslate"><span class="pre">GEOSGeometry.prepared</span></code></a>. Avec une instance <code class="docutils literal notranslate"><span class="pre">PreparedGeometry</span></code>, il est possible d’utiliser ses méthodes de prédicats spatiaux énumérées ci-dessous avec d’autres objets <code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code>. Une opération sur un objet géométrique préparé peut être beaucoup plus rapide&nbsp;; plus l’objet géométrique est complexe, plus grand sera le gain de rapidité pour l’opération. Pour plus d’informations, consultez la <a class="reference external" href="https://trac.osgeo.org/geos/wiki/PreparedGeometry">page du wiki GEOS sur les objets géométriques préparés</a>.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Polygon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="o">.</span><span class="n">from_bbox</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep_poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">prepared</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prep_poly</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">Point</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<div class="section" id="s-preparedgeometry">
+<span id="preparedgeometry"></span><h3><code class="docutils literal notranslate"><span class="pre">PreparedGeometry</span></code><a class="headerlink" href="#preparedgeometry" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.geos.PreparedGeometry">
+<em class="property">class </em><code class="descname">PreparedGeometry</code><a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Toutes les méthodes des objets <code class="docutils literal notranslate"><span class="pre">PreparedGeometry</span></code> acceptent un paramètre <code class="docutils literal notranslate"><span class="pre">other</span></code> (autre) qui doit représenter une instance <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a>.</p>
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.contains">
+<code class="descname">contains</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.contains" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.contains_properly">
+<code class="descname">contains_properly</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.contains_properly" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.covers">
+<code class="descname">covers</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.covers" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.crosses">
+<code class="descname">crosses</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.crosses" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.disjoint">
+<code class="descname">disjoint</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.disjoint" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.intersects">
+<code class="descname">intersects</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.intersects" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.overlaps">
+<code class="descname">overlaps</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.overlaps" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.touches">
+<code class="descname">touches</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.touches" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.gis.geos.PreparedGeometry.within">
+<code class="descname">within</code>(<em>other</em>)<a class="headerlink" href="#django.contrib.gis.geos.PreparedGeometry.within" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-geometry-factories">
+<span id="geometry-factories"></span><h2>Fabrication d’objets géométriques<a class="headerlink" href="#geometry-factories" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.contrib.gis.geos.fromfile">
+<code class="descname">fromfile</code>(<em>file_h</em>)<a class="headerlink" href="#django.contrib.gis.geos.fromfile" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Paramètres:</th><td class="field-body"><strong>file_h</strong> (a Python <code class="docutils literal notranslate"><span class="pre">file</span></code> object or a string path to the file) – Fichier d’entrée contenant des données spatiales</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type renvoyé:</th><td class="field-body">un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> correspondant aux données spatiales du fichier</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">fromfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">fromfile</span><span class="p">(</span><span class="s1">&#39;/home/bob/geom.wkt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.contrib.gis.geos.fromstr">
+<code class="descname">fromstr</code>(<em>string</em>, <em>srid=None</em>)<a class="headerlink" href="#django.contrib.gis.geos.fromstr" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Paramètres:</th><td class="field-body"><ul class="first simple">
+<li><strong>string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(disponible dans Python v3.9)"><em>str</em></a>) – chaîne contenant des données spatiales</li>
+<li><strong>srid</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(disponible dans Python v3.9)"><em>int</em></a>) – identifiant de référence spatiale</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type renvoyé:</th><td class="field-body"><p class="first last">un objet <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> correspondant aux données spatiales de la chaîne</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">fromstr(string,</span> <span class="pre">srid)</span></code> est équivalente à <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry(string,</span> <span class="pre">srid)</span></code></a>.</p>
+<p>Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">fromstr</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">fromstr</span><span class="p">(</span><span class="s1">&#39;POINT(-90.5 29.5)&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-i-o-objects">
+<span id="i-o-objects"></span><h2>Objets d’entrées/sorties<a class="headerlink" href="#i-o-objects" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-reader-objects">
+<span id="reader-objects"></span><h3>Objets de lecture<a class="headerlink" href="#reader-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les classes d’entrées/sorties en lecture renvoient une instance <a class="reference internal" href="#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> à partir du contenu WKB ou WKT en entrée en fonction de leur méthode <code class="docutils literal notranslate"><span class="pre">read(geom)</span></code>.</p>
+<dl class="class">
+<dt id="django.contrib.gis.geos.WKBReader">
+<em class="property">class </em><code class="descname">WKBReader</code><a class="headerlink" href="#django.contrib.gis.geos.WKBReader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">WKBReader</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_r</span> <span class="o">=</span> <span class="n">WKBReader</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_r</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;0101000000000000000000F03F000000000000F03F&#39;</span><span class="p">)</span>
+<span class="go">&lt;Point object at 0x103a88910&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.gis.geos.WKTReader">
+<em class="property">class </em><code class="descname">WKTReader</code><a class="headerlink" href="#django.contrib.gis.geos.WKTReader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">WKTReader</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_r</span> <span class="o">=</span> <span class="n">WKTReader</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_r</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;POINT(1 1)&#39;</span><span class="p">)</span>
+<span class="go">&lt;Point object at 0x103a88b50&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-writer-objects">
+<span id="writer-objects"></span><h3>Objets d’écriture<a class="headerlink" href="#writer-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Tous les objets d’écriture ont une méthode <code class="docutils literal notranslate"><span class="pre">write(geom)</span></code> qui renvoie la représentation WKB ou WKT de l’objet géométrique concerné. De plus, les objets <a class="reference internal" href="#django.contrib.gis.geos.WKBWriter" title="django.contrib.gis.geos.WKBWriter"><code class="xref py py-class docutils literal notranslate"><span class="pre">WKBWriter</span></code></a> ont aussi des propriétés pouvant être utilisées pour changer l’ordre des octets et d’inclure la valeur SRID (autrement dit, du contenu EWKB).</p>
+<dl class="class">
+<dt id="django.contrib.gis.geos.WKBWriter">
+<em class="property">class </em><code class="descname">WKBWriter</code>(<em>dim=2</em>)<a class="headerlink" href="#django.contrib.gis.geos.WKBWriter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">WKBWriter</span></code> offre le plus de contrôle sur le contenu produit. Par défaut, il renvoie du contenu WKB conforme OGC lorsqu’on appelle sa méthode <code class="docutils literal notranslate"><span class="pre">write</span></code>. Cependant, il possède des propriétés permettant la production de format EWKB, un sur-ensemble du standard WKB qui inclut des informations supplémentaires. Voir la documentation <a class="reference internal" href="#django.contrib.gis.geos.WKBWriter.outdim" title="django.contrib.gis.geos.WKBWriter.outdim"><code class="xref py py-attr docutils literal notranslate"><span class="pre">WKBWriter.outdim</span></code></a> pour plus de détails sur le paramètre <code class="docutils literal notranslate"><span class="pre">dim</span></code>.</p>
+<dl class="method">
+<dt id="django.contrib.gis.geos.WKBWriter.write">
+<code class="descname">write</code>(<em>geom</em>)<a class="headerlink" href="#django.contrib.gis.geos.WKBWriter.write" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie la représentation WKB de l’objet géométrique sous forme d’objet Python <code class="docutils literal notranslate"><span class="pre">buffer</span></code>. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKBWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span> <span class="o">=</span> <span class="n">WKBWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&lt;read-only buffer for 0x103a898f0, size -1, offset 0 at 0x103a89930&gt;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="django.contrib.gis.geos.WKBWriter.write_hex">
+<code class="descname">write_hex</code>(<em>geom</em>)<a class="headerlink" href="#django.contrib.gis.geos.WKBWriter.write_hex" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie la représentation WKB de l’objet géométrique sous forme hexadécimale. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKBWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span> <span class="o">=</span> <span class="n">WKBWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write_hex</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;0101000000000000000000F03F000000000000F03F&#39;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.WKBWriter.byteorder">
+<code class="descname">byteorder</code><a class="headerlink" href="#django.contrib.gis.geos.WKBWriter.byteorder" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette propriété peut être définie pour changer l’ordre des octets de la représentation géométrique.</p>
+<table class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Valeur <code class="docutils literal notranslate"><span class="pre">byteorder</span></code></th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0</td>
+<td>Gros-boutiste (big endian, compatible avec les systèmes RISC)</td>
+</tr>
+<tr class="row-odd"><td>1</td>
+<td>Petit-boutiste (little endian, compatible avec les systèmes x86)</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKBWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span> <span class="o">=</span> <span class="n">WKBWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write_hex</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;0101000000000000000000F03F000000000000F03F&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">byteorder</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="go">&#39;00000000013FF00000000000003FF0000000000000&#39;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.WKBWriter.outdim">
+<code class="descname">outdim</code><a class="headerlink" href="#django.contrib.gis.geos.WKBWriter.outdim" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette propriété peut être définie pour changer les dimensions du résultat de la représentation géométrique. En d’autres termes, si vous avez un objet 3D, définir cette valeur à 3 permet d’inclure la dimension Z dans le format WKB.</p>
+<table class="docutils">
+<colgroup>
+<col width="31%" />
+<col width="69%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Valeur <code class="docutils literal notranslate"><span class="pre">outdim</span></code></th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>2</td>
+<td>Par défaut, produit du contenu WKB en 2D.</td>
+</tr>
+<tr class="row-odd"><td>3</td>
+<td>Produit du contenu WKB en 3D.</td>
+</tr>
+</tbody>
+</table>
+<p>Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKBWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span> <span class="o">=</span> <span class="n">WKBWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">outdim</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write_hex</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span> <span class="c1"># By default, no Z value included:</span>
+<span class="go">&#39;0101000000000000000000F03F000000000000F03F&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">outdim</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># Tell writer to include Z values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write_hex</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;0101000080000000000000F03F000000000000F03F000000000000F03F&#39;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.WKBWriter.srid">
+<code class="descname">srid</code><a class="headerlink" href="#django.contrib.gis.geos.WKBWriter.srid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Définissez cette propriété avec une valeur booléenne pour indiquer si le code SRID de l’objet géométrique doit être inclus dans la représentation WKB. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKBWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span> <span class="o">=</span> <span class="n">WKBWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write_hex</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span> <span class="c1"># By default, no SRID included:</span>
+<span class="go">&#39;0101000000000000000000F03F000000000000F03F&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">srid</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># Tell writer to include SRID</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkb_w</span><span class="o">.</span><span class="n">write_hex</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;0101000020E6100000000000000000F03F000000000000F03F&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.gis.geos.WKTWriter">
+<em class="property">class </em><code class="descname">WKTWriter</code>(<em>dim=2</em>, <em>trim=False</em>, <em>precision=None</em>)<a class="headerlink" href="#django.contrib.gis.geos.WKTWriter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette classe permet de produire la représentation WKT d’un objet géométrique. Voir les attributs <a class="reference internal" href="#django.contrib.gis.geos.WKBWriter.outdim" title="django.contrib.gis.geos.WKBWriter.outdim"><code class="xref py py-attr docutils literal notranslate"><span class="pre">WKBWriter.outdim</span></code></a>, <a class="reference internal" href="#django.contrib.gis.geos.WKTWriter.trim" title="django.contrib.gis.geos.WKTWriter.trim"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trim</span></code></a> et <a class="reference internal" href="#django.contrib.gis.geos.WKTWriter.precision" title="django.contrib.gis.geos.WKTWriter.precision"><code class="xref py py-attr docutils literal notranslate"><span class="pre">precision</span></code></a> pour plus de détails sur les paramètres du constructeur.</p>
+<dl class="method">
+<dt id="django.contrib.gis.geos.WKTWriter.write">
+<code class="descname">write</code>(<em>geom</em>)<a class="headerlink" href="#django.contrib.gis.geos.WKTWriter.write" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie la représentation WKT de l’objet géométrique. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKTWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span> <span class="o">=</span> <span class="n">WKTWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;POINT (1.0000000000000000 1.0000000000000000)&#39;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.WKTWriter.outdim">
+<code class="descname">outdim</code><a class="headerlink" href="#django.contrib.gis.geos.WKTWriter.outdim" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Voir <a class="reference internal" href="#django.contrib.gis.geos.WKBWriter.outdim" title="django.contrib.gis.geos.WKBWriter.outdim"><code class="xref py py-attr docutils literal notranslate"><span class="pre">WKBWriter.outdim</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.WKTWriter.trim">
+<code class="descname">trim</code><a class="headerlink" href="#django.contrib.gis.geos.WKTWriter.trim" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette propriété est utilisée pour activer ou désactiver la suppression de décimales non nécessaires.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKTWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span> <span class="o">=</span> <span class="n">WKTWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">trim</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;POINT (1.0000000000000000 1.0000000000000000)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">trim</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;POINT (1 1)&#39;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.gis.geos.WKTWriter.precision">
+<code class="descname">precision</code><a class="headerlink" href="#django.contrib.gis.geos.WKTWriter.precision" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette propriété contrôle la précision de l’arrondi des coordonnées&nbsp;; si elle vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>, l’arrondi est désactivé.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">WKTWriter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mf">1.44</span><span class="p">,</span> <span class="mf">1.66</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span> <span class="o">=</span> <span class="n">WKTWriter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">wkt_w</span><span class="o">.</span><span class="n">precision</span><span class="p">)</span>
+<span class="go">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;POINT (1.4399999999999999 1.6599999999999999)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;POINT (1 2)&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wkt_w</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">pnt</span><span class="p">)</span>
+<span class="go">&#39;POINT (1.4 1.7)&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p class="rubric">Notes de bas de page</p>
+<table class="docutils footnote" frame="void" id="fnogc" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[1]</a></td><td><em>Voir</em> <a class="reference external" href="https://postgis.net/docs/using_postgis_dbmanagement.html#EWKB_EWKT">PostGIS EWKB, EWKT and Canonical Forms</a>, documentation de PostGIS au chap. 4.1.2.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="s-settings">
+<span id="settings"></span><h2>Réglages<a class="headerlink" href="#settings" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-geos-library-path">
+<span id="s-std:setting-GEOS_LIBRARY_PATH"></span><span id="geos-library-path"></span><span id="std:setting-GEOS_LIBRARY_PATH"></span><h3><code class="docutils literal notranslate"><span class="pre">GEOS_LIBRARY_PATH</span></code><a class="headerlink" href="#geos-library-path" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Une chaîne indiquant l’emplacement de la bibliothèque GEOS C. Ce réglage n’est généralement nécessaire que si la bibliothèque GEOS C n’est pas à un emplacement standard (par ex. <code class="docutils literal notranslate"><span class="pre">/home/bob/lib/libgeos_c.so</span></code>).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Le réglage doit contenir le chemin <em>complet</em> vers la bibliothèque partagée en <strong>C</strong>&nbsp;; en d’autres termes, il faut indiquer <code class="docutils literal notranslate"><span class="pre">libgeos_c.so</span></code>, et non pas <code class="docutils literal notranslate"><span class="pre">libgeos.so</span></code>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-exceptions">
+<span id="exceptions"></span><h2>Exceptions<a class="headerlink" href="#exceptions" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="exception">
+<dt id="django.contrib.gis.geos.GEOSException">
+<em class="property">exception </em><code class="descname">GEOSException</code><a class="headerlink" href="#django.contrib.gis.geos.GEOSException" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’exception GEOS de base, indiquant une erreur en lien avec GEOS.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API GEOS</a><ul>
+<li><a class="reference internal" href="#background">Contexte</a><ul>
+<li><a class="reference internal" href="#what-is-geos">Qu’est-ce que GEOS&nbsp;?</a></li>
+<li><a class="reference internal" href="#features">Fonctionnalités</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tutorial">Tutoriel</a><ul>
+<li><a class="reference internal" href="#creating-a-geometry">Création d’un objet géométrique</a></li>
+<li><a class="reference internal" href="#geometries-are-pythonic">Les objets géométriques sont «&nbsp;pythonesques&nbsp;»</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geometry-objects">Objets géométriques</a><ul>
+<li><a class="reference internal" href="#geosgeometry"><code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a><ul>
+<li><a class="reference internal" href="#properties">Propriétés</a></li>
+<li><a class="reference internal" href="#output-properties">Propriétés en sortie</a></li>
+<li><a class="reference internal" href="#spatial-predicate-methods">Méthodes de prédicats spatiaux</a></li>
+<li><a class="reference internal" href="#topological-methods">Méthodes topologiques</a></li>
+<li><a class="reference internal" href="#topological-properties">Propriétés topologiques</a></li>
+<li><a class="reference internal" href="#other-properties-methods">Autres propriétés et méthodes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a></li>
+<li><a class="reference internal" href="#linestring"><code class="docutils literal notranslate"><span class="pre">LineString</span></code></a></li>
+<li><a class="reference internal" href="#linearring"><code class="docutils literal notranslate"><span class="pre">LinearRing</span></code></a></li>
+<li><a class="reference internal" href="#polygon"><code class="docutils literal notranslate"><span class="pre">Polygon</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geometry-collections">Collections géométriques</a><ul>
+<li><a class="reference internal" href="#multipoint"><code class="docutils literal notranslate"><span class="pre">MultiPoint</span></code></a></li>
+<li><a class="reference internal" href="#multilinestring"><code class="docutils literal notranslate"><span class="pre">MultiLineString</span></code></a></li>
+<li><a class="reference internal" href="#multipolygon"><code class="docutils literal notranslate"><span class="pre">MultiPolygon</span></code></a></li>
+<li><a class="reference internal" href="#geometrycollection"><code class="docutils literal notranslate"><span class="pre">GeometryCollection</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prepared-geometries">Objets géométriques préparés</a><ul>
+<li><a class="reference internal" href="#preparedgeometry"><code class="docutils literal notranslate"><span class="pre">PreparedGeometry</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#geometry-factories">Fabrication d’objets géométriques</a></li>
+<li><a class="reference internal" href="#i-o-objects">Objets d’entrées/sorties</a><ul>
+<li><a class="reference internal" href="#reader-objects">Objets de lecture</a></li>
+<li><a class="reference internal" href="#writer-objects">Objets d’écriture</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#settings">Réglages</a><ul>
+<li><a class="reference internal" href="#geos-library-path"><code class="docutils literal notranslate"><span class="pre">GEOS_LIBRARY_PATH</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="measure.html"
+                        title="Chapitre précédent">Objets de mesure</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="gdal.html"
+                        title="Chapitre suivant">API de GDAL</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/gis/geos.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="measure.html" title="Objets de mesure">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="gdal.html" title="API de GDAL">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

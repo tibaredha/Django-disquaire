@@ -1,0 +1,682 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écriture de votre première application Django, 5ème partie &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Écriture de votre première application Django, 6ème partie" href="tutorial06.html" />
+    <link rel="prev" title="Écriture de votre première application Django, 4ème partie" href="tutorial04.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="tutorial04.html" title="Écriture de votre première application Django, 4ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="tutorial06.html" title="Écriture de votre première application Django, 6ème partie">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="intro-tutorial05">
+            
+  <div class="section" id="s-writing-your-first-django-app-part-5">
+<span id="writing-your-first-django-app-part-5"></span><h1>Écriture de votre première application Django, 5ème partie<a class="headerlink" href="#writing-your-first-django-app-part-5" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce tutoriel commence là où le <a class="reference internal" href="tutorial04.html"><span class="doc">tutoriel 4</span></a> s’est achevé. Nous avons construit une application Web de sondage et nous allons maintenant créer quelques tests automatisés pour cette application.</p>
+<div class="admonition-where-to-get-help admonition">
+<p class="first admonition-title">Où obtenir de l’aide&nbsp;:</p>
+<p class="last">Si vous rencontrez des problèmes dans le parcours de ce tutoriel, rendez-vous dans la section <a class="reference internal" href="../faq/help.html"><span class="doc">Obtenir de l’aide</span></a> de la FAQ.</p>
+</div>
+<div class="section" id="s-introducing-automated-testing">
+<span id="introducing-automated-testing"></span><h2>Introduction aux tests automatisés<a class="headerlink" href="#introducing-automated-testing" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-what-are-automated-tests">
+<span id="what-are-automated-tests"></span><h3>Que sont les tests automatisés&nbsp;?<a class="headerlink" href="#what-are-automated-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les tests sont des routines qui vérifient le fonctionnement de votre code.</p>
+<p>Les tests peuvent se faire à différents niveaux. Certains tests s’appliquent à un petit détail (<em>est-ce que tel modèle renvoie les valeurs attendues&nbsp;?</em>), alors que d’autres examinent le fonctionnement global du logiciel (<em>est-ce qu’une suite d’actions d’un utilisateur sur le site produit le résultat désiré&nbsp;?</em>). C’est le même genre de test qui a été pratiqué précédemment dans le <a class="reference internal" href="tutorial02.html"><span class="doc">tutoriel 2</span></a>, en utilisant le <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a> pour examiner le comportement d’une méthode ou en lançant l’application et en saisissant des données pour contrôler son comportement.</p>
+<p>Ce qui est différent dans les tests <em>automatisés</em>, c’est que le travail du test est fait pour vous par le système. Vous créez une seule fois un ensemble de tests, puis au fur et à mesure des modifications de votre application, vous pouvez contrôler que votre code fonctionne toujours tel qu’il devrait, sans devoir effectuer des tests manuels fastidieux.</p>
+</div>
+<div class="section" id="s-why-you-need-to-create-tests">
+<span id="why-you-need-to-create-tests"></span><h3>Pourquoi faut-il créer des tests<a class="headerlink" href="#why-you-need-to-create-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ainsi donc, pourquoi créer des tests, et pourquoi maintenant&nbsp;?</p>
+<p>Vous pouvez penser que vous avez déjà assez de chats à fouetter en apprenant Python/Django et que rajouter encore une nouvelle chose à apprendre et à faire est superflu et inutile. Après tout, notre application de sondage fonctionne maintenant à satisfaction&nbsp;; se préoccuper encore de créer des tests automatisés ne va pas l’améliorer. Si la création de l’application de sondage est la dernière œuvre de programmation Django que vous entreprenez, alors oui, vous pouvez vous passer d’apprendre à créer des tests automatisés. Mais si ce n’est pas le cas, alors c’est maintenant l’occasion d’apprendre cela.</p>
+<div class="section" id="s-tests-will-save-you-time">
+<span id="tests-will-save-you-time"></span><h4>Les tests vous feront gagner du temps<a class="headerlink" href="#tests-will-save-you-time" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Jusqu’à un certain point, «&nbsp;contrôler que cela fonctionne apparemment&nbsp;» est un test satisfaisant. Dans une application plus sophistiquée, vous pouvez rencontrer des dizaines d’interactions complexes entre les différents composants.</p>
+<p>Une modification dans n’importe lequel de ces composants pourrait avoir des conséquences inattendues sur le comportement de l’application. Contrôler que «&nbsp;cela semble marcher&nbsp;» pourrait signifier la vérification de vingt combinaisons différentes de données de test pour être sûr que vous n’avez rien cassé - vous avez certainement mieux à faire.</p>
+<p>C’est particulièrement vrai alors que des tests automatisés pourraient faire cela pour vous en quelques secondes. Si quelque chose se passe mal, les tests vous aideront à identifier le code qui produit le comportement inapproprié.</p>
+<p>Parfois, le fait de laisser de côté votre productif et créatif travail de programmation pour affronter la tâche ingrate et peu motivante de l’écriture de tests, peut ressembler à une corvée, spécialement lorsque vous savez que votre code fonctionne correctement.</p>
+<p>Cependant, l’écriture de tests est bien plus rentable que de passer des heures à tester manuellement votre application ou à essayer d’identifier la cause d’un problème récemment découvert.</p>
+</div>
+<div class="section" id="s-tests-don-t-just-identify-problems-they-prevent-them">
+<span id="tests-don-t-just-identify-problems-they-prevent-them"></span><h4>Les tests ne font pas qu’identifier les problèmes, ils les préviennent<a class="headerlink" href="#tests-don-t-just-identify-problems-they-prevent-them" title="Lien permanent vers ce titre">¶</a></h4>
+<p>C’est une erreur de penser que les tests ne sont que l’aspect négatif du développement.</p>
+<p>Sans tests, le but ou le comportement attendu d’une application pourrait rester obscur. Même quand il s’agit de votre propre code, vous vous retrouverez parfois à fouiner un peu partout pour retrouver ce qu’il fait au juste.</p>
+<p>Les tests changent cela&nbsp;; ils éclairent votre code de l’intérieur et lorsque quelque chose va de travers, ils mettent en relief la partie qui coince, <em>même lorsque vous n’avez même pas réalisé que quelque chose n’allait pas</em>.</p>
+</div>
+<div class="section" id="s-tests-make-your-code-more-attractive">
+<span id="tests-make-your-code-more-attractive"></span><h4>Les tests rendent votre code plus attractif<a class="headerlink" href="#tests-make-your-code-more-attractive" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Vous avez peut-être créé un bout de logiciel extraordinaire, mais vous constaterez que beaucoup d’autres développeurs vont refuser de l’examiner parce qu’il ne contient pas de tests&nbsp;; sans tests, ils ne lui font pas confiance. Jacob Kaplan-Moss, l’un des développeurs initiaux de Django, a dit&nbsp;: «&nbsp;Du code sans tests est par définition du code cassé&nbsp;».</p>
+<p>Le fait que d’autres développeurs veulent voir des tests dans votre logiciel avant de le prendre au sérieux est une raison supplémentaire de commencer l’écriture de tests.</p>
+</div>
+<div class="section" id="s-tests-help-teams-work-together">
+<span id="tests-help-teams-work-together"></span><h4>Les tests aident les équipes à travailler ensemble<a class="headerlink" href="#tests-help-teams-work-together" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les points précédents sont écrits du point de vue d’un développeur isolé maintenant une application. Les applications complexes sont maintenues par des équipes. Les tests garantissent que les collègues ne cassent votre code par mégarde (et aussi que vous ne cassiez le leur sans le vouloir). Si vous voulez gagner votre vie en tant que programmeur Django, vous devez être bon dans l’écriture de tests&nbsp;!</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-basic-testing-strategies">
+<span id="basic-testing-strategies"></span><h2>Stratégies élémentaires pour les tests<a class="headerlink" href="#basic-testing-strategies" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il existe de nombreuses approches pour écrire des tests.</p>
+<p>Certains programmeurs suivent une discipline appelée «&nbsp;développement piloté par les tests&nbsp;» (test-driven development &lt;http://fr.wikipedia.org/wiki/Test_Driven_Development&gt;). Ils écrivent les tests avant de commencer à écrire le code. Cela peut paraître illogique, mais c’est un processus très semblable à ce que la plupart des gens font&nbsp;: ils décrivent un problème, puis ils écrivent du code pour le résoudre. Le développement piloté par les tests formalise le problème dans un cas de test Python.</p>
+<p>Plus souvent, un débutant dans les tests va créer du code, puis il décidera plus tard qu’il devrait ajouter des tests. Il aurait peut-être été préférable d’écrire des tests plus tôt, mais il n’est jamais trop tard pour commencer.</p>
+<p>Il est parfois difficile de trouver où commencer en écrivant des tests. Si vous avez écrit plusieurs milliers de lignes de code Python, choisir quoi tester n’est pas simple. Dans un tel cas, il peut être utile d’écrire le premier test au moment où vous effectuez votre prochaine modification, soit pour ajouter une nouvelle fonctionnalité ou pour corriger un bogue.</p>
+<p>Entrons dans le vif du sujet.</p>
+</div>
+<div class="section" id="s-writing-our-first-test">
+<span id="writing-our-first-test"></span><h2>Écriture du premier test<a class="headerlink" href="#writing-our-first-test" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-we-identify-a-bug">
+<span id="we-identify-a-bug"></span><h3>Un bogue a été trouvé<a class="headerlink" href="#we-identify-a-bug" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Heureusement, il y a un petit bogue dans l’application <code class="docutils literal notranslate"><span class="pre">polls</span></code>, tout prêt à être corrigé&nbsp;: la méthode <code class="docutils literal notranslate"><span class="pre">Question.was_published_recently()</span></code> renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si l’objet <code class="docutils literal notranslate"><span class="pre">Question</span></code> a été publié durant le jour précédent (ce qui est correct), mais également si le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> de <code class="docutils literal notranslate"><span class="pre">Question</span></code> est dans le futur (ce qui n’est évidemment pas juste).</p>
+<p>Confirmez l’existence du bogue en utilisant le <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a> pour contrôler la méthode sur une question dont la date se situe dans le futur :</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py shell
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py shell
+</pre></div>
+</section>
+</div>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">polls.models</span> <span class="kn">import</span> <span class="n">Question</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a Question instance with pub_date 30 days in the future</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">future_question</span> <span class="o">=</span> <span class="n">Question</span><span class="p">(</span><span class="n">pub_date</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># was it published recently?</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">future_question</span><span class="o">.</span><span class="n">was_published_recently</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Étant donné que ce qui est dans le futur n’est pas «&nbsp;récent&nbsp;», c’est clairement une erreur.</p>
+</div>
+<div class="section" id="s-create-a-test-to-expose-the-bug">
+<span id="create-a-test-to-expose-the-bug"></span><h3>Création d’un test pour révéler le bogue<a class="headerlink" href="#create-a-test-to-expose-the-bug" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Ce que nous venons de faire dans le <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a> pour tester le problème est exactement ce que nous pouvons faire dans un test automatisé&nbsp;; transformons cette opération en un test automatisé.</p>
+<p>Un endroit conventionnel pour placer les tests d’une application est le fichier <code class="docutils literal notranslate"><span class="pre">tests.py</span></code> dans le répertoire de l’application. Le système de test va automatiquement trouver les tests dans tout fichier dont le nom commence par <code class="docutils literal notranslate"><span class="pre">test</span></code>.</p>
+<p>Placez ce qui suit dans le fichier <code class="docutils literal notranslate"><span class="pre">tests.py</span></code> de l’application <code class="docutils literal notranslate"><span class="pre">polls</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">polls/tests.py</span><a class="headerlink" href="#id1" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+
+
+<span class="k">class</span> <span class="nc">QuestionModelTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_was_published_recently_with_future_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        was_published_recently() returns False for questions whose pub_date</span>
+<span class="sd">        is in the future.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">future_question</span> <span class="o">=</span> <span class="n">Question</span><span class="p">(</span><span class="n">pub_date</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIs</span><span class="p">(</span><span class="n">future_question</span><span class="o">.</span><span class="n">was_published_recently</span><span class="p">(),</span> <span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Nous venons ici de créer une sous-classe de <a class="reference internal" href="../topics/testing/tools.html#django.test.TestCase" title="django.test.TestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.test.TestCase</span></code></a> contenant une méthode qui crée une instance <code class="docutils literal notranslate"><span class="pre">Question</span></code> en renseignant <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> dans le futur. Nous vérifions ensuite le résultat de <code class="docutils literal notranslate"><span class="pre">was_published_recently()</span></code> qui <em>devrait</em> valoir <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</div>
+<div class="section" id="s-running-tests">
+<span id="running-tests"></span><h3>Lancement des tests<a class="headerlink" href="#running-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Dans le terminal, nous pouvons lancer notre test&nbsp;:</p>
+<div class="console-block" id="console-block-1">
+<input class="c-tab-unix" id="c-tab-1-unix" type="radio" name="console-1" checked>
+<label for="c-tab-1-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-1-win" type="radio" name="console-1">
+<label for="c-tab-1-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-1-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py <span class="nb">test</span> polls
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-1-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py test polls
+</pre></div>
+</section>
+</div>
+<p>et vous devriez voir quelque chose comme&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Creating</span> <span class="n">test</span> <span class="n">database</span> <span class="k">for</span> <span class="n">alias</span> <span class="s1">&#39;default&#39;</span><span class="o">...</span>
+<span class="n">System</span> <span class="n">check</span> <span class="n">identified</span> <span class="n">no</span> <span class="n">issues</span> <span class="p">(</span><span class="mi">0</span> <span class="n">silenced</span><span class="p">)</span><span class="o">.</span>
+<span class="n">F</span>
+<span class="o">======================================================================</span>
+<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_was_published_recently_with_future_question</span> <span class="p">(</span><span class="n">polls</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">QuestionModelTests</span><span class="p">)</span>
+<span class="o">----------------------------------------------------------------------</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;/path/to/mysite/polls/tests.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">16</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_was_published_recently_with_future_question</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIs</span><span class="p">(</span><span class="n">future_question</span><span class="o">.</span><span class="n">was_published_recently</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
+<span class="ne">AssertionError</span><span class="p">:</span> <span class="kc">True</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span>
+
+<span class="o">----------------------------------------------------------------------</span>
+<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
+
+<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Destroying</span> <span class="n">test</span> <span class="n">database</span> <span class="k">for</span> <span class="n">alias</span> <span class="s1">&#39;default&#39;</span><span class="o">...</span>
+</pre></div>
+</div>
+<div class="admonition-different-error admonition">
+<p class="first admonition-title">Erreur différente ?</p>
+<p class="last">Si vous obtenez ici une erreur  <code class="docutils literal notranslate"><span class="pre">NameError</span></code>, vous avez peut-être manqué une étape à la <a class="reference internal" href="tutorial02.html#tutorial02-import-timezone"><span class="std std-ref">partie 2 du tutoriel</span></a> où des importations de <code class="docutils literal notranslate"><span class="pre">datetime</span></code> et de <code class="docutils literal notranslate"><span class="pre">timezone</span></code> ont été ajoutées à <code class="docutils literal notranslate"><span class="pre">polls/models.py</span></code>. Recopiez ces importations et essayez de relancer les tests.</p>
+</div>
+<p>Voici ce qui s’est passé&nbsp;:</p>
+<ul class="simple">
+<li>La commande <code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">test</span> <span class="pre">polls</span></code> a cherché des tests dans l’application <code class="docutils literal notranslate"><span class="pre">polls</span></code> ;</li>
+<li>elle a trouvé une sous-classe de <a class="reference internal" href="../topics/testing/tools.html#django.test.TestCase" title="django.test.TestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.test.TestCase</span></code></a>&nbsp;;</li>
+<li>elle a créé une base de données spéciale uniquement pour les tests&nbsp;;</li>
+<li>elle a recherché des méthodes de test, celles dont le nom commence par <code class="docutils literal notranslate"><span class="pre">test</span></code> ;</li>
+<li>dans <code class="docutils literal notranslate"><span class="pre">test_was_published_recently_with_future_question</span></code>, elle a créé une instance <code class="docutils literal notranslate"><span class="pre">Question</span></code> dont le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est 30 jours dans le futur&nbsp;;</li>
+<li>… et à l’aide de la méthode <code class="docutils literal notranslate"><span class="pre">assertIs()</span></code>, elle a découvert que sa méthode <code class="docutils literal notranslate"><span class="pre">was_published_recently()</span></code> renvoyait <code class="docutils literal notranslate"><span class="pre">True</span></code>, alors que nous souhaitions qu’elle renvoie <code class="docutils literal notranslate"><span class="pre">False</span></code>.</li>
+</ul>
+<p>Le test nous indique le nom du test qui a échoué ainsi que la ligne à laquelle l’échec s’est produit.</p>
+</div>
+<div class="section" id="s-fixing-the-bug">
+<span id="fixing-the-bug"></span><h3>Correction du bogue<a class="headerlink" href="#fixing-the-bug" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Nous connaissons déjà le problème&nbsp;: <code class="docutils literal notranslate"><span class="pre">Question.was_published_recently()</span></code> devrait renvoyer <code class="docutils literal notranslate"><span class="pre">False</span></code> si sa <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est dans le futur. Corrigez la méthode dans <code class="docutils literal notranslate"><span class="pre">models.py</span></code> afin qu’elle ne renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> que si la date est aussi dans le passé&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">polls/models.py</span><a class="headerlink" href="#id2" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">was_published_recently</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">&lt;=</span> <span class="n">now</span>
+</pre></div>
+</div>
+</div>
+<p>puis lancez à nouveau le test&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Creating</span> <span class="n">test</span> <span class="n">database</span> <span class="k">for</span> <span class="n">alias</span> <span class="s1">&#39;default&#39;</span><span class="o">...</span>
+<span class="n">System</span> <span class="n">check</span> <span class="n">identified</span> <span class="n">no</span> <span class="n">issues</span> <span class="p">(</span><span class="mi">0</span> <span class="n">silenced</span><span class="p">)</span><span class="o">.</span>
+<span class="o">.</span>
+<span class="o">----------------------------------------------------------------------</span>
+<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
+
+<span class="n">OK</span>
+<span class="n">Destroying</span> <span class="n">test</span> <span class="n">database</span> <span class="k">for</span> <span class="n">alias</span> <span class="s1">&#39;default&#39;</span><span class="o">...</span>
+</pre></div>
+</div>
+<p>Après avoir identifié un bogue, nous avons écrit un test qui le révèle et nous avons corrigé l’erreur dans le code pour que notre test réussisse.</p>
+<p>Bien d’autres choses pourraient aller de travers avec notre application à l’avenir, mais nous pouvons être sûrs que nous n’allons pas réintroduire cette erreur par mégarde, car en lançant le test, nous serons immédiatement avertis. Nous pouvons considérer que cette petite partie de l’application est assurée de rester fonctionnelle pour toujours.</p>
+</div>
+<div class="section" id="s-more-comprehensive-tests">
+<span id="more-comprehensive-tests"></span><h3>Des tests plus exhaustifs<a class="headerlink" href="#more-comprehensive-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pendant que nous y sommes, nous pouvons assurer un peu plus le fonctionnement de la méthode <code class="docutils literal notranslate"><span class="pre">was_published_recently()</span></code> ; en fait, il serait réellement embarrassant si en corrigeant un bogue, nous en avions introduit un autre.</p>
+<p>Ajoutez deux méthodes de test supplémentaires dans la même classe pour tester le comportement de la méthode de manière plus complète&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">polls/tests.py</span><a class="headerlink" href="#id3" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_was_published_recently_with_old_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    was_published_recently() returns False for questions whose pub_date</span>
+<span class="sd">    is older than 1 day.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">old_question</span> <span class="o">=</span> <span class="n">Question</span><span class="p">(</span><span class="n">pub_date</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIs</span><span class="p">(</span><span class="n">old_question</span><span class="o">.</span><span class="n">was_published_recently</span><span class="p">(),</span> <span class="bp">False</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">test_was_published_recently_with_recent_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    was_published_recently() returns True for questions whose pub_date</span>
+<span class="sd">    is within the last day.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">minutes</span><span class="o">=</span><span class="mi">59</span><span class="p">,</span> <span class="n">seconds</span><span class="o">=</span><span class="mi">59</span><span class="p">)</span>
+    <span class="n">recent_question</span> <span class="o">=</span> <span class="n">Question</span><span class="p">(</span><span class="n">pub_date</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIs</span><span class="p">(</span><span class="n">recent_question</span><span class="o">.</span><span class="n">was_published_recently</span><span class="p">(),</span> <span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Et maintenant nous disposons de trois tests qui confirment que <code class="docutils literal notranslate"><span class="pre">Question.was_published_recently()</span></code> renvoie des valeurs correctes pour des questions passées, récentes et futures.</p>
+<p>Encore une fois, <code class="docutils literal notranslate"><span class="pre">polls</span></code> est une application minimale, mais quelle que soit la complexité de son évolution ou le code avec lequel elle devra interagir, nous avons maintenant une certaine garantie que la méthode pour laquelle nous avons écrit des tests se comportera de façon cohérente.</p>
+</div>
+</div>
+<div class="section" id="s-test-a-view">
+<span id="test-a-view"></span><h2>Test d’une vue<a class="headerlink" href="#test-a-view" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’application de sondage est peu regardante&nbsp;: elle publiera toute question, y compris celles dont le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est situé dans le futur. C’est à améliorer. Définir <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> dans le futur devrait signifier que la question sera publiée à ce moment, mais qu’elle ne doit pas être visible avant cela.</p>
+<div class="section" id="s-a-test-for-a-view">
+<span id="a-test-for-a-view"></span><h3>Un test pour une vue<a class="headerlink" href="#a-test-for-a-view" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En corrigeant le bogue ci-dessus, nous avons d’abord écrit le test, puis le code pour le corriger. En fait, c’était un exemple de développement piloté par les tests, mais l’ordre dans lequel se font les choses n’est pas fondamental.</p>
+<p>Dans notre premier test, nous nous sommes concentrés étroitement sur le fonctionnement interne du code. Pour ce test, nous voulons contrôler son comportement tel qu’il se déroulerait avec un utilisateur depuis son navigateur.</p>
+<p>Avant d’essayer de corriger quoi que ce soit, examinons les outils à notre disposition.</p>
+</div>
+<div class="section" id="s-the-django-test-client">
+<span id="the-django-test-client"></span><h3>Le client de test de Django<a class="headerlink" href="#the-django-test-client" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django fournit un <a class="reference internal" href="../topics/testing/tools.html#django.test.Client" title="django.test.Client"><code class="xref py py-class docutils literal notranslate"><span class="pre">Client</span></code></a> de test pour simuler l’interaction d’un utilisateur avec le code au niveau des vues. On peut l’utiliser dans <code class="docutils literal notranslate"><span class="pre">tests.py</span></code> ou même dans le <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a>.</p>
+<p>Nous commencerons encore une fois par le <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a>, où nous devons faire quelques opérations qui ne seront pas nécessaires dans <code class="docutils literal notranslate"><span class="pre">tests.py</span></code>. La première est de configurer l’environnement de test dans le <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a>:</p>
+<div class="console-block" id="console-block-2">
+<input class="c-tab-unix" id="c-tab-2-unix" type="radio" name="console-2" checked>
+<label for="c-tab-2-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-2-win" type="radio" name="console-2">
+<label for="c-tab-2-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-2-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py shell
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-2-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py shell
+</pre></div>
+</section>
+</div>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.test.utils</span> <span class="kn">import</span> <span class="n">setup_test_environment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">setup_test_environment</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../topics/testing/advanced.html#django.test.utils.setup_test_environment" title="django.test.utils.setup_test_environment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_test_environment()</span></code></a> installe un moteur de rendu de gabarit qui va nous permettre d’examiner certains attributs supplémentaires des réponses, tels que <code class="docutils literal notranslate"><span class="pre">response.context</span></code> qui n’est normalement pas disponible. Notez que cette méthode <em>ne crée pas</em> de base de données de test, ce qui signifie que ce qui suit va être appliqué à la base de données existante et que par conséquent, le résultat peut légèrement différer en fonction des questions que vous avez déjà créées. Si le réglage <code class="docutils literal notranslate"><span class="pre">TIME_ZONE</span></code> dans <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> n’est pas correct, il se peut que certains résultats soient faussés. Si vous n’avez pas pensé à le régler précédemment, vérifiez-le avant de continuer.</p>
+<p>Ensuite, il est nécessaire d’importer la classe Client de test (plus loin dans <code class="docutils literal notranslate"><span class="pre">tests.py</span></code>, nous utiliserons la classe <a class="reference internal" href="../topics/testing/tools.html#django.test.TestCase" title="django.test.TestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.test.TestCase</span></code></a> qui apporte son propre client, ce qui évitera cette étape)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.test</span> <span class="k">import</span> <span class="n">Client</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create an instance of the client for our use</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Ceci fait, nous pouvons demander au client de faire certaines tâches pour nous&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># get a response from &#39;/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="go">Not Found: /</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># we should expect a 404 from that address; if you instead see an</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># &quot;Invalid HTTP_HOST header&quot; error and a 400 response, you probably</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># omitted the setup_test_environment() call described earlier.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
+<span class="go">404</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># on the other hand we should expect to find something at &#39;/polls/&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># we&#39;ll use &#39;reverse()&#39; rather than a hardcoded URL</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="k">import</span> <span class="n">reverse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:index&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span>
+<span class="go">200</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">content</span>
+<span class="go">b&#39;\n    &lt;ul&gt;\n    \n        &lt;li&gt;&lt;a href=&quot;/polls/1/&quot;&gt;What&amp;#x27;s up?&lt;/a&gt;&lt;/li&gt;\n    \n    &lt;/ul&gt;\n\n&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">response</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">]</span>
+<span class="go">&lt;QuerySet [&lt;Question: What&#39;s up?&gt;]&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-improving-our-view">
+<span id="improving-our-view"></span><h3>Amélioration de la vue<a class="headerlink" href="#improving-our-view" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La liste des sondages montre aussi les sondages pas encore publiés (c’est-à-dire ceux dont le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est dans le futur). Corrigeons cela.</p>
+<p>Dans le <a class="reference internal" href="tutorial04.html"><span class="doc">tutoriel 4</span></a>, nous avons introduit une vue basée sur la classe <a class="reference internal" href="../ref/class-based-views/generic-display.html#django.views.generic.list.ListView" title="django.views.generic.list.ListView"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListView</span></code></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">IndexView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">ListView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;polls/index.html&#39;</span>
+    <span class="n">context_object_name</span> <span class="o">=</span> <span class="s1">&#39;latest_question_list&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the last five published questions.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-pub_date&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Nous devons corriger la méthode <code class="docutils literal notranslate"><span class="pre">get_queryset()</span></code> pour qu’elle vérifie aussi la date en la comparant avec <code class="docutils literal notranslate"><span class="pre">timezone.now()</span></code>. Nous devons d’abord ajouter une importation&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id5" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="kn">import</span> <span class="n">timezone</span>
+</pre></div>
+</div>
+</div>
+<p>puis nous devons corriger la méthode <code class="docutils literal notranslate"><span class="pre">get_queryset</span></code> de cette façon&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id6" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the last five published questions (not including those set to be</span>
+<span class="sd">    published in the future).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+        <span class="n">pub_date__lte</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-pub_date&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Question.objects.filter(pub_date__lte=timezone.now())</span></code> renvoie un queryset contenant les questions dont le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est plus petit ou égal (c’est-à-dire plus ancien ou égal) à <code class="docutils literal notranslate"><span class="pre">timezone.now</span></code>.</p>
+</div>
+<div class="section" id="s-testing-our-new-view">
+<span id="testing-our-new-view"></span><h3>Test de la nouvelle vue<a class="headerlink" href="#testing-our-new-view" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez maintenant vérifier vous-même que tout fonctionne comme prévu en lançant <code class="docutils literal notranslate"><span class="pre">runserver</span></code> et en accédant au site depuis votre navigateur. Créez des questions avec des dates dans le passé et dans le futur et vérifiez que seuls celles qui ont été publiées apparaissent dans la liste. Mais vous ne voulez pas faire ce travail de test manuel <em>chaque fois que vous effectuez une modification qui pourrait affecter ce comportement</em>, créons donc aussi un test basé sur le contenu de notre session <a class="reference internal" href="../ref/django-admin.html#django-admin-shell"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">shell</span></code></a> précédente.</p>
+<p>Ajoutez ce qui suit à <code class="docutils literal notranslate"><span class="pre">polls/tests.py</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">polls/tests.py</span><a class="headerlink" href="#id7" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">reverse</span>
+</pre></div>
+</div>
+</div>
+<p>et nous allons créer une fonction raccourci pour créer des questions, ainsi qu’une nouvelle classe de test&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">polls/tests.py</span><a class="headerlink" href="#id8" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="p">,</span> <span class="n">days</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a question with the given `question_text` and published the</span>
+<span class="sd">    given number of `days` offset to now (negative for questions published</span>
+<span class="sd">    in the past, positive for questions that have yet to be published).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">days</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="n">question_text</span><span class="p">,</span> <span class="n">pub_date</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">QuestionIndexViewTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_no_questions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If no questions exist, an appropriate message is displayed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:index&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertContains</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s2">&quot;No polls are available.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertQuerysetEqual</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">],</span> <span class="p">[])</span>
+
+    <span class="k">def</span> <span class="nf">test_past_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Questions with a pub_date in the past are displayed on the</span>
+<span class="sd">        index page.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s2">&quot;Past question.&quot;</span><span class="p">,</span> <span class="n">days</span><span class="o">=-</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:index&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertQuerysetEqual</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;&lt;Question: Past question.&gt;&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_future_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Questions with a pub_date in the future aren&#39;t displayed on</span>
+<span class="sd">        the index page.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s2">&quot;Future question.&quot;</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:index&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertContains</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s2">&quot;No polls are available.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertQuerysetEqual</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">],</span> <span class="p">[])</span>
+
+    <span class="k">def</span> <span class="nf">test_future_question_and_past_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Even if both past and future questions exist, only past questions</span>
+<span class="sd">        are displayed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s2">&quot;Past question.&quot;</span><span class="p">,</span> <span class="n">days</span><span class="o">=-</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s2">&quot;Future question.&quot;</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:index&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertQuerysetEqual</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;&lt;Question: Past question.&gt;&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_two_past_questions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The questions index page may display multiple questions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s2">&quot;Past question 1.&quot;</span><span class="p">,</span> <span class="n">days</span><span class="o">=-</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s2">&quot;Past question 2.&quot;</span><span class="p">,</span> <span class="n">days</span><span class="o">=-</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:index&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertQuerysetEqual</span><span class="p">(</span>
+            <span class="n">response</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s1">&#39;&lt;Question: Past question 2.&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;Question: Past question 1.&gt;&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Examinons plus en détails certaines de ces méthodes.</p>
+<p>Tout d’abord, la fonction raccourci <code class="docutils literal notranslate"><span class="pre">create_question</span></code> permet d’éviter de répéter plusieurs fois le processus de création de questions.</p>
+<p><code class="docutils literal notranslate"><span class="pre">test_no_questions</span></code> ne crée aucune question, mais vérifie le message&nbsp;: «&nbsp;No polls are available.&nbsp;» et que la liste <code class="docutils literal notranslate"><span class="pre">latest_question_list</span></code> est vide. Notez que la classe <a class="reference internal" href="../topics/testing/tools.html#django.test.TestCase" title="django.test.TestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.test.TestCase</span></code></a> fournit quelques méthodes d’assertion supplémentaires. Dans ces exemples, nous utilisons <a class="reference internal" href="../topics/testing/tools.html#django.test.SimpleTestCase.assertContains" title="django.test.SimpleTestCase.assertContains"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assertContains()</span></code></a> et <a class="reference internal" href="../topics/testing/tools.html#django.test.TransactionTestCase.assertQuerysetEqual" title="django.test.TransactionTestCase.assertQuerysetEqual"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assertQuerysetEqual()</span></code></a>.</p>
+<p>Dans <code class="docutils literal notranslate"><span class="pre">test_past_question</span></code>, nous créons une question et vérifions qu’elle apparaît dans la liste.</p>
+<p>Dans <code class="docutils literal notranslate"><span class="pre">test_future_question</span></code>, nous créons une question avec <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> dans le futur. La base de données est réinitialisée pour chaque méthode de test, ce qui explique que la première question n’est plus disponible et que la page d’index n’affiche plus de question.</p>
+<p>Et ainsi de suite. En pratique, nous utilisons les tests pour raconter des histoires d’interactions entre des saisies dans l’interface d’administration et d’un utilisateur parcourant le site, en contrôlant qu’à chaque état ou changement d’état du système, les résultats attendus apparaissent.</p>
+</div>
+<div class="section" id="s-testing-the-detailview">
+<span id="testing-the-detailview"></span><h3>Test de  <code class="docutils literal notranslate"><span class="pre">DetailView</span></code><a class="headerlink" href="#testing-the-detailview" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le code marche bien maintenant. Cependant, même si les questions futures n’apparaissent pas sur la page <em>index</em>, les utilisateurs peuvent toujours y accéder s’ils savent ou devinent la bonne URL. Nous avons donc besoin d’une contrainte semblable dans <code class="docutils literal notranslate"><span class="pre">DetailView</span></code>&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id9" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DetailView</span><span class="p">(</span><span class="n">generic</span><span class="o">.</span><span class="n">DetailView</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Excludes any questions that aren&#39;t published yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">pub_date__lte</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<p>Il est ensuite nécessaire d’ajouter quelques tests, pour contrôler qu’une question dont  <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est dans le passé peut être affichée, mais que si <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est dans le futur, elle ne le sera pas&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">polls/tests.py</span><a class="headerlink" href="#id10" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">QuestionDetailViewTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_future_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The detail view of a question with a pub_date in the future</span>
+<span class="sd">        returns a 404 not found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">future_question</span> <span class="o">=</span> <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s1">&#39;Future question.&#39;</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:detail&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">future_question</span><span class="o">.</span><span class="n">id</span><span class="p">,))</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">404</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_past_question</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The detail view of a question with a pub_date in the past</span>
+<span class="sd">        displays the question&#39;s text.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">past_question</span> <span class="o">=</span> <span class="n">create_question</span><span class="p">(</span><span class="n">question_text</span><span class="o">=</span><span class="s1">&#39;Past Question.&#39;</span><span class="p">,</span> <span class="n">days</span><span class="o">=-</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="s1">&#39;polls:detail&#39;</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">past_question</span><span class="o">.</span><span class="n">id</span><span class="p">,))</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertContains</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">past_question</span><span class="o">.</span><span class="n">question_text</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-ideas-for-more-tests">
+<span id="ideas-for-more-tests"></span><h3>Idées pour d’autres tests<a class="headerlink" href="#ideas-for-more-tests" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Nous devrions ajouter une méthode <code class="docutils literal notranslate"><span class="pre">get_queryset</span></code> similaire à <code class="docutils literal notranslate"><span class="pre">ResultsView</span></code> et créer une nouvelle classe de test pour cette vue. Elle sera très semblable à celle que nous venons de créer&nbsp;; en fait, il y aura beaucoup de répétition.</p>
+<p>Nous pourrions aussi améliorer notre application d’autres manières, en ajoutant des tests au fur et à mesure. Par exemple, il est stupide de pouvoir publier des questions sur le site sans choix. Nos vues pourraient donc vérifier cela et exclure de telles questions. Les tests créeraient une question sans choix et testeraient qu’elle n’est pas publiée&nbsp;; de même, il s’agirait de créer une question <em>avec</em> des choix et tester qu’elle <em>est</em> bien publiée.</p>
+<p>Peut-être que les utilisateurs connectés dans l’interface d’administration pourraient être autorisés à voir les questions non publiées, mais pas les visiteurs ordinaires. C’est toujours le même principe, tout ce qui est ajouté au logiciel devrait être accompagné par un test, que ce soit en écrivant d’abord le test puis en écrivant le code pour réussir le test, ou en travaillant d’abord sur la logique du code et en écrivant ensuite le test pour prouver le bon fonctionnement.</p>
+<p>À un certain stade, vous allez regarder vos tests et vous demander si votre code ne souffre pas de surabondance de tests, ce qui nous amène à&nbsp;:</p>
+</div>
+</div>
+<div class="section" id="s-when-testing-more-is-better">
+<span id="when-testing-more-is-better"></span><h2>Pour les tests, abondance de biens ne nuit pas<a class="headerlink" href="#when-testing-more-is-better" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En apparence, les tests peuvent avoir l’air de croître sans limites. À ce rythme, il y aura bientôt plus de code dans nos tests que dans notre application&nbsp;; et la répétition est laide, comparée à la brièveté élégante du reste du code.</p>
+<p><strong>Ça n’a aucune importance</strong>. Laissez-les grandir. Dans la plupart des cas, vous pouvez écrire un test une fois et ne plus y penser. Il continuera à jouer son précieux rôle tout au long du développement de votre programme.</p>
+<p>Les tests devront parfois être mis à jour. Supposons que nous corrigeons nos vues pour que seules les questions avec choix soient publiées. Dans ce cas, de nombreux tests existants vont échouer, <em>ce qui nous informera exactement au sujet des tests qui devront être mis à jour</em>&nbsp;; dans cette optique, on peut dire que les tests prennent soin d’eux-même.</p>
+<p>Au pire, au cours du développement, vous pouvez constater que certains tests deviennent redondants. Ce n’est même pas un problème. Dans les tests, la redondance est une <em>bonne</em> chose.</p>
+<p>Tant que vos tests sont logiquement disposés, ils ne deviendront pas ingérables. Quelques bons principes à garder en tête&nbsp;:</p>
+<ul class="simple">
+<li>une classe de test séparée pour chaque modèle ou vue&nbsp;;</li>
+<li>une méthode de test séparée pour chaque ensemble de conditions que vous voulez tester&nbsp;;</li>
+<li>des noms de méthodes de test qui indiquent ce qu’elles font.</li>
+</ul>
+</div>
+<div class="section" id="s-further-testing">
+<span id="further-testing"></span><h2>Encore plus de tests<a class="headerlink" href="#further-testing" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ce tutoriel ne fait qu’introduire à quelques concepts de base des tests. Il y a encore beaucoup plus à faire et d’autres outils très utiles à votre disposition pour effectuer des choses plus perfectionnées.</p>
+<p>Par exemple, bien que les tests présentés ici couvrent une partie de la logique interne d’un modèle et la manière dont les vues publient de l’information, vous pouvez utiliser un système basé sur de vrais navigateurs comme <a class="reference external" href="http://seleniumhq.org/">Selenium</a> pour tester la façon dont le code HTML est vraiment rendu dans un navigateur. Ces outils permettent de tester plus que le comportement du seul code Django, mais aussi, par exemple, du code JavaScript. C’est assez impressionnant de voir les tests lancer un navigateur et commencer d’interagir avec votre site, comme si un être humain invisible le pilotait&nbsp;! Django propose la classe <a class="reference internal" href="../topics/testing/tools.html#django.test.LiveServerTestCase" title="django.test.LiveServerTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">LiveServerTestCase</span></code></a> pour faciliter l’intégration avec des outils comme Selenium.</p>
+<p>Si votre application est complexe, il peut être utile de lancer automatiquement les tests lors de chaque commit dans l’optique d’une <a class="reference external" href="https://en.wikipedia.org/wiki/Continuous_integration">intégration continue</a>), afin que le contrôle qualité puisse être lui-même automatisé, au moins partiellement.</p>
+<p>Une bonne façon de détecter des parties d’application non couvertes par les tests est de contrôler la couverture du code. Cela aide aussi à identifier du code fragile, ou même mort. Si vous ne pouvez pas tester un bout de code, cela signifie généralement que le code doit être réarrangé ou supprimé. Le taux de couverture aide à identifier le code inutilisé. Consultez <a class="reference internal" href="../topics/testing/advanced.html#topics-testing-code-coverage"><span class="std std-ref">Intégration avec coverage.py</span></a> pour plus de détails.</p>
+<p><a class="reference internal" href="../topics/testing/index.html"><span class="doc">Django et les tests</span></a> contient des informations complètes au sujet des tests.</p>
+</div>
+<div class="section" id="s-what-s-next">
+<span id="what-s-next"></span><h2>Et ensuite&nbsp;?<a class="headerlink" href="#what-s-next" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour des détails complets sur les tests, consultez <a class="reference internal" href="../topics/testing/index.html"><span class="doc">Django et les tests</span></a>.</p>
+<p>Lorsque vous êtes à l’aise avec les tests de vues Django, lisez la <a class="reference internal" href="tutorial06.html"><span class="doc">6ème partie de ce tutoriel</span></a> pour en savoir plus sur la gestion des fichiers statiques.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écriture de votre première application Django, 5ème partie</a><ul>
+<li><a class="reference internal" href="#introducing-automated-testing">Introduction aux tests automatisés</a><ul>
+<li><a class="reference internal" href="#what-are-automated-tests">Que sont les tests automatisés&nbsp;?</a></li>
+<li><a class="reference internal" href="#why-you-need-to-create-tests">Pourquoi faut-il créer des tests</a><ul>
+<li><a class="reference internal" href="#tests-will-save-you-time">Les tests vous feront gagner du temps</a></li>
+<li><a class="reference internal" href="#tests-don-t-just-identify-problems-they-prevent-them">Les tests ne font pas qu’identifier les problèmes, ils les préviennent</a></li>
+<li><a class="reference internal" href="#tests-make-your-code-more-attractive">Les tests rendent votre code plus attractif</a></li>
+<li><a class="reference internal" href="#tests-help-teams-work-together">Les tests aident les équipes à travailler ensemble</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-testing-strategies">Stratégies élémentaires pour les tests</a></li>
+<li><a class="reference internal" href="#writing-our-first-test">Écriture du premier test</a><ul>
+<li><a class="reference internal" href="#we-identify-a-bug">Un bogue a été trouvé</a></li>
+<li><a class="reference internal" href="#create-a-test-to-expose-the-bug">Création d’un test pour révéler le bogue</a></li>
+<li><a class="reference internal" href="#running-tests">Lancement des tests</a></li>
+<li><a class="reference internal" href="#fixing-the-bug">Correction du bogue</a></li>
+<li><a class="reference internal" href="#more-comprehensive-tests">Des tests plus exhaustifs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-a-view">Test d’une vue</a><ul>
+<li><a class="reference internal" href="#a-test-for-a-view">Un test pour une vue</a></li>
+<li><a class="reference internal" href="#the-django-test-client">Le client de test de Django</a></li>
+<li><a class="reference internal" href="#improving-our-view">Amélioration de la vue</a></li>
+<li><a class="reference internal" href="#testing-our-new-view">Test de la nouvelle vue</a></li>
+<li><a class="reference internal" href="#testing-the-detailview">Test de  <code class="docutils literal notranslate"><span class="pre">DetailView</span></code></a></li>
+<li><a class="reference internal" href="#ideas-for-more-tests">Idées pour d’autres tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#when-testing-more-is-better">Pour les tests, abondance de biens ne nuit pas</a></li>
+<li><a class="reference internal" href="#further-testing">Encore plus de tests</a></li>
+<li><a class="reference internal" href="#what-s-next">Et ensuite&nbsp;?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="tutorial04.html"
+                        title="Chapitre précédent">Écriture de votre première application Django, 4ème partie</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="tutorial06.html"
+                        title="Chapitre suivant">Écriture de votre première application Django, 6ème partie</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/tutorial05.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="tutorial04.html" title="Écriture de votre première application Django, 4ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="tutorial06.html" title="Écriture de votre première application Django, 6ème partie">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

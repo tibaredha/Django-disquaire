@@ -1,0 +1,688 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écriture de votre premier correctif pour Django &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Utilisation de Django" href="../topics/index.html" />
+    <link rel="prev" title="Quelle lecture pour la suite" href="whatsnext.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="whatsnext.html" title="Quelle lecture pour la suite">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="../topics/index.html" title="Utilisation de Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="intro-contributing">
+            
+  <div class="section" id="s-writing-your-first-patch-for-django">
+<span id="writing-your-first-patch-for-django"></span><h1>Écriture de votre premier correctif pour Django<a class="headerlink" href="#writing-your-first-patch-for-django" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-introduction">
+<span id="introduction"></span><h2>Introduction<a class="headerlink" href="#introduction" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Intéressé à redonner un peu de votre temps à la communauté&nbsp;? Vous avez peut-être trouvé un bogue dans Django et vous souhaiteriez le corriger, ou alors vous aimeriez ajouter une petite fonctionnalité dans Django.</p>
+<p>La meilleure manière de réaliser ces objectifs est de contribuer à Django lui-même. Si cela peut paraître une tâche effrayante au premier abord, le chemin est tout tracé avec de la documentation, des outils ainsi qu’une communauté pour vous épauler. Nous allons vous accompagner tout au long de ce processus afin que vous puissiez apprendre par un exemple.</p>
+<div class="section" id="s-who-s-this-tutorial-for">
+<span id="who-s-this-tutorial-for"></span><h3>À qui est destiné ce tutoriel&nbsp;?<a class="headerlink" href="#who-s-this-tutorial-for" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Si vous cherchez une référence sur la façon de soumettre des correctifs, consultez la documentation <a class="reference internal" href="../internals/contributing/writing-code/submitting-patches.html"><span class="doc">Soumission de correctifs</span></a>.</p>
+</div>
+<p>Pour ce tutoriel, il s’agit d’avoir au moins une compréhension générale de la manière dont Django fonctionne. Cela implique que vous devez être à l’aise en parcourant les tutoriaux existants sur l”<a class="reference internal" href="tutorial01.html"><span class="doc">écriture de votre première application Django</span></a>. De plus, vous devriez bien connaître Python lui-même. Si ce n’est pas le cas, <a class="reference external" href="https://diveinto.org/python3/table-of-contents.html">Dive Into Python</a> est un livre en ligne fantastique (et gratuit) pour les programmeurs Python débutants.</p>
+<p>Ceux d’entre vous qui ne sont pas familiers avec les systèmes de gestion de versions et avec Trac trouveront dans ce tutoriel et ses liens les bonnes informations pour bien démarrer. Toutefois, il serait souhaitable d’en apprendre un peu plus sur ces différents outils si vous pensez contribuer régulièrement à Django.</p>
+<p>Mais pour la plus grande partie, ce tutoriel vise à expliquer le plus possible de choses pour qu’il puisse convenir au plus grand nombre.</p>
+<div class="admonition-where-to-get-help admonition">
+<p class="first admonition-title">Où obtenir de l’aide&nbsp;:</p>
+<p class="last">Si vous avez des problèmes en suivant ce tutoriel, vous pouvez écrire (en anglais) à <a class="reference internal" href="../internals/mailing-lists.html#django-developers-mailing-list"><span class="std std-ref">django-developers</span></a> ou utiliser le canal IRC <a class="reference external" href="https://webchat.freenode.net/#django-dev">#django-dev sur irc.freenode.net</a> (ou #django-fr en français) pour discuter avec d’autres utilisateurs Django qui pourront peut-être vous aider.</p>
+</div>
+</div>
+<div class="section" id="s-what-does-this-tutorial-cover">
+<span id="what-does-this-tutorial-cover"></span><h3>Quels sont les contenus de ce tutoriel&nbsp;?<a class="headerlink" href="#what-does-this-tutorial-cover" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Nous allons vous guider dans votre première contribution d’un correctif pour Django. À la fin de ce tutoriel, vous aurez acquis une compréhension basique à la fois des outils et des processus nécessaires. Plus particulièrement, nous aborderons les thèmes suivants&nbsp;:</p>
+<ul class="simple">
+<li>installation de Git,</li>
+<li>Téléchargement d’une copie de la version de développement de Django.</li>
+<li>le lancement de la suite de tests de Django,</li>
+<li>l’écriture d’un test pour votre correctif,</li>
+<li>l’écriture du code du correctif,</li>
+<li>le test de votre correctif,</li>
+<li>la soumission d’une requête de contribution,</li>
+<li>les sources d’informations supplémentaires.</li>
+</ul>
+<p>Une fois le tutoriel terminé, vous pouvez consulter le reste de la <a class="reference internal" href="../internals/contributing/index.html"><span class="doc">documentation de Django sur la façon de contribuer</span></a>. Elle contient de nombreuses informations utiles et constitue une lecture indispensable pour tout contributeur en herbe à Django. Si vous avez des questions, vous y trouverez probablement les réponses.</p>
+<div class="admonition-python-3-required admonition">
+<p class="first admonition-title">Python 3 indispensable&nbsp;!</p>
+<p class="last">La version actuelle de Django ne prend plus en charge Python 2.7. Obtenez Python 3 depuis la <a class="reference external" href="https://www.python.org/downloads/">page des téléchargements de Python</a> ou par l’intermédiaire du gestionnaire des paquets de votre système.</p>
+</div>
+<div class="admonition-for-windows-users admonition">
+<p class="first admonition-title">Pour les utilisateurs Windows</p>
+<p class="last">Consultez <a class="reference internal" href="../howto/windows.html#install-python-windows"><span class="std std-ref">Installation de Python</span></a> dans la documentation à propos de Windows pour de plus amples indications.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-code-of-conduct">
+<span id="code-of-conduct"></span><h2>Code de conduite<a class="headerlink" href="#code-of-conduct" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En tant que contributeur, vous pouvez nous aider à maintenir la communauté Django ouverte et accueillante. Lisez et respectez notre <a class="reference external" href="https://www.djangoproject.com/conduct/">Code de conduite</a>.</p>
+</div>
+<div class="section" id="s-installing-git">
+<span id="installing-git"></span><h2>Installation de Git<a class="headerlink" href="#installing-git" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour ce tutoriel, Git doit être installé afin de pouvoir télécharger la version actuelle de développement de Django et pour générer les fichiers correctifs contenant vos modifications.</p>
+<p>Pour savoir si Git est installé, saisissez <code class="docutils literal notranslate"><span class="pre">git</span></code> sur une ligne de commande. Si vous obtenez un message vous indiquant que la commande n’a pas pu être trouvée, c’est que vous devez l’installer, voir <a class="reference external" href="https://git-scm.com/download">la page de téléchargement de Git</a>.</p>
+<p>Si vous ne connaissez pas bien Git, vous pouvez toujours obtenir des informations sur les commandes (une fois installé) en tapant <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">help</span></code> sur une ligne de commande.</p>
+</div>
+<div class="section" id="s-getting-a-copy-of-django-s-development-version">
+<span id="getting-a-copy-of-django-s-development-version"></span><h2>Téléchargement d’une copie de la version de développement de Django<a class="headerlink" href="#getting-a-copy-of-django-s-development-version" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La première étape pour contribuer à Django est d’obtenir une copie de son code source. Commencez par <a class="reference external" href="https://github.com/django/django/fork">créer un fork de Django sur GitHub</a>. Puis, à partir de la ligne de commande, utilisez la commande <code class="docutils literal notranslate"><span class="pre">cd</span></code> pour vous placer dans le répertoire où vous souhaitez mettre votre copie locale de Django.</p>
+<p>Téléchargez le dépôt du code source de Django en utilisant la commande suivante&nbsp;:</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone https://github.com/YourGitHubName/django.git
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> git clone https://github.com/YourGitHubName/django.git
+</pre></div>
+</section>
+</div>
+<div class="admonition-low-bandwidth-connection admonition">
+<p class="first admonition-title">Connexion à faible bande passante ?</p>
+<p class="last">Vous pouvez ajouter l’option <code class="docutils literal notranslate"><span class="pre">--depth</span> <span class="pre">1</span></code> à <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code> pour éviter le téléchargement de l’historique complet de Django, ce qui réduit le transfert de données de ~250 Mo à ~70 Mo.</p>
+</div>
+<p>Maintenant que vous disposez d’une copie locale de Django, vous pouvez l’installer comme tout autre paquet à l’aide de <code class="docutils literal notranslate"><span class="pre">pip</span></code>. La façon la plus simple de le faire est d’utiliser un <em>environnement virtuel</em>, qui est une fonctionnalité de Python permettant d’isoler dans une répertoire dédié les paquets installés pour chacun de vos projets afin qu’ils n’interfèrent pas entre eux.</p>
+<p>Il est conseillé de conserver tous les environnements virtuels au même endroit, par exemple dans <code class="docutils literal notranslate"><span class="pre">.virtualenvs/</span></code> dans votre dossier personnel.</p>
+<p>Créez un nouvel environnement virtuel en exécutant&nbsp;:</p>
+<div class="console-block" id="console-block-1">
+<input class="c-tab-unix" id="c-tab-1-unix" type="radio" name="console-1" checked>
+<label for="c-tab-1-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-1-win" type="radio" name="console-1">
+<label for="c-tab-1-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-1-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 -m venv ~/.virtualenvs/djangodev
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-1-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -m venv <span class="nv">%HOMEPATH%</span>\.virtualenvs\djangodev
+</pre></div>
+</section>
+</div>
+<p>Le chemin correspond à l’endroit où le nouvel environnement sera enregistré sur votre ordinateur.</p>
+<p>La dernière étape de configuration de l’environnement virtuel est de l’activer&nbsp;:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">source</span> ~/.virtualenvs/djangodev/bin/activate
+</pre></div>
+</div>
+<p>Si la commande <code class="docutils literal notranslate"><span class="pre">source</span></code> n’est pas disponible, vous pouvez essayer d’utiliser un point à la place&nbsp;:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> . ~/.virtualenvs/djangodev/bin/activate
+</pre></div>
+</div>
+<p>Vous devez activer l’environnement virtuel chaque fois que vous ouvrez une nouvelle fenêtre de terminal.</p>
+<div class="admonition-for-windows-users admonition">
+<p class="first admonition-title">Pour les utilisateurs Windows</p>
+<p>Pour activer votre environnement virtuel sur Windows, lancez&nbsp;:</p>
+<div class="last highlight-doscon notranslate"><div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> <span class="nv">%HOMEPATH%</span>\.virtualenvs\djangodev\Scripts\activate.bat
+</pre></div>
+</div>
+</div>
+<p>Le nom de l’environnement virtuel actuellement actif est affiché sur la ligne de commande pour vous aider à voir d’un coup d’œil lequel est activé. Tout ce que vous installez avec <code class="docutils literal notranslate"><span class="pre">pip</span></code> quand ce nom est affiché sera installé dans cet environnement virtuel, isolé des autres environnements et des paquets du système.</p>
+<p id="intro-contributing-install-local-copy">Poursuivez en installant la copie de Django précédemment chargée :</p>
+<div class="console-block" id="console-block-2">
+<input class="c-tab-unix" id="c-tab-2-unix" type="radio" name="console-2" checked>
+<label for="c-tab-2-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-2-win" type="radio" name="console-2">
+<label for="c-tab-2-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-2-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m pip install -e /path/to/your/local/clone/django/
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-2-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -m pip install -e \path\to\your\local\clone\django\
+</pre></div>
+</section>
+</div>
+<p>La version installée de Django correspond maintenant à votre copie locale grâce à cette installation en mode éditable. Vous constaterez immédiatement les effets de toute modification, ce qui est très utile lorsqu’on se met à écrire des correctifs.</p>
+<div class="section" id="s-creating-projects-with-a-local-copy-of-django">
+<span id="creating-projects-with-a-local-copy-of-django"></span><h3>Création de projets avec une copie locale de Django<a class="headerlink" href="#creating-projects-with-a-local-copy-of-django" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il peut être utile de tester vos modifications locales avec un projet Django. Vous devez d’abord créer un nouvel environnement virtuel, <a class="reference internal" href="#intro-contributing-install-local-copy"><span class="std std-ref">installer la copie locale de Django précédemment clonée en mode éditable</span></a>, et créer un nouveau projet Django en dehors de la copie locale de Django. Vous verrez immédiatement les effets de tout changement du code Django dans votre nouveau projet, ce qui peut être fort utile lors de l’écriture de votre premier correctif.</p>
+</div>
+</div>
+<div class="section" id="s-running-django-s-test-suite-for-the-first-time">
+<span id="running-django-s-test-suite-for-the-first-time"></span><h2>Lancement de la suite de test de Django pour la première fois<a class="headerlink" href="#running-django-s-test-suite-for-the-first-time" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En contribuant à Django, il est très important que vos modifications de code n’introduisent pas de bogues dans d’autres parties de Django. Une des façons de contrôler que Django fonctionne toujours après vos modifications est de lancer la suite de tests de Django. Si tous les tests passent, il est raisonnable de penser que vos modifications fonctionnent et n’ont pas cassé d’autres parties de Django. Si vous n’avez encore jamais lancé la suite de tests de Django, il est recommandé de le faire une fois au préalable pour vous familiariser avec le résultat obtenu.</p>
+<p>Avant de lancer la suite de tests, installez ses dépendances en vous plaçant dans le répertoire <code class="docutils literal notranslate"><span class="pre">tests/</span></code> de Django et en exécutant&nbsp;:</p>
+<div class="console-block" id="console-block-3">
+<input class="c-tab-unix" id="c-tab-3-unix" type="radio" name="console-3" checked>
+<label for="c-tab-3-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-3-win" type="radio" name="console-3">
+<label for="c-tab-3-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-3-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -m pip install -r requirements/py3.txt
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-3-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -m pip install -r requirements\py3.txt
+</pre></div>
+</section>
+</div>
+<p>Si vous rencontrez une erreur durant l’installation, il est possible qu’une dépendance pour un ou plusieurs paquets Python manque sur votre système. Consultez la documentation du paquet problématique ou recherchez sur le Web avec le message d’erreur obtenu.</p>
+<p>Nous sommes maintenant prêts à lancer la suite de tests. Si vous utilisez GNU/Linux, macOS ou une autre version de Unix, lancez&nbsp;:</p>
+<div class="console-block" id="console-block-4">
+<input class="c-tab-unix" id="c-tab-4-unix" type="radio" name="console-4" checked>
+<label for="c-tab-4-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-4-win" type="radio" name="console-4">
+<label for="c-tab-4-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-4-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./runtests.py
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-4-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> runtests.py 
+</pre></div>
+</section>
+</div>
+<p>Maintenant prenez place et détendez-vous. La suite complète de tests Django contient des milliers de tests, ce qui prend plusieurs minutes au moins à s’exécuter, en fonction de la rapidité de votre ordinateur.</p>
+<p>Pendant que la suite de tests de Django s’exécute, vous voyez un flux de caractères représentant le statut de chaque test exécuté. <code class="docutils literal notranslate"><span class="pre">E</span></code> indique qu’une erreur est survenue durant le test et <code class="docutils literal notranslate"><span class="pre">F</span></code> indique qu’une assertion de test a échoué. Les deux sont considérés comme des échecs. Quant à eux, <code class="docutils literal notranslate"><span class="pre">x</span></code> et <code class="docutils literal notranslate"><span class="pre">s</span></code> indiquent respectivement des échecs attendus et des tests omis volontairement. Chaque point signifie qu’un test a réussi.</p>
+<p>Les tests omis volontairement sont typiquement dus à des bibliothèques externes manquantes et nécessaires pour exécuter ces tests&nbsp;; voir <a class="reference internal" href="../internals/contributing/writing-code/unit-tests.html#running-unit-tests-dependencies"><span class="std std-ref">Lancement de tous les tests</span></a> pour une liste de dépendances. Prenez soin d’installer toute dépendance de test qui est liée aux modifications que vous appliquez (nous n’en utiliserons pas pour ce tutoriel). Certains tests sont spécifiques à un moteur de base de données particulier et seront sautés lors des tests avec les autres moteurs. SQLite est le moteur de base de données des réglages par défaut. Pour lancer les tests avec un moteur différent, consultez <a class="reference internal" href="../internals/contributing/writing-code/unit-tests.html#running-unit-tests-settings"><span class="std std-ref">Utilisation d’un autre module de réglages settings</span></a>.</p>
+<p>Lorsque les tests sont terminés, vous devez voir apparaître un message vous informant si la suite de tests a réussi ou échoué. Comme vous n’avez encore pas modifié de code Django, toute la suite de tests <strong>devrait</strong> passer. Si vous obtenez des échecs ou des erreurs, vérifiez que vous avez bien suivi toutes les précédentes étapes. Consultez <a class="reference internal" href="../internals/contributing/writing-code/unit-tests.html#running-unit-tests"><span class="std std-ref">Lancement des tests unitaires</span></a> pour plus d’informations.</p>
+<p>Il faut savoir que la version <code class="docutils literal notranslate"><span class="pre">master</span></code> (la plus actuelle) de Django n’est pas toujours stable. Lorsque vous développez sur cette version, vous pouvez vérifier les <a class="reference external" href="https://djangoci.com">compilations d’intégration continue de Django</a> pour savoir si les échecs que vous obtenez sont spécifiques à votre environnement ou s’ils sont aussi présents dans les compilations officielles de Django. Si vous cliquez sur une compilation particulière, vous voyez la «&nbsp;matrice de configurations&nbsp;» qui indique les échecs précisément par version de Python et par moteur de base de données.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pour ce tutoriel et le ticket sur lequel nous travaillons, il est suffisant de tester avec SQLite. Cependant, il est possible (et parfois nécessaire) de <a class="reference internal" href="../internals/contributing/writing-code/unit-tests.html#running-unit-tests-settings"><span class="std std-ref">lancer les tests en utilisant une base de données différente</span></a>.</p>
+</div>
+</div>
+<div class="section" id="s-working-on-a-feature">
+<span id="working-on-a-feature"></span><h2>Travail sur une fonctionnalité<a class="headerlink" href="#working-on-a-feature" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour ce tutoriel, nous allons travailler sur un ticket factice comme cas d’étude. Voici les détails imaginaires :</p>
+<div class="admonition-ticket-99999-allow-making-toast admonition">
+<p class="first admonition-title">Ticket #99999 – Permettre de faire des toasts</p>
+<p class="last">Django devrait fournir une fonction <code class="docutils literal notranslate"><span class="pre">django.shortcuts.make_toast()</span></code> qui renvoie <code class="docutils literal notranslate"><span class="pre">'toast'</span></code>.</p>
+</div>
+<p>Nous allons maintenant implémenter cette fonctionnalité et les tests qui l’accompagnent.</p>
+</div>
+<div class="section" id="s-creating-a-branch-for-your-patch">
+<span id="creating-a-branch-for-your-patch"></span><h2>Création d’une branche pour le correctif<a class="headerlink" href="#creating-a-branch-for-your-patch" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Avant toute modification, créez une nouvelle branche pour le ticket&nbsp;:</p>
+<div class="console-block" id="console-block-5">
+<input class="c-tab-unix" id="c-tab-5-unix" type="radio" name="console-5" checked>
+<label for="c-tab-5-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-5-win" type="radio" name="console-5">
+<label for="c-tab-5-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-5-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git checkout -b ticket_99999
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-5-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> git checkout -b ticket_99999
+</pre></div>
+</section>
+</div>
+<p>Vous êtes libre de choisir le nom de la branche, «&nbsp;ticket_99999&nbsp;» est un exemple. Toutes les modifications appliquées dans cette branche seront spécifiques au ticket et ne toucheront pas la copie principale du code que nous avons clonée précédemment.</p>
+</div>
+<div class="section" id="s-writing-some-tests-for-your-ticket">
+<span id="writing-some-tests-for-your-ticket"></span><h2>Écriture de quelques tests pour le ticket<a class="headerlink" href="#writing-some-tests-for-your-ticket" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Dans la majorité des cas, un correctif doit contenir des tests pour être accepté dans Django. Pour les correctifs de correction de bogue, cela implique la rédaction d’une test de régression pour s’assurer que le bogue ne soit plus réintroduit plus tard dans Django. Un test de régression doit être écrit de façon à échouer tant que le bogue est présent et à réussir lorsque le bogue a été corrigé. En ce qui concerne les correctifs contenant de nouvelles fonctionnalités, vous devrez inclure des tests qui assurent que les nouvelles fonctionnalités fonctionnent correctement. Ces tests devraient aussi échouer avant que la fonctionnalité ne soit développée, et réussir après qu’elle a été implémentée.</p>
+<p>Une bonne manière de faire cela est d’écrire d’abord les nouveaux tests, avant de toucher au code. Ce style de développement est appelé <a class="reference external" href="https://en.wikipedia.org/wiki/Test-driven_development">développement piloté par les tests</a> et peut être appliqué aussi bien à des projets complets qu’à des correctifs individuels. Après avoir écrit les tests, vous les lancez pour être sûr qu’ils échouent effectivement (puisque vous n’avez pas encore corrigé l’erreur ou ajouté la fonctionnalité). Si vos nouveaux tests n’échouent pas, vous devez les corriger jusqu’à ce qu’ils échouent. Après tout, un test de régression qui passe que le bogue soit présent ou non n’est pas très utile pour éviter que ce bogue ne réapparaisse à l’avenir.</p>
+<p>Entrons maintenant dans le vif du sujet.</p>
+<div class="section" id="s-writing-a-test-for-ticket-99999">
+<span id="writing-a-test-for-ticket-99999"></span><h3>Écriture d’un test pour le ticket #99999<a class="headerlink" href="#writing-a-test-for-ticket-99999" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Afin de résoudre ce ticket, nous allons ajouter une fonction <code class="docutils literal notranslate"><span class="pre">make_toast()</span></code> au module <code class="docutils literal notranslate"><span class="pre">django</span></code> de premier niveau. Pour commencer, nous écrirons un test qui essaie d’utiliser cette fonction et qui vérifie que son résultat est correct.</p>
+<p>Placez-vous dans le dossier <code class="docutils literal notranslate"><span class="pre">tests/shortcuts/</span></code> et créez un nouveau fichier <code class="docutils literal notranslate"><span class="pre">test_make_toast.py</span></code>. Ajoutez le code suivant</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">make_toast</span>
+<span class="kn">from</span> <span class="nn">django.test</span> <span class="k">import</span> <span class="n">SimpleTestCase</span>
+
+
+<span class="k">class</span> <span class="nc">MakeToastTests</span><span class="p">(</span><span class="n">SimpleTestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_make_toast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">make_toast</span><span class="p">(),</span> <span class="s1">&#39;toast&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Ce test vérifie que la fonction <code class="docutils literal notranslate"><span class="pre">make_toast()</span></code> renvoie <code class="docutils literal notranslate"><span class="pre">'toast'</span></code>.</p>
+<div class="admonition-but-this-testing-thing-looks-kinda-hard admonition">
+<p class="first admonition-title">Mais cette histoire de tests semble plutôt compliquée…</p>
+<p>Si vous n’avez jamais eu affaire à des tests précédemment, ils peuvent paraître un peu difficiles à écrire au premier abord. Heureusement, les tests sont un sujet <em>très</em> important en programmation, il existe donc beaucoup d’informations à leur sujet&nbsp;:</p>
+<ul class="last simple">
+<li>Une première approche conseillée dans l’écriture de tests pour Django est de parcourir la documentation <a class="reference internal" href="../topics/testing/overview.html"><span class="doc">Écriture et lancement de tests</span></a>.</li>
+<li>Dive Into Python (un livre en ligne gratuit pour les développeurs débutants en Python) contient une très bonne section sur l”<a class="reference external" href="https://www.diveinto.org/python3/unit-testing.html">introduction aux tests unitaires</a>.</li>
+<li>Après ces lectures, si vous désirez un peu plus de matière à digérer, vous pouvez toujours parcourir la documentation Python de <a class="reference external" href="https://docs.python.org/3/library/unittest.html#module-unittest" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unittest</span></code></a>.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="s-running-your-new-test">
+<span id="running-your-new-test"></span><h3>Lancement des nouveaux tests<a class="headerlink" href="#running-your-new-test" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme nous n’avons encore effectué aucune modification à <code class="docutils literal notranslate"><span class="pre">django.shortcuts</span></code>, notre test est censé échouer. Lançons tous les tests dans le dossier <code class="docutils literal notranslate"><span class="pre">shortcuts</span></code> pour être certain que c’est vraiment ce qui va se passer. Placez-vous dans le répertoire <code class="docutils literal notranslate"><span class="pre">tests/</span></code> de Django et lancez&nbsp;:</p>
+<div class="console-block" id="console-block-6">
+<input class="c-tab-unix" id="c-tab-6-unix" type="radio" name="console-6" checked>
+<label for="c-tab-6-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-6-win" type="radio" name="console-6">
+<label for="c-tab-6-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-6-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./runtests.py shortcuts
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-6-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> runtests.py shortcuts
+</pre></div>
+</section>
+</div>
+<p>Si les tests se sont déroulés correctement, vous devriez voir un échec correspondant à la méthode de test que nous avons ajoutée, avec cette erreur</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">ImportError</span><span class="p">:</span> <span class="n">cannot</span> <span class="kn">import</span> <span class="nn">name</span> <span class="s1">&#39;make_toast&#39;</span> <span class="kn">from</span> <span class="s1">&#39;django.shortcuts&#39;</span>
+</pre></div>
+</div>
+<p>Si tous les tests ont réussi, vous devriez alors vérifier que vous avez bien ajouté les nouveaux tests ci-dessus dans le bon répertoire et le bon nom de fichier.</p>
+</div>
+</div>
+<div class="section" id="s-writing-the-code-for-your-ticket">
+<span id="writing-the-code-for-your-ticket"></span><h2>Écriture du code pour le ticket<a class="headerlink" href="#writing-the-code-for-your-ticket" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ensuite, nous allons ajouter la fonction <code class="docutils literal notranslate"><span class="pre">make_toast()</span></code>.</p>
+<p>Passez dans le dossier <code class="docutils literal notranslate"><span class="pre">django/</span></code> et ouvrez le fichier <code class="docutils literal notranslate"><span class="pre">shortcuts.py</span></code>. Au bas du fichier, ajoutez</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">make_toast</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s1">&#39;toast&#39;</span>
+</pre></div>
+</div>
+<p>Nous devons maintenant être sûrs que le test précédemment écrit réussit, afin de vérifier que le code que nous venons d’ajouter fonctionne correctement. Placez-vous une nouvelle fois dans le répertoire <code class="docutils literal notranslate"><span class="pre">tests/</span></code> de Django et lancez&nbsp;:</p>
+<div class="console-block" id="console-block-7">
+<input class="c-tab-unix" id="c-tab-7-unix" type="radio" name="console-7" checked>
+<label for="c-tab-7-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-7-win" type="radio" name="console-7">
+<label for="c-tab-7-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-7-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./runtests.py shortcuts
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-7-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> runtests.py shortcuts
+</pre></div>
+</section>
+</div>
+<p>Tous les tests devraient réussir. Si ce n’est pas le cas, assurez-vous d’avoir ajouté la bonne fonction dans le bon fichier.</p>
+</div>
+<div class="section" id="s-running-django-s-test-suite-for-the-second-time">
+<span id="running-django-s-test-suite-for-the-second-time"></span><h2>Lancement de la suite de tests de Django pour la seconde fois<a class="headerlink" href="#running-django-s-test-suite-for-the-second-time" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Après avoir vérifié que votre correctif et les tests fonctionnent correctement, il est recommandé de relancer toute la suite de tests de Django pour contrôler que vos modifications n’ont pas introduit des bogues dans d’autres parties de Django. Même si quand la suite de tests passe entièrement, ce n’est toujours pas une garantie que votre code ne contient pas d’erreurs, cela aide tout de même à révéler de nombreux bogues et régressions qui pourraient être passés inaperçus.</p>
+<p>Pour lancer la suite complète de tests de Django, placez-vous dans le répertoire <code class="docutils literal notranslate"><span class="pre">tests/</span></code> de Django et lancez&nbsp;:</p>
+<div class="console-block" id="console-block-8">
+<input class="c-tab-unix" id="c-tab-8-unix" type="radio" name="console-8" checked>
+<label for="c-tab-8-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-8-win" type="radio" name="console-8">
+<label for="c-tab-8-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-8-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> ./runtests.py
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-8-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> runtests.py 
+</pre></div>
+</section>
+</div>
+</div>
+<div class="section" id="s-writing-documentation">
+<span id="writing-documentation"></span><h2>Écriture de la documentation<a class="headerlink" href="#writing-documentation" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ceci est une nouvelle fonctionnalité, elle doit donc être documentée. Ouvrez le fichier <code class="docutils literal notranslate"><span class="pre">docs/topics/http/shortcuts.txt</span></code>  et ajoutez le contenu ci-après à la fin du fichier</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>``make_toast()``
+================
+
+.. versionadded:: 2.2
+
+Returns ``&#39;toast&#39;``.
+</pre></div>
+</div>
+<p>Comme cette nouvelle fonctionnalité sera présente dans une version à venir, nous la mentionnons aussi dans les notes de publication de la prochaine version de Django. Ouvrez les notes de publication de la version la plus récente dans <code class="docutils literal notranslate"><span class="pre">docs/releases/</span></code> (<code class="docutils literal notranslate"><span class="pre">2.2.txt</span></code> au moment de cette rédaction). Ajoutez une note sous le chapitre « Minor Features »:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>:mod:`django.shortcuts`
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* The new :func:`django.shortcuts.make_toast` function returns ``&#39;toast&#39;``.
+</pre></div>
+</div>
+<p>Pour plus d’informations sur l’écriture de documentation, y compris une explication sur la signification de <code class="docutils literal notranslate"><span class="pre">versionadded</span></code>, consultez <a class="reference internal" href="../internals/contributing/writing-documentation.html"><span class="doc">Écrire la documentation</span></a>. Cette page contient aussi une explication sur la manière de produire une copie locale de la documentation afin de pouvoir prévisualiser le code HTML qui sera généré.</p>
+</div>
+<div class="section" id="s-previewing-your-changes">
+<span id="previewing-your-changes"></span><h2>Aperçu des changements<a class="headerlink" href="#previewing-your-changes" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il est temps maintenant de passer en revue toutes les modifications effectuées dans notre correctif. Pour approuver toutes les modifications prêtes pour le commit, exécutez :</p>
+<div class="console-block" id="console-block-9">
+<input class="c-tab-unix" id="c-tab-9-unix" type="radio" name="console-9" checked>
+<label for="c-tab-9-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-9-win" type="radio" name="console-9">
+<label for="c-tab-9-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-9-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git add --all
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-9-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> git add --all
+</pre></div>
+</section>
+</div>
+<p>Puis affichez les différences entre votre copie actuelle de Django (incluant vos modifications) et la révision que vous avez initialement extraite précédemment dans ce tutoriel avec :</p>
+<div class="console-block" id="console-block-10">
+<input class="c-tab-unix" id="c-tab-10-unix" type="radio" name="console-10" checked>
+<label for="c-tab-10-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-10-win" type="radio" name="console-10">
+<label for="c-tab-10-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-10-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git diff --cached
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-10-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> git diff --cached
+</pre></div>
+</section>
+</div>
+<p>Utilisez les touches fléchées pour avancer ou reculer.</p>
+<div class="highlight-diff notranslate"><div class="highlight"><pre><span></span><span class="gh">diff --git a/django/shortcuts.py b/django/shortcuts.py</span>
+<span class="gh">index 7ab1df0e9d..8dde9e28d9 100644</span>
+<span class="gd">--- a/django/shortcuts.py</span>
+<span class="gi">+++ b/django/shortcuts.py</span>
+<span class="gu">@@ -156,3 +156,7 @@ def resolve_url(to, *args, **kwargs):</span>
+
+     # Finally, fall back and assume it&#39;s a URL
+     return to
+<span class="gi">+</span>
+<span class="gi">+</span>
+<span class="gi">+def make_toast():</span>
+<span class="gi">+    return &#39;toast&#39;</span>
+<span class="gh">diff --git a/docs/releases/2.2.txt b/docs/releases/2.2.txt</span>
+<span class="gh">index 7d85d30c4a..81518187b3 100644</span>
+<span class="gd">--- a/docs/releases/2.2.txt</span>
+<span class="gi">+++ b/docs/releases/2.2.txt</span>
+<span class="gu">@@ -40,6 +40,11 @@ database constraints. Constraints are added to models using the</span>
+ Minor features
+ --------------
+
+<span class="gi">+:mod:`django.shortcuts`</span>
+<span class="gi">+~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="gi">+</span>
+<span class="gi">+* The new :func:`django.shortcuts.make_toast` function returns ``&#39;toast&#39;``.</span>
+<span class="gi">+</span>
+ :mod:`django.contrib.admin`
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+<span class="gh">diff --git a/docs/topics/http/shortcuts.txt b/docs/topics/http/shortcuts.txt</span>
+<span class="gh">index 7b3a3a2c00..711bf6bb6d 100644</span>
+<span class="gd">--- a/docs/topics/http/shortcuts.txt</span>
+<span class="gi">+++ b/docs/topics/http/shortcuts.txt</span>
+<span class="gu">@@ -271,3 +271,12 @@ This example is equivalent to::</span>
+         my_objects = list(MyModel.objects.filter(published=True))
+         if not my_objects:
+             raise Http404(&quot;No MyModel matches the given query.&quot;)
+<span class="gi">+</span>
+<span class="gi">+``make_toast()``</span>
+<span class="gi">+================</span>
+<span class="gi">+</span>
+<span class="gi">+.. function:: make_toast()</span>
+<span class="gi">+</span>
+<span class="gi">+.. versionadded:: 2.2</span>
+<span class="gi">+</span>
+<span class="gi">+Returns ``&#39;toast&#39;``.</span>
+<span class="gh">diff --git a/tests/shortcuts/test_make_toast.py b/tests/shortcuts/test_make_toast.py</span>
+new file mode 100644
+<span class="gh">index 0000000000..6f4c627b6e</span>
+<span class="gd">--- /dev/null</span>
+<span class="gi">+++ b/tests/shortcuts/test_make_toast.py</span>
+<span class="gu">@@ -0,0 +1,7 @@</span>
+<span class="gi">+from django.shortcuts import make_toast</span>
+<span class="gi">+from django.test import SimpleTestCase</span>
+<span class="gi">+</span>
+<span class="gi">+</span>
+<span class="gi">+class MakeToastTests(SimpleTestCase):</span>
+<span class="gi">+    def test_make_toast(self):</span>
+<span class="gi">+        self.assertEqual(make_toast(), &#39;toast&#39;)</span>
+</pre></div>
+</div>
+<p>Lorsque la relecture du correctif est terminée, pressez sur la touche <code class="docutils literal notranslate"><span class="pre">q</span></code> pour revenir à la ligne de commande. Si le contenu du correctif est bon, il est temps de valider les modifications.</p>
+</div>
+<div class="section" id="s-committing-the-changes-in-the-patch">
+<span id="committing-the-changes-in-the-patch"></span><h2>Validation (commit) des modifications du correctif<a class="headerlink" href="#committing-the-changes-in-the-patch" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour valider les modifications&nbsp;:</p>
+<div class="console-block" id="console-block-11">
+<input class="c-tab-unix" id="c-tab-11-unix" type="radio" name="console-11" checked>
+<label for="c-tab-11-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-11-win" type="radio" name="console-11">
+<label for="c-tab-11-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-11-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git commit
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-11-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> git commit
+</pre></div>
+</section>
+</div>
+<p>Un éditeur de texte apparaît pour rédiger le message de commit. Suivez les <a class="reference internal" href="../internals/contributing/committing-code.html#committing-guidelines"><span class="std std-ref">lignes directrices des messages de commit</span></a> et écrivez un message comme&nbsp;:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Fixed #99999 -- Added a shortcut function to make toast.
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-pushing-the-commit-and-making-a-pull-request">
+<span id="pushing-the-commit-and-making-a-pull-request"></span><h2>Envoi du commit et création de la requête de contribution<a class="headerlink" href="#pushing-the-commit-and-making-a-pull-request" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Après avoir validé le correctif (commit), envoyez-le vers votre fork GitHub (remplacez «&nbsp;ticket_99999&nbsp;» par le nom de votre branche)&nbsp;:</p>
+<div class="console-block" id="console-block-12">
+<input class="c-tab-unix" id="c-tab-12-unix" type="radio" name="console-12" checked>
+<label for="c-tab-12-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-12-win" type="radio" name="console-12">
+<label for="c-tab-12-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-12-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git push origin ticket_99999
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-12-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> git push origin ticket_99999
+</pre></div>
+</section>
+</div>
+<p>Vous pouvez créer une requête de contribution en visitant la <a class="reference external" href="https://github.com/django/django/">page GitHub de Django</a>. Vous verrez votre branche sous «&nbsp;Your recently pushed branches&nbsp;». Cliquez sur «&nbsp;Compare &amp; pull request&nbsp;» à côté du message.</p>
+<p>Ne le faites pas réellement pour ce tutoriel, mais sur la page suivante qui affiche l’aperçu du correctif, vous devriez cliquez sur «&nbsp;Create pull request&nbsp;».</p>
+</div>
+<div class="section" id="s-next-steps">
+<span id="next-steps"></span><h2>Étapes suivantes<a class="headerlink" href="#next-steps" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Félicitations, vous avez appris comment effectuer une requête de contribution pour Django&nbsp;! Des détails sur des techniques plus avancées sont disponibles dans <a class="reference internal" href="../internals/contributing/writing-code/working-with-git.html"><span class="doc">Travailler avec Git et GitHub</span></a>.</p>
+<p>Vous pouvez mettre à profit maintenant ces compétences en aidant à améliorer la base de code de Django.</p>
+<div class="section" id="s-more-information-for-new-contributors">
+<span id="more-information-for-new-contributors"></span><h3>Plus d’informations pour les nouveaux contributeurs<a class="headerlink" href="#more-information-for-new-contributors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Avant de vous impliquer plus intensément dans l’écriture de correctifs pour Django, il est souhaitable de parcourir un peu plus d’informations destinées aux contributeurs&nbsp;:</p>
+<ul class="simple">
+<li>Il est important de lire la documentation de Django sur l”<a class="reference internal" href="../internals/contributing/writing-code/submitting-patches.html"><span class="doc">appropriation de tickets et la soumission de correctifs</span></a>. Cela comprend les règles de comportement sur Trac, la façon de vous assigner un ticket, le style attendu du code des correctifs et encore bien d’autres détails importants.</li>
+<li>Les contributeurs débutants devraient aussi lire la <a class="reference internal" href="../internals/contributing/new-contributors.html"><span class="doc">documentation de Django pour les contributeurs débutants</span></a>. Elle contient de nombreux bons conseils pour ceux d’entre nous qui débutent dans la contribution à Django.</li>
+<li>Après cela, si vous êtes toujours avide de plus d’informations sur la contribution, vous pouvez toujours parcourir le reste de la <a class="reference internal" href="../internals/contributing/index.html"><span class="doc">documentation de Django sur la contribution</span></a>. Elle contient plein d’informations utiles et devrait constituer votre source principale de réponses aux questions que vous vous posez.</li>
+</ul>
+</div>
+<div class="section" id="s-finding-your-first-real-ticket">
+<span id="finding-your-first-real-ticket"></span><h3>Recherche de votre premier vrai ticket<a class="headerlink" href="#finding-your-first-real-ticket" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Après avoir consulté une partie de ces informations, vous êtes fin prêt pour partir à la recherche d’un ticket pour lequel vous allez écrire un correctif. Commencez en priorité par les tickets marqués comme «&nbsp;Easy pickings&nbsp;» (résolution facile). Ces tickets sont souvent plus simples par nature et sont une cible idéale pour les contributeurs débutants. Lorsque vous serez à l’aise avec la contribution à Django, vous pourrez alors passer à la rédaction de correctifs pour des tickets plus difficiles.</p>
+<p>Si vous voulez commencer tout de suite (et personne ne vous le reprochera), jetez un coup d’œil à la liste des <a class="reference external" href="https://code.djangoproject.com/query?status=new&amp;status=reopened&amp;has_patch=0&amp;easy=1&amp;col=id&amp;col=summary&amp;col=status&amp;col=owner&amp;col=type&amp;col=milestone&amp;order=priority">tickets simples qui ont besoin d’un correctif</a> et des <a class="reference external" href="https://code.djangoproject.com/query?status=new&amp;status=reopened&amp;needs_better_patch=1&amp;easy=1&amp;col=id&amp;col=summary&amp;col=status&amp;col=owner&amp;col=type&amp;col=milestone&amp;order=priority">tickets simples qui ont des correctifs nécessitant une amélioration</a>. Si vous êtes à l’aise dans l’écriture de tests, vous pouvez aussi examiner la liste des <a class="reference external" href="https://code.djangoproject.com/query?status=new&amp;status=reopened&amp;needs_tests=1&amp;easy=1&amp;col=id&amp;col=summary&amp;col=status&amp;col=owner&amp;col=type&amp;col=milestone&amp;order=priority">tickets simples qui ont besoin de tests</a>. N’oubliez pas de suivre les instructions sur l’attribution de tickets qui étaient mentionnées dans le lien sur la documentation de Django sur l”<a class="reference internal" href="../internals/contributing/writing-code/submitting-patches.html"><span class="doc">appropriation de tickets et la soumission de correctifs</span></a>.</p>
+</div>
+<div class="section" id="s-what-s-next-after-creating-a-pull-request">
+<span id="what-s-next-after-creating-a-pull-request"></span><h3>Que se passe-t-il après la création d’une requête de contribution&nbsp;?<a class="headerlink" href="#what-s-next-after-creating-a-pull-request" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Quand un ticket possède un correctif, il doit être relu par une deuxième paire d’yeux. Après la soumission d’une requête de contribution, mettez à jour les métadonnées du ticket en définissant les drapeaux du ticket «&nbsp;has patch&nbsp;», «&nbsp;doesn’t need tests&nbsp;», etc, pour que d’autres puissent les retrouver en vue d’une relecture. Contribuer ne signifie pas nécessairement écrire un correctif à partir de zéro. La relecture de correctifs existants est également une contribution très utile. Consultez  <a class="reference internal" href="../internals/contributing/triaging-tickets.html"><span class="doc">Tri des tickets</span></a> pour plus de détails.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écriture de votre premier correctif pour Django</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#who-s-this-tutorial-for">À qui est destiné ce tutoriel&nbsp;?</a></li>
+<li><a class="reference internal" href="#what-does-this-tutorial-cover">Quels sont les contenus de ce tutoriel&nbsp;?</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#code-of-conduct">Code de conduite</a></li>
+<li><a class="reference internal" href="#installing-git">Installation de Git</a></li>
+<li><a class="reference internal" href="#getting-a-copy-of-django-s-development-version">Téléchargement d’une copie de la version de développement de Django</a><ul>
+<li><a class="reference internal" href="#creating-projects-with-a-local-copy-of-django">Création de projets avec une copie locale de Django</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-django-s-test-suite-for-the-first-time">Lancement de la suite de test de Django pour la première fois</a></li>
+<li><a class="reference internal" href="#working-on-a-feature">Travail sur une fonctionnalité</a></li>
+<li><a class="reference internal" href="#creating-a-branch-for-your-patch">Création d’une branche pour le correctif</a></li>
+<li><a class="reference internal" href="#writing-some-tests-for-your-ticket">Écriture de quelques tests pour le ticket</a><ul>
+<li><a class="reference internal" href="#writing-a-test-for-ticket-99999">Écriture d’un test pour le ticket #99999</a></li>
+<li><a class="reference internal" href="#running-your-new-test">Lancement des nouveaux tests</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#writing-the-code-for-your-ticket">Écriture du code pour le ticket</a></li>
+<li><a class="reference internal" href="#running-django-s-test-suite-for-the-second-time">Lancement de la suite de tests de Django pour la seconde fois</a></li>
+<li><a class="reference internal" href="#writing-documentation">Écriture de la documentation</a></li>
+<li><a class="reference internal" href="#previewing-your-changes">Aperçu des changements</a></li>
+<li><a class="reference internal" href="#committing-the-changes-in-the-patch">Validation (commit) des modifications du correctif</a></li>
+<li><a class="reference internal" href="#pushing-the-commit-and-making-a-pull-request">Envoi du commit et création de la requête de contribution</a></li>
+<li><a class="reference internal" href="#next-steps">Étapes suivantes</a><ul>
+<li><a class="reference internal" href="#more-information-for-new-contributors">Plus d’informations pour les nouveaux contributeurs</a></li>
+<li><a class="reference internal" href="#finding-your-first-real-ticket">Recherche de votre premier vrai ticket</a></li>
+<li><a class="reference internal" href="#what-s-next-after-creating-a-pull-request">Que se passe-t-il après la création d’une requête de contribution&nbsp;?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="whatsnext.html"
+                        title="Chapitre précédent">Quelle lecture pour la suite</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../topics/index.html"
+                        title="Chapitre suivant">Utilisation de Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/contributing.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="whatsnext.html" title="Quelle lecture pour la suite">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="../topics/index.html" title="Utilisation de Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

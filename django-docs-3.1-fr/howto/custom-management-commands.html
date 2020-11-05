@@ -1,0 +1,428 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écriture de commandes django-admin personnalisées &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Écriture de champs de modèles personnalisés" href="custom-model-fields.html" />
+    <link rel="prev" title="Authentification avec REMOTE_USER" href="auth-remote-user.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="auth-remote-user.html" title="Authentification avec &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;REMOTE_USER&lt;/span&gt;&lt;/code&gt;">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="custom-model-fields.html" title="Écriture de champs de modèles personnalisés">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-custom-management-commands">
+            
+  <div class="section" id="s-module-django.core.management">
+<span id="s-writing-custom-django-admin-commands"></span><span id="module-django.core.management"></span><span id="writing-custom-django-admin-commands"></span><h1>Écriture de commandes <code class="docutils literal notranslate"><span class="pre">django-admin</span></code> personnalisées<a class="headerlink" href="#module-django.core.management" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les applications peuvent inscrire leurs propres actions auprès de <code class="docutils literal notranslate"><span class="pre">manage.py</span></code>. Par exemple, il pourrait être utile d’ajouter une action <code class="docutils literal notranslate"><span class="pre">manage.py</span></code> pour une application Django que vous distribuez. Dans ce document, nous allons créer un commande personnalisée <code class="docutils literal notranslate"><span class="pre">closepoll</span></code> pour l’application <code class="docutils literal notranslate"><span class="pre">polls</span></code> écrite dans le <a class="reference internal" href="../intro/tutorial01.html"><span class="doc">tutoriel</span></a>.</p>
+<p>Pour cela, ajoutons un répertoire <code class="docutils literal notranslate"><span class="pre">management/commands</span></code> dans l’application. Django inscrit une commande <code class="docutils literal notranslate"><span class="pre">manage.py</span></code> pour chaque module Python dans ce répertoire dont le nom ne commence pas par un soulignement. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">polls</span><span class="o">/</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">management</span><span class="o">/</span>
+        <span class="n">commands</span><span class="o">/</span>
+            <span class="n">_private</span><span class="o">.</span><span class="n">py</span>
+            <span class="n">closepoll</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">tests</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">views</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, la commande <code class="docutils literal notranslate"><span class="pre">closepoll</span></code> sera disponible dans tout projet qui inclut l’application <code class="docutils literal notranslate"><span class="pre">polls</span></code> dans son réglage <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</p>
+<p>Le module <code class="docutils literal notranslate"><span class="pre">_private.py</span></code> ne sera pas disponible en tant que commande de gestion.</p>
+<p>Le module <code class="docutils literal notranslate"><span class="pre">closepoll.py</span></code> n’a qu’une seule exigence&nbsp;: il doit définir une classe <code class="docutils literal notranslate"><span class="pre">Command</span></code> comme sous-classe de <a class="reference internal" href="#django.core.management.BaseCommand" title="django.core.management.BaseCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></a> ou l’une de ses  <a class="reference internal" href="#ref-basecommand-subclasses"><span class="std std-ref">sous-classes</span></a>.</p>
+<div class="admonition-standalone-scripts admonition">
+<p class="first admonition-title">Scripts autonomes</p>
+<p class="last">Les commandes de gestion personnalisées sont particulièrement utiles pour exécuter des scripts autonomes ou pour des scripts qui sont programmés pour s’exécuter périodiquement par l’intermédiaire du crontab Unix ou du panneau de configuration des tâches planifiées de Windows.</p>
+</div>
+<p>Pour implémenter la commande, modifiez <code class="docutils literal notranslate"><span class="pre">polls/management/commands/closepoll.py</span></code> comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.management.base</span> <span class="k">import</span> <span class="n">BaseCommand</span><span class="p">,</span> <span class="n">CommandError</span>
+<span class="kn">from</span> <span class="nn">polls.models</span> <span class="k">import</span> <span class="n">Question</span> <span class="k">as</span> <span class="n">Poll</span>
+
+<span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+    <span class="n">help</span> <span class="o">=</span> <span class="s1">&#39;Closes the specified poll for voting&#39;</span>
+
+    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;poll_ids&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">poll_id</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;poll_ids&#39;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">poll</span> <span class="o">=</span> <span class="n">Poll</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">poll_id</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Poll</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CommandError</span><span class="p">(</span><span class="s1">&#39;Poll &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">poll_id</span><span class="p">)</span>
+
+            <span class="n">poll</span><span class="o">.</span><span class="n">opened</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">poll</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span><span class="s1">&#39;Successfully closed poll &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">poll_id</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="admonition note" id="management-commands-output">
+<p class="first admonition-title">Note</p>
+<p>Quand vous utilisez des commandes de gestion et que vous souhaitez afficher des informations en console, vous devriez utiliser les méthodes <code class="docutils literal notranslate"><span class="pre">self.stdout</span></code> et <code class="docutils literal notranslate"><span class="pre">self.stderr</span></code> plutôt que d’utiliser directement  <code class="docutils literal notranslate"><span class="pre">stdout</span></code> et <code class="docutils literal notranslate"><span class="pre">stderr</span></code>. En utilisant ces méthodes intermédiaires, il devient beaucoup plus simple de tester vos commandes personnalisées. Notez aussi que vous n’avez pas besoin de terminer vos messages avec un caractère de saut de ligne car il sera ajouté automatiquement, sauf si vous indiquez le paramètre <code class="docutils literal notranslate"><span class="pre">ending</span></code>:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Unterminated line&quot;</span><span class="p">,</span> <span class="n">ending</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>La nouvelle commande personnalisée peut être appelée en utilisant <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">closepoll</span> <span class="pre">&lt;poll_ids&gt;</span></code>.</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">handle()</span></code> reçoit une ou plusieurs <code class="docutils literal notranslate"><span class="pre">poll_ids</span></code> et définit <code class="docutils literal notranslate"><span class="pre">poll.opened</span></code> à <code class="docutils literal notranslate"><span class="pre">False</span></code> pour chacun d’eux. Si l’utilisateur indique des identifiants qui n’existent pas, une erreur <a class="reference internal" href="#django.core.management.CommandError" title="django.core.management.CommandError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CommandError</span></code></a> est levée. L’attribut <code class="docutils literal notranslate"><span class="pre">poll.opened</span></code> n’existe pas dans le <a class="reference internal" href="../intro/tutorial02.html"><span class="doc">tutoriel</span></a>, elle a été ajoutée à <code class="docutils literal notranslate"><span class="pre">polls.models.Question</span></code> pour cet exemple.</p>
+<div class="section" id="s-accepting-optional-arguments">
+<span id="s-custom-commands-options"></span><span id="accepting-optional-arguments"></span><span id="custom-commands-options"></span><h2>Définition de paramètres facultatifs<a class="headerlink" href="#accepting-optional-arguments" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La même commande <code class="docutils literal notranslate"><span class="pre">closepoll</span></code> pourrait aisément être modifiée afin de supprimer un sondage donné au lieu de le fermer, en acceptant des options supplémentaires en ligne de commande. Ces options personnalisées peuvent être ajoutées dans la méthode <a class="reference internal" href="#django.core.management.BaseCommand.add_arguments" title="django.core.management.BaseCommand.add_arguments"><code class="xref py py-attr docutils literal notranslate"><span class="pre">add_arguments</span></code></a> de cette façon&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="c1"># Positional arguments</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;poll_ids&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># Named (optional) arguments</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+            <span class="s1">&#39;--delete&#39;</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Delete poll instead of closing it&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="c1"># ...</span>
+        <span class="k">if</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;delete&#39;</span><span class="p">]:</span>
+            <span class="n">poll</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+        <span class="c1"># ...</span>
+</pre></div>
+</div>
+<p>L’option (<code class="docutils literal notranslate"><span class="pre">delete</span></code> dans notre exemple) est disponible dans le paramètre dictionnaire <code class="docutils literal notranslate"><span class="pre">options</span></code> de la méthode <code class="docutils literal notranslate"><span class="pre">handle()</span></code>. Consultez la documentation Python de <a class="reference external" href="https://docs.python.org/3/library/argparse.html#module-argparse" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> pour en savoir plus sur l’utilisation de <code class="docutils literal notranslate"><span class="pre">add_argument</span></code>.</p>
+<p>En plus de pouvoir ajouter des options de ligne de commande personnalisées, toutes les <a class="reference internal" href="../ref/django-admin.html"><span class="doc">commandes de gestion</span></a> acceptent certaines options par défaut, telles que  <a class="reference internal" href="../ref/django-admin.html#cmdoption-verbosity"><code class="xref std std-option docutils literal notranslate"><span class="pre">--verbosity</span></code></a> et <a class="reference internal" href="../ref/django-admin.html#cmdoption-traceback"><code class="xref std std-option docutils literal notranslate"><span class="pre">--traceback</span></code></a>.</p>
+</div>
+<div class="section" id="s-management-commands-and-locales">
+<span id="s-id1"></span><span id="management-commands-and-locales"></span><span id="id1"></span><h2>Commandes de gestion et langues<a class="headerlink" href="#management-commands-and-locales" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Par défaut, les commandes d’administration sont exécutées avec la langue active.</p>
+<p>Si pour une raison quelconque, votre propre commande d’administration doit fonctionner sans langue active (par exemple pour empêcher du contenu traduit d’être inséré dans la base de données), désactivez toute traduction en appliquant le décorateur <code class="docutils literal notranslate"><span class="pre">&#64;no_translations</span></code> à votre méthode <a class="reference internal" href="#django.core.management.BaseCommand.handle" title="django.core.management.BaseCommand.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.management.base</span> <span class="k">import</span> <span class="n">BaseCommand</span><span class="p">,</span> <span class="n">no_translations</span>
+
+<span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+    <span class="o">...</span>
+
+    <span class="nd">@no_translations</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>Comme la désactivation des traductions nécessite d’accéder aux réglages configurés, ce décorateur ne peut pas être utilisé pour des commandes qui doivent fonctionner même si les réglages ne sont pas configurés.</p>
+</div>
+<div class="section" id="s-testing">
+<span id="testing"></span><h2>Tests<a class="headerlink" href="#testing" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Des informations sur la manière de tester des commandes d’administration personnalisées peuvent être consultées dans la <a class="reference internal" href="../topics/testing/tools.html#topics-testing-management-commands"><span class="std std-ref">documentation sur les tests</span></a>.</p>
+</div>
+<div class="section" id="s-overriding-commands">
+<span id="overriding-commands"></span><h2>Surcharge des commandes<a class="headerlink" href="#overriding-commands" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django enregistre les commandes intégrées et recherche ensuite les commandes dans l’ordre inverse de <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>. Pendant la recherche, si le nom d’une commande est un duplicata d’une commande déjà enregistrée, la commande nouvellement découverte surcharge la première.</p>
+<p>En d’autres termes, pour surcharger une commande, la nouvelle commande doit avoir le même nom et son application doit se trouver avant l’application de la commande dont on souhaite la surcharge dans <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</p>
+<p>Les commandes de gestions des applications tierces qui ont été involontairement surchargées peuvent être mises à disposition sous un nouveau nom en créant une nouvelle commande dans une des applications du projet (placée avant l’application tierce dans <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>) qui importe la <code class="docutils literal notranslate"><span class="pre">Command</span></code> de la commande surchargée.</p>
+</div>
+<div class="section" id="s-command-objects">
+<span id="command-objects"></span><h2>Objets de commandes<a class="headerlink" href="#command-objects" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.core.management.BaseCommand">
+<em class="property">class </em><code class="descname">BaseCommand</code><a class="headerlink" href="#django.core.management.BaseCommand" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>La classe de base dont toutes les autres commandes de gestion héritent.</p>
+<p>Utilisez cette classe si vous souhaitez accéder à tous les mécanismes qui analysent les paramètres de ligne de commande et qui aiguillent sur le code à appeler en conséquence. Si vous n’avez pas besoin de modifier ce comportement, considérez l’utilisation de l’une de ses <a class="reference internal" href="#ref-basecommand-subclasses"><span class="std std-ref">sous-classes</span></a>.</p>
+<p>L’héritage direct de la classe <a class="reference internal" href="#django.core.management.BaseCommand" title="django.core.management.BaseCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></a> exige que vous implémentiez la méthode <a class="reference internal" href="#django.core.management.BaseCommand.handle" title="django.core.management.BaseCommand.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a>.</p>
+<div class="section" id="s-attributes">
+<span id="attributes"></span><h3>Attributs<a class="headerlink" href="#attributes" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Tous les attributs peuvent être définis dans votre sous-classe et peuvent être utilisés dans les <a class="reference internal" href="#ref-basecommand-subclasses"><span class="std std-ref">sous-classes</span></a> de <a class="reference internal" href="#django.core.management.BaseCommand" title="django.core.management.BaseCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></a>.</p>
+<dl class="attribute">
+<dt id="django.core.management.BaseCommand.help">
+<code class="descclassname">BaseCommand.</code><code class="descname">help</code><a class="headerlink" href="#django.core.management.BaseCommand.help" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une brève description de la commande, qui sera affichée dans le message d’aide lorsque l’utilisateur lance la commande <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">help</span> <span class="pre">&lt;commande&gt;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.management.BaseCommand.missing_args_message">
+<code class="descclassname">BaseCommand.</code><code class="descname">missing_args_message</code><a class="headerlink" href="#django.core.management.BaseCommand.missing_args_message" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Si votre commande définit des paramètres positionnels obligatoires, vous pouvez personnaliser le message d’erreur renvoyé au cas où le paramètre serait absent. Le message par défaut est produit par <a class="reference external" href="https://docs.python.org/3/library/argparse.html#module-argparse" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">argparse</span></code></a> («&nbsp;too few arguments&nbsp;» (trop peu de paramètres)).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.management.BaseCommand.output_transaction">
+<code class="descclassname">BaseCommand.</code><code class="descname">output_transaction</code><a class="headerlink" href="#django.core.management.BaseCommand.output_transaction" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une valeur booléenne indiquant si la commande affiche des commandes SQL&nbsp;; si <code class="docutils literal notranslate"><span class="pre">True</span></code>, le contenu en sortie est automatiquement entouré des instructions <code class="docutils literal notranslate"><span class="pre">BEGIN;</span></code> et <code class="docutils literal notranslate"><span class="pre">COMMIT;</span></code>. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.management.BaseCommand.requires_migrations_checks">
+<code class="descclassname">BaseCommand.</code><code class="descname">requires_migrations_checks</code><a class="headerlink" href="#django.core.management.BaseCommand.requires_migrations_checks" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Valeur booléenne&nbsp;; si <code class="docutils literal notranslate"><span class="pre">True</span></code>, la commande affiche un avertissement si le jeu de migrations sur disque ne correspond pas aux migrations dans la base de données. Un avertissement n’empêche pas la commande de s’exécuter. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.management.BaseCommand.requires_system_checks">
+<code class="descclassname">BaseCommand.</code><code class="descname">requires_system_checks</code><a class="headerlink" href="#django.core.management.BaseCommand.requires_system_checks" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Valeur booléenne&nbsp;; si <code class="docutils literal notranslate"><span class="pre">True</span></code>, le projet Django entier est contrôlé à la recherche de problèmes potentiels avant l’exécution de la commande. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.management.BaseCommand.style">
+<code class="descclassname">BaseCommand.</code><code class="descname">style</code><a class="headerlink" href="#django.core.management.BaseCommand.style" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un attribut d’instance aidant à colorer le contenu envoyé aux sorties <code class="docutils literal notranslate"><span class="pre">stdout</span></code> ou <code class="docutils literal notranslate"><span class="pre">stderr</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">SUCCESS</span><span class="p">(</span><span class="s1">&#39;...&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="../ref/django-admin.html#syntax-coloring"><span class="std std-ref">Syntaxe colorée</span></a> pour savoir comment modifier la palette de couleurs et pour connaître les styles disponibles (utilisez les versions en majuscules des «&nbsp;rôles&nbsp;» décrits dans cette section).</p>
+<p>Si vous passez l’option <a class="reference internal" href="../ref/django-admin.html#cmdoption-no-color"><code class="xref std std-option docutils literal notranslate"><span class="pre">--no-color</span></code></a> lors du lancement de la commande, tous les appels à <code class="docutils literal notranslate"><span class="pre">self.style()</span></code> renverront la chaîne originale sans couleur.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-methods">
+<span id="methods"></span><h3>Méthodes<a class="headerlink" href="#methods" title="Lien permanent vers ce titre">¶</a></h3>
+<p><a class="reference internal" href="#django.core.management.BaseCommand" title="django.core.management.BaseCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></a> contient quelques méthodes qui peuvent être surchargées, mais seule la méthode <a class="reference internal" href="#django.core.management.BaseCommand.handle" title="django.core.management.BaseCommand.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a> doit absolument être implémentée.</p>
+<div class="admonition-implementing-a-constructor-in-a-subclass admonition">
+<p class="first admonition-title">Implémentation d’un constructeur dans une sous-classe</p>
+<p>Si vous implémentez <code class="docutils literal notranslate"><span class="pre">__init__</span></code> dans votre sous-classe de <a class="reference internal" href="#django.core.management.BaseCommand" title="django.core.management.BaseCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></a>, vous devez appeler la méthode <code class="docutils literal notranslate"><span class="pre">__init__</span></code> de <a class="reference internal" href="#django.core.management.BaseCommand" title="django.core.management.BaseCommand"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCommand</span></code></a>:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">BaseCommand</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># ...</span>
+</pre></div>
+</div>
+</div>
+<dl class="method">
+<dt id="django.core.management.BaseCommand.create_parser">
+<code class="descclassname">BaseCommand.</code><code class="descname">create_parser</code>(<em>prog_name</em>, <em>subcommand</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.core.management.BaseCommand.create_parser" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance <code class="docutils literal notranslate"><span class="pre">CommandParser</span></code>, elle-même une sous-classe de <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArgumentParser</span></code></a> avec quelques adaptations pour Django.</p>
+<p>Vous pouvez personnaliser l’instance en surchargeant cette méthode et en appelant <code class="docutils literal notranslate"><span class="pre">super()</span></code> avec les paramètres <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> de <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArgumentParser</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.management.BaseCommand.add_arguments">
+<code class="descclassname">BaseCommand.</code><code class="descname">add_arguments</code>(<em>parser</em>)<a class="headerlink" href="#django.core.management.BaseCommand.add_arguments" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Point d’entrée pour ajouter des paramètres acceptés lors du traitement des paramètres passés en ligne de commande. Les commandes personnalisées doivent surcharger cette méthode pour ajouter les paramètres, qu’ils soient positionnels ou nommés, que cette commande va accepter. L’appel de <code class="docutils literal notranslate"><span class="pre">super()</span></code> n’est pas nécessaire lorsqu’on hérite directement de <code class="docutils literal notranslate"><span class="pre">BaseCommand</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.management.BaseCommand.get_version">
+<code class="descclassname">BaseCommand.</code><code class="descname">get_version</code>()<a class="headerlink" href="#django.core.management.BaseCommand.get_version" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la version de Django, qui devrait être correcte pour toutes les commandes intégrées de Django. Les commandes fournies par les applications non Django peuvent surcharger cette méthode pour retourner leur propre version.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.management.BaseCommand.execute">
+<code class="descclassname">BaseCommand.</code><code class="descname">execute</code>(<em>*args</em>, <em>**options</em>)<a class="headerlink" href="#django.core.management.BaseCommand.execute" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Essaie d’exécuter cette commande en procédant aux contrôles systèmes au besoin (selon la valeur de l’attribut <a class="reference internal" href="#django.core.management.BaseCommand.requires_system_checks" title="django.core.management.BaseCommand.requires_system_checks"><code class="xref py py-attr docutils literal notranslate"><span class="pre">requires_system_checks</span></code></a>). Si la commande génère une erreur <a class="reference internal" href="#django.core.management.CommandError" title="django.core.management.CommandError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CommandError</span></code></a>, celle-ci est interceptée et affichée sur <code class="docutils literal notranslate"><span class="pre">stderr</span></code>.</p>
+</dd></dl>
+
+<div class="admonition-calling-a-management-command-in-your-code admonition">
+<p class="first admonition-title">Appel d’une commande gestion depuis son propre code</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">execute()</span></code> ne devrait pas être appelée directement depuis votre code pour lancer une commande. Utilisez plutôt <a class="reference internal" href="../ref/django-admin.html#django.core.management.call_command" title="django.core.management.call_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">call_command()</span></code></a>.</p>
+</div>
+<dl class="method">
+<dt id="django.core.management.BaseCommand.handle">
+<code class="descclassname">BaseCommand.</code><code class="descname">handle</code>(<em>*args</em>, <em>**options</em>)<a class="headerlink" href="#django.core.management.BaseCommand.handle" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le corps de la logique de votre commande. Les sous-classes doivent implémenter cette méthode.</p>
+<p>Elle peut renvoyer une chaîne qui sera envoyée vers <code class="docutils literal notranslate"><span class="pre">stdout</span></code> (encadrée par <code class="docutils literal notranslate"><span class="pre">BEGIN;</span></code> et <code class="docutils literal notranslate"><span class="pre">COMMIT;</span></code> si <a class="reference internal" href="#django.core.management.BaseCommand.output_transaction" title="django.core.management.BaseCommand.output_transaction"><code class="xref py py-attr docutils literal notranslate"><span class="pre">output_transaction</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.management.BaseCommand.check">
+<code class="descclassname">BaseCommand.</code><code class="descname">check</code>(<em>app_configs=None</em>, <em>tags=None</em>, <em>display_num_errors=False</em>)<a class="headerlink" href="#django.core.management.BaseCommand.check" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilise l’infrastructure de vérification système pour inspecter l’ensemble du projet Django à la recherche de problèmes potentiels. Les problèmes graves génèrent des exceptions de type <a class="reference internal" href="#django.core.management.CommandError" title="django.core.management.CommandError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">CommandError</span></code></a>; les avertissements sont émis sur la sortie d’erreur (<code class="docutils literal notranslate"><span class="pre">stderr</span></code>)&nbsp;; les notifications mineures sont émises sur la sortie standard (<code class="docutils literal notranslate"><span class="pre">stdout</span></code>).</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">app_configs</span></code> et <code class="docutils literal notranslate"><span class="pre">tags</span></code> valent tous deux <code class="docutils literal notranslate"><span class="pre">None</span></code>, tous les contrôles système sont effectués. <code class="docutils literal notranslate"><span class="pre">tags</span></code> peut être une liste d’étiquettes de contrôle, comme <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> ou <code class="docutils literal notranslate"><span class="pre">models</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-basecommand-subclasses">
+<span id="s-ref-basecommand-subclasses"></span><span id="basecommand-subclasses"></span><span id="ref-basecommand-subclasses"></span><h3>Sous-classes de <code class="docutils literal notranslate"><span class="pre">BaseCommand</span></code><a class="headerlink" href="#basecommand-subclasses" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.management.AppCommand">
+<em class="property">class </em><code class="descname">AppCommand</code><a class="headerlink" href="#django.core.management.AppCommand" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Une commande de gestion qui accepte en paramètre une ou plusieurs étiquettes d’applications installées, et applique un traitement à chacune d’elles.</p>
+<p>Plutôt que d’implémenter <a class="reference internal" href="#django.core.management.BaseCommand.handle" title="django.core.management.BaseCommand.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a>, les sous-classes doivent implémenter <a class="reference internal" href="#django.core.management.AppCommand.handle_app_config" title="django.core.management.AppCommand.handle_app_config"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_app_config()</span></code></a>, qui sera appelée une seule fois pour chaque application.</p>
+<dl class="method">
+<dt id="django.core.management.AppCommand.handle_app_config">
+<code class="descclassname">AppCommand.</code><code class="descname">handle_app_config</code>(<em>app_config</em>, <em>**options</em>)<a class="headerlink" href="#django.core.management.AppCommand.handle_app_config" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Effectue les actions de la commande pour <code class="docutils literal notranslate"><span class="pre">app_config</span></code>, qui sera une instance de <a class="reference internal" href="../ref/applications.html#django.apps.AppConfig" title="django.apps.AppConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppConfig</span></code></a> correspondant à une étiquette d’application passée via la ligne de commande.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.core.management.LabelCommand">
+<em class="property">class </em><code class="descname">LabelCommand</code><a class="headerlink" href="#django.core.management.LabelCommand" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Une commande de gestion qui accepte un ou plusieurs paramètres arbitraires (labels) en ligne de commande et effectue une opération pour chacun d’eux.</p>
+<p>Plutôt que d’implémenter <a class="reference internal" href="#django.core.management.BaseCommand.handle" title="django.core.management.BaseCommand.handle"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle()</span></code></a>, les sous-classes doivent implémenter <a class="reference internal" href="#django.core.management.LabelCommand.handle_label" title="django.core.management.LabelCommand.handle_label"><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_label()</span></code></a> qui sera appelée une fois pour chaque paramètre (label).</p>
+<dl class="attribute">
+<dt id="django.core.management.LabelCommand.label">
+<code class="descclassname">LabelCommand.</code><code class="descname">label</code><a class="headerlink" href="#django.core.management.LabelCommand.label" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une chaîne indiquant les paramètres arbitraires transmis à la commande. La chaîne est utilisée dans le texte d’aide et dans les messages d’erreur de la commande. Contient <code class="docutils literal notranslate"><span class="pre">label</span></code> par défaut.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.core.management.LabelCommand.handle_label">
+<code class="descclassname">LabelCommand.</code><code class="descname">handle_label</code>(<em>label</em>, <em>**options</em>)<a class="headerlink" href="#django.core.management.LabelCommand.handle_label" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Effectue les actions de la commande pour <code class="docutils literal notranslate"><span class="pre">label</span></code>, qui sera la chaîne telle que passée à la ligne de commande.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-command-exceptions">
+<span id="command-exceptions"></span><h3>Exceptions des commandes<a class="headerlink" href="#command-exceptions" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="exception">
+<dt id="django.core.management.CommandError">
+<em class="property">exception </em><code class="descname">CommandError</code>(<em>returncode=1</em>)<a class="headerlink" href="#django.core.management.CommandError" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Classe d’exception indiquant qu’un problème est survenu lors de l’exécution d’une commande de gestion.</p>
+<p>Si cette exception est levée durant l’exécution d’une commande de gestion à partir de la console en ligne de commande, elle sera interceptée et transformée en un message d’erreur proprement affiché à destination du flux de sortie approprié (par ex. stderr). En conséquence, le déclenchement de cette exception (accompagné d’une description significative de l’erreur) est la manière privilégiée de signaler que quelque chose s’est mal passé durant l’exécution d’une commande. Elle accepte le paramètre facultatif <code class="docutils literal notranslate"><span class="pre">returncode</span></code> pour personnaliser l’état de sortie de la commande d’administration, en utilisant <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.exit" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sys.exit()</span></code></a>.</p>
+<p>Si une commande de gestion est appelée depuis du code par l’intermédiaire de <a class="reference internal" href="../ref/django-admin.html#django.core.management.call_command" title="django.core.management.call_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">call_command()</span></code></a>, c’est alors à vous d’intercepter cette exception si nécessaire.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>Le paramètre <code class="docutils literal notranslate"><span class="pre">returncode</span></code> a été ajouté.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écriture de commandes <code class="docutils literal notranslate"><span class="pre">django-admin</span></code> personnalisées</a><ul>
+<li><a class="reference internal" href="#accepting-optional-arguments">Définition de paramètres facultatifs</a></li>
+<li><a class="reference internal" href="#management-commands-and-locales">Commandes de gestion et langues</a></li>
+<li><a class="reference internal" href="#testing">Tests</a></li>
+<li><a class="reference internal" href="#overriding-commands">Surcharge des commandes</a></li>
+<li><a class="reference internal" href="#command-objects">Objets de commandes</a><ul>
+<li><a class="reference internal" href="#attributes">Attributs</a></li>
+<li><a class="reference internal" href="#methods">Méthodes</a></li>
+<li><a class="reference internal" href="#basecommand-subclasses">Sous-classes de <code class="docutils literal notranslate"><span class="pre">BaseCommand</span></code></a></li>
+<li><a class="reference internal" href="#command-exceptions">Exceptions des commandes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="auth-remote-user.html"
+                        title="Chapitre précédent">Authentification avec <code class="docutils literal notranslate"><span class="pre">REMOTE_USER</span></code></a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="custom-model-fields.html"
+                        title="Chapitre suivant">Écriture de champs de modèles personnalisés</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/howto/custom-management-commands.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="auth-remote-user.html" title="Authentification avec &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;REMOTE_USER&lt;/span&gt;&lt;/code&gt;">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="custom-model-fields.html" title="Écriture de champs de modèles personnalisés">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1110 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Création de formulaires à partir de modèles &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Fichiers annexes de formulaire (classe Media)" href="media.html" />
+    <link rel="prev" title="Formulaires groupés" href="formsets.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="formsets.html" title="Formulaires groupés">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="media.html" title="Fichiers annexes de formulaire (classe &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;Media&lt;/span&gt;&lt;/code&gt;)">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-forms-modelforms">
+            
+  <div class="section" id="s-creating-forms-from-models">
+<span id="creating-forms-from-models"></span><h1>Création de formulaires à partir de modèles<a class="headerlink" href="#creating-forms-from-models" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-modelform">
+<span id="modelform"></span><h2><code class="docutils literal notranslate"><span class="pre">ModelForm</span></code><a class="headerlink" href="#modelform" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.forms.ModelForm">
+<em class="property">class </em><code class="descname">ModelForm</code><a class="headerlink" href="#django.forms.ModelForm" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si vous construisez une application basée sur une base de données, il y a des chances pour que vos formulaires correspondent étroitement avec les modèles Django. Par exemple, vous pourriez avoir un modèle <code class="docutils literal notranslate"><span class="pre">BlogComment</span></code> et vouloir créer un formulaire permettant d’envoyer des commentaires. Dans ce cas, il serait redondant de devoir définir les types de champs du formulaire, car vous avez déjà défini des champs au niveau du modèle.</p>
+<p>C’est pour cette raison que Django fournit une classe utilitaire permettant de créer une classe de formulaire <code class="docutils literal notranslate"><span class="pre">Form</span></code> à partir d’un modèle Django.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Article</span>
+
+<span class="go"># Create the form class.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">ArticleForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
+<span class="gp">... </span>        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">,</span> <span class="s1">&#39;headline&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="s1">&#39;reporter&#39;</span><span class="p">]</span>
+
+<span class="go"># Creating a form to add an article.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">ArticleForm</span><span class="p">()</span>
+
+<span class="go"># Creating a form to change an existing article.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">article</span> <span class="o">=</span> <span class="n">Article</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">ArticleForm</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">article</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="s-field-types">
+<span id="field-types"></span><h3>Types de champs<a class="headerlink" href="#field-types" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La classe de formulaire générée contiendra un champ de formulaire pour chaque champ de modèle inclus, dans l’ordre indiqué par l’attribut <code class="docutils literal notranslate"><span class="pre">fields</span></code>.</p>
+<p>Chaque champ de modèle possède un champ de formulaire par défaut. Par exemple, le champ <code class="docutils literal notranslate"><span class="pre">CharField</span></code> d’un modèle est représenté par un champ de formulaire <code class="docutils literal notranslate"><span class="pre">CharField</span></code>. Un champ <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> d’un modèle est représenté par un champ de formulaire <code class="docutils literal notranslate"><span class="pre">MultipleChoiceField</span></code>. Voici la liste complète des correspondances&nbsp;:</p>
+<table class="docutils">
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Champ de modèle</th>
+<th class="head">Champ de formulaire</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.AutoField" title="django.db.models.AutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoField</span></code></a></td>
+<td>Non représenté dans le formulaire</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.BigAutoField" title="django.db.models.BigAutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigAutoField</span></code></a></td>
+<td>Non représenté dans le formulaire</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.BigIntegerField" title="django.db.models.BigIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BigIntegerField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a> avec <code class="docutils literal notranslate"><span class="pre">min_value</span></code> à -9223372036854775808 et <code class="docutils literal notranslate"><span class="pre">max_value</span></code> à 9223372036854775807.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.BinaryField" title="django.db.models.BinaryField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField" title="django.forms.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a>, si <a class="reference internal" href="../../ref/models/fields.html#django.db.models.Field.editable" title="django.db.models.Field.editable"><code class="xref py py-attr docutils literal notranslate"><span class="pre">editable</span></code></a> est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code> sur le champ de modèle, sinon il n’est pas représenté dans le formulaire.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.BooleanField" title="django.db.models.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.BooleanField" title="django.forms.BooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanField</span></code></a>, ou <a class="reference internal" href="../../ref/forms/fields.html#django.forms.NullBooleanField" title="django.forms.NullBooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullBooleanField</span></code></a> si <code class="docutils literal notranslate"><span class="pre">null=True</span></code>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.CharField" title="django.db.models.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField" title="django.forms.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a> avec <code class="docutils literal notranslate"><span class="pre">max_length</span></code> définie à la même valeur que <code class="docutils literal notranslate"><span class="pre">max_length</span></code> du champ de modèle et <a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField.empty_value" title="django.forms.CharField.empty_value"><code class="xref py py-attr docutils literal notranslate"><span class="pre">empty_value</span></code></a> définie à <code class="docutils literal notranslate"><span class="pre">None</span></code> si <code class="docutils literal notranslate"><span class="pre">null=True</span></code>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.DateField" title="django.db.models.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.DateField" title="django.forms.DateField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.DateTimeField" title="django.forms.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.DecimalField" title="django.db.models.DecimalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.DecimalField" title="django.forms.DecimalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecimalField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.DurationField" title="django.db.models.DurationField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DurationField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.DurationField" title="django.forms.DurationField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DurationField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.EmailField" title="django.db.models.EmailField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.EmailField" title="django.forms.EmailField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.FileField" title="django.db.models.FileField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.FileField" title="django.forms.FileField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.FilePathField" title="django.db.models.FilePathField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilePathField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.FilePathField" title="django.forms.FilePathField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FilePathField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.FloatField" title="django.db.models.FloatField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.FloatField" title="django.forms.FloatField"><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.ForeignKey" title="django.db.models.ForeignKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForeignKey</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.ModelChoiceField" title="django.forms.ModelChoiceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelChoiceField</span></code></a> (voir ci-dessous)</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.ImageField" title="django.db.models.ImageField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.ImageField" title="django.forms.ImageField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.IntegerField" title="django.db.models.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">IPAddressField</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">IPAddressField</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.GenericIPAddressField" title="django.db.models.GenericIPAddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericIPAddressField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.GenericIPAddressField" title="django.forms.GenericIPAddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericIPAddressField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.ManyToManyField" title="django.db.models.ManyToManyField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManyToManyField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.ModelMultipleChoiceField" title="django.forms.ModelMultipleChoiceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelMultipleChoiceField</span></code></a> (voir ci-dessous)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.NullBooleanField" title="django.db.models.NullBooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullBooleanField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.NullBooleanField" title="django.forms.NullBooleanField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullBooleanField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.PositiveBigIntegerField" title="django.db.models.PositiveBigIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositiveBigIntegerField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.PositiveIntegerField" title="django.db.models.PositiveIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositiveIntegerField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.PositiveSmallIntegerField" title="django.db.models.PositiveSmallIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositiveSmallIntegerField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.SlugField" title="django.db.models.SlugField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SlugField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.SlugField" title="django.forms.SlugField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SlugField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.SmallAutoField" title="django.db.models.SmallAutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmallAutoField</span></code></a></td>
+<td>Non représenté dans le formulaire</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.SmallIntegerField" title="django.db.models.SmallIntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmallIntegerField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.IntegerField" title="django.forms.IntegerField"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.TextField" title="django.db.models.TextField"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.CharField" title="django.forms.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a> avec <code class="docutils literal notranslate"><span class="pre">widget=forms.Textarea</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.TimeField" title="django.db.models.TimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.TimeField" title="django.forms.TimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeField</span></code></a></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.URLField" title="django.db.models.URLField"><code class="xref py py-class docutils literal notranslate"><span class="pre">URLField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.URLField" title="django.forms.URLField"><code class="xref py py-class docutils literal notranslate"><span class="pre">URLField</span></code></a></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="../../ref/models/fields.html#django.db.models.UUIDField" title="django.db.models.UUIDField"><code class="xref py py-class docutils literal notranslate"><span class="pre">UUIDField</span></code></a></td>
+<td><a class="reference internal" href="../../ref/forms/fields.html#django.forms.UUIDField" title="django.forms.UUIDField"><code class="xref py py-class docutils literal notranslate"><span class="pre">UUIDField</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<p>Comme l’on peut s’y attendre, les champs de modèle de type <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> et <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> sont des cas spéciaux&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> est représenté par <code class="docutils literal notranslate"><span class="pre">django.forms.ModelChoiceField</span></code>, qui est un champ <code class="docutils literal notranslate"><span class="pre">ChoiceField</span></code>  dont les choix possibles sont définis par le <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> d’un modèle.</li>
+<li><code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> est représenté par un <code class="docutils literal notranslate"><span class="pre">django.forms.ModelMultipleChoiceField</span></code>, qui est un champ <code class="docutils literal notranslate"><span class="pre">MultipleChoiceField</span></code> dont les choix possibles sont définis par le <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> d’un modèle.</li>
+</ul>
+<p>De plus, chaque champ de formulaire généré possède les attributs comme suit&nbsp;:</p>
+<ul class="simple">
+<li>Si le champ de modèle a <code class="docutils literal notranslate"><span class="pre">blank=True</span></code>, <code class="docutils literal notranslate"><span class="pre">required</span></code> est alors défini à <code class="docutils literal notranslate"><span class="pre">False</span></code> dans le champ de formulaire. Sinon, <code class="docutils literal notranslate"><span class="pre">required=True</span></code>.</li>
+<li>L’étiquette (<code class="docutils literal notranslate"><span class="pre">label</span></code>) du champ de formulaire est défini à la valeur <code class="docutils literal notranslate"><span class="pre">verbose_name</span></code> du champ de modèle, avec le premier caractère en majuscules.</li>
+<li>La valeur <code class="docutils literal notranslate"><span class="pre">help_text</span></code> du champ de formulaire est définie à la valeur <code class="docutils literal notranslate"><span class="pre">help_text</span></code> du champ de modèle.</li>
+<li>Si la valeur <code class="docutils literal notranslate"><span class="pre">choices</span></code> d’un champ de modèle est définie, le composant ( <code class="docutils literal notranslate"><span class="pre">widget</span></code>) du champ de formulaire sera de type <code class="docutils literal notranslate"><span class="pre">Select</span></code> dont les choix proviendront de la valeur <code class="docutils literal notranslate"><span class="pre">choices</span></code> du champ de modèle. Ces choix incluent normalement le choix vierge qui est sélectionné par défaut. Si le champ est obligatoire, cela force l’utilisateur à faire un choix. Le choix vierge n’est pas inclus si le champ de modèle a <code class="docutils literal notranslate"><span class="pre">blank=False</span></code> ainsi qu’une valeur par défaut (<code class="docutils literal notranslate"><span class="pre">default</span></code>) explicite (c’est la valeur <code class="docutils literal notranslate"><span class="pre">default</span></code> qui sera initialement sélectionnée).</li>
+</ul>
+<p>Pour terminer, notez que vous pouvez surcharger le champ de formulaire utilisé pour un champ de modèle donné. Consultez <a class="reference internal" href="#overriding-the-default-fields">Surcharge des champs par défaut</a> ci-dessous.</p>
+</div>
+<div class="section" id="s-a-full-example">
+<span id="a-full-example"></span><h3>Un exemple complet<a class="headerlink" href="#a-full-example" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Considérez cet ensemble de modèles&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span>
+
+<span class="n">TITLE_CHOICES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;MR&#39;</span><span class="p">,</span> <span class="s1">&#39;Mr.&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;MRS&#39;</span><span class="p">,</span> <span class="s1">&#39;Mrs.&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;MS&#39;</span><span class="p">,</span> <span class="s1">&#39;Ms.&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">Author</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">TITLE_CHOICES</span><span class="p">)</span>
+    <span class="n">birth_date</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Author</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;birth_date&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">BookForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Book</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;authors&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Avec ces modèles, les sous-classes <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> ci-dessus seraient à peu près équivalentes à ceci (avec comme seule différence la méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code> que nous aborderons dans un moment)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">widget</span><span class="o">=</span><span class="n">forms</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">choices</span><span class="o">=</span><span class="n">TITLE_CHOICES</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">birth_date</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">DateField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">BookForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">ModelMultipleChoiceField</span><span class="p">(</span><span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-validation-on-a-modelform">
+<span id="s-validation-on-modelform"></span><span id="validation-on-a-modelform"></span><span id="validation-on-modelform"></span><h3>Validation d’un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code><a class="headerlink" href="#validation-on-a-modelform" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La validation d’un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> se distingue en deux étapes importantes&nbsp;:</p>
+<ol class="arabic simple">
+<li>La <a class="reference internal" href="../../ref/forms/validation.html"><span class="doc">validation du formulaire</span></a></li>
+<li>La <a class="reference internal" href="../../ref/models/instances.html#validating-objects"><span class="std std-ref">validation de l’instance de modèle</span></a></li>
+</ol>
+<p>Comme pour la validation de formulaire normale, la validation des formulaires de modèle est déclenchée implicitement lors de l’appel à <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form.is_valid" title="django.forms.Form.is_valid"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_valid()</span></code></a> ou par l’accession à l’attribut <a class="reference internal" href="../../ref/forms/api.html#django.forms.Form.errors" title="django.forms.Form.errors"><code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code></a>, ou explicitement en appelant <code class="docutils literal notranslate"><span class="pre">full_clean()</span></code>, même si en pratique cette dernière méthode est rarement utilisée.</p>
+<p>La validation de <code class="docutils literal notranslate"><span class="pre">Model</span></code> (<a class="reference internal" href="../../ref/models/instances.html#django.db.models.Model.full_clean" title="django.db.models.Model.full_clean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Model.full_clean()</span></code></a>) est déclenchée à l’intérieur de l’étape de validation de formulaire, juste après l’appel à la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> du formulaire.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Le processus de nettoyage modifie l’instance de modèle transmise au constructeur de <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> de plusieurs manières. Par exemple, toute valeur de champ date du modèle est convertie en vrai objet date. Une validation qui échoue peut laisser l’instance de modèle sous-jacente dans un état non cohérent et il n’est donc pas conseillé de la réutiliser.</p>
+</div>
+<div class="section" id="s-overriding-the-clean-method">
+<span id="s-overriding-modelform-clean-method"></span><span id="overriding-the-clean-method"></span><span id="overriding-modelform-clean-method"></span><h4>Surcharge de la méthode clean()<a class="headerlink" href="#overriding-the-clean-method" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Vous pouvez surcharger la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> d’un formulaire de modèle pour procéder à des validations supplémentaires de la même manière que pour un formulaire normal.</p>
+<p>Une instance de formulaire de modèle liée à un objet modèle contient un attribut <code class="docutils literal notranslate"><span class="pre">instance</span></code> qui donne à ses méthodes l’accès à cette instance de modèle spécifique.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">ModelForm.clean()</span></code> définit un drapeau qui fait que l’étape de <a class="reference internal" href="../../ref/models/instances.html#validating-objects"><span class="std std-ref">validation de modèle</span></a> valide l’unicité des champs de modèle marqués comme <code class="docutils literal notranslate"><span class="pre">unique</span></code>, <code class="docutils literal notranslate"><span class="pre">unique_together</span></code> ou <code class="docutils literal notranslate"><span class="pre">unique_for_date|month|year</span></code>.</p>
+<p class="last">Si vous souhaitez surcharger la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> et maintenir cette validation, vous devez appeler la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> de la classe parente.</p>
+</div>
+</div>
+<div class="section" id="s-interaction-with-model-validation">
+<span id="interaction-with-model-validation"></span><h4>Interactions avec la validation des modèles<a class="headerlink" href="#interaction-with-model-validation" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Dans le cadre du processus de validation, <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> appelle la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> de chaque champ du modèle possédant un champ de formulaire correspondant. Si vous avez exclu des champs de modèle, la validation ne sera pas effectuée pour ces champs. Consultez la documentation de la <a class="reference internal" href="../../ref/forms/validation.html"><span class="doc">validation des formulaires</span></a> pour en savoir plus sur le fonctionnement du nettoyage et de la validation des champs.</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> du modèle est appelée avant les contrôles d’unicité. Consultez la <a class="reference internal" href="../../ref/models/instances.html#validating-objects"><span class="std std-ref">validation des objets</span></a> pour plus d’informations sur la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> des modèles.</p>
+</div>
+<div class="section" id="s-considerations-regarding-model-s-error-messages">
+<span id="s-considerations-regarding-model-errormessages"></span><span id="considerations-regarding-model-s-error-messages"></span><span id="considerations-regarding-model-errormessages"></span><h4>Considérations sur les messages d’erreur des modèles<a class="headerlink" href="#considerations-regarding-model-s-error-messages" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les messages d’erreur définis au niveau des <a class="reference internal" href="../../ref/forms/fields.html#django.forms.Field.error_messages" title="django.forms.Field.error_messages"><code class="xref py py-attr docutils literal notranslate"><span class="pre">champs</span> <span class="pre">de</span> <span class="pre">formulaire</span></code></a> ou au niveau de la <a class="reference internal" href="#modelforms-overriding-default-fields"><span class="std std-ref">classe Meta de formulaire</span></a> ont toujours la priorité sur les messages d’erreur définis au niveau des <a class="reference internal" href="../../ref/models/fields.html#django.db.models.Field.error_messages" title="django.db.models.Field.error_messages"><code class="xref py py-attr docutils literal notranslate"><span class="pre">champs</span> <span class="pre">de</span> <span class="pre">modèle</span></code></a>.</p>
+<p>Les messages d’erreur définis au niveau des <a class="reference internal" href="../../ref/models/fields.html#django.db.models.Field.error_messages" title="django.db.models.Field.error_messages"><code class="xref py py-attr docutils literal notranslate"><span class="pre">champs</span> <span class="pre">de</span> <span class="pre">modèle</span></code></a> ne sont utilisés que lorsqu’une erreur <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> est générée à l’étape de <a class="reference internal" href="../../ref/models/instances.html#validating-objects"><span class="std std-ref">validation du modèle</span></a> et qu’aucun message d’erreur correspondant n’est défini au niveau du formulaire.</p>
+<p>Vous pouvez surcharger les messages d’erreur issus de <code class="docutils literal notranslate"><span class="pre">NON_FIELD_ERRORS</span></code> et générés par la validation des modèles en ajoutant la clé <a class="reference internal" href="../../ref/exceptions.html#django.core.exceptions.NON_FIELD_ERRORS" title="django.core.exceptions.NON_FIELD_ERRORS"><code class="xref py py-data docutils literal notranslate"><span class="pre">NON_FIELD_ERRORS</span></code></a> au dictionnaire <code class="docutils literal notranslate"><span class="pre">error_messages</span></code> de la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code> interne des classes <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="k">import</span> <span class="n">NON_FIELD_ERRORS</span>
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span>
+
+<span class="k">class</span> <span class="nc">ArticleForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">error_messages</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">NON_FIELD_ERRORS</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;unique_together&#39;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">%(model_name)s</span><span class="s2">&#39;s </span><span class="si">%(field_labels)s</span><span class="s2"> are not unique.&quot;</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-the-save-method">
+<span id="s-topics-modelform-save"></span><span id="the-save-method"></span><span id="topics-modelform-save"></span><h3>La méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code><a class="headerlink" href="#the-save-method" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Chaque <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> possède aussi une méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code>. Celle-ci crée et enregistre un objet en base de données à partir des données saisies dans le formulaire. Une sous-classe de <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> peut accepter une instance existante de modèle par le paramètre nommé <code class="docutils literal notranslate"><span class="pre">instance</span></code>. Si celui-ci est présent, <code class="docutils literal notranslate"><span class="pre">save()</span></code> met à jour cette instance. Dans le cas contraire, <code class="docutils literal notranslate"><span class="pre">save()</span></code> crée une nouvelle instance du modèle concerné&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Article</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myapp.forms</span> <span class="k">import</span> <span class="n">ArticleForm</span>
+
+<span class="go"># Create a form instance from POST data.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ArticleForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+
+<span class="go"># Save a new Article object from the form&#39;s data.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_article</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="go"># Create a form to edit an existing Article, but use</span>
+<span class="go"># POST data to populate the form.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Article</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">ArticleForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Notez que si le formulaire <a class="reference internal" href="#validation-on-modelform"><span class="std std-ref">n’a pas été validé</span></a>, l’appel à <code class="docutils literal notranslate"><span class="pre">save()</span></code> s’en occupera en contrôlant <code class="docutils literal notranslate"><span class="pre">form.errors</span></code>. Une erreur <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> est générée si les données du formulaire ne sont pas valides, par exemple si <code class="docutils literal notranslate"><span class="pre">form.errors</span></code> est évalué à <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Si un champ facultatif ne figure pas dans les données de formulaire, l’instance de modèle résultante utilise comme valeur de champ le contenu <a class="reference internal" href="../../ref/models/fields.html#django.db.models.Field.default" title="django.db.models.Field.default"><code class="xref py py-attr docutils literal notranslate"><span class="pre">default</span></code></a> du champ de modèle, si elle est définie. Ce comportement ne s’applique pas aux champs qui utilisent <a class="reference internal" href="../../ref/forms/widgets.html#django.forms.CheckboxInput" title="django.forms.CheckboxInput"><code class="xref py py-class docutils literal notranslate"><span class="pre">CheckboxInput</span></code></a>, <a class="reference internal" href="../../ref/forms/widgets.html#django.forms.CheckboxSelectMultiple" title="django.forms.CheckboxSelectMultiple"><code class="xref py py-class docutils literal notranslate"><span class="pre">CheckboxSelectMultiple</span></code></a> ou <a class="reference internal" href="../../ref/forms/widgets.html#django.forms.SelectMultiple" title="django.forms.SelectMultiple"><code class="xref py py-class docutils literal notranslate"><span class="pre">SelectMultiple</span></code></a> (ou tout autre composant personnalisé dont la méthode  <a class="reference internal" href="../../ref/forms/widgets.html#django.forms.Widget.value_omitted_from_data" title="django.forms.Widget.value_omitted_from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">value_omitted_from_data()</span></code></a> renvoie toujours <code class="docutils literal notranslate"><span class="pre">False</span></code>) dans la mesure où une case à cocher non cochée ou des <code class="docutils literal notranslate"><span class="pre">&lt;select</span> <span class="pre">multiple&gt;</span></code> non sélectionnés ne sont pas inclus dans l’envoi des données d’un formulaire HTML. Utilisez un champ ou un composant de formulaire personnalisé si vous concevez une API et que vous souhaitez obtenir le comportement de valeur par défaut de base pour un champ qui utilise l’un de ces composants.</p>
+<p>Cette méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code> accepte un paramètre nommé facultatif <code class="docutils literal notranslate"><span class="pre">commit</span></code>, qui accepte les valeurs <code class="docutils literal notranslate"><span class="pre">True</span></code> ou <code class="docutils literal notranslate"><span class="pre">False</span></code>. Si vous appelez <code class="docutils literal notranslate"><span class="pre">save()</span></code> avec <code class="docutils literal notranslate"><span class="pre">commit=False</span></code>, elle renvoie un objet qui n’aura pas encore été enregistré dans la base de données. Dans ce cas, c’est à vous d’appeler <code class="docutils literal notranslate"><span class="pre">save()</span></code> sur l’instance de modèle obtenue. C’est utile lorsque vous souhaitez effectuer un traitement particulier sur l’objet avant qu’il soit enregistré, ou si vous voulez utiliser l’une des <a class="reference internal" href="../../ref/models/instances.html#ref-models-force-insert"><span class="std std-ref">options d’enregistrement de modèle</span></a> spécialisées. <code class="docutils literal notranslate"><span class="pre">commit</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code> par défaut.</p>
+<p>Un autre effet de bord de l’utilisation de <code class="docutils literal notranslate"><span class="pre">commit=False</span></code> se voit lorsque le modèle possède une relation plusieurs-à-plusieurs vers un autre modèle. Dans ce cas, Django ne peut pas enregistrer immédiatement les données du formulaire de la relation plusieurs-à-plusieurs. La raison est qu’il n’est pas possible d’enregistrer des données plusieurs-à-plusieurs propres à une instance si celle-ci n’existe pas encore dans la base de données.</p>
+<p>Pour contourner ce problème, chaque fois que vous enregistrez un formulaire avec <code class="docutils literal notranslate"><span class="pre">commit=False</span></code>, Django ajoute une méthode <code class="docutils literal notranslate"><span class="pre">save_m2m()</span></code> à la sous-classe de votre <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>. Après avoir manuellement enregistré l’instance dérivée du formulaire, vous pouvez appeler <code class="docutils literal notranslate"><span class="pre">save_m2m()</span></code> pour enregistrer les données de formulaire de type plusieurs-à-plusieurs. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a form instance with POST data.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">AuthorForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+
+<span class="c1"># Create, but don&#39;t save the new author instance.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">new_author</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Modify the author in some way.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">new_author</span><span class="o">.</span><span class="n">some_field</span> <span class="o">=</span> <span class="s1">&#39;some_value&#39;</span>
+
+<span class="c1"># Save the new instance.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">new_author</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="c1"># Now, save the many-to-many data for the form.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="o">.</span><span class="n">save_m2m</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Il n’est utile d’appeler <code class="docutils literal notranslate"><span class="pre">save_m2m()</span></code> que si vous utilisez <code class="docutils literal notranslate"><span class="pre">save(commit=False)</span></code>. Lorsque vous appelez la méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code> d’un formulaire, toutes les données, y compris les données plusieurs-à-plusieurs, sont enregistrées sans avoir besoin de faire quoi que ce soit d’autre. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a form instance with POST data.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">a</span> <span class="o">=</span> <span class="n">Author</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span> <span class="o">=</span> <span class="n">AuthorForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+
+<span class="c1"># Create and save the new author instance. There&#39;s no need to do anything else.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">new_author</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>À part les méthodes <code class="docutils literal notranslate"><span class="pre">save()</span></code> et <code class="docutils literal notranslate"><span class="pre">save_m2m()</span></code>, un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> fonctionne exactement de la même manière que tout autre formulaire <code class="docutils literal notranslate"><span class="pre">forms</span></code>. Par exemple, la méthode <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> est utilisée pour vérifier la validité, la méthode <code class="docutils literal notranslate"><span class="pre">is_multipart()</span></code> est utilisée pour déterminer si un formulaire nécessite un envoi de fichier <code class="docutils literal notranslate"><span class="pre">multipart</span></code> (et donc que <code class="docutils literal notranslate"><span class="pre">request.FILES</span></code> doit être transmis au formulaire), etc. Voir <a class="reference internal" href="../../ref/forms/api.html#binding-uploaded-files"><span class="std std-ref">Liaison de fichiers téléversés avec un formulaire</span></a> pour plus d’informations.</p>
+</div>
+<div class="section" id="s-selecting-the-fields-to-use">
+<span id="s-modelforms-selecting-fields"></span><span id="selecting-the-fields-to-use"></span><span id="modelforms-selecting-fields"></span><h3>Sélection des champs à utiliser<a class="headerlink" href="#selecting-the-fields-to-use" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est fortement recommandé de définir explicitement tous les champs qui doivent être présents dans le formulaire en utilisant l’attribut <code class="docutils literal notranslate"><span class="pre">fields</span></code>. Si vous ne le faites pas, cela peut facilement devenir source de problèmes de sécurité lorsqu’un formulaire permet à un utilisateur de définir certains champs de manière non prévue, particulièrement lorsqu’on ajoute de nouveaux champs à un modèle. En fonction de la façon dont le formulaire est affiché, il est même possible que le problème ne soit pas visible sur la page Web.</p>
+<p>Une autre approche est d’inclure automatiquement tous les champs ou d’en exclure certains. Mais à la base, cette approche est notoirement moins sécurisée et a déjà abouti à des failles sévères sur des sites Web célèbres (par ex. <a class="reference external" href="https://github.com/blog/1068-public-key-security-vulnerability-and-mitigation">GitHub</a>).</p>
+<p>Il existe toutefois deux raccourcis disponibles pour les cas où vous pouvez garantir que ces questions de sécurité ne s’appliquent pas à votre situation&nbsp;:</p>
+<ol class="arabic">
+<li><p class="first">Définir l’attribut <code class="docutils literal notranslate"><span class="pre">fields</span></code> à la valeur spéciale <code class="docutils literal notranslate"><span class="pre">'__all__'</span></code> pour indiquer que tous les champs du modèle doivent être utilisés. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span>
+
+<span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="s1">&#39;__all__&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Définir l’attribut <code class="docutils literal notranslate"><span class="pre">exclude</span></code> de la classe interne <code class="docutils literal notranslate"><span class="pre">Meta</span></code> du <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> à une liste de champs à exclure du formulaire.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">PartialAuthorForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+        <span class="n">exclude</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Comme le modèle <code class="docutils literal notranslate"><span class="pre">Author</span></code> possède les trois champs <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code> et <code class="docutils literal notranslate"><span class="pre">birth_date</span></code>, nous nous retrouvons avec les champs <code class="docutils literal notranslate"><span class="pre">name</span></code> et <code class="docutils literal notranslate"><span class="pre">birth_date</span></code> affichés dans le formulaire.</p>
+</li>
+</ol>
+<p>Si l’une de ces techniques est employée, l’ordre d’apparition des champs dans le formulaire respecte l’ordre de définition des champs du modèle, avec les instances <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code> apparaissant en dernier.</p>
+<p>De plus, Django applique la règle suivante&nbsp;: si vous définissez <code class="docutils literal notranslate"><span class="pre">editable=False</span></code> au niveau du champ de modèle, <em>tout</em> formulaire créé à partir du modèle via <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> ne contiendra pas ce champ.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Tout champ non inclus dans un formulaire par la logique ci-dessus ne sera pas touché par la méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code> du formulaire. De même, si vous ajoutez manuellement dans un formulaire un champ initialement exclu, ce champ ne sera pas initialisé avec les données de l’instance de modèle.</p>
+<p>Django empêche toute tentative d’enregistrer un modèle incomplet. Si le modèle n’autorise pas les champs manquants à être vides et que ces champs n’ont pas de valeur par défaut, tout tentative d’appeler <code class="docutils literal notranslate"><span class="pre">save()</span></code> sur un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> avec des champs manquants échouera. Pour éviter ce problème, vous devez créer une instance de modèle comportant des valeurs initiales pour les champs obligatoires manquants&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">author</span> <span class="o">=</span> <span class="n">Author</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Mr&#39;</span><span class="p">)</span>
+<span class="n">form</span> <span class="o">=</span> <span class="n">PartialAuthorForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">author</span><span class="p">)</span>
+<span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Une variante est d’utiliser <code class="docutils literal notranslate"><span class="pre">save(commit=False)</span></code> et de définir manuellement les champs obligatoires supplémentaires&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">form</span> <span class="o">=</span> <span class="n">PartialAuthorForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+<span class="n">author</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">author</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Mr&#39;</span>
+<span class="n">author</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="last">Consultez la <a class="reference internal" href="#the-save-method">section sur l’enregistrement des formulaires</a> pour plus de détails sur l’utilisation de <code class="docutils literal notranslate"><span class="pre">save(commit=False)</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-overriding-the-default-fields">
+<span id="s-modelforms-overriding-default-fields"></span><span id="overriding-the-default-fields"></span><span id="modelforms-overriding-default-fields"></span><h3>Surcharge des champs par défaut<a class="headerlink" href="#overriding-the-default-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les types de champs par défaut, tels que décrits dans le tableau ci-dessus <a class="reference internal" href="#field-types">Types de champs</a>, sont des choix raisonnables. Si votre modèle contient un champ <code class="docutils literal notranslate"><span class="pre">DateField</span></code>, il est probable que vous vouliez représenter ce champ dans un formulaire par un champ de formulaire <code class="docutils literal notranslate"><span class="pre">DateField</span></code>. Mais <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> apporte la souplesse de pouvoir modifier le champ de formulaire pour un modèle défini.</p>
+<p>Pour indiquer un composant personnalisé pour un champ, utilisez l’attribut <code class="docutils literal notranslate"><span class="pre">widgets</span></code> de la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code> interne. Ce doit être un dictionnaire faisant correspondre les noms de champs à des classes ou des instances de composants.</p>
+<p>Par exemple, si vous voulez que le champ <code class="docutils literal notranslate"><span class="pre">CharField</span></code> de l’attribut <code class="docutils literal notranslate"><span class="pre">name</span></code> du modèle <code class="docutils literal notranslate"><span class="pre">Author</span></code> soit représenté par un composant <code class="docutils literal notranslate"><span class="pre">&lt;textarea&gt;</span></code> au lieu du composant <code class="docutils literal notranslate"><span class="pre">&lt;input</span> <span class="pre">type=&quot;text&quot;&gt;</span></code> par défaut, vous pouvez surcharger le composant du champ&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span><span class="p">,</span> <span class="n">Textarea</span>
+<span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Author</span>
+
+<span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;birth_date&#39;</span><span class="p">)</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">Textarea</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cols&#39;</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">&#39;rows&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}),</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>Le dictionnaire <code class="docutils literal notranslate"><span class="pre">widgets</span></code> accepte soit des instances de composants (par ex.  <code class="docutils literal notranslate"><span class="pre">Textarea(...)</span></code>) ou des classes (par ex. <code class="docutils literal notranslate"><span class="pre">Textarea</span></code>). Notez que le dictionnaire <code class="docutils literal notranslate"><span class="pre">widgets</span></code> est ignoré pour les champs de modèles ayant un attribut <code class="docutils literal notranslate"><span class="pre">choices</span></code> non vide. Dans ce cas, vous devez surcharger le champ de formulaire pour indiquer un composant <code class="docutils literal notranslate"><span class="pre">widget</span></code> différent.</p>
+<p>De la même façon, vous pouvez indiquer les attributs <code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">help_texts</span></code> et <code class="docutils literal notranslate"><span class="pre">error_messages</span></code> de la classe interne <code class="docutils literal notranslate"><span class="pre">Meta</span></code> si vous avez besoin de personnaliser davantage un champ.</p>
+<p>Par exemple, si vous souhaitez personnaliser la formulation de tous les textes visibles pour l’utilisateur concernant le champ <code class="docutils literal notranslate"><span class="pre">name</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="k">import</span> <span class="n">gettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;birth_date&#39;</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Writer&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">help_texts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Some useful help text.&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">error_messages</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;max_length&#39;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;This writer&#39;s name is too long.&quot;</span><span class="p">),</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>Vous pouvez aussi indiquer <code class="docutils literal notranslate"><span class="pre">field_classes</span></code> pour personnaliser le type des champs créés par le formulaire.</p>
+<p>Par exemple, si vous souhaitez utiliser <code class="docutils literal notranslate"><span class="pre">MySlugFormField</span></code> pour le champ <code class="docutils literal notranslate"><span class="pre">slug</span></code>, vous pourriez procéder ainsi&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span>
+<span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Article</span>
+
+<span class="k">class</span> <span class="nc">ArticleForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">,</span> <span class="s1">&#39;headline&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="s1">&#39;reporter&#39;</span><span class="p">,</span> <span class="s1">&#39;slug&#39;</span><span class="p">]</span>
+        <span class="n">field_classes</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;slug&#39;</span><span class="p">:</span> <span class="n">MySlugFormField</span><span class="p">,</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>Finalement, si vous souhaitez contrôler complètement un champ, y compris son type, ses validateurs, son caractère obligatoire, etc., vous pouvez le faire en définissant les champs de manière déclarative comme on le ferait pour un formulaire <code class="docutils literal notranslate"><span class="pre">Form</span></code> normal.</p>
+<p>Si vous souhaitez indiquer les validateurs d’un champ, vous pouvez le faire en définissant le champ de manière déclarative et en indiquant le paramètre <code class="docutils literal notranslate"><span class="pre">validators</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">CharField</span><span class="p">,</span> <span class="n">ModelForm</span>
+<span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Article</span>
+
+<span class="k">class</span> <span class="nc">ArticleForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="n">slug</span> <span class="o">=</span> <span class="n">CharField</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_slug</span><span class="p">])</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">,</span> <span class="s1">&#39;headline&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="s1">&#39;reporter&#39;</span><span class="p">,</span> <span class="s1">&#39;slug&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Lorsque vous créez une instance de formulaire explicitement comme ceci, il est important de comprendre comment les formulaires de type <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> et <code class="docutils literal notranslate"><span class="pre">Form</span></code> sont liés.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> est comme un formulaire <code class="docutils literal notranslate"><span class="pre">Form</span></code> normal qui peut générer automatiquement certains champs. Les champs automatiquement générés dépendent du contenu de la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code> et des champs éventuellement définis de manière déclarative. Au fond, <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> va <strong>uniquement</strong> générer les champs qui sont <strong>absents</strong> du formulaire, ou en d’autres termes, les champs qui n’ont pas été définis déclarativement.</p>
+<p>Les champs définis déclarativement sont laissés tels quels, ce qui fait que toute personnalisation effectuée au niveau des attributs de <code class="docutils literal notranslate"><span class="pre">Meta</span></code>, tels que <code class="docutils literal notranslate"><span class="pre">widgets</span></code>, <code class="docutils literal notranslate"><span class="pre">labels</span></code>, <code class="docutils literal notranslate"><span class="pre">help_texts</span></code> ou <code class="docutils literal notranslate"><span class="pre">error_messages</span></code> est ignorée&nbsp;; ces derniers ne s’appliquent qu’aux champs automatiquement générés.</p>
+<p>De même, les champs définis déclarativement ne dérivent pas leurs attributs comme <code class="docutils literal notranslate"><span class="pre">max_length</span></code> ou <code class="docutils literal notranslate"><span class="pre">required</span></code> du modèle correspondant. Si vous voulez conserver le comportement défini au niveau du modèle, vous devez définir les paramètres adéquats explicitement dans la déclaration du champ de formulaire.</p>
+<p>Par exemple, si le modèle <code class="docutils literal notranslate"><span class="pre">Article</span></code> ressemble à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Article</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">headline</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Use puns liberally&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>et que vous vouliez effectuer une validation particulière pour <code class="docutils literal notranslate"><span class="pre">headline</span></code> tout en conservant les valeurs <code class="docutils literal notranslate"><span class="pre">blank</span></code> et <code class="docutils literal notranslate"><span class="pre">help_text</span></code> d’origine, voici comment vous pourriez définir <code class="docutils literal notranslate"><span class="pre">ArticleForm</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ArticleForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="n">headline</span> <span class="o">=</span> <span class="n">MyFormField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Use puns liberally&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;headline&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Vous devez vous assurer que le type du champ de formulaire peut être utilisé pour définir le contenu du champ de modèle correspondant. S’ils ne sont pas compatibles, vous obtiendrez une erreur <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> car aucune conversion implicite n’est effectuée.</p>
+<p class="last">Consultez la <a class="reference internal" href="../../ref/forms/fields.html"><span class="doc">documentation des champs de formulaire</span></a> pour plus d’informations sur les champs et leurs paramètres.</p>
+</div>
+</div>
+<div class="section" id="s-enabling-localization-of-fields">
+<span id="enabling-localization-of-fields"></span><h3>Activation de la régionalisation des champs<a class="headerlink" href="#enabling-localization-of-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, les champs d’un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> ne régionalisent pas leurs données. Pour activer cette régionalisation, vous pouvez utiliser l’attribut <code class="docutils literal notranslate"><span class="pre">localized_fields</span></code> de la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">ModelForm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Author</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">ModelForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+<span class="gp">... </span>        <span class="n">localized_fields</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;birth_date&#39;</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>Si <code class="docutils literal notranslate"><span class="pre">localized_fields</span></code> est défini à la valeur spéciale <code class="docutils literal notranslate"><span class="pre">'__all__'</span></code>, les valeurs de tous les champs seront régionalisées.</p>
+</div>
+<div class="section" id="s-form-inheritance">
+<span id="form-inheritance"></span><h3>Héritage de formulaire<a class="headerlink" href="#form-inheritance" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme pour les formulaires de base, il est possible d’étendre et de réutiliser les <code class="docutils literal notranslate"><span class="pre">ModelForms</span></code> par l’héritage. C’est utile lorsque vous devez déclarer des champs ou des méthodes supplémentaires dans une sous-classe pour les utiliser dans des formulaires dérivés de modèles. Par exemple, en utilisant la classe <code class="docutils literal notranslate"><span class="pre">ArticleForm</span></code> présentée précédemment&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">EnhancedArticleForm</span><span class="p">(</span><span class="n">ArticleForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">clean_pub_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="o">...</span>
+</pre></div>
+</div>
+<p>Cela crée un formulaire qui se comporte comme <code class="docutils literal notranslate"><span class="pre">ArticleForm</span></code>, à l’exception de certaines validations et nettoyages supplémentaires pour le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code>.</p>
+<p>Il est aussi possible d’hériter de la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code> interne du parent si vous avez besoin de modifier les listes <code class="docutils literal notranslate"><span class="pre">Meta.fields</span></code> ou <code class="docutils literal notranslate"><span class="pre">Meta.exclude</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">RestrictedArticleForm</span><span class="p">(</span><span class="n">EnhancedArticleForm</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">ArticleForm</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">exclude</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>Nous conservons ici la méthode supplémentaire de <code class="docutils literal notranslate"><span class="pre">EnhancedArticleForm</span></code> et enlevons un champ de la classe <code class="docutils literal notranslate"><span class="pre">ArticleForm.Meta</span></code> originale.</p>
+<p>Il faut cependant relever certains points.</p>
+<ul>
+<li><p class="first">Les règles Python habituelles de la résolution de noms s’appliquent. Si vous avez plusieurs classes de base déclarant une classe interne <code class="docutils literal notranslate"><span class="pre">Meta</span></code>, seule la première sera considérée. C’est -à-dire la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code> de la sous-classe, s’il y en a une, sinon celle du premier parent, etc.</p>
+</li>
+<li><p class="first">Il est possible d’hériter à la fois de <code class="docutils literal notranslate"><span class="pre">Form</span></code> et de <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>. Cependant, il faut s’assurer que <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> apparaisse en premier dans la chaîne MRO. Ceci parce que ces classes se basent sur des métaclasses différentes et qu’une classe ne peut posséder qu’une seule métaclasse.</p>
+</li>
+<li><p class="first">Il est possible d’enlever de manière déclarative un champ <code class="docutils literal notranslate"><span class="pre">Field</span></code> hérité d’une classe parente en définissant son nom à <code class="docutils literal notranslate"><span class="pre">None</span></code> dans la sous-classe.</p>
+<p>Cette technique n’est utilisable que pour enlever des champs qui ont eux-mêmes été définis de manière déclarative dans la classe parente&nbsp;; cela n’empêchera pas la métaclasse de <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> de générer un champ par défaut. Pour enlever des champs par défaut, voir <a class="reference internal" href="#modelforms-selecting-fields"><span class="std std-ref">Sélection des champs à utiliser</span></a>.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-providing-initial-values">
+<span id="providing-initial-values"></span><h3>Indication de valeurs initiales<a class="headerlink" href="#providing-initial-values" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme avec les formulaires normaux, il est possible de spécifier les données initiales pour les formulaires en spécifiant un paramètre <code class="docutils literal notranslate"><span class="pre">initial</span></code> lors de l’instanciation du formulaire. Les valeurs initiales prévues de cette façon remplaceront la valeur initiale définie pour le champ et celle définie pour le modèle lié. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">article</span> <span class="o">=</span> <span class="n">Article</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">article</span><span class="o">.</span><span class="n">headline</span>
+<span class="go">&#39;My headline&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span> <span class="o">=</span> <span class="n">ArticleForm</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;headline&#39;</span><span class="p">:</span> <span class="s1">&#39;Initial headline&#39;</span><span class="p">},</span> <span class="n">instance</span><span class="o">=</span><span class="n">article</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">form</span><span class="p">[</span><span class="s1">&#39;headline&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+<span class="go">&#39;Initial headline&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-modelform-factory-function">
+<span id="s-modelforms-factory"></span><span id="modelform-factory-function"></span><span id="modelforms-factory"></span><h3>Fonction de fabrique de ModelForm<a class="headerlink" href="#modelform-factory-function" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez créer des formulaires à partir d’un modèle donné en utilisant la fonction autonome <a class="reference internal" href="../../ref/forms/models.html#django.forms.models.modelform_factory" title="django.forms.models.modelform_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">modelform_factory()</span></code></a> au lieu de passer par une définition de classe. Cela peut être plus pratique si vous n’avez pas à effectuer trop d’adaptations&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">modelform_factory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Book</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BookForm</span> <span class="o">=</span> <span class="n">modelform_factory</span><span class="p">(</span><span class="n">Book</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;author&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Cela peut également être utilisé pour faire des modifications à des formulaires existants, par exemple pour indiquer les composants à utiliser pour un certain champ&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">Textarea</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Form</span> <span class="o">=</span> <span class="n">modelform_factory</span><span class="p">(</span><span class="n">Book</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">BookForm</span><span class="p">,</span>
+<span class="gp">... </span>                         <span class="n">widgets</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">Textarea</span><span class="p">()})</span>
+</pre></div>
+</div>
+<p>Les champs à inclure peuvent être spécifiés en utilisant les paramètres nommés <code class="docutils literal notranslate"><span class="pre">fields</span></code> et <code class="docutils literal notranslate"><span class="pre">exclude</span></code>, ou les attributs correspondants de la classe interne <code class="docutils literal notranslate"><span class="pre">Meta</span></code> du <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>. Veuillez consulter la documentation <a class="reference internal" href="#modelforms-selecting-fields"><span class="std std-ref">Sélection des champs à utiliser</span></a> des <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>.</p>
+<p>… ou pour activer la régionalisation de certains champs&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Form</span> <span class="o">=</span> <span class="n">modelform_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">AuthorForm</span><span class="p">,</span> <span class="n">localized_fields</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;birth_date&quot;</span><span class="p">,))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-model-formsets">
+<span id="s-id1"></span><span id="model-formsets"></span><span id="id1"></span><h2>Formulaires groupés de modèles<a class="headerlink" href="#model-formsets" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.forms.models.BaseModelFormSet">
+<em class="property">class </em><code class="descclassname">models.</code><code class="descname">BaseModelFormSet</code><a class="headerlink" href="#django.forms.models.BaseModelFormSet" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Comme pour les <a class="reference internal" href="formsets.html"><span class="doc">formulaires groupés normaux</span></a>, Django fournit quelques classes de formulaires groupés améliorées qui facilitent le travail avec les modèles Django. Réutilisons le modèle <code class="docutils literal notranslate"><span class="pre">Author</span></code> défini plus haut&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">modelformset_factory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Author</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>L’utilisation de <code class="docutils literal notranslate"><span class="pre">fields</span></code> indique aux formulaires groupés  les champs qu’ils doivent utiliser. Il est aussi possible d’utiliser une approche par exclusion, indiquant quels sont les champs à exclure&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;birth_date&#39;</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>Cela crée un jeu de formulaires groupés qui sont capables de gérer les données associées au modèle <code class="docutils literal notranslate"><span class="pre">Author</span></code>. Le fonctionnement est le même que pour des formulaires groupés normaux&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">formset</span><span class="p">)</span>
+<span class="go">&lt;input type=&quot;hidden&quot; name=&quot;form-TOTAL_FORMS&quot; value=&quot;1&quot; id=&quot;id_form-TOTAL_FORMS&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-INITIAL_FORMS&quot; value=&quot;0&quot; id=&quot;id_form-INITIAL_FORMS&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-MIN_NUM_FORMS&quot; value=&quot;0&quot; id=&quot;id_form-MIN_NUM_FORMS&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-MAX_NUM_FORMS&quot; value=&quot;1000&quot; id=&quot;id_form-MAX_NUM_FORMS&quot;&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_form-0-name&quot;&gt;Name:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_form-0-name&quot; type=&quot;text&quot; name=&quot;form-0-name&quot; maxlength=&quot;100&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_form-0-title&quot;&gt;Title:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;select name=&quot;form-0-title&quot; id=&quot;id_form-0-title&quot;&gt;</span>
+<span class="go">&lt;option value=&quot;&quot; selected&gt;---------&lt;/option&gt;</span>
+<span class="go">&lt;option value=&quot;MR&quot;&gt;Mr.&lt;/option&gt;</span>
+<span class="go">&lt;option value=&quot;MRS&quot;&gt;Mrs.&lt;/option&gt;</span>
+<span class="go">&lt;option value=&quot;MS&quot;&gt;Ms.&lt;/option&gt;</span>
+<span class="go">&lt;/select&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-0-id&quot; id=&quot;id_form-0-id&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><a class="reference internal" href="../../ref/forms/models.html#django.forms.models.modelformset_factory" title="django.forms.models.modelformset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">modelformset_factory()</span></code></a> utilise <a class="reference internal" href="../../ref/forms/formsets.html#django.forms.formsets.formset_factory" title="django.forms.formsets.formset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">formset_factory()</span></code></a> pour générer les formulaires groupés. Cela signifie qu’un formulaire groupé de modèle est une extension des formulaires groupés de base sachant interagir avec un modèle particulier.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Dans les contextes d”<a class="reference internal" href="../db/models.html#multi-table-inheritance"><span class="std std-ref">héritages multi-tables</span></a>, les formulaires générés par une fabrique de jeux de formulaires contiennent un champ de lien parent (par défaut <code class="docutils literal notranslate"><span class="pre">&lt;nom_modèle_parent&gt;_ptr</span></code>) au lieu d’un champ <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
+</div>
+<div class="section" id="s-changing-the-queryset">
+<span id="changing-the-queryset"></span><h3>Modification du jeu de requête<a class="headerlink" href="#changing-the-queryset" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, lorsque vous créez des formulaires groupés à partir d’un modèle, ceux-ci utilisent un jeu de requête qui contient tous les objets du modèle (par ex. <code class="docutils literal notranslate"><span class="pre">Author.objects.all()</span></code>). Vous pouvez surcharger ce comportement en utilisant le paramètre <code class="docutils literal notranslate"><span class="pre">queryset</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Comme variante, vous pouvez créer une sous-classe définissant <code class="docutils literal notranslate"><span class="pre">self.queryset</span></code> dans sa méthode <code class="docutils literal notranslate"><span class="pre">__init__</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">BaseModelFormSet</span>
+<span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Author</span>
+
+<span class="k">class</span> <span class="nc">BaseAuthorFormSet</span><span class="p">(</span><span class="n">BaseModelFormSet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queryset</span> <span class="o">=</span> <span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Puis, passez votre classe <code class="docutils literal notranslate"><span class="pre">BaseAuthorFormSet</span></code> à la fonction de fabrique&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">),</span> <span class="n">formset</span><span class="o">=</span><span class="n">BaseAuthorFormSet</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Si vous souhaitez renvoyer des formulaires groupés qui ne contiennent <em>aucune</em> instance préexistante du modèle, vous pouvez indiquer un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> vide&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">none</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-changing-the-form">
+<span id="changing-the-form"></span><h3>Modification du formulaire<a class="headerlink" href="#changing-the-form" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, lorsque vous utilisez <code class="docutils literal notranslate"><span class="pre">modelformset_factory</span></code>, un formulaire de modèle est créé par <a class="reference internal" href="../../ref/forms/models.html#django.forms.models.modelform_factory" title="django.forms.models.modelform_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">modelform_factory()</span></code></a>. Il peut souvent être utile d’indiquer un formulaire de modèle personnalisé. Par exemple, vous pouvez créer un formulaire de modèle personnalisé comportant une validation personnalisée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">AuthorForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Author</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">clean_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># custom validation for the name field</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>Puis, indiquez ce formulaire de modèle à la fonction de fabrication&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">AuthorForm</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Il n’est pas toujours nécessaire de définir un formulaire de modèle personnalisé. La fonction <code class="docutils literal notranslate"><span class="pre">modelformset_factory</span></code> accepte plusieurs paramètres qui sont eux-mêmes transmis à <code class="docutils literal notranslate"><span class="pre">modelform_factory</span></code> et qui sont documentés plus bas.</p>
+</div>
+<div class="section" id="s-specifying-widgets-to-use-in-the-form-with-widgets">
+<span id="specifying-widgets-to-use-in-the-form-with-widgets"></span><h3>Indication des composants de formulaire à utiliser avec <code class="docutils literal notranslate"><span class="pre">widgets</span></code><a class="headerlink" href="#specifying-widgets-to-use-in-the-form-with-widgets" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En exploitant le paramètre <code class="docutils literal notranslate"><span class="pre">widgets</span></code>, vous pouvez indiquer un dictionnaire de valeurs afin de personnaliser la classe de composant d’un champ particulier du <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>. C’est le même principe de fonctionnement que le dictionnaire <code class="docutils literal notranslate"><span class="pre">widgets</span></code> de la classe <code class="docutils literal notranslate"><span class="pre">Meta</span></code> interne d’un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">widgets</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">Textarea</span><span class="p">(</span><span class="n">attrs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cols&#39;</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span> <span class="s1">&#39;rows&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})})</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-enabling-localization-for-fields-with-localized-fields">
+<span id="enabling-localization-for-fields-with-localized-fields"></span><h3>Activation de la régionalisation des champs avec <code class="docutils literal notranslate"><span class="pre">localized_fields</span></code><a class="headerlink" href="#enabling-localization-for-fields-with-localized-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>À l’aide du paramètre <code class="docutils literal notranslate"><span class="pre">localized_fields</span></code>, vous pouvez activer la régionalisation des champs du formulaire.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;birth_date&#39;</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">localized_fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;birth_date&#39;</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>Si <code class="docutils literal notranslate"><span class="pre">localized_fields</span></code> est défini à la valeur spéciale <code class="docutils literal notranslate"><span class="pre">'__all__'</span></code>, les valeurs de tous les champs seront régionalisées.</p>
+</div>
+<div class="section" id="s-id2">
+<span id="id2"></span><h3>Indication de valeurs initiales<a class="headerlink" href="#id2" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme pour les formulaires groupés normaux, il est possible <a class="reference internal" href="formsets.html#formsets-initial-data"><span class="std std-ref">de fournir des données initiales</span></a> aux formulaires groupés en indiquant le paramètre <code class="docutils literal notranslate"><span class="pre">initial</span></code> au moment de la création de l’instance de classe de formulaires groupés de modèles renvoyée par <a class="reference internal" href="../../ref/forms/models.html#django.forms.models.modelformset_factory" title="django.forms.models.modelformset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">modelformset_factory()</span></code></a>. Cependant, avec les formulaires groupés de modèles, les valeurs initiales ne s’appliquent qu’aux formulaires supplémentaires, ceux qui ne sont pas liés à des instances d’objets existants. Si la longueur de <code class="docutils literal notranslate"><span class="pre">initial</span></code> dépasse le nombre de formulaires supplémentaires, les données initiales en trop sont ignorées. Si les formulaires supplémentaires avec données initiales ne sont pas modifiés par l’utilisateur, ils ne seront ni validés, ni enregistrés.</p>
+</div>
+<div class="section" id="s-saving-objects-in-the-formset">
+<span id="s-id3"></span><span id="saving-objects-in-the-formset"></span><span id="id3"></span><h3>Enregistrement des objets des formulaires groupés<a class="headerlink" href="#saving-objects-in-the-formset" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme pour un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code>, vous pouvez enregistrer les données sous forme d’objet de modèle. Cela se fait par la méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code> des formulaires groupés&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a formset instance with POST data.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+
+<span class="c1"># Assuming all is valid, save the data.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">instances</span> <span class="o">=</span> <span class="n">formset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code> renvoie les instances qui ont été enregistrées dans la base de données. Si les données d’une instance précise n’ont pas été modifiées dans les données du formulaire, l’instance ne sera pas enregistrée dans la base de données et ne sera pas non plus incluse dans la valeur renvoyée (<code class="docutils literal notranslate"><span class="pre">instances</span></code>, dans l’exemple ci-dessus).</p>
+<p>Lorsque des champs sont absents du formulaire (par exemple en raison de leur exclusion), ces champs ne sont pas modifiés par la méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code>. Vous pouvez trouver plus d’informations sur cette restriction, qui est aussi valable pour les formulaires <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> normaux, dans <a class="reference internal" href="#selecting-the-fields-to-use">Sélection des champs à utiliser</a>.</p>
+<p>Passez <code class="docutils literal notranslate"><span class="pre">commit=False</span></code> pour recevoir les instances de modèles non enregistrées&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># don&#39;t save to the database</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">instances</span> <span class="o">=</span> <span class="n">formset</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="n">instances</span><span class="p">:</span>
+<span class="o">...</span>     <span class="c1"># do something with instance</span>
+<span class="o">...</span>     <span class="n">instance</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Cela vous permet de définir des données complémentaires dans les instances avant de les enregistrer dans la base de données. Si vos formulaires groupés contiennent un champ <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code>, vous devrez également appeler <code class="docutils literal notranslate"><span class="pre">formset.save_m2m()</span></code> pour vous assurer que les liens plusieurs-à-plusieurs soient correctement enregistrés.</p>
+<p>Après l’appel à <code class="docutils literal notranslate"><span class="pre">save()</span></code>, les formulaires groupés du modèle posséderont trois nouveaux attributs contenant les modifications des formulaires&nbsp;:</p>
+<dl class="attribute">
+<dt id="django.forms.models.BaseModelFormSet.changed_objects">
+<code class="descclassname">models.BaseModelFormSet.</code><code class="descname">changed_objects</code><a class="headerlink" href="#django.forms.models.BaseModelFormSet.changed_objects" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.models.BaseModelFormSet.deleted_objects">
+<code class="descclassname">models.BaseModelFormSet.</code><code class="descname">deleted_objects</code><a class="headerlink" href="#django.forms.models.BaseModelFormSet.deleted_objects" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="django.forms.models.BaseModelFormSet.new_objects">
+<code class="descclassname">models.BaseModelFormSet.</code><code class="descname">new_objects</code><a class="headerlink" href="#django.forms.models.BaseModelFormSet.new_objects" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="s-limiting-the-number-of-editable-objects">
+<span id="s-model-formsets-max-num"></span><span id="limiting-the-number-of-editable-objects"></span><span id="model-formsets-max-num"></span><h3>Restriction du nombre d’objets modifiables<a class="headerlink" href="#limiting-the-number-of-editable-objects" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme pour les formulaires groupés normaux, vous pouvez utiliser les paramètres <code class="docutils literal notranslate"><span class="pre">max_num</span></code> et <code class="docutils literal notranslate"><span class="pre">extra</span></code> de <a class="reference internal" href="../../ref/forms/models.html#django.forms.models.modelformset_factory" title="django.forms.models.modelformset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">modelformset_factory()</span></code></a> pour restreindre le nombre de formulaires supplémentaires affichés.</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_num</span></code> n’empêche pas les objets existants d’être affichés&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+<span class="go">&lt;QuerySet [&lt;Author: Charles Baudelaire&gt;, &lt;Author: Paul Verlaine&gt;, &lt;Author: Walt Whitman&gt;]&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,),</span> <span class="n">max_num</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">formset</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()]</span>
+<span class="go">[&#39;Charles Baudelaire&#39;, &#39;Paul Verlaine&#39;, &#39;Walt Whitman&#39;]</span>
+</pre></div>
+</div>
+<p>De plus, <code class="docutils literal notranslate"><span class="pre">extra=0</span></code> n’empêche pas la création de nouvelles instances de modèles car il est possible d”<a class="reference internal" href="formsets.html#understanding-the-managementform"><span class="std std-ref">ajouter des formulaires supplémentaires par JavaScript</span></a> ou d’envoyer des données POST supplémentaires. Les jeux de formulaires <a class="reference external" href="https://code.djangoproject.com/ticket/26142">ne fournissent pas encore la fonctionnalité</a> d’une vue uniquement en mode édition qui empêcherait la création de nouvelles instances.</p>
+<p>Si la valeur de <code class="docutils literal notranslate"><span class="pre">max_num</span></code> est plus grande que le nombre d’objets liés existants, un maximum de  <code class="docutils literal notranslate"><span class="pre">extra</span></code> formulaires vierges supplémentaires seront ajoutés aux formulaires groupés, aussi longtemps que le nombre total de formulaires n’excède pas <code class="docutils literal notranslate"><span class="pre">max_num</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,),</span> <span class="n">max_num</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">formset</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">as_table</span><span class="p">())</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_form-0-name&quot;&gt;Name:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_form-0-name&quot; type=&quot;text&quot; name=&quot;form-0-name&quot; value=&quot;Charles Baudelaire&quot; maxlength=&quot;100&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-0-id&quot; value=&quot;1&quot; id=&quot;id_form-0-id&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_form-1-name&quot;&gt;Name:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_form-1-name&quot; type=&quot;text&quot; name=&quot;form-1-name&quot; value=&quot;Paul Verlaine&quot; maxlength=&quot;100&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-1-id&quot; value=&quot;3&quot; id=&quot;id_form-1-id&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_form-2-name&quot;&gt;Name:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_form-2-name&quot; type=&quot;text&quot; name=&quot;form-2-name&quot; value=&quot;Walt Whitman&quot; maxlength=&quot;100&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-2-id&quot; value=&quot;2&quot; id=&quot;id_form-2-id&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="go">&lt;tr&gt;&lt;th&gt;&lt;label for=&quot;id_form-3-name&quot;&gt;Name:&lt;/label&gt;&lt;/th&gt;&lt;td&gt;&lt;input id=&quot;id_form-3-name&quot; type=&quot;text&quot; name=&quot;form-3-name&quot; maxlength=&quot;100&quot;&gt;&lt;input type=&quot;hidden&quot; name=&quot;form-3-id&quot; id=&quot;id_form-3-id&quot;&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+</pre></div>
+</div>
+<p>Une valeur <code class="docutils literal notranslate"><span class="pre">max_num</span></code> <code class="docutils literal notranslate"><span class="pre">None</span></code> (par défaut) place une limite élevée du nombre de formulaires affichés (1000). En pratique, cela équivaut à aucune limite.</p>
+</div>
+<div class="section" id="s-using-a-model-formset-in-a-view">
+<span id="using-a-model-formset-in-a-view"></span><h3>Utilisation de formulaires groupés de modèle dans une vue<a class="headerlink" href="#using-a-model-formset-in-a-view" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les formulaires groupés de modèle sont très semblables aux formulaires groupés normaux. Admettons que nous voulions afficher des formulaires groupés pour modifier les instances du modèle <code class="docutils literal notranslate"><span class="pre">Author</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">modelformset_factory</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Author</span>
+
+<span class="k">def</span> <span class="nf">manage_authors</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">formset</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">formset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="c1"># do something.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;manage_authors.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;formset&#39;</span><span class="p">:</span> <span class="n">formset</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Comme vous pouvez le voir, la logique de la vue de formulaires groupés de modèle n’est pas fondamentalement différente de celle de formulaires groupés normaux. La seule différence est que nous appelons <code class="docutils literal notranslate"><span class="pre">formset.save()</span></code> pour enregistrer les données dans la base de données (comme cela a été décrit ci-dessus dans <a class="reference internal" href="#saving-objects-in-the-formset"><span class="std std-ref">Enregistrement des objets des formulaires groupés</span></a>).</p>
+</div>
+<div class="section" id="s-overriding-clean-on-a-modelformset">
+<span id="s-model-formsets-overriding-clean"></span><span id="overriding-clean-on-a-modelformset"></span><span id="model-formsets-overriding-clean"></span><h3>Surcharge de <code class="docutils literal notranslate"><span class="pre">clean()</span></code> d’un <code class="docutils literal notranslate"><span class="pre">ModelFormSet</span></code><a class="headerlink" href="#overriding-clean-on-a-modelformset" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Tout comme pour <code class="docutils literal notranslate"><span class="pre">ModelForms</span></code>, la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> de <code class="docutils literal notranslate"><span class="pre">ModelFormSet</span></code> valide par défaut qu’aucun des éléments dans les formulaires groupés ne viole les contraintes d’unicité de votre modèle (que ce soit <code class="docutils literal notranslate"><span class="pre">unique</span></code>, <code class="docutils literal notranslate"><span class="pre">unique_together</span></code> ou <code class="docutils literal notranslate"><span class="pre">unique_for_date|month|year</span></code>). Si vous souhaitez surcharger la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> d’un <code class="docutils literal notranslate"><span class="pre">ModelFormSet</span></code> et conserver cette validation, vous devez appeler la méthode <code class="docutils literal notranslate"><span class="pre">clean</span></code> de la classe parente&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">BaseModelFormSet</span>
+
+<span class="k">class</span> <span class="nc">MyModelFormSet</span><span class="p">(</span><span class="n">BaseModelFormSet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="c1"># example custom validation across forms in the formset</span>
+        <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forms</span><span class="p">:</span>
+            <span class="c1"># your custom formset validation</span>
+            <span class="o">...</span>
+</pre></div>
+</div>
+<p>Notez également qu’une fois que vous avez atteint cette étape, les instances de modèles individuelles pour chaque formulaire ont déjà été créées. Il ne suffit donc pas de modifier une valeur dans <code class="docutils literal notranslate"><span class="pre">form.cleaned_data</span></code> pour changer la valeur enregistrée. Si vous souhaitez modifier une valeur dans <code class="docutils literal notranslate"><span class="pre">ModelFormSet.clean()</span></code>, vous devez modifier <code class="docutils literal notranslate"><span class="pre">form.instance</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">BaseModelFormSet</span>
+
+<span class="k">class</span> <span class="nc">MyModelFormSet</span><span class="p">(</span><span class="n">BaseModelFormSet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forms</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="c1"># update the instance value.</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">instance</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-using-a-custom-queryset">
+<span id="using-a-custom-queryset"></span><h3>Utilisation d’un jeu de requête personnalisé<a class="headerlink" href="#using-a-custom-queryset" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme indiqué précédemment, il est possible de surcharger le jeu de requête utilisé par défaut par les formulaires groupés de modèle&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">modelformset_factory</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">myapp.models</span> <span class="k">import</span> <span class="n">Author</span>
+
+<span class="k">def</span> <span class="nf">manage_authors</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">AuthorFormSet</span> <span class="o">=</span> <span class="n">modelformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">,</span>
+            <span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">formset</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">formset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="c1"># Do something.</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">AuthorFormSet</span><span class="p">(</span><span class="n">queryset</span><span class="o">=</span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="s1">&#39;O&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;manage_authors.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;formset&#39;</span><span class="p">:</span> <span class="n">formset</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Notez que nous transmettons le paramètre <code class="docutils literal notranslate"><span class="pre">queryset</span></code> à la fois aux requêtes <code class="docutils literal notranslate"><span class="pre">POST</span></code> et <code class="docutils literal notranslate"><span class="pre">GET</span></code> dans cet exemple.</p>
+</div>
+<div class="section" id="s-using-the-formset-in-the-template">
+<span id="using-the-formset-in-the-template"></span><h3>Utilisation des formulaires groupés dans un gabarit<a class="headerlink" href="#using-the-formset-in-the-template" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il y a trois façons d’afficher des formulaires groupés dans un gabarit Django.</p>
+<p>Premièrement, vous pouvez déléguer aux formulaires groupés l’essentiel du travail&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">formset</span> <span class="cp">}}</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Deuxièmement, vous pouvez afficher les formulaires groupés manuellement, mais laisser le soin à chaque formulaire de s’afficher lui-même&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">formset.management_form</span> <span class="cp">}}</span>
+    <span class="cp">{%</span> <span class="k">for</span> <span class="nv">form</span> <span class="k">in</span> <span class="nv">formset</span> <span class="cp">%}</span>
+        <span class="cp">{{</span> <span class="nv">form</span> <span class="cp">}}</span>
+    <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Lorsque vous vous occupez vous-même d’afficher les différents formulaires, prenez soin d’inclure également le formulaire de gestion comme le montre l’exemple ci-dessus. Voir la <a class="reference internal" href="formsets.html#understanding-the-managementform"><span class="std std-ref">documentation du formulaire de gestion</span></a>.</p>
+<p>Troisièmement, vous pouvez afficher manuellement chaque champ&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">formset.management_form</span> <span class="cp">}}</span>
+    <span class="cp">{%</span> <span class="k">for</span> <span class="nv">form</span> <span class="k">in</span> <span class="nv">formset</span> <span class="cp">%}</span>
+        <span class="cp">{%</span> <span class="k">for</span> <span class="nv">field</span> <span class="k">in</span> <span class="nv">form</span> <span class="cp">%}</span>
+            <span class="cp">{{</span> <span class="nv">field.label_tag</span> <span class="cp">}}</span> <span class="cp">{{</span> <span class="nv">field</span> <span class="cp">}}</span>
+        <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+    <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Si vous optez pour cette troisième méthode et que vous ne bouclez pas sur les champs avec un <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">for</span> <span class="pre">%}</span></code>, vous devez aussi inclure le champ de clé primaire. Par exemple, si vous affichez les champs <code class="docutils literal notranslate"><span class="pre">name</span></code> et <code class="docutils literal notranslate"><span class="pre">age</span></code> d’un modèle&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;post&quot;</span><span class="p">&gt;</span>
+    <span class="cp">{{</span> <span class="nv">formset.management_form</span> <span class="cp">}}</span>
+    <span class="cp">{%</span> <span class="k">for</span> <span class="nv">form</span> <span class="k">in</span> <span class="nv">formset</span> <span class="cp">%}</span>
+        <span class="cp">{{</span> <span class="nv">form.id</span> <span class="cp">}}</span>
+        <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">form.name</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+            <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">form.age</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Voyez comment nous devons explicitement afficher <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.id</span> <span class="pre">}}</span></code>. Ceci pour s’assurer du bon fonctionnement des formulaires groupés de modèle, dans le cas de l’envoi <code class="docutils literal notranslate"><span class="pre">POST</span></code> (cet exemple suppose que la clé primaire s’appelle <code class="docutils literal notranslate"><span class="pre">id</span></code>. Si vous avez explicitement nommé la clé primaire su modèle autrement que <code class="docutils literal notranslate"><span class="pre">id</span></code>, prenez soin de l’afficher).</p>
+</div>
+</div>
+<div class="section" id="s-inline-formsets">
+<span id="s-id4"></span><span id="inline-formsets"></span><span id="id4"></span><h2>Sous-formulaires groupés<a class="headerlink" href="#inline-formsets" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.forms.models.BaseInlineFormSet">
+<em class="property">class </em><code class="descclassname">models.</code><code class="descname">BaseInlineFormSet</code><a class="headerlink" href="#django.forms.models.BaseInlineFormSet" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Les sous-formulaires groupés sont une petite couche d’abstraction au-dessus des formulaires groupés de modèle. Ils simplifient la situation où l’on manipule des objets liés au travers d’une clé étrangère. Supposons que l’on dispose de ces deux modèles&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Author</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Si vous voulez créer des formulaires groupés permettant de modifier les livres appartenant à un auteur particulier, vous pourriez faire ainsi&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">inlineformset_factory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BookFormSet</span> <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">Book</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">author</span> <span class="o">=</span> <span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mike Royko&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">formset</span> <span class="o">=</span> <span class="n">BookFormSet</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">author</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Le <a class="reference internal" href="formsets.html#formset-prefix"><span class="std std-ref">préfixe</span></a> de <code class="docutils literal notranslate"><span class="pre">BookFormSet</span></code> est <code class="docutils literal notranslate"><span class="pre">'book_set'</span></code> (<code class="docutils literal notranslate"><span class="pre">&lt;nom_modèle&gt;_set</span></code> ). Si la clé étrangère de <code class="docutils literal notranslate"><span class="pre">Book</span></code> vers <code class="docutils literal notranslate"><span class="pre">Author</span></code> possède l’attribut <a class="reference internal" href="../../ref/models/fields.html#django.db.models.ForeignKey.related_name" title="django.db.models.ForeignKey.related_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">related_name</span></code></a>, c’est ce dernier qui est utilisé.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><a class="reference internal" href="../../ref/forms/models.html#django.forms.models.inlineformset_factory" title="django.forms.models.inlineformset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">inlineformset_factory()</span></code></a> utilise <a class="reference internal" href="../../ref/forms/models.html#django.forms.models.modelformset_factory" title="django.forms.models.modelformset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">modelformset_factory()</span></code></a> et définit <code class="docutils literal notranslate"><span class="pre">can_delete=True</span></code>.</p>
+</div>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last"><a class="reference internal" href="formsets.html#manually-rendered-can-delete-and-can-order"><span class="std std-ref">can_delete et can_order affichés manuellement</span></a>.</p>
+</div>
+<div class="section" id="s-overriding-methods-on-an-inlineformset">
+<span id="overriding-methods-on-an-inlineformset"></span><h3>Surcharge des méthodes d’un <code class="docutils literal notranslate"><span class="pre">InlineFormSet</span></code><a class="headerlink" href="#overriding-methods-on-an-inlineformset" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque vous surchargez des méthodes de sous-formulaires groupés (<code class="docutils literal notranslate"><span class="pre">InlineFormSet</span></code>), il est préférable d’hériter de <a class="reference internal" href="#django.forms.models.BaseInlineFormSet" title="django.forms.models.BaseInlineFormSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInlineFormSet</span></code></a> plutôt que de <a class="reference internal" href="#django.forms.models.BaseModelFormSet" title="django.forms.models.BaseModelFormSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModelFormSet</span></code></a>.</p>
+<p>Par exemple, si vous souhaitez surcharger <code class="docutils literal notranslate"><span class="pre">clean()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">BaseInlineFormSet</span>
+
+<span class="k">class</span> <span class="nc">CustomInlineFormSet</span><span class="p">(</span><span class="n">BaseInlineFormSet</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="c1"># example custom validation across forms in the formset</span>
+        <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">forms</span><span class="p">:</span>
+            <span class="c1"># your custom formset validation</span>
+            <span class="o">...</span>
+</pre></div>
+</div>
+<p>Voir aussi <a class="reference internal" href="#model-formsets-overriding-clean"><span class="std std-ref">Surcharge de clean() d’un ModelFormSet</span></a>.</p>
+<p>Puis, au moment de créer les sous-formulaires groupés, passez le paramètre facultatif <code class="docutils literal notranslate"><span class="pre">formset</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.forms</span> <span class="kn">import</span> <span class="n">inlineformset_factory</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">BookFormSet</span> <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">Book</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,),</span>
+<span class="gp">... </span>    <span class="n">formset</span><span class="o">=</span><span class="n">CustomInlineFormSet</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">author</span> <span class="o">=</span> <span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mike Royko&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">formset</span> <span class="o">=</span> <span class="n">BookFormSet</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">author</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-more-than-one-foreign-key-to-the-same-model">
+<span id="more-than-one-foreign-key-to-the-same-model"></span><h3>Plus d’une clé étrangère vers le même modèle<a class="headerlink" href="#more-than-one-foreign-key-to-the-same-model" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si votre modèle contient plus d’une clé étrangère vers le même modèle, vous devrez résoudre l’ambiguïté manuellement en utilisant <code class="docutils literal notranslate"><span class="pre">fk_name</span></code>. Par exemple, considérez le modèle suivant&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Friendship</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">from_friend</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Friend</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;from_friends&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">to_friend</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span>
+        <span class="n">Friend</span><span class="p">,</span>
+        <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">,</span>
+        <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;friends&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">length_in_months</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Pour résoudre cela, vous pouvez définir <code class="docutils literal notranslate"><span class="pre">fk_name</span></code> dans <a class="reference internal" href="../../ref/forms/models.html#django.forms.models.inlineformset_factory" title="django.forms.models.inlineformset_factory"><code class="xref py py-func docutils literal notranslate"><span class="pre">inlineformset_factory()</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">FriendshipFormSet</span> <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Friend</span><span class="p">,</span> <span class="n">Friendship</span><span class="p">,</span> <span class="n">fk_name</span><span class="o">=</span><span class="s1">&#39;from_friend&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;to_friend&#39;</span><span class="p">,</span> <span class="s1">&#39;length_in_months&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-using-an-inline-formset-in-a-view">
+<span id="using-an-inline-formset-in-a-view"></span><h3>Utilisation de sous-formulaires groupés dans une vue<a class="headerlink" href="#using-an-inline-formset-in-a-view" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il peut être nécessaire de définir une vue permettant à un utilisateur de modifier les objets liés d’un modèle. Voici comment on peut le faire&nbsp;:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">manage_books</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">author_id</span><span class="p">):</span>
+    <span class="n">author</span> <span class="o">=</span> <span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">author_id</span><span class="p">)</span>
+    <span class="n">BookInlineFormSet</span> <span class="o">=</span> <span class="n">inlineformset_factory</span><span class="p">(</span><span class="n">Author</span><span class="p">,</span> <span class="n">Book</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,))</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">BookInlineFormSet</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">FILES</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">author</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">formset</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="n">formset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="c1"># Do something. Should generally end with a redirect. For example:</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="n">author</span><span class="o">.</span><span class="n">get_absolute_url</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">formset</span> <span class="o">=</span> <span class="n">BookInlineFormSet</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">author</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;manage_books.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;formset&#39;</span><span class="p">:</span> <span class="n">formset</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Notez comment nous définissons le paramètre <code class="docutils literal notranslate"><span class="pre">instance</span></code> aussi bien dans le cas <code class="docutils literal notranslate"><span class="pre">POST</span></code> que le cas <code class="docutils literal notranslate"><span class="pre">GET</span></code>.</p>
+</div>
+<div class="section" id="s-specifying-widgets-to-use-in-the-inline-form">
+<span id="specifying-widgets-to-use-in-the-inline-form"></span><h3>Indication des composants à utiliser dans le sous-formulaire<a class="headerlink" href="#specifying-widgets-to-use-in-the-inline-form" title="Lien permanent vers ce titre">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">inlineformset_factory</span></code> utilise <code class="docutils literal notranslate"><span class="pre">modelformset_factory</span></code> et transmet la plupart de ses paramètres à <code class="docutils literal notranslate"><span class="pre">modelformset_factory</span></code>. Cela signifie que vous pouvez utiliser le paramètre <code class="docutils literal notranslate"><span class="pre">widgets</span></code> tout comme vous le feriez pour <code class="docutils literal notranslate"><span class="pre">modelformset_factory</span></code>. Voir <a class="reference internal" href="#specifying-widgets-to-use-in-the-form-with-widgets">Indication des composants de formulaire à utiliser avec widgets</a> ci-dessus.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Création de formulaires à partir de modèles</a><ul>
+<li><a class="reference internal" href="#modelform"><code class="docutils literal notranslate"><span class="pre">ModelForm</span></code></a><ul>
+<li><a class="reference internal" href="#field-types">Types de champs</a></li>
+<li><a class="reference internal" href="#a-full-example">Un exemple complet</a></li>
+<li><a class="reference internal" href="#validation-on-a-modelform">Validation d’un <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code></a><ul>
+<li><a class="reference internal" href="#overriding-the-clean-method">Surcharge de la méthode clean()</a></li>
+<li><a class="reference internal" href="#interaction-with-model-validation">Interactions avec la validation des modèles</a></li>
+<li><a class="reference internal" href="#considerations-regarding-model-s-error-messages">Considérations sur les messages d’erreur des modèles</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-save-method">La méthode <code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
+<li><a class="reference internal" href="#selecting-the-fields-to-use">Sélection des champs à utiliser</a></li>
+<li><a class="reference internal" href="#overriding-the-default-fields">Surcharge des champs par défaut</a></li>
+<li><a class="reference internal" href="#enabling-localization-of-fields">Activation de la régionalisation des champs</a></li>
+<li><a class="reference internal" href="#form-inheritance">Héritage de formulaire</a></li>
+<li><a class="reference internal" href="#providing-initial-values">Indication de valeurs initiales</a></li>
+<li><a class="reference internal" href="#modelform-factory-function">Fonction de fabrique de ModelForm</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#model-formsets">Formulaires groupés de modèles</a><ul>
+<li><a class="reference internal" href="#changing-the-queryset">Modification du jeu de requête</a></li>
+<li><a class="reference internal" href="#changing-the-form">Modification du formulaire</a></li>
+<li><a class="reference internal" href="#specifying-widgets-to-use-in-the-form-with-widgets">Indication des composants de formulaire à utiliser avec <code class="docutils literal notranslate"><span class="pre">widgets</span></code></a></li>
+<li><a class="reference internal" href="#enabling-localization-for-fields-with-localized-fields">Activation de la régionalisation des champs avec <code class="docutils literal notranslate"><span class="pre">localized_fields</span></code></a></li>
+<li><a class="reference internal" href="#id2">Indication de valeurs initiales</a></li>
+<li><a class="reference internal" href="#saving-objects-in-the-formset">Enregistrement des objets des formulaires groupés</a></li>
+<li><a class="reference internal" href="#limiting-the-number-of-editable-objects">Restriction du nombre d’objets modifiables</a></li>
+<li><a class="reference internal" href="#using-a-model-formset-in-a-view">Utilisation de formulaires groupés de modèle dans une vue</a></li>
+<li><a class="reference internal" href="#overriding-clean-on-a-modelformset">Surcharge de <code class="docutils literal notranslate"><span class="pre">clean()</span></code> d’un <code class="docutils literal notranslate"><span class="pre">ModelFormSet</span></code></a></li>
+<li><a class="reference internal" href="#using-a-custom-queryset">Utilisation d’un jeu de requête personnalisé</a></li>
+<li><a class="reference internal" href="#using-the-formset-in-the-template">Utilisation des formulaires groupés dans un gabarit</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#inline-formsets">Sous-formulaires groupés</a><ul>
+<li><a class="reference internal" href="#overriding-methods-on-an-inlineformset">Surcharge des méthodes d’un <code class="docutils literal notranslate"><span class="pre">InlineFormSet</span></code></a></li>
+<li><a class="reference internal" href="#more-than-one-foreign-key-to-the-same-model">Plus d’une clé étrangère vers le même modèle</a></li>
+<li><a class="reference internal" href="#using-an-inline-formset-in-a-view">Utilisation de sous-formulaires groupés dans une vue</a></li>
+<li><a class="reference internal" href="#specifying-widgets-to-use-in-the-inline-form">Indication des composants à utiliser dans le sous-formulaire</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="formsets.html"
+                        title="Chapitre précédent">Formulaires groupés</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="media.html"
+                        title="Chapitre suivant">Fichiers annexes de formulaire (classe <code class="docutils literal notranslate"><span class="pre">Media</span></code>)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/forms/modelforms.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="formsets.html" title="Formulaires groupés">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="media.html" title="Fichiers annexes de formulaire (classe &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;Media&lt;/span&gt;&lt;/code&gt;)">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

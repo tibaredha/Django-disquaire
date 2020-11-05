@@ -1,0 +1,239 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Authentification sur la base de données des utilisateurs de Django depuis Apache &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Comment déployer avec ASGI" href="../asgi/index.html" />
+    <link rel="prev" title="Django avec Apache et mod_wsgi" href="modwsgi.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="modwsgi.html" title="Django avec Apache et &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;mod_wsgi&lt;/span&gt;&lt;/code&gt;">previous</a>
+     |
+    <a href="../../index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="../asgi/index.html" title="Comment déployer avec ASGI">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-deployment-wsgi-apache-auth">
+            
+  <div class="section" id="s-authenticating-against-django-s-user-database-from-apache">
+<span id="authenticating-against-django-s-user-database-from-apache"></span><h1>Authentification sur la base de données des utilisateurs de Django depuis Apache<a class="headerlink" href="#authenticating-against-django-s-user-database-from-apache" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Étant donné que la synchronisation de plusieurs bases de données d’authentification est un problème fréquent avec Apache, vous pouvez configurer Apache afin qu’il authentifie les utilisateurs à partir du  <a class="reference internal" href="../../../topics/auth/index.html"><span class="doc">système d’authentification</span></a> de Django. Cela nécessite la version 2.2 ou plus récente d’Apache ainsi que la version 2 ou plus récente de mod_wsgi. Par exemple, vous pourriez&nbsp;:</p>
+<ul class="simple">
+<li>Servir des fichiers static/media limités aux utilisateurs authentifiés directement depuis Apache.</li>
+<li>Accéder de manière authentifiée à un dépôt <a class="reference external" href="https://subversion.apache.org/">Subversion</a> pour des utilisateurs Django ayant certaines permissions.</li>
+<li>Permettre à certains utilisateurs de se connecter à un partage WebDAV créé avec <a class="reference external" href="https://httpd.apache.org/docs/2.2/mod/mod_dav.html">mod_dav</a>.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Si vous avez installé un <a class="reference internal" href="../../../topics/auth/customizing.html#auth-custom-user"><span class="std std-ref">modèle utilisateur personnalisé</span></a> et que vous voulez utiliser ce gestionnaire d’authentification par défaut, votre modèle doit prendre en charge un attribut <code class="docutils literal notranslate"><span class="pre">is_active</span></code>. Si vous voulez exploiter l’autorisation basée sur des groupes d’utilisateurs, votre utilisateur personnalisé doit posséder une relation nommée «&nbsp;groups&nbsp;» qui se réfère à un objet lié possédant le champ «&nbsp;name&nbsp;». Il est aussi possible de définir son propre gestionnaire d’authentification mod_wsgi si l’utilisateur personnalisé ne peut pas répondre à ces exigences.</p>
+</div>
+<div class="section" id="s-authentication-with-mod-wsgi">
+<span id="authentication-with-mod-wsgi"></span><h2>Authentification avec <code class="docutils literal notranslate"><span class="pre">mod_wsgi</span></code><a class="headerlink" href="#authentication-with-mod-wsgi" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">L’utilisation de <code class="docutils literal notranslate"><span class="pre">WSGIApplicationGroup</span> <span class="pre">%{GLOBAL}</span></code> dans les configurations ci-dessous présuppose que l’instance d’Apache ne sert qu’une seule application Django. Si vous faites fonctionner plus d’une application Django, référez-vous à la section <a class="reference external" href="https://modwsgi.readthedocs.io/en/develop/user-guides/configuration-guidelines.html#defining-application-groups">Defining Application Groups</a> de la documentation de mod_wsgi pour plus d’informations au sujet de ce réglage.</p>
+</div>
+<p>Assurez-vous que mod_wsgi est installé et activé et que vous avez suivi les étapes de configuration de <a class="reference internal" href="modwsgi.html"><span class="doc">Apache avec mod_wsgi</span></a>.</p>
+<p>Ensuite, modifiez votre configuration Apache pour ajouter un emplacement dont vous souhaitez limiter l’accès aux utilisateurs authentifiés&nbsp;:</p>
+<div class="highlight-apache notranslate"><div class="highlight"><pre><span></span><span class="nb">WSGIScriptAlias</span> / <span class="sx">/path/to/mysite.com/mysite/wsgi.py</span>
+<span class="nb">WSGIPythonPath</span> <span class="sx">/path/to/mysite.com</span>
+
+<span class="nb">WSGIProcessGroup</span> %{GLOBAL}
+<span class="nb">WSGIApplicationGroup</span> %{GLOBAL}
+
+<span class="nt">&lt;Location</span> <span class="s">&quot;/secret&quot;</span><span class="nt">&gt;</span>
+    <span class="nb">AuthType</span> Basic
+    <span class="nb">AuthName</span> <span class="s2">&quot;Top Secret&quot;</span>
+    <span class="nb">Require</span> valid-user
+    <span class="nb">AuthBasicProvider</span> wsgi
+    <span class="nb">WSGIAuthUserScript</span> <span class="sx">/path/to/mysite.com/mysite/wsgi.py</span>
+<span class="nt">&lt;/Location&gt;</span>
+</pre></div>
+</div>
+<p>La directive <code class="docutils literal notranslate"><span class="pre">WSGIAuthUserScript</span></code> dit à mod_wsgi d’exécuter la fonction <code class="docutils literal notranslate"><span class="pre">check_password</span></code> dans le script wsgi indiqué, en passant le nom d’utilisateur et le mot de passe qu’il reçoit de la boîte de dialogue. Dans cet exemple, le contenu de <code class="docutils literal notranslate"><span class="pre">WSGIAuthUserScript</span></code> est identique à <code class="docutils literal notranslate"><span class="pre">WSGIScriptAlias</span></code> qui définit votre application <a class="reference internal" href="index.html"><span class="doc">créée par django-admin startproject</span></a>.</p>
+<div class="admonition-using-apache-2-2-with-authentication admonition">
+<p class="first admonition-title">Utilisation d’Apache 2.2 avec l’authentification</p>
+<p>Vérifiez que <code class="docutils literal notranslate"><span class="pre">mod_auth_basic</span></code> et <code class="docutils literal notranslate"><span class="pre">mod_authz_user</span></code> sont chargés.</p>
+<p>Ils peuvent être compilés statiquement dans Apache ou vous devez peut-être utiliser LoadModule pour les charger dynamiquement dans votre fichier <code class="docutils literal notranslate"><span class="pre">httpd.conf</span></code>:</p>
+<div class="last highlight-apache notranslate"><div class="highlight"><pre><span></span><span class="nb">LoadModule</span> auth_basic_module modules/mod_auth_basic.so
+<span class="nb">LoadModule</span> authz_user_module modules/mod_authz_user.so
+</pre></div>
+</div>
+</div>
+<p>Finalement, modifiez votre script WSGI <code class="docutils literal notranslate"><span class="pre">mysite.wsgi</span></code> pour lier l’authentification Apache aux mécanismes d’authentification de votre site en important la fonction <code class="docutils literal notranslate"><span class="pre">check_password</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;DJANGO_SETTINGS_MODULE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;mysite.settings&#39;</span>
+
+<span class="kn">from</span> <span class="nn">django.contrib.auth.handlers.modwsgi</span> <span class="k">import</span> <span class="n">check_password</span>
+
+<span class="kn">from</span> <span class="nn">django.core.handlers.wsgi</span> <span class="k">import</span> <span class="n">WSGIHandler</span>
+<span class="n">application</span> <span class="o">=</span> <span class="n">WSGIHandler</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Les requêtes commençant pas <code class="docutils literal notranslate"><span class="pre">/secret/</span></code> vont dorénavant exiger l’authentification des utilisateurs.</p>
+<p>La <a class="reference external" href="https://modwsgi.readthedocs.io/en/develop/user-guides/access-control-mechanisms.html">documentation sur les mécanismes de contrôle d’accès</a> de mod_wsgi fournissent des détails supplémentaires au sujet des méthodes alternatives d’authentification.</p>
+<div class="section" id="s-authorization-with-mod-wsgi-and-django-groups">
+<span id="authorization-with-mod-wsgi-and-django-groups"></span><h3>Autorisation avec <code class="docutils literal notranslate"><span class="pre">mod_wsgi</span></code> et les groupes Django<a class="headerlink" href="#authorization-with-mod-wsgi-and-django-groups" title="Lien permanent vers ce titre">¶</a></h3>
+<p>mod_wsgi offre également la possibilité de limiter l’accès à un emplacement particulier en fonction de l’appartenance à un groupe.</p>
+<p>Dans ce cas, la configuration Apache devrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-apache notranslate"><div class="highlight"><pre><span></span><span class="nb">WSGIScriptAlias</span> / <span class="sx">/path/to/mysite.com/mysite/wsgi.py</span>
+
+<span class="nb">WSGIProcessGroup</span> %{GLOBAL}
+<span class="nb">WSGIApplicationGroup</span> %{GLOBAL}
+
+<span class="nt">&lt;Location</span> <span class="s">&quot;/secret&quot;</span><span class="nt">&gt;</span>
+    <span class="nb">AuthType</span> Basic
+    <span class="nb">AuthName</span> <span class="s2">&quot;Top Secret&quot;</span>
+    <span class="nb">AuthBasicProvider</span> wsgi
+    <span class="nb">WSGIAuthUserScript</span> <span class="sx">/path/to/mysite.com/mysite/wsgi.py</span>
+    <span class="nb">WSGIAuthGroupScript</span> <span class="sx">/path/to/mysite.com/mysite/wsgi.py</span>
+    <span class="nb">Require</span> <span class="k">group</span> secret-agents
+    <span class="nb">Require</span> valid-user
+<span class="nt">&lt;/Location&gt;</span>
+</pre></div>
+</div>
+<p>Pour prendre en charge la directive <code class="docutils literal notranslate"><span class="pre">WSGIAuthGroupScript</span></code>, le même script WSGI <code class="docutils literal notranslate"><span class="pre">mysite.wsgi</span></code> doit aussi importer la fonction <code class="docutils literal notranslate"><span class="pre">groups_for_user</span></code> qui renvoie une liste de groupes auxquels l’utilisateur appartient.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.handlers.modwsgi</span> <span class="kn">import</span> <span class="n">check_password</span><span class="p">,</span> <span class="n">groups_for_user</span>
+</pre></div>
+</div>
+<p>Les requêtes à <code class="docutils literal notranslate"><span class="pre">/secret/</span></code> vont dorénavant aussi exiger que l’utilisateur soit membre du groupe  «&nbsp;secret-agents&nbsp;».</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Authentification sur la base de données des utilisateurs de Django depuis Apache</a><ul>
+<li><a class="reference internal" href="#authentication-with-mod-wsgi">Authentification avec <code class="docutils literal notranslate"><span class="pre">mod_wsgi</span></code></a><ul>
+<li><a class="reference internal" href="#authorization-with-mod-wsgi-and-django-groups">Autorisation avec <code class="docutils literal notranslate"><span class="pre">mod_wsgi</span></code> et les groupes Django</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="modwsgi.html"
+                        title="Chapitre précédent">Django avec Apache et <code class="docutils literal notranslate"><span class="pre">mod_wsgi</span></code></a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../asgi/index.html"
+                        title="Chapitre suivant">Comment déployer avec ASGI</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/howto/deployment/wsgi/apache-auth.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="modwsgi.html" title="Django avec Apache et &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;mod_wsgi&lt;/span&gt;&lt;/code&gt;">previous</a>
+     |
+    <a href="../../index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="../asgi/index.html" title="Comment déployer avec ASGI">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

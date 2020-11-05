@@ -1,0 +1,407 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Recherche plein texte &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="Validateurs" href="validators.html" />
+    <link rel="prev" title="Opérations de migration de base de données" href="operations.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="operations.html" title="Opérations de migration de base de données">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="validators.html" title="Validateurs">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-postgres-search">
+            
+  <div class="section" id="s-full-text-search">
+<span id="full-text-search"></span><h1>Recherche plein texte<a class="headerlink" href="#full-text-search" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les fonctions de base de données dans le module <code class="docutils literal notranslate"><span class="pre">django.contrib.postgres.search</span></code> facilitent l’utilisation du <a class="reference external" href="https://www.postgresql.org/docs/current/textsearch.html">moteur de recherche plein texte</a> de PostgreSQL.</p>
+<p>Pour les exemples de ce document, nous utiliserons les modèles définis dans <a class="reference internal" href="../../../topics/db/queries.html"><span class="doc">Création de requêtes</span></a>.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Pour un aperçu de haut niveau de la recherche, consultez la <a class="reference internal" href="../../../topics/db/search.html"><span class="doc">documentation thématique</span></a>.</p>
+</div>
+<div class="section" id="s-the-search-lookup">
+<span id="the-search-lookup"></span><h2>L’expression de recherche <code class="docutils literal notranslate"><span class="pre">search</span></code><a class="headerlink" href="#the-search-lookup" title="Lien permanent vers ce titre">¶</a></h2>
+<p id="std:fieldlookup-search">Une manière habituelle d’utiliser la recherche plein texte est de rechercher un seul terme dans une seule colonne de base de données. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">body_text__search</span><span class="o">=</span><span class="s1">&#39;Cheese&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Entry: Cheese on Toast recipes&gt;, &lt;Entry: Pizza Recipes&gt;]</span>
+</pre></div>
+</div>
+<p>Ceci crée un vecteur <code class="docutils literal notranslate"><span class="pre">to_tsvector</span></code> dans la base de données à partir du champ <code class="docutils literal notranslate"><span class="pre">body_text</span></code> et une requête <code class="docutils literal notranslate"><span class="pre">plainto_tsquery</span></code> à partir du terme de recherche <code class="docutils literal notranslate"><span class="pre">'Cheese'</span></code>, les deux utilisant la configuration de recherche par défaut de la base de données. Les résultats sont obtenus en faisant correspondre la requête et le vecteur.</p>
+<p>Pour utiliser l’expression de recherche <code class="docutils literal notranslate"><span class="pre">search</span></code>, <code class="docutils literal notranslate"><span class="pre">'django.contrib.postgres'</span></code> doit figurer dans le réglage <a class="reference internal" href="../../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des expressions de requête a été ajoutée.</p>
+</div>
+</div>
+<div class="section" id="s-searchvector">
+<span id="searchvector"></span><h2><code class="docutils literal notranslate"><span class="pre">SearchVector</span></code><a class="headerlink" href="#searchvector" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.search.SearchVector">
+<em class="property">class </em><code class="descname">SearchVector</code>(<em>*expressions</em>, <em>config=None</em>, <em>weight=None</em>)<a class="headerlink" href="#django.contrib.postgres.search.SearchVector" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>La recherche dans un champ unique fonctionne bien mais est plutôt limitée. Les instances <code class="docutils literal notranslate"><span class="pre">Entry</span></code> que nous recherchons appartiennent à un <code class="docutils literal notranslate"><span class="pre">Blog</span></code>, qui possède un champ <code class="docutils literal notranslate"><span class="pre">tagline</span></code>. Pour interroger les deux champs, utilisez un vecteur <code class="docutils literal notranslate"><span class="pre">SearchVector</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchVector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">search</span><span class="o">=</span><span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">,</span> <span class="s1">&#39;blog__tagline&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s1">&#39;Cheese&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Entry: Cheese on Toast recipes&gt;, &lt;Entry: Pizza Recipes&gt;]</span>
+</pre></div>
+</div>
+<p>Les paramètres à <code class="docutils literal notranslate"><span class="pre">SearchVector</span></code> peuvent être n’importe quelle <a class="reference internal" href="../../models/expressions.html#django.db.models.Expression" title="django.db.models.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">Expression</span></code></a> ou le nom d’un champ. Plusieurs paramètres seront concaténés par des espaces afin que le document de recherche les inclue tous.</p>
+<p>Les objets <code class="docutils literal notranslate"><span class="pre">SearchVector</span></code> peuvent être combinés ce qui permet de les réutiliser. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">search</span><span class="o">=</span><span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;blog__tagline&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s1">&#39;Cheese&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Entry: Cheese on Toast recipes&gt;, &lt;Entry: Pizza Recipes&gt;]</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="#postgresql-fts-search-configuration"><span class="std std-ref">Modification de la configuration de recherche</span></a> et <a class="reference internal" href="#postgresql-fts-weighting-queries"><span class="std std-ref">Pondération des requêtes</span></a> pour une explication des paramètres <code class="docutils literal notranslate"><span class="pre">config</span></code> et <code class="docutils literal notranslate"><span class="pre">weight</span></code>.</p>
+</div>
+<div class="section" id="s-searchquery">
+<span id="searchquery"></span><h2><code class="docutils literal notranslate"><span class="pre">SearchQuery</span></code><a class="headerlink" href="#searchquery" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.search.SearchQuery">
+<em class="property">class </em><code class="descname">SearchQuery</code>(<em>value</em>, <em>config=None</em>, <em>search_type='plain'</em>)<a class="headerlink" href="#django.contrib.postgres.search.SearchQuery" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">SearchQuery</span></code> traduit les termes fournis par l’utilisateur en un objet requête de recherche que la base de données va comparer à un vecteur de recherche. Par défaut, tous les mots fournis par l’utilisateur sont passés par un algorithme de segmentation, puis la recherche de correspondance s’effectue pour tous les termes résultants.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">search_type</span></code> vaut <code class="docutils literal notranslate"><span class="pre">'plain'</span></code>, la valeur par défaut, les termes sont traités comme des mots-clés séparés. Si <code class="docutils literal notranslate"><span class="pre">search_type</span></code> vaut <code class="docutils literal notranslate"><span class="pre">'phrase'</span></code>, les termes sont traités comme une phrase unique. Si <code class="docutils literal notranslate"><span class="pre">search_type</span></code> vaut <code class="docutils literal notranslate"><span class="pre">'raw'</span></code>, vous pouvez alors fournir un requête de recherche formatée avec des termes et des opérateurs. Si <code class="docutils literal notranslate"><span class="pre">search_type</span></code> vaut <code class="docutils literal notranslate"><span class="pre">'websearch'</span></code>, vous pouvez fournir une requête de recherche mise en forme telle qu’on peut la trouver dans des moteurs de recherche du Web.  <code class="docutils literal notranslate"><span class="pre">'websearch'</span></code> nécessite PostgreSQL ≥ 11. Lisez la <a href="#id1"><span class="problematic" id="id2">_`</span></a>documentation de recherche plein texte`_ de PostgreSQL pour explorer les différences et la syntaxe. Exemples :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchQuery</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;red tomato&#39;</span><span class="p">)</span>  <span class="c1"># two keywords</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;tomato red&#39;</span><span class="p">)</span>  <span class="c1"># same results as above</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;red tomato&#39;</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s1">&#39;phrase&#39;</span><span class="p">)</span>  <span class="c1"># a phrase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;tomato red&#39;</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s1">&#39;phrase&#39;</span><span class="p">)</span>  <span class="c1"># a different phrase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s2">&quot;&#39;tomato&#39; &amp; (&#39;red&#39; | &#39;green&#39;)&quot;</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">)</span>  <span class="c1"># boolean operators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s2">&quot;&#39;tomato&#39; (&#39;red&#39; OR &#39;green&#39;)&quot;</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s1">&#39;websearch&#39;</span><span class="p">)</span>  <span class="c1"># websearch operators</span>
+</pre></div>
+</div>
+<p>Les termes <code class="docutils literal notranslate"><span class="pre">SearchQuery</span></code> peuvent être combinés logiquement pour fournir plus de souplesse&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchQuery</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;meat&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>  <span class="c1"># AND</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;meat&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>  <span class="c1"># OR</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="o">~</span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;meat&#39;</span><span class="p">)</span>  <span class="c1"># NOT</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="#postgresql-fts-search-configuration"><span class="std std-ref">Modification de la configuration de recherche</span></a> pour une explication du paramètre <code class="docutils literal notranslate"><span class="pre">config</span></code>.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge du type de recherche <code class="docutils literal notranslate"><span class="pre">'websearch'</span></code> et des expressions de requête dans <code class="docutils literal notranslate"><span class="pre">SearchQuery.value</span></code> a été ajoutée.</p>
+</div>
+</div>
+<div class="section" id="s-searchrank">
+<span id="searchrank"></span><h2><code class="docutils literal notranslate"><span class="pre">SearchRank</span></code><a class="headerlink" href="#searchrank" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.contrib.postgres.search.SearchRank">
+<em class="property">class </em><code class="descname">SearchRank</code>(<em>vector</em>, <em>query</em>, <em>weights=None</em>, <em>normalization=None</em>, <em>cover_density=False</em>)<a class="headerlink" href="#django.contrib.postgres.search.SearchRank" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Nous avons jusqu’ici renvoyés les résultats pour lesquels au moins une correspondance entre le vecteur et la requête est possible. Il est probable que vous souhaitiez trier les résultats par une certaine notion de pertinence. PostgreSQL fournit une fonction de classement qui prend en compte la fréquence d’apparition des termes recherchés dans le document, la proximité de ces termes dans le document et l’importance de l’endroit où les termes se trouvent dans le document. Plus la correspondance est bonne, plus le classement sera élevé. Pour trier par pertinence&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchQuery</span><span class="p">,</span> <span class="n">SearchRank</span><span class="p">,</span> <span class="n">SearchVector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vector</span> <span class="o">=</span> <span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">query</span> <span class="o">=</span> <span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">SearchRank</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">query</span><span class="p">))</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-rank&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Entry: Cheese on Toast recipes&gt;, &lt;Entry: Pizza recipes&gt;]</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="#postgresql-fts-weighting-queries"><span class="std std-ref">Pondération des requêtes</span></a> pour une explication du paramètre <code class="docutils literal notranslate"><span class="pre">weights</span></code>.</p>
+<p>Définissez le paramètre <code class="docutils literal notranslate"><span class="pre">cover_density</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> pour activer le classement selon densité de couverture, ce qui signifie que la proximité des termes de recherche correspondants est prise en compte.</p>
+<p>Indiquez un nombre entier dans le paramètre <code class="docutils literal notranslate"><span class="pre">normalization</span></code> pour contrôler la normalisation du classement. Ce nombre est un masque binaire, ce qui permet de combiner plusieurs comportements</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Value</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">rank</span><span class="o">=</span><span class="n">SearchRank</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">vector</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">query</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">normalization</span><span class="o">=</span><span class="n">Value</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">bitor</span><span class="p">(</span><span class="n">Value</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La documentation PostgreSQL contient plus de détails sur les <a class="reference external" href="https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-RANKING">différentes options de normalisation de classement</a>.</p>
+<div class="versionadded">
+<span class="title">New in Django 3.1:</span> <p>Les paramètres <code class="docutils literal notranslate"><span class="pre">normalization</span></code> et <code class="docutils literal notranslate"><span class="pre">cover_density</span></code> ont été ajoutés.</p>
+</div>
+</div>
+<div class="section" id="s-searchheadline">
+<span id="searchheadline"></span><h2><code class="docutils literal notranslate"><span class="pre">SearchHeadline</span></code><a class="headerlink" href="#searchheadline" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<dl class="class">
+<dt id="django.contrib.postgres.search.SearchHeadline">
+<em class="property">class </em><code class="descname">SearchHeadline</code>(<em>expression</em>, <em>query</em>, <em>config=None</em>, <em>start_sel=None</em>, <em>stop_sel=None</em>, <em>max_words=None</em>, <em>min_words=None</em>, <em>short_word=None</em>, <em>highlight_all=None</em>, <em>max_fragments=None</em>, <em>fragment_delimiter=None</em>)<a class="headerlink" href="#django.contrib.postgres.search.SearchHeadline" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Accepte un champ texte ou une expression unique, une requête, une configuration et un ensemble d’options. Renvoie des résultats de recherche avec mises en évidence.</p>
+<p>Définissez les paramètres <code class="docutils literal notranslate"><span class="pre">start_sel</span></code> et <code class="docutils literal notranslate"><span class="pre">stop_sel</span></code> à des valeurs textuelles utilisées pour envelopper les termes de recherche mis en évidence dans le document. Les valeurs par défaut de PostgreSQL sont <code class="docutils literal notranslate"><span class="pre">&lt;b&gt;</span></code> et <code class="docutils literal notranslate"><span class="pre">&lt;/b&gt;</span></code>.</p>
+<p>Fournissez des valeurs nombre entier dans les paramètres <code class="docutils literal notranslate"><span class="pre">max_words</span></code> et <code class="docutils literal notranslate"><span class="pre">min_words</span></code> pour déterminer les longueurs minimales et maximales des résumés. Les valeurs par défaut de PostgreSQL sont 35 et 15.</p>
+<p>Fournissez une valeur nombre entier dans le paramètre <code class="docutils literal notranslate"><span class="pre">short_word</span></code> pour éliminer les mots de cette longueur ou plus petits dans chaque résumé. La valeur par défaut de PostgreSQL est 3.</p>
+<p>Définissez le paramètre <code class="docutils literal notranslate"><span class="pre">highlight_all</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> pour utiliser le document complet au lieu d’un résumé et donc ignorer les paramètres <code class="docutils literal notranslate"><span class="pre">max_words</span></code>, <code class="docutils literal notranslate"><span class="pre">min_words</span></code> et <code class="docutils literal notranslate"><span class="pre">short_word</span></code>. PostgreSQL désactive ce comportement par défaut.</p>
+<p>Fournissez une valeur nombre entier différente de zéro dans le paramètre <code class="docutils literal notranslate"><span class="pre">max_fragments</span></code> pour définir le nombre maximum de résumés à afficher. PostgreSQL désactive ce comportement par défaut.</p>
+<p>Définissez le paramètre textuel <code class="docutils literal notranslate"><span class="pre">fragment_delimiter</span></code> pour configurer le délimiteur entre les résumés. La valeur par défaut de PostgreSQL est <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">...</span> <span class="pre">&quot;</span></code>.</p>
+<p>La documentation PostgreSQL contient plus de détails sur les <a class="reference external" href="https://www.postgresql.org/docs/current/textsearch-controls.html#TEXTSEARCH-HEADLINE">mises en évidence des résultats de recherche</a>.</p>
+<p>Exemple d’utilisation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchHeadline</span><span class="p">,</span> <span class="n">SearchQuery</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">query</span> <span class="o">=</span> <span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;red tomato&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">entry</span> <span class="o">=</span> <span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">headline</span><span class="o">=</span><span class="n">SearchHeadline</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="s1">&#39;body_text&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">query</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">start_sel</span><span class="o">=</span><span class="s1">&#39;&lt;span&gt;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">stop_sel</span><span class="o">=</span><span class="s1">&#39;&lt;/span&gt;&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">headline</span><span class="p">)</span>
+<span class="go">Sandwich with &lt;span&gt;tomato&lt;/span&gt; and &lt;span&gt;red&lt;/span&gt; cheese.</span>
+</pre></div>
+</div>
+<p>Voir <a class="reference internal" href="#postgresql-fts-search-configuration"><span class="std std-ref">Modification de la configuration de recherche</span></a> pour une explication du paramètre <code class="docutils literal notranslate"><span class="pre">config</span></code>.</p>
+</div>
+<div class="section" id="s-changing-the-search-configuration">
+<span id="s-postgresql-fts-search-configuration"></span><span id="changing-the-search-configuration"></span><span id="postgresql-fts-search-configuration"></span><h2>Modification de la configuration de recherche<a class="headerlink" href="#changing-the-search-configuration" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il est possible de préciser l’attribut <code class="docutils literal notranslate"><span class="pre">config</span></code> de <a class="reference internal" href="#django.contrib.postgres.search.SearchVector" title="django.contrib.postgres.search.SearchVector"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchVector</span></code></a> et de <a class="reference internal" href="#django.contrib.postgres.search.SearchQuery" title="django.contrib.postgres.search.SearchQuery"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchQuery</span></code></a> afin d’utiliser une configuration de recherche différente. Cela permet d’utiliser des analyseurs et des dictionnaires de langue différents tels que définis par la base de données&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchQuery</span><span class="p">,</span> <span class="n">SearchVector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">search</span><span class="o">=</span><span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s1">&#39;french&#39;</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;œuf&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s1">&#39;french&#39;</span><span class="p">))</span>
+<span class="go">[&lt;Entry: Pain perdu&gt;]</span>
+</pre></div>
+</div>
+<p>La valeur de <code class="docutils literal notranslate"><span class="pre">config</span></code> peut aussi être stockée dans une autre colonne&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">F</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">search</span><span class="o">=</span><span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">F</span><span class="p">(</span><span class="s1">&#39;blog__language&#39;</span><span class="p">)),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;œuf&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">F</span><span class="p">(</span><span class="s1">&#39;blog__language&#39;</span><span class="p">)))</span>
+<span class="go">[&lt;Entry: Pain perdu&gt;]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-weighting-queries">
+<span id="s-postgresql-fts-weighting-queries"></span><span id="weighting-queries"></span><span id="postgresql-fts-weighting-queries"></span><h2>Pondération des requêtes<a class="headerlink" href="#weighting-queries" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les différents champs d’une requête n’ont pas toujours la même pertinence, il est donc possible de pondérer les différents vecteurs avant de les combiner&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">SearchQuery</span><span class="p">,</span> <span class="n">SearchRank</span><span class="p">,</span> <span class="n">SearchVector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vector</span> <span class="o">=</span> <span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;A&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;blog__tagline&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">query</span> <span class="o">=</span> <span class="n">SearchQuery</span><span class="p">(</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">SearchRank</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">query</span><span class="p">))</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rank__gte</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;rank&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Le poids devrait correspondre à l’une des lettres suivantes&nbsp;: D, C, B, A. Par défaut, ces poids font référence respectivement aux nombres  <code class="docutils literal notranslate"><span class="pre">0,1</span></code>, <code class="docutils literal notranslate"><span class="pre">0,2</span></code>, <code class="docutils literal notranslate"><span class="pre">0,4</span></code> et <code class="docutils literal notranslate"><span class="pre">1,0</span></code>. Si vous souhaitez pondérer de manière différente, passez une liste de quatre nombres flottants à <a class="reference internal" href="#django.contrib.postgres.search.SearchRank" title="django.contrib.postgres.search.SearchRank"><code class="xref py py-class docutils literal notranslate"><span class="pre">SearchRank</span></code></a> pour le paramètre <code class="docutils literal notranslate"><span class="pre">weights</span></code> dans le même ordre que ci-dessus&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rank</span> <span class="o">=</span> <span class="n">SearchRank</span><span class="p">(</span><span class="n">vector</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">rank</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rank__gte</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-rank&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-performance">
+<span id="performance"></span><h2>Performance<a class="headerlink" href="#performance" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il n’est pas nécessaire de disposer d’une configuration de base de données spéciale pour utiliser ces fonctions. Cependant, si vous recherchez dans plus de quelques centaines d’enregistrements, vous risquez de rencontrer des problèmes de performance. La recherche plein texte est un processus plus intensif que la comparaison de la taille d’un nombre entier, par exemple.</p>
+<p>Dans le cas où tous les champs dans lesquels vous recherchez sont contenus dans un modèle particulier, vous pouvez créer un index fonctionnel qui correspond au vecteur de recherche que vous souhaitez utiliser. La documentation de PostgreSQL contient des détails sur la <a class="reference external" href="https://www.postgresql.org/docs/current/textsearch-tables.html#TEXTSEARCH-TABLES-INDEX">création d’index pour la recherche plein texte</a>.</p>
+<div class="section" id="s-searchvectorfield">
+<span id="searchvectorfield"></span><h3><code class="docutils literal notranslate"><span class="pre">SearchVectorField</span></code><a class="headerlink" href="#searchvectorfield" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.search.SearchVectorField">
+<em class="property">class </em><code class="descname">SearchVectorField</code><a class="headerlink" href="#django.contrib.postgres.search.SearchVectorField" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si cette approche devient trop lente, vous pouvez ajouter un champ <code class="docutils literal notranslate"><span class="pre">SearchVectorField</span></code> à votre modèle. Il faudra assurer son remplissage par des déclencheurs, par exemple, comme expliqué dans la <a class="reference external" href="https://www.postgresql.org/docs/current/textsearch-features.html#TEXTSEARCH-UPDATE-TRIGGERS">documentation PostgreSQL</a>. Il est alors possible d’interroger le champ comme s’il s’agissait d’un vecteur annoté <code class="docutils literal notranslate"><span class="pre">SearchVector</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">search_vector</span><span class="o">=</span><span class="n">SearchVector</span><span class="p">(</span><span class="s1">&#39;body_text&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Entry</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">search_vector</span><span class="o">=</span><span class="s1">&#39;cheese&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Entry: Cheese on Toast recipes&gt;, &lt;Entry: Pizza recipes&gt;]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-trigram-similarity">
+<span id="trigram-similarity"></span><h2>Similarité par trigramme<a class="headerlink" href="#trigram-similarity" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une autre approche de la recherche est la similitude par trigramme. Un trigramme est un groupe de trois caractères consécutifs. En plus de l’expression de recherche <a class="reference internal" href="lookups.html#std:fieldlookup-trigram_similar"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">trigram_similar</span></code></a>, il est possible d’utiliser une certain nombre d’autres expressions.</p>
+<p>Pour les utiliser, vous devez activer <a class="reference external" href="https://www.postgresql.org/docs/current/pgtrgm.html">l’extension pg_trgm</a> dans PostgreSQL. Vous pouvez installer l’extension par une opération de migration <a class="reference internal" href="operations.html#django.contrib.postgres.operations.TrigramExtension" title="django.contrib.postgres.operations.TrigramExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrigramExtension</span></code></a>.</p>
+<div class="section" id="s-trigramsimilarity">
+<span id="trigramsimilarity"></span><h3><code class="docutils literal notranslate"><span class="pre">TrigramSimilarity</span></code><a class="headerlink" href="#trigramsimilarity" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.search.TrigramSimilarity">
+<em class="property">class </em><code class="descname">TrigramSimilarity</code>(<em>expression</em>, <em>string</em>, <em>**extra</em>)<a class="headerlink" href="#django.contrib.postgres.search.TrigramSimilarity" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Accepte un nom de champ ou une expression, ainsi qu’une chaîne ou une expression. Renvoie la similitude par trigramme entre les deux paramètres.</p>
+<p>Exemple d’utilisation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">TrigramSimilarity</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Katy Stevens&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Stephen Keats&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="s1">&#39;Katie Stephens&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">similarity</span><span class="o">=</span><span class="n">TrigramSimilarity</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">similarity__gt</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-similarity&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Author: Katy Stevens&gt;, &lt;Author: Stephen Keats&gt;]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-trigramdistance">
+<span id="trigramdistance"></span><h3><code class="docutils literal notranslate"><span class="pre">TrigramDistance</span></code><a class="headerlink" href="#trigramdistance" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.postgres.search.TrigramDistance">
+<em class="property">class </em><code class="descname">TrigramDistance</code>(<em>expression</em>, <em>string</em>, <em>**extra</em>)<a class="headerlink" href="#django.contrib.postgres.search.TrigramDistance" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Accepte un nom de champ ou une expression, ainsi qu’une chaîne ou une expression. Renvoie la distance par trigramme entre les deux paramètres.</p>
+<p>Exemple d’utilisation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.postgres.search</span> <span class="k">import</span> <span class="n">TrigramDistance</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Katy Stevens&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Stephen Keats&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test</span> <span class="o">=</span> <span class="s1">&#39;Katie Stephens&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">distance</span><span class="o">=</span><span class="n">TrigramDistance</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">distance__lte</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;distance&#39;</span><span class="p">)</span>
+<span class="go">[&lt;Author: Katy Stevens&gt;, &lt;Author: Stephen Keats&gt;]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Recherche plein texte</a><ul>
+<li><a class="reference internal" href="#the-search-lookup">L’expression de recherche <code class="docutils literal notranslate"><span class="pre">search</span></code></a></li>
+<li><a class="reference internal" href="#searchvector"><code class="docutils literal notranslate"><span class="pre">SearchVector</span></code></a></li>
+<li><a class="reference internal" href="#searchquery"><code class="docutils literal notranslate"><span class="pre">SearchQuery</span></code></a></li>
+<li><a class="reference internal" href="#searchrank"><code class="docutils literal notranslate"><span class="pre">SearchRank</span></code></a></li>
+<li><a class="reference internal" href="#searchheadline"><code class="docutils literal notranslate"><span class="pre">SearchHeadline</span></code></a></li>
+<li><a class="reference internal" href="#changing-the-search-configuration">Modification de la configuration de recherche</a></li>
+<li><a class="reference internal" href="#weighting-queries">Pondération des requêtes</a></li>
+<li><a class="reference internal" href="#performance">Performance</a><ul>
+<li><a class="reference internal" href="#searchvectorfield"><code class="docutils literal notranslate"><span class="pre">SearchVectorField</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#trigram-similarity">Similarité par trigramme</a><ul>
+<li><a class="reference internal" href="#trigramsimilarity"><code class="docutils literal notranslate"><span class="pre">TrigramSimilarity</span></code></a></li>
+<li><a class="reference internal" href="#trigramdistance"><code class="docutils literal notranslate"><span class="pre">TrigramDistance</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="operations.html"
+                        title="Chapitre précédent">Opérations de migration de base de données</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="validators.html"
+                        title="Chapitre suivant">Validateurs</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/postgres/search.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="operations.html" title="Opérations de migration de base de données">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="validators.html" title="Validateurs">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

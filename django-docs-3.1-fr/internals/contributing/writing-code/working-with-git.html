@@ -1,0 +1,358 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Travailler avec Git et GitHub &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="JavaScript" href="javascript.html" />
+    <link rel="prev" title="Soumission de correctifs" href="submitting-patches.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="submitting-patches.html" title="Soumission de correctifs">previous</a>
+     |
+    <a href="../../index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="javascript.html" title="JavaScript">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="internals-contributing-writing-code-working-with-git">
+            
+  <div class="section" id="s-working-with-git-and-github">
+<span id="working-with-git-and-github"></span><h1>Travailler avec Git et GitHub<a class="headerlink" href="#working-with-git-and-github" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Cette section explique comment la communauté peur contribuer au code de Django au travers de requêtes de contribution (« pull requests »). SI vous vous intéressez à la manière dont les commiteurs les gèrent, consultez <a class="reference internal" href="../committing-code.html"><span class="doc">Commit de code</span></a>.</p>
+<p>Nous allons montrer ci-dessous comment créer une requête de contribution GitHub contenant les modifications pour un ticket Trac #xxxxx. En créant une requête de contribution totalement complète, vous faciliterez le travail des relecteurs, ce qui augmentera aussi la probabilité de voir votre code intégré dans Django.</p>
+<p>Il est aussi possible de téléverser un correctif traditionnel dans Trac, mais c’est moins pratique pour la relecture.</p>
+<div class="section" id="s-installing-git">
+<span id="installing-git"></span><h2>Installation de Git<a class="headerlink" href="#installing-git" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django utilise <a class="reference external" href="https://git-scm.com/">Git</a> comme système de gestion de version. Vous pouvez <a class="reference external" href="https://git-scm.com/download">télécharger</a> Git, mais il est souvent plus simple de l’installer avec le gestionnaire de paquets de votre système d’exploitation.</p>
+<p>Le <a class="reference external" href="https://github.com/django/django/">dépôt GIt</a> de Django est hébergé sur <a class="reference external" href="https://github.com/">GitHub</a>, et nous vous recommandons aussi de travailler avec GitHub.</p>
+<p>Après l’installation de Git, la première chose à faire est de configurer votre nom et votre courriel</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git config --global user.name &quot;Your Real Name&quot;
+$ git config --global user.email &quot;you@email.com&quot;
+</pre></div>
+</div>
+<p>Notez que <code class="docutils literal notranslate"><span class="pre">user.name</span></code> devrait être votre nom réel, pas un alias GitHub. GitHub devrait reconnaître le courriel que vous indiquez dans le champ <code class="docutils literal notranslate"><span class="pre">user.email</span></code>, car il sera utilisé pour associer vos commits avec votre compte GitHub.</p>
+</div>
+<div class="section" id="s-setting-up-local-repository">
+<span id="setting-up-local-repository"></span><h2>Configuration d’un dépôt local<a class="headerlink" href="#setting-up-local-repository" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Un fois votre compte GitHub créé, avec le pseudonyme « GitHub_nick », et <a class="reference external" href="https://github.com/django/django/fork">le dépôt Django cloné</a>, créez une copie locale de votre clone :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">GitHub_nick</span><span class="o">/</span><span class="n">django</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>This will create a new directory «&nbsp;django&nbsp;», containing a clone of your GitHub
+repository. The rest of the git commands on this page need to be run within the
+cloned directory, so switch to it now:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">django</span>
+</pre></div>
+</div>
+<p>Votre dépôt GitHub sera appelé « origin » dans Git.</p>
+<p>You should also setup <code class="docutils literal notranslate"><span class="pre">django/django</span></code> as an «&nbsp;upstream&nbsp;» remote (that is, tell
+git that the reference Django repository was the source of your fork of it):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">upstream</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">django</span><span class="o">/</span><span class="n">django</span><span class="o">.</span><span class="n">git</span>
+<span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+</pre></div>
+</div>
+<p>You can add other remotes similarly, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">akaariai</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">akaariai</span><span class="o">/</span><span class="n">django</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-working-on-a-ticket">
+<span id="working-on-a-ticket"></span><h2>Working on a ticket<a class="headerlink" href="#working-on-a-ticket" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque vous travaillez sur un ticket, créez une nouvelle branche dédiée à ce travail e la basant sur upstream/master</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">ticket_xxxxx</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span>
+</pre></div>
+</div>
+<p>L’option <code class="docutils literal notranslate"><span class="pre">-b</span></code> crée une branche locale. N’hésitez pas à créer de nouvelles branches même pour les plus petites choses, elles sont prévues pour ça.</p>
+<p>Si par contre vous travailliez sur une correction dans la branche 1.4, vous auriez écrit</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">ticket_xxxxx_1_4</span> <span class="n">upstream</span><span class="o">/</span><span class="n">stable</span><span class="o">/</span><span class="mf">1.4</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+</div>
+<p>On part du principe que le travail se fait sur la branche ticket_xxxxx. Faites des modifications et validez-les par commit</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">commit</span>
+</pre></div>
+</div>
+<p>When writing the commit message, follow the <a class="reference internal" href="../committing-code.html#committing-guidelines"><span class="std std-ref">commit message
+guidelines</span></a> to ease the work of the committer. If
+you’re uncomfortable with English, try at least to describe precisely what the
+commit does.</p>
+<p>If you need to do additional work on your branch, commit as often as
+necessary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s1">&#39;Added two more tests for edge cases&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="s-publishing-work">
+<span id="publishing-work"></span><h3>Publication de votre travail<a class="headerlink" href="#publishing-work" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez publier votre travail sur GitHub en exécutant</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">ticket_xxxxx</span>
+</pre></div>
+</div>
+<p>Lorsque vous allez sur votre page GitHub, vous pouvez constater qu’une nouvelle branche a été créée.</p>
+<p>Si vous travaillez à partir d’un ticket Trac, vous devriez mentionner dans le ticket que votre travail est disponible dans la branche ticket_xxxxx de votre dépôt GiHub. Incluez un lien vers votre branche.</p>
+<p>Notez que la branche ci-dessus est appelée une branche thématique (« topic branch ») dans le jargon Git. Vous êtes libre de réécrire l’historique de cette branche, par exemple avec <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">rebase</span></code>. D’autres personnes ne devraient pas baser leur travail sur une telle branche, car leur clone serait corrompu dès le moment où vous modifiez des commits.</p>
+<p>Il existe aussi des branches publiques. Ce sont des branches que d’autres personnes sont susceptibles de fourcher, ce qui implique que leur historique ne devrait jamais être altéré. De bons exemples de branches publiques sont les branches <code class="docutils literal notranslate"><span class="pre">master</span></code> et <code class="docutils literal notranslate"><span class="pre">stable/A.B.x</span></code> dans le dépôt <code class="docutils literal notranslate"><span class="pre">django/django</span></code>.</p>
+<p>Lorsque vous pensez que votre travail est prêt à être intégré dans Django, c’est le moment de créer une requête de contribution (pull request) dans GitHub. Une bonne requête de contribution signifie :</p>
+<ul class="simple">
+<li>des commits avec chacun son changement logique, respectant le <a class="reference internal" href="coding-style.html"><span class="doc">style de code</span></a> ;</li>
+<li>des messages correctement formés pour chaque commit : une ligne de résumé puis des paragraphes de lignes à 72 caractères - consultez les <span class="xref std std-ref">lignes directrices pour les commits</span> pour plus de détails ;</li>
+<li>de la documentation et des tests, si nécessaire – en réalité, des tests sont toujours nécessaires à l’exception des modifications de documentation.</li>
+</ul>
+<p>La suite de tests doit passer et la documentation doit pouvoir être construite sans avertissement.</p>
+<p>Après avoir créà la requête de contribution, vous devriez ajouter un commentaire dans le ticket Trac correspondant en expliquant ce que vous avez fait. En particulier, vous devriez signaler l’environnement dans lequel vous avez lancé les tests, par exemple : « tous les tests passent avec SQLite et MySQL ».</p>
+<p>Les requêtes de contribution de GitHub ont seulement deux états : ouvert et fermé. Le développeur qui s’occupera de cette requête n’a que deux options, la fusionner ou la fermer. C’est pour cela qu’il n’est pas utile de créer une requête de contribution avant que le code soit prêt à être fusionné, ou suffisamment proche de l’être pour qu’un développeur avec droit de commit puisse la terminer lui-même.</p>
+</div>
+<div class="section" id="s-rebasing-branches">
+<span id="rebasing-branches"></span><h3>Rebasing branches<a class="headerlink" href="#rebasing-branches" title="Lien permanent vers ce titre">¶</a></h3>
+<p>In the example above, you created two commits, the «&nbsp;Fixed ticket_xxxxx&nbsp;» commit
+and «&nbsp;Added two more tests&nbsp;» commit.</p>
+<p>We do not want to have the entire history of your working process in your
+repository. Your commit «&nbsp;Added two more tests&nbsp;» would be unhelpful noise.
+Instead, we would rather only have one commit containing all your work.</p>
+<p>To rework the history of your branch you can squash the commits into one by
+using interactive rebase:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">rebase</span> <span class="o">-</span><span class="n">i</span> <span class="n">HEAD</span><span class="o">~</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>The HEAD~2 above is shorthand for two latest commits. The above command
+will open an editor showing the two commits, prefixed with the word «&nbsp;pick&nbsp;».</p>
+<p>Change «&nbsp;pick&nbsp;» on the second line to «&nbsp;squash&nbsp;» instead. This will keep the
+first commit, and squash the second commit into the first one. Save and quit
+the editor. A second editor window should open, so you can reword the
+commit message for the commit now that it includes both your steps.</p>
+<p>You can also use the «&nbsp;edit&nbsp;» option in rebase. This way you can change a single
+commit, for example to fix a typo in a docstring:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">rebase</span> <span class="o">-</span><span class="n">i</span> <span class="n">HEAD</span><span class="o">~</span><span class="mi">3</span>
+<span class="c1"># Choose edit, pick, pick for the commits</span>
+<span class="c1"># Now you are able to rework the commit (use git add normally to add changes)</span>
+<span class="c1"># When finished, commit work with &quot;--amend&quot; and continue</span>
+<span class="n">git</span> <span class="n">commit</span> <span class="o">--</span><span class="n">amend</span>
+<span class="c1"># Reword the commit message if needed</span>
+<span class="n">git</span> <span class="n">rebase</span> <span class="o">--</span><span class="k">continue</span>
+<span class="c1"># The second and third commits should be applied.</span>
+</pre></div>
+</div>
+<p>If your topic branch is already published at GitHub, for example if you’re
+making minor changes to take into account a review, you will need to force-push
+the changes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="o">-</span><span class="n">f</span> <span class="n">origin</span> <span class="n">ticket_xxxxx</span>
+</pre></div>
+</div>
+<p>Note that this will rewrite history of ticket_xxxxx - if you check the commit
+hashes before and after the operation at GitHub you will notice that the commit
+hashes do not match anymore. This is acceptable, as the branch is a topic
+branch, and nobody should be basing their work on it.</p>
+</div>
+<div class="section" id="s-after-upstream-has-changed">
+<span id="after-upstream-has-changed"></span><h3>After upstream has changed<a class="headerlink" href="#after-upstream-has-changed" title="Lien permanent vers ce titre">¶</a></h3>
+<p>When upstream (<code class="docutils literal notranslate"><span class="pre">django/django</span></code>) has changed, you should rebase your work. To
+do this, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">rebase</span>
+</pre></div>
+</div>
+<p>The work is automatically rebased using the branch you forked on, in the
+example case using <code class="docutils literal notranslate"><span class="pre">upstream/master</span></code>.</p>
+<p>The rebase command removes all your local commits temporarily, applies the
+upstream commits, and then applies your local commits again on the work.</p>
+<p>If there are merge conflicts, you will need to resolve them and then use <code class="docutils literal notranslate"><span class="pre">git</span>
+<span class="pre">rebase</span> <span class="pre">--continue</span></code>. At any point you can use <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">rebase</span> <span class="pre">--abort</span></code> to return
+to the original state.</p>
+<p>Note that you want to <em>rebase</em> on upstream, not <em>merge</em> the upstream.</p>
+<p>The reason for this is that by rebasing, your commits will always be <em>on
+top of</em> the upstream’s work, not <em>mixed in with</em> the changes in the upstream.
+This way your branch will contain only commits related to its topic, which
+makes squashing easier.</p>
+</div>
+<div class="section" id="s-after-review">
+<span id="after-review"></span><h3>After review<a class="headerlink" href="#after-review" title="Lien permanent vers ce titre">¶</a></h3>
+<p>It is unusual to get any non-trivial amount of code into core without changes
+requested by reviewers. In this case, it is often a good idea to add the
+changes as one incremental commit to your work. This allows the reviewer to
+easily check what changes you have done.</p>
+<p>In this case, do the changes required by the reviewer. Commit as often as
+necessary. Before publishing the changes, rebase your work. If you added two
+commits, you would run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">rebase</span> <span class="o">-</span><span class="n">i</span> <span class="n">HEAD</span><span class="o">~</span><span class="mi">2</span>
+</pre></div>
+</div>
+<p>Squash the second commit into the first. Write a commit message along the lines
+of:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Made</span> <span class="n">changes</span> <span class="n">asked</span> <span class="ow">in</span> <span class="n">review</span> <span class="n">by</span> <span class="o">&lt;</span><span class="n">reviewer</span><span class="o">&gt;</span>
+
+<span class="o">-</span> <span class="n">Fixed</span> <span class="n">whitespace</span> <span class="n">errors</span> <span class="ow">in</span> <span class="n">foobar</span>
+<span class="o">-</span> <span class="n">Reworded</span> <span class="n">the</span> <span class="n">docstring</span> <span class="n">of</span> <span class="n">bar</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Finally, push your work back to your GitHub repository. Since you didn’t touch
+the public commits during the rebase, you should not need to force-push:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">ticket_xxxxx</span>
+</pre></div>
+</div>
+<p>Your pull request should now contain the new commit too.</p>
+<p>Note that the committer is likely to squash the review commit into the previous
+commit when committing the code.</p>
+</div>
+</div>
+<div class="section" id="s-working-on-a-patch">
+<span id="working-on-a-patch"></span><h2>Travail sur un correctif<a class="headerlink" href="#working-on-a-patch" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’une des manières de contribuer à Django par les développeurs est de réviser des correctifs. Ces correctifs se trouvent habituellement sous la forme de requêtes de contribution (pull request) dans GitHub et peuvent facilement être intégrés dans un dépôt local</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">pull_xxxxx</span> <span class="n">upstream</span><span class="o">/</span><span class="n">master</span>
+<span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">django</span><span class="o">/</span><span class="n">django</span><span class="o">/</span><span class="n">pull</span><span class="o">/</span><span class="n">xxxxx</span><span class="o">.</span><span class="n">patch</span> <span class="o">|</span> <span class="n">git</span> <span class="n">am</span>
+</pre></div>
+</div>
+<p>Cela va créer une nouvelle branche, puis y appliquer les modifications de la requête de contribution. À ce stade, vous pouvez lancer les tests ou faire tout ce qu’il faut pour examiner la qualité du correctif.</p>
+<p>Pour plus de détails sur le travail avec les requêtes de contribution, consultez <a class="reference internal" href="../committing-code.html#handling-pull-requests"><span class="std std-ref">les lignes directrices pour les commiteurs</span></a>.</p>
+</div>
+<div class="section" id="s-summary">
+<span id="summary"></span><h2>Sommaire<a class="headerlink" href="#summary" title="Lien permanent vers ce titre">¶</a></h2>
+<ul class="simple">
+<li>Travaillez avec GitHub si vous le pouvez.</li>
+<li>Annoncez votre travail sur le ticket Trac en y ajoutant un lien vers votre branche GitHub.</li>
+<li>Lorsque vous avez du code qui vous semble prêt, créez une requête de contribution (« pull request »).</li>
+<li>Préparez vos requêtes de contribution aussi bien que vous le pouvez.</li>
+<li>Lorsque vous appliquez des corrections à votre travail, utilisez <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">rebase</span> <span class="pre">-i</span></code> pour fusionner vos commits.</li>
+<li>Lorsque le code principal amont a changé, faites <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">fetch</span> <span class="pre">upstream;</span> <span class="pre">git</span> <span class="pre">rebase</span></code>.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Travailler avec Git et GitHub</a><ul>
+<li><a class="reference internal" href="#installing-git">Installation de Git</a></li>
+<li><a class="reference internal" href="#setting-up-local-repository">Configuration d’un dépôt local</a></li>
+<li><a class="reference internal" href="#working-on-a-ticket">Working on a ticket</a><ul>
+<li><a class="reference internal" href="#publishing-work">Publication de votre travail</a></li>
+<li><a class="reference internal" href="#rebasing-branches">Rebasing branches</a></li>
+<li><a class="reference internal" href="#after-upstream-has-changed">After upstream has changed</a></li>
+<li><a class="reference internal" href="#after-review">After review</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#working-on-a-patch">Travail sur un correctif</a></li>
+<li><a class="reference internal" href="#summary">Sommaire</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="submitting-patches.html"
+                        title="Chapitre précédent">Soumission de correctifs</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="javascript.html"
+                        title="Chapitre suivant">JavaScript</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/internals/contributing/writing-code/working-with-git.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="submitting-patches.html" title="Soumission de correctifs">previous</a>
+     |
+    <a href="../../index.html" title="Fonctionnement interne du projet Django" accesskey="U">up</a>
+   |
+    <a href="javascript.html" title="JavaScript">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

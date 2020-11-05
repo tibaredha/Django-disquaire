@@ -1,0 +1,725 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Thématiques de tests avancées &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Authentification des utilisateurs dans Django" href="../auth/index.html" />
+    <link rel="prev" title="Outils de test" href="tools.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="tools.html" title="Outils de test">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="../auth/index.html" title="Authentification des utilisateurs dans Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-testing-advanced">
+            
+  <div class="section" id="s-advanced-testing-topics">
+<span id="advanced-testing-topics"></span><h1>Thématiques de tests avancées<a class="headerlink" href="#advanced-testing-topics" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-the-request-factory">
+<span id="the-request-factory"></span><h2>La fabrique de requêtes<a class="headerlink" href="#the-request-factory" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.test.RequestFactory">
+<em class="property">class </em><code class="descname">RequestFactory</code><a class="headerlink" href="#django.test.RequestFactory" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>La classe <a class="reference internal" href="#django.test.RequestFactory" title="django.test.RequestFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestFactory</span></code></a> partage la même API que le client de test. Cependant, au lieu de se comporter comme un navigateur, <code class="docutils literal notranslate"><span class="pre">RequestFactory</span></code> offre une manière de générer une instance de requête pouvant être utilisée comme premier paramètre de n’importe quelle vue. Cela permet de tester une fonction de vue de la même façon que vous testeriez toute autre fonction, comme une boîte noire, avec des données connues en entrée et en testant un résultat spécifique.</p>
+<p>L’API de <a class="reference internal" href="#django.test.RequestFactory" title="django.test.RequestFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestFactory</span></code></a> est un tout petit peu plus restreinte que celle du client de test&nbsp;:</p>
+<ul class="simple">
+<li>Elle ne donne accès qu’aux méthodes HTTP <a class="reference internal" href="tools.html#django.test.Client.get" title="django.test.Client.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, <a class="reference internal" href="tools.html#django.test.Client.post" title="django.test.Client.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code></a>, <a class="reference internal" href="tools.html#django.test.Client.put" title="django.test.Client.put"><code class="xref py py-meth docutils literal notranslate"><span class="pre">put()</span></code></a>, <a class="reference internal" href="tools.html#django.test.Client.delete" title="django.test.Client.delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delete()</span></code></a>, <a class="reference internal" href="tools.html#django.test.Client.head" title="django.test.Client.head"><code class="xref py py-meth docutils literal notranslate"><span class="pre">head()</span></code></a>, <a class="reference internal" href="tools.html#django.test.Client.options" title="django.test.Client.options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">options()</span></code></a> et <a class="reference internal" href="tools.html#django.test.Client.trace" title="django.test.Client.trace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">trace()</span></code></a>.</li>
+<li>Toutes ces méthodes acceptent les mêmes paramètres, <em>à l’exception</em> de <code class="docutils literal notranslate"><span class="pre">follow</span></code>. Comme il ne s’agit que d’une fabrique produisant des requêtes, le traitement de la réponse est de votre responsabilité.</li>
+<li>Elle ne gère pas les intergiciels. Les attributs de session et d’authentification doivent être fournis par le test lui-même, si nécessaire, pour que la vue fonctionne correctement.</li>
+</ul>
+<div class="section" id="s-example">
+<span id="example"></span><h3>Exemple<a class="headerlink" href="#example" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’exemple suivant est un test unitaire utilisant la fabrique de requêtes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="k">import</span> <span class="n">AnonymousUser</span><span class="p">,</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">django.test</span> <span class="k">import</span> <span class="n">RequestFactory</span><span class="p">,</span> <span class="n">TestCase</span>
+
+<span class="kn">from</span> <span class="nn">.views</span> <span class="k">import</span> <span class="n">MyView</span><span class="p">,</span> <span class="n">my_view</span>
+
+<span class="k">class</span> <span class="nc">SimpleTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Every test needs access to the request factory.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">RequestFactory</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create_user</span><span class="p">(</span>
+            <span class="n">username</span><span class="o">=</span><span class="s1">&#39;jacob&#39;</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="s1">&#39;jacob@…&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;top_secret&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_details</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Create an instance of a GET request.</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/customer/details&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Recall that middleware are not supported. You can simulate a</span>
+        <span class="c1"># logged-in user by setting request.user manually.</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span>
+
+        <span class="c1"># Or you can simulate an anonymous user by setting request.user to</span>
+        <span class="c1"># an AnonymousUser instance.</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">AnonymousUser</span><span class="p">()</span>
+
+        <span class="c1"># Test my_view() as if it were deployed at /customer/details</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="c1"># Use this syntax for class-based views.</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">MyView</span><span class="o">.</span><span class="n">as_view</span><span class="p">()(</span><span class="n">request</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-asyncrequestfactory">
+<span id="asyncrequestfactory"></span><h3>AsyncRequestFactory<a class="headerlink" href="#asyncrequestfactory" title="Lien permanent vers ce titre">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">RequestFactory</span></code> crée des requêtes de type WSGI. Si vous souhaitez créer des requêtes de type ASGI, ayant aussi une portée <code class="docutils literal notranslate"><span class="pre">scope</span></code> ASGI correcte, vous pouvez utiliser <code class="docutils literal notranslate"><span class="pre">django.test.AsyncRequestFactory</span></code> à la place.</p>
+<p>L’API de cette classe est directement compatible avec <code class="docutils literal notranslate"><span class="pre">RequestFactory</span></code>, avec comme seule différence le renvoi d’instances <code class="docutils literal notranslate"><span class="pre">ASGIRequest</span></code> au lieu de <code class="docutils literal notranslate"><span class="pre">WSGIRequest</span></code>. Toutes ses méthodes restent des exécutables synchrones.</p>
+</div>
+</div>
+<div class="section" id="s-testing-class-based-views">
+<span id="testing-class-based-views"></span><h2>Test des vues fondées sur les classes<a class="headerlink" href="#testing-class-based-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Afin de tester les vues fondées sur des classes en dehors du cycle requête/réponse, vous devez vous assurer qu’elles sont configurées correctement en appelant <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.setup" title="django.views.generic.base.View.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a> après leur instanciation.</p>
+<p>Par exemple, en partant de la vue classe suivante :</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">views.py</span><a class="headerlink" href="#id1" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">TemplateView</span>
+
+
+<span class="k">class</span> <span class="nc">HomeView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;myapp/home.html&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;environment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Production&#39;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Vous pouvez directement tester la méthode <code class="docutils literal notranslate"><span class="pre">get_context_data()</span></code> en commençant par créer une instance de la vue, puis en passant une requête à <code class="docutils literal notranslate"><span class="pre">setup()</span></code> avant de procéder au test du code :</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">tests.py</span><a class="headerlink" href="#id2" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.test</span> <span class="kn">import</span> <span class="n">RequestFactory</span><span class="p">,</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">.views</span> <span class="kn">import</span> <span class="n">HomeView</span>
+
+
+<span class="k">class</span> <span class="nc">HomePageTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_environment_set_in_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">RequestFactory</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">view</span> <span class="o">=</span> <span class="n">HomeView</span><span class="p">()</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">get_context_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="s1">&#39;environment&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-tests-and-multiple-host-names">
+<span id="s-topics-testing-advanced-multiple-hosts"></span><span id="tests-and-multiple-host-names"></span><span id="topics-testing-advanced-multiple-hosts"></span><h2>Tests avec plusieurs noms d’hôtes<a class="headerlink" href="#tests-and-multiple-host-names" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-ALLOWED_HOSTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ALLOWED_HOSTS</span></code></a> est validé lors de l’exécution des tests. Cela permet au client de test de faire la différence entre les URL internes et externes.</p>
+<p>Les projets qui gèrent plusieurs domaines par site ou adaptent leur comportement en fonction de l’hôte de la requête et qui utilisent des noms d’hôte particuliers dans les tests doivent inclure ces noms d’hôte dans <a class="reference internal" href="../../ref/settings.html#std:setting-ALLOWED_HOSTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ALLOWED_HOSTS</span></code></a>.</p>
+<p>La première option pour accomplir cela est d’ajouter les hôtes dans le fichier des réglages. Par exemple, la suite de tests de docs.djangoproject.com contient ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.test</span> <span class="k">import</span> <span class="n">TestCase</span>
+
+<span class="k">class</span> <span class="nc">SearchFormTestCase</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_empty_get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/en/dev/search/&#39;</span><span class="p">,</span> <span class="n">HTTP_HOST</span><span class="o">=</span><span class="s1">&#39;docs.djangoproject.dev:8000&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>et le fichier des réglages contient une liste des domaines pris en charge par le projet&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ALLOWED_HOSTS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;www.djangoproject.dev&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;docs.djangoproject.dev&#39;</span><span class="p">,</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Une autre option est d’ajouter les hôtes nécessaires dans <a class="reference internal" href="../../ref/settings.html#std:setting-ALLOWED_HOSTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ALLOWED_HOSTS</span></code></a> en utilisant <a class="reference internal" href="tools.html#django.test.override_settings" title="django.test.override_settings"><code class="xref py py-meth docutils literal notranslate"><span class="pre">override_settings()</span></code></a> ou <a class="reference internal" href="tools.html#django.test.SimpleTestCase.modify_settings" title="django.test.SimpleTestCase.modify_settings"><code class="xref py py-attr docutils literal notranslate"><span class="pre">modify_settings()</span></code></a>. Cette option peut être préférable pour les applications autonomes qui ne peuvent pas fournir leur propre fichier de réglages ou pour les projets dont la liste des domaines n’est pas figée (par ex. des sous-domaines dans un service partagé). Par exemple, il serait possible d’écrire un test pour le domaine <code class="docutils literal notranslate"><span class="pre">http://otherserver/</span></code> comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.test</span> <span class="k">import</span> <span class="n">TestCase</span><span class="p">,</span> <span class="n">override_settings</span>
+
+<span class="k">class</span> <span class="nc">MultiDomainTestCase</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@override_settings</span><span class="p">(</span><span class="n">ALLOWED_HOSTS</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;otherserver&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">test_other_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://otherserver/foo/bar/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La désactivation du contrôle de <a class="reference internal" href="../../ref/settings.html#std:setting-ALLOWED_HOSTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ALLOWED_HOSTS</span></code></a> (<code class="docutils literal notranslate"><span class="pre">ALLOWED_HOSTS</span> <span class="pre">=</span> <span class="pre">['*']</span></code>) lors de l’exécution des tests empêche le client de test de produire un message d’erreur instructif si une redirection est appelée pour une URL externe.</p>
+</div>
+<div class="section" id="s-tests-and-multiple-databases">
+<span id="s-topics-testing-advanced-multidb"></span><span id="tests-and-multiple-databases"></span><span id="topics-testing-advanced-multidb"></span><h2>Tests avec plusieurs base de données<a class="headerlink" href="#tests-and-multiple-databases" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-testing-primary-replica-configurations">
+<span id="s-topics-testing-primaryreplica"></span><span id="testing-primary-replica-configurations"></span><span id="topics-testing-primaryreplica"></span><h3>Test des configurations primaire/réplique<a class="headerlink" href="#testing-primary-replica-configurations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous testez une configuration avec plusieurs bases de données impliquant une réplication primaire/réplique (désignée comme maître/esclave par certaines bases de données), cette stratégie de création de bases de données de test pose un problème. Lorsque les bases de données de test sont créées, la réplication n’a pas lieu et par conséquent, les données créées sur la base primaire ne seront pas visibles sur les répliques.</p>
+<p>Pour contourner ce problème, Django permet de définir une base de données comme un <em>miroir de test</em>. Considérez cet exemple (simplifié) de configuration de bases de données&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.mysql&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;myproject&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HOST&#39;</span><span class="p">:</span> <span class="s1">&#39;dbprimary&#39;</span><span class="p">,</span>
+         <span class="c1"># ... plus some other settings</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;replica&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.mysql&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;myproject&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HOST&#39;</span><span class="p">:</span> <span class="s1">&#39;dbreplica&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;TEST&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;MIRROR&#39;</span><span class="p">:</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="c1"># ... plus some other settings</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Dans cette configuration figurent deux serveurs de base de données&nbsp;: <code class="docutils literal notranslate"><span class="pre">dbprimary</span></code>, défini par l’alias de base de données <code class="docutils literal notranslate"><span class="pre">default</span></code> et <code class="docutils literal notranslate"><span class="pre">dbreplica</span></code>, défini par l’alias <code class="docutils literal notranslate"><span class="pre">replica</span></code>. Comme l’on peut s’y attendre, <code class="docutils literal notranslate"><span class="pre">dbreplica</span></code> a été configuré par l’administrateur de base de données comme réplique en lecture de <code class="docutils literal notranslate"><span class="pre">dbprimary</span></code>. En temps normal, toute écriture sur <code class="docutils literal notranslate"><span class="pre">default</span></code> apparaît aussi sur <code class="docutils literal notranslate"><span class="pre">replica</span></code>.</p>
+<p>Si Django avait créé deux bases de données de test indépendantes, cela casserait d’éventuels tests s’attendant à de la réplication. Cependant, la base de données <code class="docutils literal notranslate"><span class="pre">replica</span></code> a été configurée comme miroir de test (via le réglage de test <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_MIRROR"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIRROR</span></code></a>), indiquant par là que lors des tests, <code class="docutils literal notranslate"><span class="pre">replica</span></code> doit être traité comme un miroir de <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+<p>Au moment de la création de l’environnement de test, <em>aucune</em> base ne sera créée pour <code class="docutils literal notranslate"><span class="pre">replica</span></code>. Par contre, la connexion vers <code class="docutils literal notranslate"><span class="pre">replica</span></code> sera redirigée pour pointer vers <code class="docutils literal notranslate"><span class="pre">default</span></code>. Par conséquent, les écritures sur <code class="docutils literal notranslate"><span class="pre">default</span></code> apparaîtront aussi sur <code class="docutils literal notranslate"><span class="pre">replica</span></code>, mais parce qu’il s’agit en réalité de la même base de données, car aucune réplication de données ne sera mise en place entre les deux bases de données.</p>
+</div>
+<div class="section" id="s-controlling-creation-order-for-test-databases">
+<span id="s-topics-testing-creation-dependencies"></span><span id="controlling-creation-order-for-test-databases"></span><span id="topics-testing-creation-dependencies"></span><h3>Ordre de création des bases de données de test<a class="headerlink" href="#controlling-creation-order-for-test-databases" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, Django part du principe que toutes les bases de données dépendent de la base de données <code class="docutils literal notranslate"><span class="pre">default</span></code> et va par conséquent toujours créer celle-ci en premier. Cependant, pour toute autre base de données de votre configuration de test, il n’y a aucune garantie sur l’ordre de création des bases de données.</p>
+<p>Si votre configuration de base de données nécessite un ordre de création bien défini, vous pouvez indiquer les dépendances entre bases de données dans le réglage de test <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_DEPENDENCIES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEPENDENCIES</span></code></a>. Considérez cet exemple (simplifié) de configuration de bases de données&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># ... db settings</span>
+        <span class="s1">&#39;TEST&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;DEPENDENCIES&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;diamonds&#39;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;diamonds&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># ... db settings</span>
+        <span class="s1">&#39;TEST&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;DEPENDENCIES&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;clubs&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># ... db settings</span>
+        <span class="s1">&#39;TEST&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;DEPENDENCIES&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;diamonds&#39;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;spades&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># ... db settings</span>
+        <span class="s1">&#39;TEST&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;DEPENDENCIES&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;diamonds&#39;</span><span class="p">,</span> <span class="s1">&#39;hearts&#39;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;hearts&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="c1"># ... db settings</span>
+        <span class="s1">&#39;TEST&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;DEPENDENCIES&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;diamonds&#39;</span><span class="p">,</span> <span class="s1">&#39;clubs&#39;</span><span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Avec cette configuration, la base de données <code class="docutils literal notranslate"><span class="pre">diamonds</span></code> sera créée en premier car c’est le seul alias de base de données sans dépendances. Les alias <code class="docutils literal notranslate"><span class="pre">default</span></code> et <code class="docutils literal notranslate"><span class="pre">clubs</span></code> seront ensuite créés (bien que l’ordre de création de ceux-ci ne soit pas défini), puis <code class="docutils literal notranslate"><span class="pre">hearts</span></code> et enfin, <code class="docutils literal notranslate"><span class="pre">spades</span></code>.</p>
+<p>Si la définition de <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_DEPENDENCIES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEPENDENCIES</span></code></a> comporte des dépendances circulaires, une exception <a class="reference internal" href="../../ref/exceptions.html#django.core.exceptions.ImproperlyConfigured" title="django.core.exceptions.ImproperlyConfigured"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImproperlyConfigured</span></code></a> sera générée.</p>
+</div>
+</div>
+<div class="section" id="s-advanced-features-of-transactiontestcase">
+<span id="advanced-features-of-transactiontestcase"></span><h2>Fonctionnalités avancées de <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code><a class="headerlink" href="#advanced-features-of-transactiontestcase" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="attribute">
+<dt id="django.test.TransactionTestCase.available_apps">
+<code class="descclassname">TransactionTestCase.</code><code class="descname">available_apps</code><a class="headerlink" href="#django.test.TransactionTestCase.available_apps" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Cet attribut est une API privée. Il peut être modifié ou supprimé dans une version future sans période d’obsolescence, par exemple pour s’adapter à des modifications du processus de chargement des applications.</p>
+<p class="last">Il est utilisé pour optimiser la suite de tests de Django lui-même qui contient des centaines de modèles mais sans relations entre les modèles des différentes applications de test.</p>
+</div>
+<p>Par défaut, <code class="docutils literal notranslate"><span class="pre">available_apps</span></code> vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>. Après chaque test, Django appelle <a class="reference internal" href="../../ref/django-admin.html#django-admin-flush"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">flush</span></code></a> pour réinitialiser l’état de la base de données. Toutes les tables sont ainsi vidées et le signal <a class="reference internal" href="../../ref/signals.html#django.db.models.signals.post_migrate" title="django.db.models.signals.post_migrate"><code class="xref py py-data docutils literal notranslate"><span class="pre">post_migrate</span></code></a> est émis, ce qui recrée un type de contenu et quatre permissions pour chaque modèle. Cette opération s’alourdit proportionnellement au nombre de modèles.</p>
+<p>En définissant <code class="docutils literal notranslate"><span class="pre">available_apps</span></code> à une liste d’applications, Django se comporte comme si seuls les modèles de ces applications étaient disponibles. Le comportement de <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code> est modifié comme suit&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../../ref/signals.html#django.db.models.signals.post_migrate" title="django.db.models.signals.post_migrate"><code class="xref py py-data docutils literal notranslate"><span class="pre">post_migrate</span></code></a> est émis avant chaque test pour créer les types de contenu et les permissions de chaque modèle des applications disponibles, dans le cas où ils manqueraient.</li>
+<li>Après chaque test, Django ne vide que les tables correspondants aux modèles des applications disponibles. Cependant, au niveau de la base de données, il est possible que les troncatures s’appliquent en cascade à des modèles liés dans des applications non disponibles. De plus, <a class="reference internal" href="../../ref/signals.html#django.db.models.signals.post_migrate" title="django.db.models.signals.post_migrate"><code class="xref py py-data docutils literal notranslate"><span class="pre">post_migrate</span></code></a> n’est pas émis&nbsp;; il sera émis par le prochain test  <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code>, après que l’ensemble d’applications adéquat a été sélectionné.</li>
+</ul>
+<p>Comme la base de données n’est pas complètement vidée, si un test crée des instances de modèles non inclus dans <code class="docutils literal notranslate"><span class="pre">available_apps</span></code>, ces instances vont rester et pourraient être la cause d’échecs de tests non liés. Restez prudent avec les tests employant des sessions&nbsp;; le moteur de sessions par défaut les stocke dans la base de données.</p>
+<p>Comme <a class="reference internal" href="../../ref/signals.html#django.db.models.signals.post_migrate" title="django.db.models.signals.post_migrate"><code class="xref py py-data docutils literal notranslate"><span class="pre">post_migrate</span></code></a> n’est pas émis après la réinitialisation de la base de données, son état après un <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code> n’est pas le même qu’après un <code class="docutils literal notranslate"><span class="pre">TestCase</span></code>: les lignes créées par les récepteurs de <a class="reference internal" href="../../ref/signals.html#django.db.models.signals.post_migrate" title="django.db.models.signals.post_migrate"><code class="xref py py-data docutils literal notranslate"><span class="pre">post_migrate</span></code></a> sont manquantes. Mais sachant <a class="reference internal" href="overview.html#order-of-tests"><span class="std std-ref">l’ordre dans lequel les tests sont exécutés</span></a>, ce n’est pas un problème, dans la mesure où soit tous les tests <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code> d’une suite de tests déclarent <code class="docutils literal notranslate"><span class="pre">available_apps</span></code>, soit aucun.</p>
+<p><code class="docutils literal notranslate"><span class="pre">available_apps</span></code> est obligatoire dans la propre suite de tests de Django.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.test.TransactionTestCase.reset_sequences">
+<code class="descclassname">TransactionTestCase.</code><code class="descname">reset_sequences</code><a class="headerlink" href="#django.test.TransactionTestCase.reset_sequences" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>En définissant <code class="docutils literal notranslate"><span class="pre">reset_sequences</span> <span class="pre">=</span> <span class="pre">True</span></code> d’une classe <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code>, vous vous assurez que les séquences sont toujours réinitialisées avant le lancement du test&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TestsThatDependsOnPrimaryKeySequences</span><span class="p">(</span><span class="n">TransactionTestCase</span><span class="p">):</span>
+    <span class="n">reset_sequences</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">test_animal_pk</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lion</span> <span class="o">=</span> <span class="n">Animal</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;lion&quot;</span><span class="p">,</span> <span class="n">sound</span><span class="o">=</span><span class="s2">&quot;roar&quot;</span><span class="p">)</span>
+        <span class="c1"># lion.pk is guaranteed to always be 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">lion</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>À l’exception des cas où vous testez explicitement les numéros de séquence de clés primaires, il est recommandé de ne pas tester des valeurs de clés primaires figées.</p>
+<p>L’utilisation de <code class="docutils literal notranslate"><span class="pre">reset_sequences</span> <span class="pre">=</span> <span class="pre">True</span></code> ralentit les tests, car la réinitialisation des clés primaires est une opération de base de données relativement coûteuse.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-enforce-running-test-classes-sequentially">
+<span id="s-topics-testing-enforce-run-sequentially"></span><span id="enforce-running-test-classes-sequentially"></span><span id="topics-testing-enforce-run-sequentially"></span><h2>Exécution séquentielle forcée des classes de tests<a class="headerlink" href="#enforce-running-test-classes-sequentially" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous avez des classes de tests qui ne peuvent pas fonctionner en parallèle (par exemple si elles partagent une ressource commune), vous pouvez utiliser <code class="docutils literal notranslate"><span class="pre">django.test.testcases.SerializeMixin</span></code> pour les exécuter de manière séquentielle. Cette classe mixin utilise un fichier verrou <code class="docutils literal notranslate"><span class="pre">lockfile</span></code> du système de fichiers.</p>
+<p>Par exemple, vous pouvez utiliser <code class="docutils literal notranslate"><span class="pre">__file__</span></code> pour déterminer que toutes les classes de tests du même fichier héritant de <code class="docutils literal notranslate"><span class="pre">SerializeMixin</span></code> seront exécutées les unes à la suite des autres</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">django.test</span> <span class="k">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">django.test.testcases</span> <span class="k">import</span> <span class="n">SerializeMixin</span>
+
+<span class="k">class</span> <span class="nc">ImageTestCaseMixin</span><span class="p">(</span><span class="n">SerializeMixin</span><span class="p">):</span>
+    <span class="n">lockfile</span> <span class="o">=</span> <span class="vm">__file__</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_storage_dir</span><span class="p">,</span> <span class="s1">&#39;my_file.png&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">create_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">RemoveImageTests</span><span class="p">(</span><span class="n">ImageTestCaseMixin</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_remove_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">ResizeImageTests</span><span class="p">(</span><span class="n">ImageTestCaseMixin</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_resize_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">resize_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">get_image_size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file</span><span class="p">),</span> <span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">48</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-using-the-django-test-runner-to-test-reusable-applications">
+<span id="s-testing-reusable-applications"></span><span id="using-the-django-test-runner-to-test-reusable-applications"></span><span id="testing-reusable-applications"></span><h2>Utilisation du lanceur de tests de Django pour tester des applications réutilisables<a class="headerlink" href="#using-the-django-test-runner-to-test-reusable-applications" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous écrivez une <a class="reference internal" href="../../intro/reusable-apps.html"><span class="doc">application réutilisable</span></a>, il peut être intéressant d’utiliser le lanceur de tests de Django pour lancer votre propre suite de tests et bénéficier ainsi de l’infrastructure de tests de Django.</p>
+<p>Une pratique courante est de placer un répertoire <em>tests</em> en parallèle de votre code d’application, avec la structure suivante&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">runtests</span><span class="o">.</span><span class="n">py</span>
+<span class="n">polls</span><span class="o">/</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+    <span class="o">...</span>
+<span class="n">tests</span><span class="o">/</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">test_settings</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">tests</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Examinons ce qui se trouve dans certains de ces fichiers&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">runtests.py</span><a class="headerlink" href="#id3" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">django</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.test.utils</span> <span class="kn">import</span> <span class="n">get_runner</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;DJANGO_SETTINGS_MODULE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;tests.test_settings&#39;</span>
+    <span class="n">django</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+    <span class="n">TestRunner</span> <span class="o">=</span> <span class="n">get_runner</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+    <span class="n">test_runner</span> <span class="o">=</span> <span class="n">TestRunner</span><span class="p">()</span>
+    <span class="n">failures</span> <span class="o">=</span> <span class="n">test_runner</span><span class="o">.</span><span class="n">run_tests</span><span class="p">([</span><span class="s2">&quot;tests&quot;</span><span class="p">])</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">failures</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Il s’agit ici du script invoqué pour lancer la suite de tests. Il met en place l’environnement Django, crée la base de données de tests et lance les tests.</p>
+<p>Par souci de clarté, cet exemple ne contient que le strict minimum nécessaire à l’utilisation du lanceur de tests de Django. On peut cependant imaginer ajouter des options en ligne de commande pour le contrôle de la verbosité, pour passer des étiquettes de tests spécifiques à lancer, etc.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">tests/test_settings.py</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SECRET_KEY</span> <span class="o">=</span> <span class="s1">&#39;fake-key&#39;</span>
+<span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;tests&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Ce fichier contient les <a class="reference internal" href="../settings.html"><span class="doc">réglages Django</span></a> indispensables pour lancer les tests de votre application.</p>
+<p>Encore une fois, il s’agit d’un exemple minimal&nbsp;; les tests peuvent exiger des réglages supplémentaires pour fonctionner.</p>
+<p>Comme le paquet <em>tests</em> est inclus dans <a class="reference internal" href="../../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> au moment de lancer les tests, il est possible de définir des modèles uniquement pour les tests dans le fichier <code class="docutils literal notranslate"><span class="pre">models.py</span></code>.</p>
+</div>
+<div class="section" id="s-using-different-testing-frameworks">
+<span id="s-other-testing-frameworks"></span><span id="using-different-testing-frameworks"></span><span id="other-testing-frameworks"></span><h2>Utilisation d’autres infrastructures de test<a class="headerlink" href="#using-different-testing-frameworks" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il est clair que <a class="reference external" href="https://docs.python.org/3/library/unittest.html#module-unittest" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">unittest</span></code></a> n’est pas la seule infrastructure de test de Python. Même si Django ne fournit pas de prise en charge explicite d’autres systèmes de test, il offre une manière d’invoquer des tests construits pour un autre système comme s’il s’agissait de tests Django normaux.</p>
+<p>Lorsque vous lancez <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">test</span></code>, Django consulte le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_RUNNER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEST_RUNNER</span></code></a> pour déterminer ce qu’il doit faire. Par défaut, <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_RUNNER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEST_RUNNER</span></code></a> contient <code class="docutils literal notranslate"><span class="pre">'django.test.runner.DiscoverRunner'</span></code>. Cette classe définit le comportement de test par défaut de Django. Ce comportement implique&nbsp;:</p>
+<ol class="arabic simple">
+<li>Une préparation générale avant les tests.</li>
+<li>La recherche de tests dans tout fichier au-dessous du répertoire actuel dont le nom correspond au motif <code class="docutils literal notranslate"><span class="pre">test*.py</span></code>.</li>
+<li>La création des bases de données de test.</li>
+<li>Le lancement de <code class="docutils literal notranslate"><span class="pre">migrate</span></code> pour installer les modèles et les données initiales dans les bases de données de test.</li>
+<li>L’exécution des <a class="reference internal" href="../checks.html"><span class="doc">vérifications systèmes</span></a>.</li>
+<li>L’exécution des tests découverts.</li>
+<li>La suppression des bases de données de test.</li>
+<li>Une finalisation générale après les tests.</li>
+</ol>
+<p>Si vous définissez votre propre classe de lanceur de tests et que vous indiquez cette classe dans <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_RUNNER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEST_RUNNER</span></code></a>, Django se servira de votre lanceur de tests lors de chaque appel à <code class="docutils literal notranslate"><span class="pre">./manage.py</span> <span class="pre">test</span></code>. De cette façon, il est possible d’utiliser n’importe quel système de test pouvant être lancé à partir de code Python ou de modifier le processus d’exécution des tests Django pour adapter les tests à d’éventuels besoins spécifiques.</p>
+<div class="section" id="s-defining-a-test-runner">
+<span id="s-topics-testing-test-runner"></span><span id="defining-a-test-runner"></span><span id="topics-testing-test-runner"></span><h3>Définition d’un lanceur de tests<a class="headerlink" href="#defining-a-test-runner" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Un lanceur de tests est une classe définissant une méthode <code class="docutils literal notranslate"><span class="pre">run_tests()</span></code>. Django fournit une classe <code class="docutils literal notranslate"><span class="pre">DiscoverRunner</span></code> définissant le comportement de test par défaut de Django. Cette classe définit le point d’entrée <code class="docutils literal notranslate"><span class="pre">run_tests()</span></code> ainsi qu’une sélection d’autres méthodes utilisées par <code class="docutils literal notranslate"><span class="pre">run_tests()</span></code> pour préparer, exécuter et clore la suite de tests.</p>
+<dl class="class">
+<dt id="django.test.runner.DiscoverRunner">
+<em class="property">class </em><code class="descname">DiscoverRunner</code>(<em>pattern='test*.py'</em>, <em>top_level=None</em>, <em>verbosity=1</em>, <em>interactive=True</em>, <em>failfast=False</em>, <em>keepdb=False</em>, <em>reverse=False</em>, <em>debug_mode=False</em>, <em>debug_sql=False</em>, <em>test_name_patterns=None</em>, <em>pdb=False</em>, <em>buffer=False</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DiscoverRunner</span></code> recherche des tests dans tout fichier correspondant au motif <code class="docutils literal notranslate"><span class="pre">pattern</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">top_level</span></code> peut être utilisé pour indiquer le répertoire contenant les modules Python de premier niveau. Django peut généralement le découvrir automatiquement, ce qui fait que cette option n’est pas absolument nécessaire. Lorsqu’elle est définie, elle devrait en principe correspondre au répertoire contenant le fichier <code class="docutils literal notranslate"><span class="pre">manage.py</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verbosity</span></code> détermine la quantité de notifications et d’informations de débogage qui s’afficheront sur la console&nbsp;; <code class="docutils literal notranslate"><span class="pre">0</span></code> n’affiche rien, <code class="docutils literal notranslate"><span class="pre">1</span></code> correspond à l’affichage normal et <code class="docutils literal notranslate"><span class="pre">2</span></code> à l’affichage verbeux.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">interactive</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la suite de tests a le droit de poser des questions à l’utilisateur durant son exécution. Par exemple, elle pourrait demander la permission de supprimer une base de données de test existante. Si <code class="docutils literal notranslate"><span class="pre">interactive</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, la suite de tests doit pouvoir s’exécuter sans aucune intervention manuelle de l’utilisateur.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">failfast</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la suite de tests s’arrête immédiatement après le premier échec de test.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">keepdb</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la suite de tests va utiliser la base de données existante ou en créer une si c’est nécessaire. Si la valeur est <code class="docutils literal notranslate"><span class="pre">False</span></code>, une nouvelle base de données est toujours créée, demandant à l’utilisateur de supprimer une éventuelle base existante de même nom.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">reverse</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, les cas de tests sont exécutés dans l’ordre inverse. Cela peut être utile pour déboguer des tests qui ne sont pas isolés correctement et génèrent des effets de bord. Le <a class="reference internal" href="overview.html#order-of-tests"><span class="std std-ref">groupement par classe de test</span></a> est conservé lors de l’utilisation de cette option.</p>
+<p><code class="docutils literal notranslate"><span class="pre">debug_mode</span></code> indique la valeur que doit prendre le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> avant d’exécuter les tests.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">debug_sql</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, les tests en échec affichent les requêtes SQL journalisées vers <a class="reference internal" href="../logging.html#django-db-logger"><span class="std std-ref">django.db.backends</span></a> en plus de la pile d’appels. Si <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> vaut <code class="docutils literal notranslate"><span class="pre">2</span></code>, les requêtes de tous les tests sont affichées.</p>
+<p><code class="docutils literal notranslate"><span class="pre">test_name_patterns</span></code> peut être utilisé pour définir un ensemble de motifs pour filtrer les méthodes et classes de test par leur nom.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">pdb</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, un débogueur (<code class="docutils literal notranslate"><span class="pre">pdb</span></code> ou <code class="docutils literal notranslate"><span class="pre">ipdb</span></code>) sera déclenché lors de chaque erreur ou échec de test.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">buffer</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la sortie des tests réussis sera omise.</p>
+<p>Il est possible que de temps à autre, Django étende les capacités du lanceur de tests en ajoutant de nouveaux paramètres. La déclaration <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> permet cette extension. Si vous héritez de <code class="docutils literal notranslate"><span class="pre">DiscoverRunner</span></code> ou que vous écrivez votre propre lanceur de tests, vérifiez qu’il accepte <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code>.</p>
+<p>Votre lanceur de tests peut aussi définir des options supplémentaires en ligne de commande. Créez ou surchargez une méthode de classe <code class="docutils literal notranslate"><span class="pre">add_arguments(cls,</span> <span class="pre">parser)</span></code> et ajoutez des paramètres personnalisés en appelant <code class="docutils literal notranslate"><span class="pre">parser.add_argument()</span></code> dans cette méthode, afin que la commande <a class="reference internal" href="../../ref/django-admin.html#django-admin-test"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">test</span></code></a> puisse exploiter ces paramètres.</p>
+<div class="versionadded">
+<span class="title">New in Django 3.0:</span> <p>Le paramètre <code class="docutils literal notranslate"><span class="pre">pdb</span></code> a été ajouté.</p>
+</div>
+<div class="versionadded">
+<span class="title">New in Django 3.1:</span> <p>Le paramètre <code class="docutils literal notranslate"><span class="pre">buffer</span></code> a été ajouté.</p>
+</div>
+</dd></dl>
+
+<div class="section" id="s-attributes">
+<span id="attributes"></span><h4>Attributs<a class="headerlink" href="#attributes" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="attribute">
+<dt id="django.test.runner.DiscoverRunner.test_suite">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">test_suite</code><a class="headerlink" href="#django.test.runner.DiscoverRunner.test_suite" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La classe utilisée pour construire la suite de tests. Par défaut, il s’agit de <code class="docutils literal notranslate"><span class="pre">unittest.TestSuite</span></code>. Il est possible de surcharger cette valeur si vous souhaitez implémenter une logique différente pour collecter les tests.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.test.runner.DiscoverRunner.test_runner">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">test_runner</code><a class="headerlink" href="#django.test.runner.DiscoverRunner.test_runner" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette classe est celle du lanceur de tests de bas niveau utilisé pour exécuter les tests individuels et mettre en forme les résultats. Par défaut, il s’agit de <code class="docutils literal notranslate"><span class="pre">unittest.TextTestRunner</span></code>. Malgré la malencontreuse similitude des conventions de nommage, il ne s’agit pas du même type de classe que <code class="docutils literal notranslate"><span class="pre">DiscoverRunner</span></code>, qui prend en charge un plus grand spectre de responsabilités. Vous pouvez surcharger cet attribut pour modifier la façon dont les tests sont exécutés et leurs résultats affichés.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.test.runner.DiscoverRunner.test_loader">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">test_loader</code><a class="headerlink" href="#django.test.runner.DiscoverRunner.test_loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Il s’agit de la classe qui charge les tests, que ce soit à partir de classes <code class="docutils literal notranslate"><span class="pre">TestCase</span></code>, de modules ou d’autres façons, et qui les consolide en suites de tests que le lanceur pourra exécuter. Par défaut, c’est <code class="docutils literal notranslate"><span class="pre">unittest.defaultTestLoader</span></code>. Vous pouvez surcharger cet attribut si vos tests doivent être chargés de manière inhabituelle.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-methods">
+<span id="methods"></span><h4>Méthodes<a class="headerlink" href="#methods" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.run_tests">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">run_tests</code>(<em>test_labels</em>, <em>extra_tests=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.run_tests" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Lance la suite de tests.</p>
+<p><code class="docutils literal notranslate"><span class="pre">test_labels</span></code> permet d’indiquer les tests à exécuter et accepte plusieurs formats (voir <a class="reference internal" href="#django.test.runner.DiscoverRunner.build_suite" title="django.test.runner.DiscoverRunner.build_suite"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DiscoverRunner.build_suite()</span></code></a> pour la liste des formats pris en charge).</p>
+<p><code class="docutils literal notranslate"><span class="pre">extra_tests</span></code> est une liste d’instances <code class="docutils literal notranslate"><span class="pre">TestCase</span></code> supplémentaires à ajouter à la suite exécutée par le lanceur de tests. Ces tests supplémentaires sont exécutés en plus de ceux découverts dans les modules énumérés dans <code class="docutils literal notranslate"><span class="pre">test_labels</span></code>.</p>
+<p>Cette méthode doit renvoyer le nombre de tests ayant échoué.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="django.test.runner.DiscoverRunner.add_arguments">
+<em class="property">classmethod </em><code class="descclassname">DiscoverRunner.</code><code class="descname">add_arguments</code>(<em>parser</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.add_arguments" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Surchargez cette méthode de classe pour ajouter des paramètres personnalisés acceptés par la commande d’administration <a class="reference internal" href="../../ref/django-admin.html#django-admin-test"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">test</span></code></a>. Voir <a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_argument" title="(disponible dans Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">argparse.ArgumentParser.add_argument()</span></code></a> pour plus de détails au sujet de l’ajout de paramètres de ligne de commande.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.setup_test_environment">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">setup_test_environment</code>(<em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.setup_test_environment" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Met en place l’environnement de test en appelant <a class="reference internal" href="#django.test.utils.setup_test_environment" title="django.test.utils.setup_test_environment"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_test_environment()</span></code></a> et en définissant <a class="reference internal" href="../../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> à <code class="docutils literal notranslate"><span class="pre">self.debug_mode</span></code> (<code class="docutils literal notranslate"><span class="pre">False</span></code> par défaut).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.build_suite">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">build_suite</code>(<em>test_labels</em>, <em>extra_tests=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.build_suite" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Construit une suite de tests correspondant aux noms de test indiqués.</p>
+<p><code class="docutils literal notranslate"><span class="pre">test_labels</span></code> est une liste de chaînes décrivant les tests à exécuter. Un nom de test peut apparaître sous quatre formes&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">chemin.vers.module_test.TestCase.methode_test</span></code> – Lance une seule méthode de test dans un cas de test.</li>
+<li><code class="docutils literal notranslate"><span class="pre">chemin.vers.module_test.TestCase</span></code> – Lance toutes les méthodes de test d’un cas de test.</li>
+<li><code class="docutils literal notranslate"><span class="pre">chemin.vers.module</span></code> – Recherche et lance tous les tests d’un paquet ou module Python donné.</li>
+<li><code class="docutils literal notranslate"><span class="pre">chemin/vers/répertoire</span></code> – Recherche et lance tous les tests dans la sous-arborescence du répertoire donné.</li>
+</ul>
+<p>Si <code class="docutils literal notranslate"><span class="pre">test_labels</span></code> contient la valeur <code class="docutils literal notranslate"><span class="pre">None</span></code>, le lanceur de tests recherche des tests dans tous les fichiers au-dessous du répertoire actuel dont le nom correspond à son motif <code class="docutils literal notranslate"><span class="pre">pattern</span></code> (voir ci-dessus).</p>
+<p><code class="docutils literal notranslate"><span class="pre">extra_tests</span></code> est une liste d’instances <code class="docutils literal notranslate"><span class="pre">TestCase</span></code> supplémentaires à ajouter à la suite exécutée par le lanceur de tests. Ces tests supplémentaires sont exécutés en plus de ceux découverts dans les modules énumérés dans <code class="docutils literal notranslate"><span class="pre">test_labels</span></code>.</p>
+<p>Renvoie une instance <code class="docutils literal notranslate"><span class="pre">TestSuite</span></code> prête à être exécutée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.setup_databases">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">setup_databases</code>(<em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.setup_databases" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée les bases de données de test en appelant <a class="reference internal" href="#django.test.utils.setup_databases" title="django.test.utils.setup_databases"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup_databases()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.run_checks">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">run_checks</code>(<em>databases</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.run_checks" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Lance les <a class="reference internal" href="../checks.html"><span class="doc">vérifications systèmes</span></a> pour les bases <code class="docutils literal notranslate"><span class="pre">databases</span></code> de test.</p>
+<div class="versionadded">
+<span class="title">New in Django 3.1:</span> <p>Le paramètre <code class="docutils literal notranslate"><span class="pre">databases</span></code> a été ajouté.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.run_suite">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">run_suite</code>(<em>suite</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.run_suite" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Lance la suite de tests.</p>
+<p>Renvoie le résultat produit par l’exécution de la suite de tests.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.get_test_runner_kwargs">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">get_test_runner_kwargs</code>()<a class="headerlink" href="#django.test.runner.DiscoverRunner.get_test_runner_kwargs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie les paramètres nommés pour l’instanciation de  <code class="docutils literal notranslate"><span class="pre">DiscoverRunner.test_runner</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.teardown_databases">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">teardown_databases</code>(<em>old_config</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.teardown_databases" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Supprime les bases de données de test, rétablissant la situation d’avant-test en appelant <a class="reference internal" href="#django.test.utils.teardown_databases" title="django.test.utils.teardown_databases"><code class="xref py py-func docutils literal notranslate"><span class="pre">teardown_databases()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.teardown_test_environment">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">teardown_test_environment</code>(<em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.teardown_test_environment" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Rétablit l’environnement à son état d’avant les tests.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.test.runner.DiscoverRunner.suite_result">
+<code class="descclassname">DiscoverRunner.</code><code class="descname">suite_result</code>(<em>suite</em>, <em>result</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.runner.DiscoverRunner.suite_result" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Calcule et renvoie un code de retour basé sur une suite de tests et des résultats de ces tests.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-testing-utilities">
+<span id="testing-utilities"></span><h3>Utilitaires de test<a class="headerlink" href="#testing-utilities" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="section" id="s-module-django.test.utils">
+<span id="s-django-test-utils"></span><span id="module-django.test.utils"></span><span id="django-test-utils"></span><h4><code class="docutils literal notranslate"><span class="pre">django.test.utils</span></code><a class="headerlink" href="#module-django.test.utils" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Pour aider à la création de votre propre lanceur de tests, Django fournit un certain nombre de méthodes utilitaires dans le module <code class="docutils literal notranslate"><span class="pre">django.test.utils</span></code>.</p>
+<dl class="function">
+<dt id="django.test.utils.setup_test_environment">
+<code class="descname">setup_test_environment</code>(<em>debug=None</em>)<a class="headerlink" href="#django.test.utils.setup_test_environment" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Effectue la mise en place générale avant les tests, comme l’installation des adaptations du système de rendu des gabarits et la mise en place de la boîte de messagerie factice.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">debug</span></code> ne vaut pas <code class="docutils literal notranslate"><span class="pre">None</span></code>, le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> est mis à jour avec cette valeur.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.test.utils.teardown_test_environment">
+<code class="descname">teardown_test_environment</code>()<a class="headerlink" href="#django.test.utils.teardown_test_environment" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Effectue la finalisation générale après les tests, comme la suppression des adaptations du système des gabarits et le rétablissement des services de messagerie par défaut.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.test.utils.setup_databases">
+<code class="descname">setup_databases</code>(<em>verbosity</em>, <em>interactive</em>, <em>keepdb=False</em>, <em>debug_sql=False</em>, <em>parallel=0</em>, <em>aliases=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.test.utils.setup_databases" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée les bases de données de test.</p>
+<p>Renvoie une structure de données fournissant suffisamment de détails pour annuler les changements effectués. Ces données sont ensuite transmises à la fonction <a class="reference internal" href="#django.test.utils.teardown_databases" title="django.test.utils.teardown_databases"><code class="xref py py-func docutils literal notranslate"><span class="pre">teardown_databases()</span></code></a> lors de la finalisation des tests.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">aliases</span></code> détermine pour quels alias de <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a> les bases de données de test doivent être préparées. S’il n’est pas présent, sa valeur par défaut contient tous les alias de <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.test.utils.teardown_databases">
+<code class="descname">teardown_databases</code>(<em>old_config</em>, <em>parallel=0</em>, <em>keepdb=False</em>)<a class="headerlink" href="#django.test.utils.teardown_databases" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Supprime les bases de données de test, rétablissant la situation d’avant-test.</p>
+<p><code class="docutils literal notranslate"><span class="pre">old_config</span></code> est une structure de données définissant les modifications de la configuration des bases de données qui doivent être annulées. C’est la valeur de renvoi de la méthode <a class="reference internal" href="#django.test.utils.setup_databases" title="django.test.utils.setup_databases"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup_databases()</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-django-db-connection-creation">
+<span id="django-db-connection-creation"></span><h4><code class="docutils literal notranslate"><span class="pre">django.db.connection.creation</span></code><a class="headerlink" href="#django-db-connection-creation" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le module de création du moteur de base de données propose également quelques utilitaires pouvant être utiles durant les tests.</p>
+<dl class="function">
+<dt id="django.db.connection.creation.create_test_db">
+<code class="descname">create_test_db</code>(<em>verbosity=1</em>, <em>autoclobber=False</em>, <em>serialize=True</em>, <em>keepdb=False</em>)<a class="headerlink" href="#django.db.connection.creation.create_test_db" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée une nouvelle base de données de test et exécute <code class="docutils literal notranslate"><span class="pre">migrate</span></code> sur cette base.</p>
+<p><code class="docutils literal notranslate"><span class="pre">verbosity</span></code> a le même effet que dans <code class="docutils literal notranslate"><span class="pre">run_tests()</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">autoclobber</span></code> décrit le comportement adopté si une base de données de même nom que la base de données de test existe déjà&nbsp;:</p>
+<ul class="simple">
+<li>Si <code class="docutils literal notranslate"><span class="pre">autoclobber</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, l’utilisateur devra confirmer la suppression de la base de données existante. <code class="docutils literal notranslate"><span class="pre">sys.exit</span></code> est appelée si l’utilisateur refuse.</li>
+<li>Si <code class="docutils literal notranslate"><span class="pre">autoclobber</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la base de données est supprimée sans rien demander à l’utilisateur.</li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">serialize</span></code> détermine si Django sérialise la base de données en une chaîne JSON en mémoire avant de lancer les tests (utilisé pour restaurer l’état de la base de données entre les tests s’il n’y a pas de transactions). Vous pouvez le définir à <code class="docutils literal notranslate"><span class="pre">False</span></code> pour accélérer nettement le temps de création si aucune de vos classes de test ne comporte <a class="reference internal" href="overview.html#test-case-serialized-rollback"><span class="std std-ref">serialized_rollback=True</span></a>.</p>
+<p>Si vous utilisez le lanceur de tests par défaut, vous pouvez contrôler cela avec la clé <a class="reference internal" href="../../ref/settings.html#std:setting-TEST_SERIALIZE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SERIALIZE</span></code></a> du dictionnaire <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASE-TEST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEST</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">keepdb</span></code> détermine si la session de test doit utiliser une base de données existante ou si elle doit en créer une nouvelle. Si <code class="docutils literal notranslate"><span class="pre">True</span></code>, une éventuelle base de données existante est utilisée, sinon une nouvelle base est créée. Si <code class="docutils literal notranslate"><span class="pre">False</span></code>, une nouvelle base de données sera créée dans tous les cas, en demandant à l’utilisateur s’il doit supprimer la base existante, s’il y en a une.</p>
+<p>Renvoie le nom de la base de données de test qui a été créée.</p>
+<p><code class="docutils literal notranslate"><span class="pre">create_test_db()</span></code> présente un effet de bord&nbsp;: la valeur de <a class="reference internal" href="../../ref/settings.html#std:setting-NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">NAME</span></code></a> dans <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a> est mise à jour pour correspondre au nom de la base de données de test.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.db.connection.creation.destroy_test_db">
+<code class="descname">destroy_test_db</code>(<em>old_database_name</em>, <em>verbosity=1</em>, <em>keepdb=False</em>)<a class="headerlink" href="#django.db.connection.creation.destroy_test_db" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Supprime la base de données dont le nom correspond à la valeur de <a class="reference internal" href="../../ref/settings.html#std:setting-NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">NAME</span></code></a> dans <a class="reference internal" href="../../ref/settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a> et met à jour <a class="reference internal" href="../../ref/settings.html#std:setting-NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">NAME</span></code></a> avec la valeur contenue dans <code class="docutils literal notranslate"><span class="pre">old_database_name</span></code>.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">verbosity</span></code> a le même effet que pour <a class="reference internal" href="#django.test.runner.DiscoverRunner" title="django.test.runner.DiscoverRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscoverRunner</span></code></a>.</p>
+<p>Si le paramètre <code class="docutils literal notranslate"><span class="pre">keepdb</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la connexion à la base de données sera fermée, mais la base de données ne sera pas détruite.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="s-integration-with-coverage-py">
+<span id="s-topics-testing-code-coverage"></span><span id="integration-with-coverage-py"></span><span id="topics-testing-code-coverage"></span><h2>Intégration avec <code class="docutils literal notranslate"><span class="pre">coverage.py</span></code><a class="headerlink" href="#integration-with-coverage-py" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La couverture de code représente la quantité de code source mis à l’épreuve par les tests. Elle montre quelles sont les parties de code que les tests éprouvent et les parties qui ne le sont pas. C’est un aspect important du test des applications, c’est pourquoi il est fortement recommandé de contrôler la couverture de vos tests.</p>
+<p>Django peut facilement s’intégrer à <a class="reference external" href="https://coverage.readthedocs.io/">coverage.py</a>, un outil de mesure de couverture du code de programmes Python. Premièrement, <a class="reference external" href="https://pypi.org/project/coverage/">installez coverage.py</a>. Puis, lancez la commande suivante à partir du répertoire de votre projet contenant <code class="docutils literal notranslate"><span class="pre">manage.py</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coverage</span> <span class="n">run</span> <span class="o">--</span><span class="n">source</span><span class="o">=</span><span class="s1">&#39;.&#39;</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">test</span> <span class="n">myapp</span>
+</pre></div>
+</div>
+<p>Cela va lancer les tests et collecter les données de couverture des fichiers exécutés dans votre projet. Vous pouvez afficher un rapport de ces données en saisissant la commande suivante&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coverage</span> <span class="n">report</span>
+</pre></div>
+</div>
+<p>Notez que du code Django a été exécuté lors de l’exécution des tests, mais il ne figure pas dans le rapport à cause de l’option <code class="docutils literal notranslate"><span class="pre">source</span></code> indiquée dans la commande précédente.</p>
+<p>Pour davantage d’options comme les listings HTML annotés détaillant les lignes manquantes, consultez la documentation de <a class="reference external" href="https://coverage.readthedocs.io/">coverage.py</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Thématiques de tests avancées</a><ul>
+<li><a class="reference internal" href="#the-request-factory">La fabrique de requêtes</a><ul>
+<li><a class="reference internal" href="#example">Exemple</a></li>
+<li><a class="reference internal" href="#asyncrequestfactory">AsyncRequestFactory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing-class-based-views">Test des vues fondées sur les classes</a></li>
+<li><a class="reference internal" href="#tests-and-multiple-host-names">Tests avec plusieurs noms d’hôtes</a></li>
+<li><a class="reference internal" href="#tests-and-multiple-databases">Tests avec plusieurs base de données</a><ul>
+<li><a class="reference internal" href="#testing-primary-replica-configurations">Test des configurations primaire/réplique</a></li>
+<li><a class="reference internal" href="#controlling-creation-order-for-test-databases">Ordre de création des bases de données de test</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-features-of-transactiontestcase">Fonctionnalités avancées de <code class="docutils literal notranslate"><span class="pre">TransactionTestCase</span></code></a></li>
+<li><a class="reference internal" href="#enforce-running-test-classes-sequentially">Exécution séquentielle forcée des classes de tests</a></li>
+<li><a class="reference internal" href="#using-the-django-test-runner-to-test-reusable-applications">Utilisation du lanceur de tests de Django pour tester des applications réutilisables</a></li>
+<li><a class="reference internal" href="#using-different-testing-frameworks">Utilisation d’autres infrastructures de test</a><ul>
+<li><a class="reference internal" href="#defining-a-test-runner">Définition d’un lanceur de tests</a><ul>
+<li><a class="reference internal" href="#attributes">Attributs</a></li>
+<li><a class="reference internal" href="#methods">Méthodes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing-utilities">Utilitaires de test</a><ul>
+<li><a class="reference internal" href="#module-django.test.utils"><code class="docutils literal notranslate"><span class="pre">django.test.utils</span></code></a></li>
+<li><a class="reference internal" href="#django-db-connection-creation"><code class="docutils literal notranslate"><span class="pre">django.db.connection.creation</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#integration-with-coverage-py">Intégration avec <code class="docutils literal notranslate"><span class="pre">coverage.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="tools.html"
+                        title="Chapitre précédent">Outils de test</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../auth/index.html"
+                        title="Chapitre suivant">Authentification des utilisateurs dans Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/testing/advanced.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="tools.html" title="Outils de test">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="../auth/index.html" title="Authentification des utilisateurs dans Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

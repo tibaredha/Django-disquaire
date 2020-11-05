@@ -1,0 +1,390 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Intergiciels (« Middleware ») &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Utilisation des sessions" href="sessions.html" />
+    <link rel="prev" title="Vues génériques" href="generic-views.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="generic-views.html" title="Vues génériques">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="sessions.html" title="Utilisation des sessions">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-http-middleware">
+            
+  <div class="section" id="s-middleware">
+<span id="middleware"></span><h1>Intergiciels («&nbsp;Middleware&nbsp;»)<a class="headerlink" href="#middleware" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les intergiciels représentent un système de points d’entrée dans le traitement des requêtes et des réponses de Django. C’est un système de greffons léger et de bas niveau pour modifier de façon globale les entrées et sorties HTTP de Django.</p>
+<p>Chaque composant d’intergiciel est responsable d’effectuer une tâche spécifique. Par exemple, Django contient un intergiciel, <a class="reference internal" href="../../ref/middleware.html#django.contrib.auth.middleware.AuthenticationMiddleware" title="django.contrib.auth.middleware.AuthenticationMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthenticationMiddleware</span></code></a>, qui associe les utilisateurs aux requêtes et aux sessions.</p>
+<p>Ce document explique comment fonctionnent les intergiciels, la manière de les activer et d’écrire vos propres intergiciels. Django est livré avec quelques intergiciels intégrés qu’il est possible d’utiliser tels quels. Ils sont documentés dans la <a class="reference internal" href="../../ref/middleware.html"><span class="doc">référence des intergiciels intégrés</span></a>.</p>
+<div class="section" id="s-writing-your-own-middleware">
+<span id="writing-your-own-middleware"></span><h2>Écriture de son propre intergiciel<a class="headerlink" href="#writing-your-own-middleware" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une fabrique d’intergiciel est un objet exécutable acceptant un exécutable <code class="docutils literal notranslate"><span class="pre">get_response</span></code> et renvoyant un intergiciel. Un intergiciel est un objet exécutable acceptant une requête et renvoyant une réponse, tout comme une vue.</p>
+<p>Un intergiciel peut être écrit comme une fonction qui ressemble à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">simple_middleware</span><span class="p">(</span><span class="n">get_response</span><span class="p">):</span>
+    <span class="c1"># One-time configuration and initialization.</span>
+
+    <span class="k">def</span> <span class="nf">middleware</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="c1"># Code to be executed for each request before</span>
+        <span class="c1"># the view (and later middleware) are called.</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">get_response</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># Code to be executed for each request/response after</span>
+        <span class="c1"># the view is called.</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">return</span> <span class="n">middleware</span>
+</pre></div>
+</div>
+<p>Ou il peut être écrit comme une classe dont les instances peuvent être appelées, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SimpleMiddleware</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">get_response</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span> <span class="o">=</span> <span class="n">get_response</span>
+        <span class="c1"># One-time configuration and initialization.</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c1"># Code to be executed for each request before</span>
+        <span class="c1"># the view (and later middleware) are called.</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="c1"># Code to be executed for each request/response after</span>
+        <span class="c1"># the view is called.</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</div>
+<p>L’exécutable <code class="docutils literal notranslate"><span class="pre">get_response</span></code> fournit par Django pourrait être la vue elle-même (s’il s’agit du dernier intergiciel) ou alors le prochain intergiciel dans la chaîne. L’intergiciel actuel n’a pas besoin de savoir ou de se préoccuper de ce que c’est exactement, il lui suffit de savoir que ça représente ce qui vient ensuite.</p>
+<p>Nous avons un peu simplifié l’explication ci-dessus, car l’exécutable <code class="docutils literal notranslate"><span class="pre">get_response</span></code> du dernier intergiciel dans la chaîne est en fait une méthode enveloppant la vue, créée par le gestionnaire se chargeant d’appliquer les <a class="reference internal" href="#view-middleware"><span class="std std-ref">intergiciels de vue</span></a>; cette méthode appelle la vue avec les paramètres appropriés et applique les intergiciels <a class="reference internal" href="#template-response-middleware"><span class="std std-ref">template-response</span></a> et <a class="reference internal" href="#exception-middleware"><span class="std std-ref">exception</span></a>.</p>
+<p>Un intergiciel peut soit uniquement prendre en charge le code Python synchrone (par défaut), soit uniquement du code asynchrone, ou encore les deux. Consultez <a class="reference internal" href="#async-middleware"><span class="std std-ref">Gestion du code asynchrone</span></a> pour des détails sur la manière d’informer sur ce qui est pris en charge et pour connaître le genre de requête que vous obtenez.</p>
+<p>Les intergiciels peuvent se trouver n’importe où dans votre chemin Python.</p>
+<div class="section" id="s-init-get-response">
+<span id="init-get-response"></span><h3><code class="docutils literal notranslate"><span class="pre">__init__(get_response)</span></code><a class="headerlink" href="#init-get-response" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les fabriques d’intergiciel doivent accepter un paramètre <code class="docutils literal notranslate"><span class="pre">get_response</span></code>. Il est aussi possible d’initialiser de l’état global pour l’intergiciel. Gardez à l’esprit quelques précautions&nbsp;:</p>
+<ul class="simple">
+<li>Django initialise les intergiciels avec le seul paramètre <code class="docutils literal notranslate"><span class="pre">get_response</span></code>, il n’est donc pas possible de définir d’autres paramètres obligatoires à <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>.</li>
+<li>Contrairement à la méthode <code class="docutils literal notranslate"><span class="pre">__call__()</span></code> qui est appelée une fois par requête, <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> n’est appelée qu”<em>une seule fois</em>, lorsque le serveur Web démarre.</li>
+</ul>
+</div>
+<div class="section" id="s-marking-middleware-as-unused">
+<span id="marking-middleware-as-unused"></span><h3>Signalement d’un intergiciel à exclure<a class="headerlink" href="#marking-middleware-as-unused" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est parfois utile de déterminer au moment du démarrage si un intergiciel doit être utilisé. Dans ces cas, la méthode <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> de l’intergiciel peut générer l’exception <a class="reference internal" href="../../ref/exceptions.html#django.core.exceptions.MiddlewareNotUsed" title="django.core.exceptions.MiddlewareNotUsed"><code class="xref py py-exc docutils literal notranslate"><span class="pre">MiddlewareNotUsed</span></code></a>. Django se charge alors d’enlever cet intergiciel du processus des intergiciels et jouranlise un message de débogage vers le journaliseur <a class="reference internal" href="../logging.html#django-request-logger"><span class="std std-ref">django.request</span></a> lorsque  <a class="reference internal" href="../../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-activating-middleware">
+<span id="activating-middleware"></span><h2>Activation des intergiciels<a class="headerlink" href="#activating-middleware" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour activer un intergiciel, ajoutez son chemin dans la liste <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> de vos réglages Django.</p>
+<p>Dans <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>, chaque intergiciel est représenté par une chaîne&nbsp;: le chemin Python complet vers le nom de la classe ou de la fonction de fabrique d’intergiciel. Par exemple, voici la valeur par défaut créée par <a class="reference internal" href="../../ref/django-admin.html#django-admin-startproject"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">django-admin</span> <span class="pre">startproject</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MIDDLEWARE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;django.middleware.security.SecurityMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.sessions.middleware.SessionMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.middleware.common.CommonMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.middleware.csrf.CsrfViewMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.auth.middleware.AuthenticationMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.messages.middleware.MessageMiddleware&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.middleware.clickjacking.XFrameOptionsMiddleware&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Une installation de Django n’a pas nécessairement des intergiciels, <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> pouvant très bien être vide si vous le souhaitez, mais il est fortement recommandé d’utiliser au moins <a class="reference internal" href="../../ref/middleware.html#django.middleware.common.CommonMiddleware" title="django.middleware.common.CommonMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">CommonMiddleware</span></code></a>.</p>
+<p>L’ordre dans <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> a son importance car un intergiciel peut dépendre d’un autre. Par exemple, <a class="reference internal" href="../../ref/middleware.html#django.contrib.auth.middleware.AuthenticationMiddleware" title="django.contrib.auth.middleware.AuthenticationMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthenticationMiddleware</span></code></a> stocke l’utilisateur non authentifié dans la session&nbsp;; il doit donc être exécuté après <a class="reference internal" href="../../ref/middleware.html#django.contrib.sessions.middleware.SessionMiddleware" title="django.contrib.sessions.middleware.SessionMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">SessionMiddleware</span></code></a>. Voir <a class="reference internal" href="../../ref/middleware.html#middleware-ordering"><span class="std std-ref">Ordre des intergiciels</span></a> pour d’autres indications utiles concernant l’ordre des classes d’intergiciel de Django.</p>
+</div>
+<div class="section" id="s-middleware-order-and-layering">
+<span id="middleware-order-and-layering"></span><h2>Ordre des intergiciels et empilement<a class="headerlink" href="#middleware-order-and-layering" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Durant la phase de requête, avant d’appeler la vue, Django applique les intergiciels dans l’ordre où ils sont définis dans <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>, de haut en bas.</p>
+<p>Vous pouvez l’imaginer comme un oignon&nbsp;: chaque classe d’intergiciel est une «&nbsp;couche&nbsp;» qui enveloppe la vue, elle-même le cœur de l’oignon. Si la requête traverse toutes les couches de l’oignon (chacune appelant <code class="docutils literal notranslate"><span class="pre">get_response</span></code> pour passer la requête à la prochaine couche), jusqu’à atteindre la vue au cœur, la réponse va ensuite traverser elle-même toutes les couches (dans l’ordre inverse) jusqu’à sa sortie du mécanisme.</p>
+<p>Si l’une des couches décide de court-circuiter et de renvoyer une réponse sans jamais appeler <code class="docutils literal notranslate"><span class="pre">get_response</span></code>, aucune des couches de l’oignon plus à l’intérieur de cette couche (y compris la vue) ne verra la requête ou la réponse. La réponse ne traversera toujours que les mêmes couches traversées par la requête.</p>
+</div>
+<div class="section" id="s-other-middleware-hooks">
+<span id="other-middleware-hooks"></span><h2>Autres points d’entrée d’intergiciel<a class="headerlink" href="#other-middleware-hooks" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En dehors du modèle basique requête/réponse d’intergiciel présenté précédemment, vous pouvez ajouter trois autres méthodes spéciales aux intergiciels basés sur des classes&nbsp;:</p>
+<div class="section" id="s-process-view">
+<span id="s-view-middleware"></span><span id="process-view"></span><span id="view-middleware"></span><h3><code class="docutils literal notranslate"><span class="pre">process_view()</span></code><a class="headerlink" href="#process-view" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="process_view">
+<code class="descname">process_view</code>(<em>request</em>, <em>view_func</em>, <em>view_args</em>, <em>view_kwargs</em>)<a class="headerlink" href="#process_view" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">request</span></code> est un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a>. <code class="docutils literal notranslate"><span class="pre">view_func</span></code> et la fonction python que Django s’apprête à utiliser (il s’agit bien de l’objet fonction, pas du nom textuel de la fonction). <code class="docutils literal notranslate"><span class="pre">view_args</span></code> est une liste de paramètres positionnels qui seront transmis à la vue, et <code class="docutils literal notranslate"><span class="pre">view_kwargs</span></code> est un dictionnaire de paramètres nommés qui seront transmis à la vue. Ni <code class="docutils literal notranslate"><span class="pre">view_args</span></code> ni <code class="docutils literal notranslate"><span class="pre">view_kwargs</span></code> ne comprennent le premier paramètre de la vue (<code class="docutils literal notranslate"><span class="pre">request</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">process_view()</span></code> est appelée juste avant que Django n’appelle la vue.</p>
+<p>Elle doit renvoyer soit <code class="docutils literal notranslate"><span class="pre">None</span></code>, soit un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>. Si elle renvoie <code class="docutils literal notranslate"><span class="pre">None</span></code>, Django continue le traitement de la requête, en appliquant d’éventuels autres intergiciels <code class="docutils literal notranslate"><span class="pre">process_view()</span></code>, puis exécute la vue appropriée. Si elle renvoie un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>, Django ne prend pas la peine d’appeler la vue correspondante ; il va simplement appliquer les intergiciels de réponse à cet objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> et renvoyer le résultat.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>L’accès à <a class="reference internal" href="../../ref/request-response.html#django.http.HttpRequest.POST" title="django.http.HttpRequest.POST"><code class="xref py py-attr docutils literal notranslate"><span class="pre">request.POST</span></code></a> depuis un intergiciel avant que la vue ne soit exécutée ou dans <code class="docutils literal notranslate"><span class="pre">process_view()</span></code> empêche toute vue exécutée après les intergiciels de pouvoir <a class="reference internal" href="file-uploads.html#modifying-upload-handlers-on-the-fly"><span class="std std-ref">modifier les gestionnaires de téléversement de la requête</span></a>, et devrait donc être évité.</p>
+<p class="last">La classe <a class="reference internal" href="../../ref/middleware.html#django.middleware.csrf.CsrfViewMiddleware" title="django.middleware.csrf.CsrfViewMiddleware"><code class="xref py py-class docutils literal notranslate"><span class="pre">CsrfViewMiddleware</span></code></a> peut être considérée comme une exception, car elle fournit les décorateurs <a class="reference internal" href="../../ref/csrf.html#django.views.decorators.csrf.csrf_exempt" title="django.views.decorators.csrf.csrf_exempt"><code class="xref py py-func docutils literal notranslate"><span class="pre">csrf_exempt()</span></code></a> et <a class="reference internal" href="../../ref/csrf.html#django.views.decorators.csrf.csrf_protect" title="django.views.decorators.csrf.csrf_protect"><code class="xref py py-func docutils literal notranslate"><span class="pre">csrf_protect()</span></code></a> qui permettent aux vues de contrôler explicitement le moment de la validation CSRF.</p>
+</div>
+</div>
+<div class="section" id="s-process-exception">
+<span id="s-exception-middleware"></span><span id="process-exception"></span><span id="exception-middleware"></span><h3><code class="docutils literal notranslate"><span class="pre">process_exception()</span></code><a class="headerlink" href="#process-exception" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="process_exception">
+<code class="descname">process_exception</code>(<em>request</em>, <em>exception</em>)<a class="headerlink" href="#process_exception" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">request</span></code> est un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a>. <code class="docutils literal notranslate"><span class="pre">exception</span></code> est un objet <code class="docutils literal notranslate"><span class="pre">Exception</span></code> généré par la fonction de vue.</p>
+<p>Django appelle <code class="docutils literal notranslate"><span class="pre">process_exception()</span></code> lorsqu’une vue génère une exception. <code class="docutils literal notranslate"><span class="pre">process_exception()</span></code> doit renvoyer <code class="docutils literal notranslate"><span class="pre">None</span></code> ou un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>. Si elle renvoie un objet  <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>, les intergiciels de réponse par gabarit et de réponse sont appliqués, et la réponse résultante sera renvoyée au navigateur. Sinon, la <a class="reference internal" href="../../ref/views.html#error-views"><span class="std std-ref">gestion par défaut des exceptions</span></a> intervient.</p>
+<p>Encore une fois, les intergiciels sont exécutés dans l’ordre inverse lors de la phase de réponse, ce qui comprend <code class="docutils literal notranslate"><span class="pre">process_exception</span></code>. Si un intergiciel d’exception renvoie une réponse, les méthodes <code class="docutils literal notranslate"><span class="pre">process_exception</span></code> des classes d’intergiciels situées au-dessus ne seront pas du tout appelées.</p>
+</div>
+<div class="section" id="s-process-template-response">
+<span id="s-template-response-middleware"></span><span id="process-template-response"></span><span id="template-response-middleware"></span><h3><code class="docutils literal notranslate"><span class="pre">process_template_response()</span></code><a class="headerlink" href="#process-template-response" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="process_template_response">
+<code class="descname">process_template_response</code>(<em>request</em>, <em>response</em>)<a class="headerlink" href="#process_template_response" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">request</span></code> est un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a>. <code class="docutils literal notranslate"><span class="pre">response</span></code> est l’objet <a class="reference internal" href="../../ref/template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a> (ou équivalent) renvoyé par une vue Django ou par un intergiciel.</p>
+<p><code class="docutils literal notranslate"><span class="pre">process_template_response()</span></code> est appelée juste après la fin de l’exécution de la vue, pour autant que l’instance réponse possède une méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code>, ce qui laisse penser qu’il s’agit d’un objet <a class="reference internal" href="../../ref/template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a> ou d’un équivalent.</p>
+<p>Elle doit renvoyer un objet réponse qui implémente une méthode <code class="docutils literal notranslate"><span class="pre">render</span></code>. Elle peut modifier la réponse donnée en changeant <code class="docutils literal notranslate"><span class="pre">response.template_name</span></code> et <code class="docutils literal notranslate"><span class="pre">response.context_data</span></code>, ou elle peut créer et renvoyer une toute nouvelle classe <a class="reference internal" href="../../ref/template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a> ou un équivalent.</p>
+<p>Il n’est pas nécessaire d’effectuer explicitement le rendu des réponses, celles-ci étant automatiquement «&nbsp;rendues&nbsp;» après que tous les intergiciels de réponse ont été appelés.</p>
+<p>Les intergiciels sont exécutés dans l’ordre inverse lors de la phase de réponse, ce qui inclut <code class="docutils literal notranslate"><span class="pre">process_template_response()</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-dealing-with-streaming-responses">
+<span id="dealing-with-streaming-responses"></span><h2>Gestion des réponses en flux<a class="headerlink" href="#dealing-with-streaming-responses" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Au contraire de <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>, <a class="reference internal" href="../../ref/request-response.html#django.http.StreamingHttpResponse" title="django.http.StreamingHttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamingHttpResponse</span></code></a> ne possède pas d’attribut <code class="docutils literal notranslate"><span class="pre">content</span></code>. En conséquence, les intergiciels ne peuvent plus compter sur le fait que toutes les réponses possèdent un attribut <code class="docutils literal notranslate"><span class="pre">content</span></code>. S’ils ont besoin d’accéder au contenu, ils doivent savoir s’ils ont affaire avec une réponse de type flux (streaming) et ajuster leur comportement en fonction de cela&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">streaming</span><span class="p">:</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">streaming_content</span> <span class="o">=</span> <span class="n">wrap_streaming_content</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">streaming_content</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">alter_content</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Il faut toujours partir du principe que <code class="docutils literal notranslate"><span class="pre">streaming_content</span></code> est trop volumineux pour être stocké en mémoire. Les intergiciels de réponse peuvent l’adapter dans un nouveau générateur, mais ils ne devraient pas le consommer. L’adaptation s’implémente typiquement de cette façon&nbsp;:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">wrap_streaming_content</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">alter_content</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-exception-handling">
+<span id="exception-handling"></span><h2>Gestion des exceptions<a class="headerlink" href="#exception-handling" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django convertit automatiquement les exceptions produites par la vue ou par l’intergiciel en une réponse HTTP appropriée avec un code de statut d’erreur. <a class="reference internal" href="../../ref/views.html#error-views"><span class="std std-ref">Certaine exceptions</span></a> sont converties en codes de statut 4xx, alors qu’une exception inconnue est convertie en un code de statut 500.</p>
+<p>Cette conversion a lieu avant et après chaque intergiciel (vous pouvez vous représenter cela comme la fine peau entre chaque couche de l’oignon), afin que chaque intergiciel puisse toujours compter sur l’obtention d’un certain type de réponse HTTP en retour de son appel à <code class="docutils literal notranslate"><span class="pre">get_response</span></code>. Les intergiciels n’ont pas besoin se se soucier d’envelopper leur appel à <code class="docutils literal notranslate"><span class="pre">get_response</span></code> dans un bloc <code class="docutils literal notranslate"><span class="pre">try/except</span></code> pour gérer une exception qui aurait pu être générée par un intergiciel suivant ou par la vue. Même si l’intergiciel suivant dans la chaîne génère une exception <a class="reference internal" href="views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-class docutils literal notranslate"><span class="pre">Http404</span></code></a>, par exemple, votre intergiciel ne verra pas cette exception&nbsp;; il obtiendra à la place un objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> avec un code <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse.status_code" title="django.http.HttpResponse.status_code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">status_code</span></code></a> 404.</p>
+</div>
+<div class="section" id="s-asynchronous-support">
+<span id="s-async-middleware"></span><span id="asynchronous-support"></span><span id="async-middleware"></span><h2>Gestion du code asynchrone<a class="headerlink" href="#asynchronous-support" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Les intergiciels peuvent prendre en charge n’importe quelle combinaison de requêtes synchrones et asynchrones. Django adapte les requêtes pour correspondre aux exigences des intergiciels si ceux-ci ne gèrent pas les deux types de requêtes, mais avec une baisse de performance.</p>
+<p>Par défaut, Django part du principe qu’un intergiciel n’est capable de traiter que des requêtes synchrones. Pour modifier ce présupposé, définissez les attributs suivants sur la classe ou la fonction fabriquante d’intergiciel :</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">sync_capable</span></code> est une variable booléenne indiquant si l’intergiciel peut gérer des requêtes synchrones. Vaut <code class="docutils literal notranslate"><span class="pre">True</span></code> par défaut.</li>
+<li><code class="docutils literal notranslate"><span class="pre">async_capable</span></code> est une variable booléenne indiquant si l’intergiciel peut gérer des requêtes asynchrones. Vaut <code class="docutils literal notranslate"><span class="pre">False</span></code> par défaut.</li>
+</ul>
+<p>Si un intergiciel possède à la fois <code class="docutils literal notranslate"><span class="pre">sync_capable</span> <span class="pre">=</span> <span class="pre">True</span></code> et <code class="docutils literal notranslate"><span class="pre">async_capable</span> <span class="pre">=</span> <span class="pre">True</span></code>,  Django lui transmet la requête sans la modifier. Dans ce cas, l’intergiciel peut savoir si la requête qu’il reçoit est asynchrone ou pas en vérifiant si l’objet <code class="docutils literal notranslate"><span class="pre">get_response</span></code> qu’il reçoit est une fonction coroutine, à l’aide de <a class="reference external" href="https://docs.python.org/3/library/asyncio-task.html#asyncio.iscoroutinefunction" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.iscoroutinefunction()</span></code></a>.</p>
+<p>Le module <code class="docutils literal notranslate"><span class="pre">django.utils.decorators</span></code> contient les décorateurs <a class="reference internal" href="../../ref/utils.html#django.utils.decorators.sync_only_middleware" title="django.utils.decorators.sync_only_middleware"><code class="xref py py-func docutils literal notranslate"><span class="pre">sync_only_middleware()</span></code></a>, <a class="reference internal" href="../../ref/utils.html#django.utils.decorators.async_only_middleware" title="django.utils.decorators.async_only_middleware"><code class="xref py py-func docutils literal notranslate"><span class="pre">async_only_middleware()</span></code></a> et <a class="reference internal" href="../../ref/utils.html#django.utils.decorators.sync_and_async_middleware" title="django.utils.decorators.sync_and_async_middleware"><code class="xref py py-func docutils literal notranslate"><span class="pre">sync_and_async_middleware()</span></code></a> qui permettent d’attribuer les drapeaux adéquats aux fonctions fabriquantes d’intergiciels.</p>
+<p>L’objet exécutable renvoyé doit correspondre à la nature synchrone ou asynchrone de la méthode <code class="docutils literal notranslate"><span class="pre">get_response</span></code>. Si vous recevez un <code class="docutils literal notranslate"><span class="pre">get_response</span></code> asynchrone, vous devez renvoyer une fonction coroutine (<code class="docutils literal notranslate"><span class="pre">async</span> <span class="pre">def</span></code>).</p>
+<p>Les méthodes <code class="docutils literal notranslate"><span class="pre">process_view</span></code>, <code class="docutils literal notranslate"><span class="pre">process_template_response</span></code> et <code class="docutils literal notranslate"><span class="pre">process_exception</span></code>, quand elles sont présentes, doivent aussi être adaptées pour les modes synchrones/asynchrones. Cependant, Django les adapte individuellement si vous ne le faites pas, mais avec une perte de performance supplémentaire.</p>
+<p>Voici un exemple de la manière de créer une fonction d’intergiciel qui prend en charge les deux modes</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="k">import</span> <span class="n">sync_and_async_middleware</span>
+
+<span class="nd">@sync_and_async_middleware</span>
+<span class="k">def</span> <span class="nf">simple_middleware</span><span class="p">(</span><span class="n">get_response</span><span class="p">):</span>
+    <span class="c1"># One-time configuration and initialization goes here.</span>
+    <span class="k">if</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">get_response</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">middleware</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="c1"># Do something here!</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_response</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">middleware</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="c1"># Do something here!</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">get_response</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">return</span> <span class="n">middleware</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Si vous déclarez un intergiciel hybride qui prend en charge à la fois les appels synchrones et asynchrones, le type d’appel que vous obtenez pourrait ne pas correspondre à la vue sous-jacente. Django optimise la pile d’appel des intergiciels pour qu’il y ait le moins de transitions synchrones/asynchrones que possible.</p>
+<p class="last">Ainsi, même si vous enveloppez une vue asynchrone, elle pourrait être appelée en mode synchrone s’il y a d’autres intergiciels synchrones entre son exécution et la vue.</p>
+</div>
+</div>
+<div class="section" id="s-upgrading-pre-django-1-10-style-middleware">
+<span id="s-upgrading-middleware"></span><span id="upgrading-pre-django-1-10-style-middleware"></span><span id="upgrading-middleware"></span><h2>Mise à jour d’intergiciels écrits avant Django 1.10<a class="headerlink" href="#upgrading-pre-django-1-10-style-middleware" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.utils.deprecation.MiddlewareMixin">
+<em class="property">class </em><code class="descclassname">django.utils.deprecation.</code><code class="descname">MiddlewareMixin</code><a class="headerlink" href="#django.utils.deprecation.MiddlewareMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Django fournit <code class="docutils literal notranslate"><span class="pre">django.utils.deprecation.MiddlewareMixin</span></code> pour faciliter la création de classes d’intergiciel qui sont compatibles à la fois avec <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> et l’ancien <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE_CLASSES</span></code>, et qui prennent en charge les requêtes synchrones et asynchrones. Toutes les classes d’intergiciel incluses dans Django sont compatibles avec les deux réglages.</p>
+<p>Cette classe «&nbsp;mixin&nbsp;» fournit une méthode <code class="docutils literal notranslate"><span class="pre">__init__()</span></code> exigeant un paramètre <code class="docutils literal notranslate"><span class="pre">get_response</span></code> et le stockant dans <code class="docutils literal notranslate"><span class="pre">self.get_response</span></code>.</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">__call__()</span></code>:</p>
+<ol class="arabic simple">
+<li>Appelle <code class="docutils literal notranslate"><span class="pre">self.process_request(request)</span></code> (si elle est définie).</li>
+<li>Appelle <code class="docutils literal notranslate"><span class="pre">self.get_response(request)</span></code> pour obtenir la réponse du dernier intergiciel et de la vue.</li>
+<li>Appelle <code class="docutils literal notranslate"><span class="pre">self.process_response(request,</span> <span class="pre">response)</span></code> (si elle est définie).</li>
+<li>Renvoie la réponse.</li>
+</ol>
+<p>Quand elle est utilisée avec <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE_CLASSES</span></code>, la méthode <code class="docutils literal notranslate"><span class="pre">__call__()</span></code> ne sera jamais utilisée&nbsp;; Django appelle directement <code class="docutils literal notranslate"><span class="pre">process_request()</span></code> et <code class="docutils literal notranslate"><span class="pre">process_response()</span></code>.</p>
+<p>Dans la plupart des cas, l’héritage de cette classe «&nbsp;mixin&nbsp;» suffit à rendre compatible un intergiciel ancien style avec le nouveau système avec suffisamment de rétro-compatibilité. La nouvelle sémantique de court-circuitage ne fera pas de mal ou sera même avantageuse pour l’intergiciel existant. Dans quelques cas, une classe d’intergiciel pourrait avoir besoin de certains changements pour s’ajuster à la nouvelle sémantique.</p>
+<p>Voici les différences de comportement entre l’utilisation de <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> et de <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE_CLASSES</span></code>:</p>
+<ol class="arabic simple">
+<li>Avec <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE_CLASSES</span></code>, chaque intergiciel verra toujours sa méthode <code class="docutils literal notranslate"><span class="pre">process_response</span></code> appelée, même si un intergiciel précédent a court-circuité le processus en renvoyant une réponse de sa méthode <code class="docutils literal notranslate"><span class="pre">process_request</span></code>. Avec <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>, les intergiciels se comportent plus comme un oignon&nbsp;: les couches que parcourt une réponse jusqu’à sa sortie sont les mêmes que la requête a vu passer dans le sens inverse. Si un intergiciel court-circuite, seul cet intergiciel et ceux qui le précèdent dans <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> verront passer la réponse.</li>
+<li>Avec <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE_CLASSES</span></code>, <code class="docutils literal notranslate"><span class="pre">process_exception</span></code> est appliquée aux exceptions générées depuis une méthode <code class="docutils literal notranslate"><span class="pre">process_request</span></code> d’intergiciel. Avec <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>, <code class="docutils literal notranslate"><span class="pre">process_exception</span></code> ne s’applique qu’aux exceptions générées dans la vue (ou depuis la méthode <code class="docutils literal notranslate"><span class="pre">render</span></code> d’une réponse <a class="reference internal" href="../../ref/template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a>). Les exceptions générées depuis un intergiciel sont converties en une réponse HTTP appropriée puis transmises à l’intergiciel suivant.</li>
+<li>Avec <code class="docutils literal notranslate"><span class="pre">MIDDLEWARE_CLASSES</span></code>, si une méthode <code class="docutils literal notranslate"><span class="pre">process_response</span></code> génère une exception, les méthodes <code class="docutils literal notranslate"><span class="pre">process_response</span></code> de tous les intergiciels précédents sont omises et une réponse HTTP <code class="docutils literal notranslate"><span class="pre">500</span> <span class="pre">erreur</span> <span class="pre">de</span> <span class="pre">serveur</span> <span class="pre">interne</span></code> est toujours renvoyée (même si l’exception générée était par exemple <a class="reference internal" href="views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-class docutils literal notranslate"><span class="pre">Http404</span></code></a>). Avec <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>, une exception générée depuis un intergiciel est immédiatement convertie en une réponse HTTP appropriée, puis le prochain intergiciel dans la chaîne verra la réponse. Les intergiciels ne sont jamais outrepassés en raison d’une exception générée dans un autre intergiciel.</li>
+</ol>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des requêtes asynchrones a été ajoutée dans <code class="docutils literal notranslate"><span class="pre">MiddlewareMixin</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Intergiciels («&nbsp;Middleware&nbsp;»)</a><ul>
+<li><a class="reference internal" href="#writing-your-own-middleware">Écriture de son propre intergiciel</a><ul>
+<li><a class="reference internal" href="#init-get-response"><code class="docutils literal notranslate"><span class="pre">__init__(get_response)</span></code></a></li>
+<li><a class="reference internal" href="#marking-middleware-as-unused">Signalement d’un intergiciel à exclure</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#activating-middleware">Activation des intergiciels</a></li>
+<li><a class="reference internal" href="#middleware-order-and-layering">Ordre des intergiciels et empilement</a></li>
+<li><a class="reference internal" href="#other-middleware-hooks">Autres points d’entrée d’intergiciel</a><ul>
+<li><a class="reference internal" href="#process-view"><code class="docutils literal notranslate"><span class="pre">process_view()</span></code></a></li>
+<li><a class="reference internal" href="#process-exception"><code class="docutils literal notranslate"><span class="pre">process_exception()</span></code></a></li>
+<li><a class="reference internal" href="#process-template-response"><code class="docutils literal notranslate"><span class="pre">process_template_response()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dealing-with-streaming-responses">Gestion des réponses en flux</a></li>
+<li><a class="reference internal" href="#exception-handling">Gestion des exceptions</a></li>
+<li><a class="reference internal" href="#asynchronous-support">Gestion du code asynchrone</a></li>
+<li><a class="reference internal" href="#upgrading-pre-django-1-10-style-middleware">Mise à jour d’intergiciels écrits avant Django 1.10</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="generic-views.html"
+                        title="Chapitre précédent">Vues génériques</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="sessions.html"
+                        title="Chapitre suivant">Utilisation des sessions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/http/middleware.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="generic-views.html" title="Vues génériques">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="sessions.html" title="Utilisation des sessions">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

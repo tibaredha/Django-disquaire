@@ -1,0 +1,1156 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Utilitaires Django &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Validateurs" href="validators.html" />
+    <link rel="prev" title="Fonctions django.urls à utiliser dans les configurations d’URL" href="urls.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="urls.html" title="Fonctions &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;django.urls&lt;/span&gt;&lt;/code&gt; à utiliser dans les configurations d’URL">previous</a>
+     |
+    <a href="index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="validators.html" title="Validateurs">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-utils">
+            
+  <div class="section" id="s-module-django.utils">
+<span id="s-django-utils"></span><span id="module-django.utils"></span><span id="django-utils"></span><h1>Utilitaires Django<a class="headerlink" href="#module-django.utils" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document présente tous les modules stables dans <code class="docutils literal notranslate"><span class="pre">django.utils</span></code>.  La plupart des modules dans <code class="docutils literal notranslate"><span class="pre">django.utils</span></code> sont conçus pour un usage interne et seuls les parties documentées ici peuvent être considérées comme stables et donc rétrocompatibles, selon la <a class="reference internal" href="../internals/release-process.html#internal-release-deprecation-policy"><span class="std std-ref">politique interne d’obsolescence de publication</span></a>.</p>
+<div class="section" id="s-module-django.utils.cache">
+<span id="s-django-utils-cache"></span><span id="module-django.utils.cache"></span><span id="django-utils-cache"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.cache</span></code><a class="headerlink" href="#module-django.utils.cache" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ce module contient des fonctions utilitaires pour le contrôle du cache HTTP. Il opère en manipulant l’en-tête <code class="docutils literal notranslate"><span class="pre">Vary</span></code> des réponses. Il contient des fonctions pour modifier directement l’en-tête des objets réponse ainsi que des décorateurs qui modifient les fonctions afin qu’elle se chargent elles-mêmes de la modification des en-têtes.</p>
+<p>Pour plus d’informations sur l’en-tête <code class="docutils literal notranslate"><span class="pre">Vary</span></code>, voir la <span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7231.html#section-7.1.4"><strong>RFC 7231#section-7.1.4</strong></a>.</p>
+<p>À la base, l’en-tête HTTP <code class="docutils literal notranslate"><span class="pre">Vary</span></code> définit quels en-têtes de requête un cache doit prendre en considération pour générer sa clé de cache. Les requêtes vers un même chemin mais contenant des contenus d’en-tête différents pour les en-têtes mentionnés dans <code class="docutils literal notranslate"><span class="pre">Vary</span></code> ont besoin de produire des clés de cache différentes pour ne pas délivrer de mauvais contenu.</p>
+<p>Par exemple, l’intergiciel d”<a class="reference internal" href="../topics/i18n/index.html"><span class="doc">internationalisation</span></a> doit pouvoir mettre en cache des versions différentes en fonction de l’en-tête <code class="docutils literal notranslate"><span class="pre">Accept-language</span></code>.</p>
+<dl class="function">
+<dt id="django.utils.cache.patch_cache_control">
+<code class="descname">patch_cache_control</code>(<em>response</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.utils.cache.patch_cache_control" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette fonction complète l’en-tête <code class="docutils literal notranslate"><span class="pre">Cache-Control</span></code> en y ajoutant tous les paramètres nommés. La transformation se fait comme suit&nbsp;:</p>
+<ul class="simple">
+<li>Tous les paramètres nommés sont transformés en minuscules et les soulignements sont convertis en tirets.</li>
+<li>Si la valeur d’un paramètre est <code class="docutils literal notranslate"><span class="pre">True</span></code> (exactement <code class="docutils literal notranslate"><span class="pre">True</span></code>, pas seulement une valeur évaluée à <code class="docutils literal notranslate"><span class="pre">True</span></code>), seul le nom du paramètre est ajouté à l’en-tête.</li>
+<li>Tous les autres paramètres sont ajoutés avec leur valeur, après avoir passé par la fonction <code class="docutils literal notranslate"><span class="pre">str()</span></code>.</li>
+</ul>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge de plusieurs noms de champs dans la directive <code class="docutils literal notranslate"><span class="pre">no-cache</span></code> a été ajoutée.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.cache.get_max_age">
+<code class="descname">get_max_age</code>(<em>response</em>)<a class="headerlink" href="#django.utils.cache.get_max_age" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la valeur <code class="docutils literal notranslate"><span class="pre">max-age</span></code> de l’en-tête de réponse <code class="docutils literal notranslate"><span class="pre">Cache-Control</span></code> sous forme de nombre entier (ou <code class="docutils literal notranslate"><span class="pre">None</span></code> s’il n’existe pas ou qu’il n’est pas un nombre entier).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.cache.patch_response_headers">
+<code class="descname">patch_response_headers</code>(<em>response</em>, <em>cache_timeout=None</em>)<a class="headerlink" href="#django.utils.cache.patch_response_headers" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute certains en-têtes utiles à l’objet <code class="docutils literal notranslate"><span class="pre">HttpResponse</span></code> donné&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">Expires</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">Cache-Control</span></code></li>
+</ul>
+<p>Chaque en-tête n’est ajouté que s’il n’est pas déjà présent.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cache_timeout</span></code> est en secondes. Le réglage <a class="reference internal" href="settings.html#std:setting-CACHE_MIDDLEWARE_SECONDS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CACHE_MIDDLEWARE_SECONDS</span></code></a> est utilisé par défaut.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.cache.add_never_cache_headers">
+<code class="descname">add_never_cache_headers</code>(<em>response</em>)<a class="headerlink" href="#django.utils.cache.add_never_cache_headers" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute un en-tête <code class="docutils literal notranslate"><span class="pre">Cache-Control:</span> <span class="pre">max-age=0,</span> <span class="pre">no-cache,</span> <span class="pre">no-store,</span> <span class="pre">must-revalidate,</span> <span class="pre">private</span></code> à une réponse pour indiquer que la page ne doit jamais être mise en cache.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.0:</span> <p>La directive <code class="docutils literal notranslate"><span class="pre">private</span></code> a été ajoutée.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.cache.patch_vary_headers">
+<code class="descname">patch_vary_headers</code>(<em>response</em>, <em>newheaders</em>)<a class="headerlink" href="#django.utils.cache.patch_vary_headers" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute (ou met à jour) l’en-tête <code class="docutils literal notranslate"><span class="pre">Vary</span></code> dans l’objet <code class="docutils literal notranslate"><span class="pre">HttpResponse</span></code> donné. <code class="docutils literal notranslate"><span class="pre">newheaders</span></code> est une liste de noms d’en-têtes qui doivent se trouver dans <code class="docutils literal notranslate"><span class="pre">Vary</span></code>. Si les en-têtes contiennent un astérisque, l’en-tête <code class="docutils literal notranslate"><span class="pre">Vary</span></code> consistera en un seul astérisque <code class="docutils literal notranslate"><span class="pre">'*'</span></code>. Sinon, les en-têtes existants dans <code class="docutils literal notranslate"><span class="pre">Vary</span></code> ne sont pas enlevés.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.0:</span> <p>La gestion de l’astérisque conformément à <span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7231.html#section-7.1.4"><strong>RFC 7231#section-7.1.4</strong></a> a été ajoutée.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.cache.get_cache_key">
+<code class="descname">get_cache_key</code>(<em>request</em>, <em>key_prefix=None</em>, <em>method='GET'</em>, <em>cache=None</em>)<a class="headerlink" href="#django.utils.cache.get_cache_key" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une clé de cache basée sur le chemin de requête. Cette méthode peut être utilisée dans la phase de requête car elle extrait la liste d’en-têtes à prendre en compte à partir du registre global de chemin et utilise ces en-têtes pour construire une clé de cache à utiliser.</p>
+<p>Si aucune liste d’en-tête n’est stockée, la page doit être reconstruite et cette fonction renvoie donc <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.cache.learn_cache_key">
+<code class="descname">learn_cache_key</code>(<em>request</em>, <em>response</em>, <em>cache_timeout=None</em>, <em>key_prefix=None</em>, <em>cache=None</em>)<a class="headerlink" href="#django.utils.cache.learn_cache_key" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Apprend quels en-têtes à prendre en compte pour un certain chemin de requête à partir de l’objet réponse. Elle stocke ces en-têtes dans un registre global de chemins afin que tout accès ultérieur à ce chemin sache les en-têtes à prendre en compte sans devoir construire l’objet réponse lui-même. Les en-têtes sont nommés dans l’en-tête <code class="docutils literal notranslate"><span class="pre">Vary</span></code> de la réponse, mais il s’agit d’éviter de devoir générer la réponse.</p>
+<p>La liste des en-têtes à utiliser pour la génération de la clé de cache est stockée dans le même cache que les pages elles-mêmes. Si le cache rejette certaines vieilles données du cache, cela signifie qu’il faut reconstruire une fois la réponse pour avoir accès à l’en-tête <code class="docutils literal notranslate"><span class="pre">Vary</span></code> et par là à la liste des en-têtes à utiliser pour la clé de cache.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.dateparse">
+<span id="s-django-utils-dateparse"></span><span id="module-django.utils.dateparse"></span><span id="django-utils-dateparse"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.dateparse</span></code><a class="headerlink" href="#module-django.utils.dateparse" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les fonctions définies dans ce module partagent les propriétés suivantes&nbsp;:</p>
+<ul class="simple">
+<li>Elles acceptent les chaînes aux formats date/heure ISO 8601 (ou certaines alternatives proches) et renvoient des objets des classes correspondantes du module Python <a class="reference external" href="https://docs.python.org/3/library/datetime.html#module-datetime" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">datetime</span></code></a>.</li>
+<li>Elles génèrent une exception <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> si la valeur d’entrée est correctement mise en forme mais qu’elle ne correspond pas à une date ou heure valable.</li>
+<li>Elles renvoient <code class="docutils literal notranslate"><span class="pre">None</span></code> si la valeur d’entrée n’est pas correctement mise en forme.</li>
+<li>Elles acceptent une résolution de valeur d’entrée jusqu’à la picoseconde, mais elles tronquent à la microseconde car c’est la résolution maximale gérée par Python.</li>
+</ul>
+<dl class="function">
+<dt id="django.utils.dateparse.parse_date">
+<code class="descname">parse_date</code>(<em>value</em>)<a class="headerlink" href="#django.utils.dateparse.parse_date" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Analyse une chaîne et renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.dateparse.parse_time">
+<code class="descname">parse_time</code>(<em>value</em>)<a class="headerlink" href="#django.utils.dateparse.parse_time" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Analyse une chaîne et renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.time</span></code></a>.</p>
+<p>Les décalages UTC ne sont pas pris en charge&nbsp;; si <code class="docutils literal notranslate"><span class="pre">value</span></code> en contient un, le résultat sera <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des séparateurs virgules pour les millisecondes a été ajoutée.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.dateparse.parse_datetime">
+<code class="descname">parse_datetime</code>(<em>value</em>)<a class="headerlink" href="#django.utils.dateparse.parse_datetime" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Analyse une chaîne et renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>.</p>
+<p>Les décalages UTC sont pris en charge ; si <code class="docutils literal notranslate"><span class="pre">value</span></code> en contient un, l’attribut <code class="docutils literal notranslate"><span class="pre">tzinfo</span></code> du résultat sera une instance <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timezone" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.timezone</span></code></a>.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des séparateurs virgules pour les millisecondes a été ajoutée.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.dateparse.parse_duration">
+<code class="descname">parse_duration</code>(<em>value</em>)<a class="headerlink" href="#django.utils.dateparse.parse_duration" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Analyse une chaîne et renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.timedelta</span></code></a>.</p>
+<p>S’attend à recevoir des données au format <code class="docutils literal notranslate"><span class="pre">&quot;JJ</span> <span class="pre">HH:MM:SS.uuuuuu&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;DD</span> <span class="pre">HH:MM:SS,uuuuuu&quot;</span></code> ou tel que défini par ISO 8601 (par ex. <code class="docutils literal notranslate"><span class="pre">P4DT1H15M20S</span></code> ce qui est équivalent à <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">1:15:20</span></code>), ou au format d’intervalle jour-heure de PostgreSQL (par ex. <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">days</span> <span class="pre">04:05:06</span></code>).</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des séparateurs virgules pour les fractions décimales dans le format ISO 8601 et dans le format <code class="docutils literal notranslate"><span class="pre">&quot;DD</span> <span class="pre">HH:MM:SS,uuuuuu&quot;</span></code> a été ajoutée.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.decorators">
+<span id="s-django-utils-decorators"></span><span id="module-django.utils.decorators"></span><span id="django-utils-decorators"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.decorators</span></code><a class="headerlink" href="#module-django.utils.decorators" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.utils.decorators.method_decorator">
+<code class="descname">method_decorator</code>(<em>decorator</em>, <em>name=''</em>)<a class="reference internal" href="../_modules/django/utils/decorators.html#method_decorator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.decorators.method_decorator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit un décorateur de fonction en un décorateur de méthode. Cette fonction peut être utilisée pour décorer des méthodes ou des classes&nbsp;; dans ce dernier cas, <code class="docutils literal notranslate"><span class="pre">name</span></code> est le nom de la méthode à décorer et est obligatoire.</p>
+<p><code class="docutils literal notranslate"><span class="pre">decorator</span></code> peut aussi être une liste ou un tuple de fonctions. Celles-ci sont décorées dans l’ordre inverse, ce qui fait que l’ordre d’appel est le même que celui dans lequel les fonctions apparaissent dans la liste.</p>
+<p>Voir <a class="reference internal" href="../topics/class-based-views/intro.html#id1"><span class="std std-ref">décoration des vues fondées sur les classes</span></a> pour un exemple d’utilisation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.decorators.decorator_from_middleware">
+<code class="descname">decorator_from_middleware</code>(<em>middleware_class</em>)<a class="reference internal" href="../_modules/django/utils/decorators.html#decorator_from_middleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.decorators.decorator_from_middleware" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un décorateur de vue à partir d’une classe d’intergiciel. Cela permet d’utiliser des fonctionnalités d’intergiciel pour certaines vues seulement. L’intergiciel est créé sans aucun paramètre.</p>
+<p>Il s’attend à des intergiciels compatibles avec l’ancien style de Django jusqu’à 1.9 (en ayant des méthodes comme <code class="docutils literal notranslate"><span class="pre">process_request()</span></code>, <code class="docutils literal notranslate"><span class="pre">process_exception()</span></code> et <code class="docutils literal notranslate"><span class="pre">process_response()</span></code>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.decorators.decorator_from_middleware_with_args">
+<code class="descname">decorator_from_middleware_with_args</code>(<em>middleware_class</em>)<a class="reference internal" href="../_modules/django/utils/decorators.html#decorator_from_middleware_with_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.decorators.decorator_from_middleware_with_args" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Comme <code class="docutils literal notranslate"><span class="pre">decorator_from_middleware</span></code>, mais renvoie une fonction qui accepte des paramètres à transmettre à la classe <code class="docutils literal notranslate"><span class="pre">middleware_class</span></code>. Par exemple, le décorateur <a class="reference internal" href="../topics/cache.html#django.views.decorators.cache.cache_page" title="django.views.decorators.cache.cache_page"><code class="xref py py-func docutils literal notranslate"><span class="pre">cache_page()</span></code></a> est créé à partir de <code class="docutils literal notranslate"><span class="pre">CacheMiddleware</span></code> comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cache_page</span> <span class="o">=</span> <span class="n">decorator_from_middleware_with_args</span><span class="p">(</span><span class="n">CacheMiddleware</span><span class="p">)</span>
+
+<span class="nd">@cache_page</span><span class="p">(</span><span class="mi">3600</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.decorators.sync_only_middleware">
+<code class="descname">sync_only_middleware</code>(<em>middleware</em>)<a class="reference internal" href="../_modules/django/utils/decorators.html#sync_only_middleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.decorators.sync_only_middleware" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Marque un intergiciel comme <a class="reference internal" href="../topics/http/middleware.html#async-middleware"><span class="std std-ref">purement synchrone</span></a> (par défaut dans Django, mais cela ajoute une robustesse supplémentaire au cas où la valeur par défaut devait changer dans le futur).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.decorators.async_only_middleware">
+<code class="descname">async_only_middleware</code>(<em>middleware</em>)<a class="reference internal" href="../_modules/django/utils/decorators.html#async_only_middleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.decorators.async_only_middleware" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Marque un intergiciel comme <a class="reference internal" href="../topics/http/middleware.html#async-middleware"><span class="std std-ref">purement asynchrone</span></a>. Django va l’envelopper dans une boucle événementielle asynchrone lorsqu’il est appelé à partir d’un chemin de requête WSGI.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.decorators.sync_and_async_middleware">
+<code class="descname">sync_and_async_middleware</code>(<em>middleware</em>)<a class="reference internal" href="../_modules/django/utils/decorators.html#sync_and_async_middleware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.decorators.sync_and_async_middleware" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Marque un intergiciel comme <a class="reference internal" href="../topics/http/middleware.html#async-middleware"><span class="std std-ref">compatible synchrone et asynchrone</span></a>, ce qui évite de devoir convertir les requêtes. Vous devez implémenter la détection du type de requête actuel pour utiliser ce décorateur. Voir la <a class="reference internal" href="../topics/http/middleware.html#async-middleware"><span class="std std-ref">documentation des intergiciels asynchrones</span></a> pour plus de détails.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.encoding">
+<span id="s-django-utils-encoding"></span><span id="module-django.utils.encoding"></span><span id="django-utils-encoding"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.encoding</span></code><a class="headerlink" href="#module-django.utils.encoding" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.utils.encoding.smart_str">
+<code class="descname">smart_str</code>(<em>s</em>, <em>encoding='utf-8'</em>, <em>strings_only=False</em>, <em>errors='strict'</em>)<a class="headerlink" href="#django.utils.encoding.smart_str" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <code class="docutils literal notranslate"><span class="pre">str</span></code> représentant un objet arbitraire <code class="docutils literal notranslate"><span class="pre">s</span></code>. Traite les chaînes d’octets en utilisant le codage <code class="docutils literal notranslate"><span class="pre">encoding</span></code>.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">strings_only</span></code> est <code class="docutils literal notranslate"><span class="pre">True</span></code>, ne convertit pas certains objets non assimilables à des chaînes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.is_protected_type">
+<code class="descname">is_protected_type</code>(<em>obj</em>)<a class="headerlink" href="#django.utils.encoding.is_protected_type" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Détermine si l’instance d’objet est d’un type protégé.</p>
+<p>Les objets d’un type protégé sont préservés tels quels lorsqu’ils sont transmis à <code class="docutils literal notranslate"><span class="pre">force_str(strings_only=True)</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.force_str">
+<code class="descname">force_str</code>(<em>s</em>, <em>encoding='utf-8'</em>, <em>strings_only=False</em>, <em>errors='strict'</em>)<a class="headerlink" href="#django.utils.encoding.force_str" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Semblable à <code class="docutils literal notranslate"><span class="pre">smart_str()</span></code>, sauf que les instances différées sont évaluées en chaînes, plutôt que de conserver leur état différé.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">strings_only</span></code> est <code class="docutils literal notranslate"><span class="pre">True</span></code>, ne convertit pas certains objets non assimilables à des chaînes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.smart_bytes">
+<code class="descname">smart_bytes</code>(<em>s</em>, <em>encoding='utf-8'</em>, <em>strings_only=False</em>, <em>errors='strict'</em>)<a class="headerlink" href="#django.utils.encoding.smart_bytes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une version de l’objet arbitraire <code class="docutils literal notranslate"><span class="pre">s</span></code> sous forme de chaîne d’octets, en utilisant le codage indiqué dans <code class="docutils literal notranslate"><span class="pre">encoding</span></code>.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">strings_only</span></code> est <code class="docutils literal notranslate"><span class="pre">True</span></code>, ne convertit pas certains objets non assimilables à des chaînes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.force_bytes">
+<code class="descname">force_bytes</code>(<em>s</em>, <em>encoding='utf-8'</em>, <em>strings_only=False</em>, <em>errors='strict'</em>)<a class="headerlink" href="#django.utils.encoding.force_bytes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Semblable à <code class="docutils literal notranslate"><span class="pre">smart_bytes</span></code>, sauf que les instances différées sont évaluées en chaînes d’octets, plutôt que de conserver leur état différé.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">strings_only</span></code> est <code class="docutils literal notranslate"><span class="pre">True</span></code>, ne convertit pas certains objets non assimilables à des chaînes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.smart_text">
+<code class="descname">smart_text</code>(<em>s</em>, <em>encoding='utf-8'</em>, <em>strings_only=False</em>, <em>errors='strict'</em>)<a class="headerlink" href="#django.utils.encoding.smart_text" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="deprecated">
+<p><span class="versionmodified">Obsolète depuis la version 3.0.</span></p>
+</div>
+<p>Alias de <a class="reference internal" href="#django.utils.encoding.force_str" title="django.utils.encoding.force_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">force_str()</span></code></a> pour des questions de rétrocompatibilité, particulièrement pour le code qui gère encore Python 2.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.force_text">
+<code class="descname">force_text</code>(<em>s</em>, <em>encoding='utf-8'</em>, <em>strings_only=False</em>, <em>errors='strict'</em>)<a class="headerlink" href="#django.utils.encoding.force_text" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="deprecated">
+<p><span class="versionmodified">Obsolète depuis la version 3.0.</span></p>
+</div>
+<p>Alias de <a class="reference internal" href="#django.utils.encoding.force_str" title="django.utils.encoding.force_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">force_str()</span></code></a> pour des questions de rétrocompatibilité, particulièrement pour le code qui gère encore Python 2.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.iri_to_uri">
+<code class="descname">iri_to_uri</code>(<em>iri</em>)<a class="headerlink" href="#django.utils.encoding.iri_to_uri" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit une portion d’identifiant de ressource internationalisé (IRI) en portion d’URI qui convient pour l’inclusion dans une URL.</p>
+<p>Il s’agit de l’algorithme de la section 3.1 de la <span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3987.html#section-3.1"><strong>RFC 3987#section-3.1</strong></a>, légèrement simplifiée dans la mesure où l’on admet que la valeur d’entrée est une chaîne et non pas un flux binaire arbitraire.</p>
+<p>Accepte une IRI (chaîne ou octets UTF-8) et renvoie une chaîne contenant le résultat encodé.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.uri_to_iri">
+<code class="descname">uri_to_iri</code>(<em>uri</em>)<a class="headerlink" href="#django.utils.encoding.uri_to_iri" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit une URI (Uniform Resource Identifier) en une IRI (Internationalized Resource Identifier).</p>
+<p>Il s’agit d’un algorithme inspiré de la section 3.2 de la <span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3987.html#section-3.2"><strong>RFC 3987#section-3.2</strong></a>.</p>
+<p>Accepte une URI en octets ASCII et renvoie une chaîne contenant le résultat encodé.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.filepath_to_uri">
+<code class="descname">filepath_to_uri</code>(<em>path</em>)<a class="headerlink" href="#django.utils.encoding.filepath_to_uri" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit un chemin de système de fichiers en une portion d’URI convenable pour son inclusion dans une URL. Le chemin en entrée doit être soit des octets UTF-8, une chaîne ou un chemin <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>.</p>
+<p>Cette méthode code certains caractères qui sont normalement identifiés comme des caractères spéciaux dans les URI. Notez que cette méthode ne code pas le caractère «&nbsp;”&nbsp;» car c’est un caractère accepté dans les URI. Voir la fonction JavaScript <code class="docutils literal notranslate"><span class="pre">encodeURIComponent()</span></code> pour plus de détails.</p>
+<p>Renvoie une chaîne ASCII contenant le résultat encodé.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.1:</span> <p>La prise en charge des chemins <code class="docutils literal notranslate"><span class="pre">path</span></code> de type <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a> a été ajoutée.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.encoding.escape_uri_path">
+<code class="descname">escape_uri_path</code>(<em>path</em>)<a class="headerlink" href="#django.utils.encoding.escape_uri_path" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Échappe les caractères non sûrs de la portion de chemin d’un URI (Uniform Resource Identifier).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.feedgenerator">
+<span id="s-django-utils-feedgenerator"></span><span id="module-django.utils.feedgenerator"></span><span id="django-utils-feedgenerator"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.feedgenerator</span></code><a class="headerlink" href="#module-django.utils.feedgenerator" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Exemple d’utilisation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.utils</span> <span class="k">import</span> <span class="n">feedgenerator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feed</span> <span class="o">=</span> <span class="n">feedgenerator</span><span class="o">.</span><span class="n">Rss201rev2Feed</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Poynter E-Media Tidbits&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">link</span><span class="o">=</span><span class="s2">&quot;http://www.poynter.org/column.asp?id=31&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;A group Weblog by the sharpest minds in online media/journalism/publishing.&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">language</span><span class="o">=</span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">feed</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">link</span><span class="o">=</span><span class="s2">&quot;http://www.holovaty.com/test/&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Testing.&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;test.rss&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">feed</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pour simplifier la sélection d’un générateur, utilisez <code class="docutils literal notranslate"><span class="pre">feedgenerator.DefaultFeed</span></code> qui est actuellement <code class="docutils literal notranslate"><span class="pre">Rss201rev2Feed</span></code>.</p>
+<p>Pour les définitions des différentes versions de RSS, voir <a class="reference external" href="https://web.archive.org/web/20110718035220/http://diveintomark.org/archives/2004/02/04/incompatible-rss">https://web.archive.org/web/20110718035220/http://diveintomark.org/archives/2004/02/04/incompatible-rss</a></p>
+<dl class="function">
+<dt id="django.utils.feedgenerator.get_tag_uri">
+<code class="descname">get_tag_uri</code>(<em>url</em>, <em>date</em>)<a class="headerlink" href="#django.utils.feedgenerator.get_tag_uri" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée un <code class="docutils literal notranslate"><span class="pre">TagURI</span></code>.</p>
+<p>Voir <a class="reference external" href="https://web.archive.org/web/20110514113830/http://diveintomark.org/archives/2004/05/28/howto-atom-id">https://web.archive.org/web/20110514113830/http://diveintomark.org/archives/2004/05/28/howto-atom-id</a></p>
+</dd></dl>
+
+<div class="section" id="s-syndicationfeed">
+<span id="syndicationfeed"></span><h3><code class="docutils literal notranslate"><span class="pre">SyndicationFeed</span></code><a class="headerlink" href="#syndicationfeed" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.utils.feedgenerator.SyndicationFeed">
+<em class="property">class </em><code class="descname">SyndicationFeed</code><a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Classe de base pour tous les flux de syndication. Les sous-classes doivent implémenter <code class="docutils literal notranslate"><span class="pre">write()</span></code>.</p>
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.__init__">
+<code class="descname">__init__</code>(<em>title</em>, <em>link</em>, <em>description</em>, <em>language=None</em>, <em>author_email=None</em>, <em>author_name=None</em>, <em>author_link=None</em>, <em>subtitle=None</em>, <em>categories=None</em>, <em>feed_url=None</em>, <em>feed_copyright=None</em>, <em>feed_guid=None</em>, <em>ttl=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.__init__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Initialise le flux avec le dictionnaire de métadonnées indiqué, qui s’applique au flux entier.</p>
+<p>Tout paramètre nommé supplémentaire passé à <code class="docutils literal notranslate"><span class="pre">__init__</span></code> est stocké dans <code class="docutils literal notranslate"><span class="pre">self.feed</span></code>.</p>
+<p>Tous les paramètres doivent être des chaînes, à l’exception de <code class="docutils literal notranslate"><span class="pre">categories</span></code>, qui doit être une liste de chaînes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.add_item">
+<code class="descname">add_item</code>(<em>title</em>, <em>link</em>, <em>description</em>, <em>author_email=None</em>, <em>author_name=None</em>, <em>author_link=None</em>, <em>pubdate=None</em>, <em>comments=None</em>, <em>unique_id=None</em>, <em>categories=()</em>, <em>item_copyright=None</em>, <em>ttl=None</em>, <em>updateddate=None</em>, <em>enclosures=None</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.add_item" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute un élément au flux. Tous les paramètres sont censés être des chaînes, sauf <code class="docutils literal notranslate"><span class="pre">pubdate</span></code> et <code class="docutils literal notranslate"><span class="pre">updateddate</span></code> qui doivent être des objets <code class="docutils literal notranslate"><span class="pre">datetime.datetime</span></code>, et <code class="docutils literal notranslate"><span class="pre">enclosures</span></code> qui doit être une liste d’instances <code class="docutils literal notranslate"><span class="pre">Enclosure</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.num_items">
+<code class="descname">num_items</code>()<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.num_items" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.root_attributes">
+<code class="descname">root_attributes</code>()<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.root_attributes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie des attributs supplémentaires à ajouter à l’élément racine (c’est-à-dire le flux ou canal). Appelé depuis <code class="docutils literal notranslate"><span class="pre">write()</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.add_root_elements">
+<code class="descname">add_root_elements</code>(<em>handler</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.add_root_elements" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute des éléments à l’élément racine (c’est-à-dire le flux ou canal). Appelé depuis <code class="docutils literal notranslate"><span class="pre">write()</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.item_attributes">
+<code class="descname">item_attributes</code>(<em>item</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.item_attributes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie des attributs supplémentaires à placer dans chaque élément du flux.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.add_item_elements">
+<code class="descname">add_item_elements</code>(<em>handler</em>, <em>item</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.add_item_elements" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute des éléments pour chaque élément du flux.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.write">
+<code class="descname">write</code>(<em>outfile</em>, <em>encoding</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.write" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exporte le flux dans le codage indiqué vers <code class="docutils literal notranslate"><span class="pre">outfile</span></code> qui est un objet de type fichier. Les sous-classes sont censées surcharger cette méthode.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.writeString">
+<code class="descname">writeString</code>(<em>encoding</em>)<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.writeString" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le flux dans le codage indiqué sous forme de chaîne.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.utils.feedgenerator.SyndicationFeed.latest_post_date">
+<code class="descname">latest_post_date</code>()<a class="headerlink" href="#django.utils.feedgenerator.SyndicationFeed.latest_post_date" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la dernière date <code class="docutils literal notranslate"><span class="pre">pubdate</span></code> ou <code class="docutils literal notranslate"><span class="pre">updateddate</span></code> parmi tous les éléments du flux. Si aucun de ces attributs n’est trouvé sur aucun élément, la date/heure UTC actuelle est renvoyée.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-enclosure">
+<span id="enclosure"></span><h3><code class="docutils literal notranslate"><span class="pre">Enclosure</span></code><a class="headerlink" href="#enclosure" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.utils.feedgenerator.Enclosure">
+<em class="property">class </em><code class="descname">Enclosure</code><a class="headerlink" href="#django.utils.feedgenerator.Enclosure" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Représente une annexe RSS.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-rssfeed">
+<span id="rssfeed"></span><h3><code class="docutils literal notranslate"><span class="pre">RssFeed</span></code><a class="headerlink" href="#rssfeed" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.utils.feedgenerator.RssFeed">
+<em class="property">class </em><code class="descname">RssFeed</code>(<em>SyndicationFeed</em>)<a class="headerlink" href="#django.utils.feedgenerator.RssFeed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="s-rss201rev2feed">
+<span id="rss201rev2feed"></span><h3><code class="docutils literal notranslate"><span class="pre">Rss201rev2Feed</span></code><a class="headerlink" href="#rss201rev2feed" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.utils.feedgenerator.Rss201rev2Feed">
+<em class="property">class </em><code class="descname">Rss201rev2Feed</code>(<em>RssFeed</em>)<a class="headerlink" href="#django.utils.feedgenerator.Rss201rev2Feed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Spécification&nbsp;: <a class="reference external" href="https://cyber.harvard.edu/rss/rss.html">https://cyber.harvard.edu/rss/rss.html</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-rssuserland091feed">
+<span id="rssuserland091feed"></span><h3><code class="docutils literal notranslate"><span class="pre">RssUserland091Feed</span></code><a class="headerlink" href="#rssuserland091feed" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.utils.feedgenerator.RssUserland091Feed">
+<em class="property">class </em><code class="descname">RssUserland091Feed</code>(<em>RssFeed</em>)<a class="headerlink" href="#django.utils.feedgenerator.RssUserland091Feed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Spécification&nbsp;: <a class="reference external" href="http://backend.userland.com/rss091">http://backend.userland.com/rss091</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-atom1feed">
+<span id="atom1feed"></span><h3><code class="docutils literal notranslate"><span class="pre">Atom1Feed</span></code><a class="headerlink" href="#atom1feed" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.utils.feedgenerator.Atom1Feed">
+<em class="property">class </em><code class="descname">Atom1Feed</code>(<em>SyndicationFeed</em>)<a class="headerlink" href="#django.utils.feedgenerator.Atom1Feed" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Spécification : <span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4287.html"><strong>RFC 4287</strong></a></p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-module-django.utils.functional">
+<span id="s-django-utils-functional"></span><span id="module-django.utils.functional"></span><span id="django-utils-functional"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.functional</span></code><a class="headerlink" href="#module-django.utils.functional" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.utils.functional.cached_property">
+<em class="property">class </em><code class="descname">cached_property</code>(<em>func</em>, <em>name=None</em>)<a class="reference internal" href="../_modules/django/utils/functional.html#cached_property"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.functional.cached_property" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le décorateur <code class="docutils literal notranslate"><span class="pre">&#64;cached_property</span></code> met en cache le résultat d’une méthode ayant un seul paramètre <code class="docutils literal notranslate"><span class="pre">self</span></code> sous forme de propriété. Le résultat en cache persiste aussi longtemps que l’instance, ce qui fait que si l’instance est conservée et que la fonction est appelée une nouvelle fois plus tard, le résultat en cache est renvoyé.</p>
+<p>Considérons un cas typique où une vue a besoin d’appeler la méthode d’un modèle pour effectuer un certain calcul avant de placer cette instance de modèle dans le contexte passé au gabarit, et celui-ci a aussi besoin d’appeler la méthode une nouvelle fois&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># the model</span>
+<span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">friends</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># expensive computation</span>
+        <span class="o">...</span>
+        <span class="k">return</span> <span class="n">friends</span>
+
+<span class="c1"># in the view:</span>
+<span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">friends</span><span class="p">():</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Et dans le gabarit, vous auriez&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">friend</span> <span class="k">in</span> <span class="nv">person.friends</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">friends()</span></code> sera ici appelée deux fois. Puisque les instances <code class="docutils literal notranslate"><span class="pre">person</span></code> dans la vue et dans le gabarit représentent la même instance, décorer la méthode <code class="docutils literal notranslate"><span class="pre">friends()</span></code> avec <code class="docutils literal notranslate"><span class="pre">&#64;cached_property</span></code> permet d’éviter cela</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="k">import</span> <span class="n">cached_property</span>
+
+<span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">friends</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>
+</pre></div>
+</div>
+<p>Notez que la méthode étant maintenant devenue une propriété, le code Python doit y accéder de manière adéquate&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># in the view:</span>
+<span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">friends</span><span class="p">:</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>La valeur en cache peut être traitée comme n’importe quel autre attribut normal de l’instance&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># clear it, requiring re-computation next time it&#39;s called</span>
+<span class="k">del</span> <span class="n">person</span><span class="o">.</span><span class="n">friends</span> <span class="c1"># or delattr(person, &quot;friends&quot;)</span>
+
+<span class="c1"># set a value manually, that will persist on the instance until cleared</span>
+<span class="n">person</span><span class="o">.</span><span class="n">friends</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Huckleberry Finn&quot;</span><span class="p">,</span> <span class="s2">&quot;Tom Sawyer&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>En raison du fonctionnement du <a class="reference external" href="https://docs.python.org/3/reference/datamodel.html#descriptor-invocation" title="(disponible dans Python v3.9)"><span class="xref std std-ref">protocole de descripteur</span></a>, l’utilisation de <code class="docutils literal notranslate"><span class="pre">del</span></code> (ou <code class="docutils literal notranslate"><span class="pre">delattr</span></code>) sur une propriété décorée par <code class="docutils literal notranslate"><span class="pre">cached_property</span></code> qui n’a pas encore été accédée génère une exception <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code>.</p>
+<p>En plus d’offrir des avantages potentiels en terme de performance, <code class="docutils literal notranslate"><span class="pre">&#64;cached_property</span></code> peut garantir que la valeur d’un attribut ne change pas de manière inattendue au cours de la vie d’une instance. Cela pourrait se produire avec une méthode dont le calcul est basé sur <code class="docutils literal notranslate"><span class="pre">datetime.now()</span></code>, ou dans le cas où la base de données est modifiée par une autre processus dans le bref intervalle entre des appels successifs d’une méthode de la même instance.</p>
+<p>Vous pouvez créer des propriétés en cache pour des méthodes. Par exemple, si vous avez une méthode coûteuse <code class="docutils literal notranslate"><span class="pre">get_friends()</span></code> et que vous vouliez permettre de l’appeler aussi sans récupérer la valeur en cache, vous pourriez écrire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">friends</span> <span class="o">=</span> <span class="n">cached_property</span><span class="p">(</span><span class="n">get_friends</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;friends&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">name</span></code> n’est nécessaire que pour la prise en charge de Python &lt; 3.6.</p>
+<p>Alors que <code class="docutils literal notranslate"><span class="pre">person.get_friends()</span></code> recalcule les amis à chaque appel, la valeur de la propriété en cache persiste tant que vous ne la supprimez pas, comme expliqué ci-dessus&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">friends</span>         <span class="c1"># calls first time</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">get_friends</span><span class="p">()</span>   <span class="c1"># calls again</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">friends</span>         <span class="c1"># does not call</span>
+<span class="n">x</span> <span class="ow">is</span> <span class="n">z</span>                     <span class="c1"># is True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.utils.functional.classproperty">
+<em class="property">class </em><code class="descname">classproperty</code>(<em>method=None</em>)<a class="reference internal" href="../_modules/django/utils/functional.html#classproperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.functional.classproperty" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.1.</span> </div>
+<p>Semblable à <a class="reference external" href="https://docs.python.org/3/library/functions.html#classmethod" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">&#64;classmethod</span></code></a>, le décorateur <code class="docutils literal notranslate"><span class="pre">&#64;classproperty</span></code> convertit le résultat d’une méthode ayant un unique paramètre <code class="docutils literal notranslate"><span class="pre">cls</span></code> en une propriété à laquelle on peut directement accéder depuis la classe.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.functional.keep_lazy">
+<code class="descname">keep_lazy</code>(<em>func</em>, <em>*resultclasses</em>)<a class="reference internal" href="../_modules/django/utils/functional.html#keep_lazy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.functional.keep_lazy" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Django offre de nombreuses fonctions utilitaires (particulièrement dans <code class="docutils literal notranslate"><span class="pre">django.utils</span></code>) qui acceptent une chaîne comme premier paramètre et font quelque chose avec cette chaîne. Ces fonctions sont utilisées aussi bien par des filtres de gabarit que de façon directe dans du code Python.</p>
+<p>Si vous écrivez vous-même des fonctions semblables et que vous devez gérer des traductions, vous serez confronté au problème du traitement du premier paramètre quand il s’agit d’un objet de traduction différée. Il n’est pas souhaitable de le convertir immédiatement en chaîne de caractères, car il se peut que cette fonction soit utilisée en dehors d’une vue (et donc que le réglage de langue du fil d’exécution en cours ne soit pas le bon).</p>
+<p>Pour des cas comme celui-là, utilisez le décorateur <code class="docutils literal notranslate"><span class="pre">django.utils.functional.keep_lazy()</span></code>. Il modifie la fonction afin que <em>si</em> elle est appelée avec en paramètre une traduction différée, l’évaluation de la fonction est reportée jusqu’au moment où il devient vraiment nécessaire de produire une chaîne.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="k">import</span> <span class="n">keep_lazy</span><span class="p">,</span> <span class="n">keep_lazy_text</span>
+
+<span class="k">def</span> <span class="nf">fancy_utility_function</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="c1"># Do some conversion on string &#39;s&#39;</span>
+    <span class="o">...</span>
+<span class="n">fancy_utility_function</span> <span class="o">=</span> <span class="n">keep_lazy</span><span class="p">(</span><span class="nb">str</span><span class="p">)(</span><span class="n">fancy_utility_function</span><span class="p">)</span>
+
+<span class="c1"># Or more succinctly:</span>
+<span class="nd">@keep_lazy</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fancy_utility_function</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Le décorateur <code class="docutils literal notranslate"><span class="pre">keep_lazy()</span></code> accepte quelques paramètres supplémentaires (<code class="docutils literal notranslate"><span class="pre">*args</span></code>) indiquant le ou les types renvoyés par la fonction originale. Un cas d’utilisation fréquent est d’avoir des fonctions qui renvoient du texte. Pour celles-ci, passez le type <code class="docutils literal notranslate"><span class="pre">str</span></code> à <code class="docutils literal notranslate"><span class="pre">keep_lazy</span></code> (ou utilisez le décorateur <a class="reference internal" href="#django.utils.functional.keep_lazy_text" title="django.utils.functional.keep_lazy_text"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_lazy_text()</span></code></a> présenté à la section suivante).</p>
+<p>L’emploi de ce décorateur permet d’écrire une fonction et de compter sur la présence d’une vraie chaîne en entrée, puis d’ajouter au final la prise en charge des objets de traduction différée.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.functional.keep_lazy_text">
+<code class="descname">keep_lazy_text</code>(<em>func</em>)<a class="reference internal" href="../_modules/django/utils/functional.html#keep_lazy_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.functional.keep_lazy_text" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un raccourci pour <code class="docutils literal notranslate"><span class="pre">keep_lazy(str)(func)</span></code>.</p>
+<p>Si vous avez une fonction qui renvoie du texte et que vous souhaitez pouvoir accepter des paramètres dont l’évaluation est différée, utilisez ce décorateur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="k">import</span> <span class="n">keep_lazy</span><span class="p">,</span> <span class="n">keep_lazy_text</span>
+
+<span class="c1"># Our previous example was:</span>
+<span class="nd">@keep_lazy</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fancy_utility_function</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="c1"># Which can be rewritten as:</span>
+<span class="nd">@keep_lazy_text</span>
+<span class="k">def</span> <span class="nf">fancy_utility_function</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.html">
+<span id="s-django-utils-html"></span><span id="module-django.utils.html"></span><span id="django-utils-html"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.html</span></code><a class="headerlink" href="#module-django.utils.html" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En principe, le code HTML doit être construit avec des gabarits Django pour profiter de leur mécanisme d’échappement automatique, en faisant appel aux utilitaires de <a class="reference internal" href="#module-django.utils.safestring" title="django.utils.safestring: Functions and classes for working with strings that can be displayed safely without further escaping in HTML."><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.utils.safestring</span></code></a> en cas de besoin. Ce module fournit quelques utilitaires supplémentaires de bas niveau pour l’échappement de code HTML.</p>
+<dl class="function">
+<dt id="django.utils.html.escape">
+<code class="descname">escape</code>(<em>text</em>)<a class="headerlink" href="#django.utils.html.escape" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le texte donné en codant les esperluettes, les guillemets et les chevrons de manière adaptée au HTML. Le texte en entrée est d’abord forcé en chaîne de caractères et le résultat final est marqué comme sûr avec <a class="reference internal" href="#django.utils.safestring.mark_safe" title="django.utils.safestring.mark_safe"><code class="xref py py-func docutils literal notranslate"><span class="pre">mark_safe()</span></code></a>.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.0:</span> <p>Avec les anciennes versions, <code class="docutils literal notranslate"><span class="pre">'</span></code> était converti en son code décimal <code class="docutils literal notranslate"><span class="pre">&amp;#39;</span></code> au lieu du code hexadécimal équivalent <code class="docutils literal notranslate"><span class="pre">&amp;#x27;</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.html.conditional_escape">
+<code class="descname">conditional_escape</code>(<em>text</em>)<a class="headerlink" href="#django.utils.html.conditional_escape" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Semblable à <code class="docutils literal notranslate"><span class="pre">escape()</span></code>, sauf qu’elle n’opère pas sur les chaînes déjà échappées afin d’éviter un double échappement.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.html.format_html">
+<code class="descname">format_html</code>(<em>format_string</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.utils.html.format_html" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette fonction ressemble à <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str.format" title="(disponible dans Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.format()</span></code></a>, sauf qu’elle est particulièrement appropriée pour la construction de fragments HTML. Tous les paramètres (<code class="docutils literal notranslate"><span class="pre">args</span></code>/<code class="docutils literal notranslate"><span class="pre">kwargs</span></code>) passent par <a class="reference internal" href="#django.utils.html.conditional_escape" title="django.utils.html.conditional_escape"><code class="xref py py-func docutils literal notranslate"><span class="pre">conditional_escape()</span></code></a> avant d’être transmis à <code class="docutils literal notranslate"><span class="pre">str.format()</span></code>.</p>
+<p>Dans les cas où il s’agit de produire des petits fragments HTML, cette fonction doit être préférée à l’interpolation de chaîne directe avec <code class="docutils literal notranslate"><span class="pre">%</span></code> ou <code class="docutils literal notranslate"><span class="pre">str.format()</span></code>, car elle applique l’échappement à tous ses paramètres, tout comme le fait le système de gabarit par défaut.</p>
+<p>Donc au lieu d’écrire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mark_safe</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &lt;b&gt;</span><span class="si">%s</span><span class="s2">&lt;/b&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="n">some_html</span><span class="p">,</span>
+    <span class="n">escape</span><span class="p">(</span><span class="n">some_text</span><span class="p">),</span>
+    <span class="n">escape</span><span class="p">(</span><span class="n">some_other_text</span><span class="p">),</span>
+<span class="p">))</span>
+</pre></div>
+</div>
+<p>Il est préférable d’écrire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">format_html</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> &lt;b&gt;</span><span class="si">{}</span><span class="s2">&lt;/b&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">mark_safe</span><span class="p">(</span><span class="n">some_html</span><span class="p">),</span>
+    <span class="n">some_text</span><span class="p">,</span>
+    <span class="n">some_other_text</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Ceci présente l’avantage de ne pas devoir appliquer soi-même <a class="reference internal" href="#django.utils.html.escape" title="django.utils.html.escape"><code class="xref py py-func docutils literal notranslate"><span class="pre">escape()</span></code></a> à chacun des paramètres et de risquer une anomalie ou une vulnérabilité XSS si on en oublie un.</p>
+<p>Notez que bien que cette fonction utilise <code class="docutils literal notranslate"><span class="pre">str.format()</span></code> pour effectuer l’interpolation, certaines des options de format fournies par <code class="docutils literal notranslate"><span class="pre">str.format()</span></code> (par ex. les formats de nombre) ne fonctionnent pas, car tous les paramètres sont passés par la moulinette <a class="reference internal" href="#django.utils.html.conditional_escape" title="django.utils.html.conditional_escape"><code class="xref py py-func docutils literal notranslate"><span class="pre">conditional_escape()</span></code></a> qui appelle <a class="reference internal" href="#django.utils.encoding.force_str" title="django.utils.encoding.force_str"><code class="xref py py-func docutils literal notranslate"><span class="pre">force_str()</span></code></a> sur les valeurs reçues.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.html.format_html_join">
+<code class="descname">format_html_join</code>(<em>sep</em>, <em>format_string</em>, <em>args_generator</em>)<a class="headerlink" href="#django.utils.html.format_html_join" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une adaptateur de <a class="reference internal" href="#django.utils.html.format_html" title="django.utils.html.format_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_html()</span></code></a> conçu pour le cas courant d’un groupe de paramètres devant être mis en forme avec la même chaîne de format, puis combinés avec <code class="docutils literal notranslate"><span class="pre">sep</span></code>. <code class="docutils literal notranslate"><span class="pre">sep</span></code> passe lui-même aussi par <a class="reference internal" href="#django.utils.html.conditional_escape" title="django.utils.html.conditional_escape"><code class="xref py py-func docutils literal notranslate"><span class="pre">conditional_escape()</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">args_generator</span></code> doit être un itérateur renvoyant la liste de paramètres <code class="docutils literal notranslate"><span class="pre">args</span></code> qui seront transmis à <a class="reference internal" href="#django.utils.html.format_html" title="django.utils.html.format_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_html()</span></code></a>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">format_html_join</span><span class="p">(</span>
+    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s2">&quot;&lt;li&gt;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&lt;/li&gt;&quot;</span><span class="p">,</span>
+    <span class="p">((</span><span class="n">u</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="n">u</span><span class="o">.</span><span class="n">last_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">users</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.html.strip_tags">
+<code class="descname">strip_tags</code>(<em>value</em>)<a class="headerlink" href="#django.utils.html.strip_tags" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Tente de supprimer de la chaîne tout ce qui ressemble à une balise HTML, c’est-à-dire tout ce qui est contenu à l’intérieur de <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code>.</p>
+<p>Il n’y a absolument AUCUNE garantie que la chaîne résultante sera vraiment sûre du point de vue HTML. Il ne faut donc JAMAIS marquer comme sûre le résultat d’un appel à <code class="docutils literal notranslate"><span class="pre">strip_tag</span></code> sans l’avoir d’abord échappé, par exemple avec <a class="reference internal" href="#django.utils.html.escape" title="django.utils.html.escape"><code class="xref py py-func docutils literal notranslate"><span class="pre">escape()</span></code></a>.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">strip_tags</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Si <code class="docutils literal notranslate"><span class="pre">value</span></code> vaut <code class="docutils literal notranslate"><span class="pre">&quot;&lt;b&gt;Joël&lt;/b&gt;</span> <span class="pre">&lt;button&gt;est&lt;/button&gt;</span> <span class="pre">une</span> <span class="pre">&lt;span&gt;limace&lt;/span&gt;&quot;</span></code>, la valeur renvoyée sera <code class="docutils literal notranslate"><span class="pre">&quot;Joël</span> <span class="pre">est</span> <span class="pre">une</span> <span class="pre">limace&quot;</span></code>.</p>
+<p>Si vous recherchez une solution plus robuste, regardez du côté de la bibliothèque Python <a class="reference external" href="https://pypi.org/project/bleach/">bleach</a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.html.html_safe">
+<code class="descname">html_safe</code>()<a class="headerlink" href="#django.utils.html.html_safe" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La méthode <code class="docutils literal notranslate"><span class="pre">__html__()</span></code> d’une classe aide les gabarits non Django à détecter les classes dont le résultat ne demande pas d’échappement HTML.</p>
+<p>Ce décorateur définit la méthode <code class="docutils literal notranslate"><span class="pre">__html__()</span></code> pour la classe décorée en enveloppant <code class="docutils literal notranslate"><span class="pre">__str__()</span></code> dans <a class="reference internal" href="#django.utils.safestring.mark_safe" title="django.utils.safestring.mark_safe"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mark_safe()</span></code></a>. Assurez-vous que la méthode <code class="docutils literal notranslate"><span class="pre">__str__()</span></code> renvoie effectivement du texte qui ne demande pas d’échappement HTML.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.http">
+<span id="s-django-utils-http"></span><span id="module-django.utils.http"></span><span id="django-utils-http"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.http</span></code><a class="headerlink" href="#module-django.utils.http" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.utils.http.urlencode">
+<code class="descname">urlencode</code>(<em>query</em>, <em>doseq=False</em>)<a class="headerlink" href="#django.utils.http.urlencode" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une version de la fonction Python <a class="reference external" href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlencode" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">urllib.parse.urlencode()</span></code></a> pouvant agir sur des dictionnaires <code class="docutils literal notranslate"><span class="pre">MultiValueDict</span></code> et d’autres valeurs qui ne sont pas des chaînes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.http.http_date">
+<code class="descname">http_date</code>(<em>epoch_seconds=None</em>)<a class="headerlink" href="#django.utils.http.http_date" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Met en forme la date/heure en respectant le format de date <span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1123.html#section-5.2.14"><strong>RFC 1123#section-5.2.14</strong></a> tel que défini par la <span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7231.html#section-7.1.1.1"><strong>RFC 7231#section-7.1.1.1</strong></a> du standard HTTP.</p>
+<p>Accepte un nombre à virgule exprimé en secondes depuis le temps Unix initial en UTC, de manière semblable à ce que produit <code class="docutils literal notranslate"><span class="pre">time.time()</span></code>. Si le paramètre est <code class="docutils literal notranslate"><span class="pre">None</span></code>, c’est la date actuelle qui est renvoyée.</p>
+<p>Produit une chaîne au format <code class="docutils literal notranslate"><span class="pre">Wdy,</span> <span class="pre">DD</span> <span class="pre">Mon</span> <span class="pre">YYYY</span> <span class="pre">HH:MM:SS</span> <span class="pre">GMT</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.http.base36_to_int">
+<code class="descname">base36_to_int</code>(<em>s</em>)<a class="headerlink" href="#django.utils.http.base36_to_int" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit une chaîne base 36 en nombre entier.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.http.int_to_base36">
+<code class="descname">int_to_base36</code>(<em>i</em>)<a class="headerlink" href="#django.utils.http.int_to_base36" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit un nombre entier positif en chaîne base 36.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.http.urlsafe_base64_encode">
+<code class="descname">urlsafe_base64_encode</code>(<em>s</em>)<a class="headerlink" href="#django.utils.http.urlsafe_base64_encode" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Code une chaîne d’octets en chaîne base64 pour être utilisée dans les URL, en enlevant d’éventuels signes «&nbsp;égal&nbsp;» finaux.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.http.urlsafe_base64_decode">
+<code class="descname">urlsafe_base64_decode</code>(<em>s</em>)<a class="headerlink" href="#django.utils.http.urlsafe_base64_decode" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Décode une chaîne codée en base64, ajoutant d’éventuels signes « égal » finaux qui pourraient avoir été enlevés.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.module_loading">
+<span id="s-django-utils-module-loading"></span><span id="module-django.utils.module_loading"></span><span id="django-utils-module-loading"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.module_loading</span></code><a class="headerlink" href="#module-django.utils.module_loading" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Fonctions pour manipuler les modules Python.</p>
+<dl class="function">
+<dt id="django.utils.module_loading.import_string">
+<code class="descname">import_string</code>(<em>dotted_path</em>)<a class="reference internal" href="../_modules/django/utils/module_loading.html#import_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.module_loading.import_string" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Importe un chemin pointé de module et renvoie la classe ou l’attribut désigné par le dernier nom du chemin. Génère <code class="docutils literal notranslate"><span class="pre">ImportError</span></code> si l’importation échoue. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.module_loading</span> <span class="k">import</span> <span class="n">import_string</span>
+<span class="n">ValidationError</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="s1">&#39;django.core.exceptions.ValidationError&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>est équivalent à&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.safestring">
+<span id="s-django-utils-safestring"></span><span id="module-django.utils.safestring"></span><span id="django-utils-safestring"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.safestring</span></code><a class="headerlink" href="#module-django.utils.safestring" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Fonctions et classes pour travailler avec des «&nbsp;chaînes sûres&nbsp;»&nbsp;: des chaînes qui peuvent être affichées sans crainte sans devoir subir d’échappement HTML. Quand une chaîne est marquée comme «&nbsp;sûre&nbsp;» (safe), cela signifie que le producteur de la chaîne a déjà transformé en entités appropriées les caractères qui ne doivent pas être interprétés par le moteur HTML (par ex. «&nbsp;&lt;&nbsp;»).</p>
+<dl class="class">
+<dt id="django.utils.safestring.SafeString">
+<em class="property">class </em><code class="descname">SafeString</code><a class="reference internal" href="../_modules/django/utils/safestring.html#SafeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.safestring.SafeString" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une sous-classe de <code class="docutils literal notranslate"><span class="pre">str</span></code> pour des chaînes ayant été explicitement marquées comme «&nbsp;sûres&nbsp;» (plus besoin d’échappement) à des fins d’affichage HTML.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.safestring.mark_safe">
+<code class="descname">mark_safe</code>(<em>s</em>)<a class="reference internal" href="../_modules/django/utils/safestring.html#mark_safe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.utils.safestring.mark_safe" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Marque explicitement une chaîne comme sûre en vue de son affichage (HTML). L’objet renvoyé peut être utilisé partout où une chaîne peut être utilisé.</p>
+<p>Cette fonction peut être utilisée plusieurs fois sur la même chaîne.</p>
+<p>Peut aussi être utilisé comme décorateur.</p>
+<p>Pour la construction de fragments de HTML, il est généralement préférable d’utiliser plutôt <a class="reference internal" href="#django.utils.html.format_html" title="django.utils.html.format_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.utils.html.format_html()</span></code></a>.</p>
+<p>Une chaîne marquée comme sûre redevient non sûre quand elle est modifiée. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mystr</span> <span class="o">=</span> <span class="s1">&#39;&lt;b&gt;Hello World&lt;/b&gt;   &#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mystr</span> <span class="o">=</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">mystr</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">mystr</span><span class="p">)</span>
+<span class="go">&lt;class &#39;django.utils.safestring.SafeString&#39;&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mystr</span> <span class="o">=</span> <span class="n">mystr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># removing whitespace</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">mystr</span><span class="p">)</span>
+<span class="go">&lt;type &#39;str&#39;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.text">
+<span id="s-django-utils-text"></span><span id="module-django.utils.text"></span><span id="django-utils-text"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.text</span></code><a class="headerlink" href="#module-django.utils.text" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="function">
+<dt id="django.utils.text.format_lazy">
+<code class="descname">format_lazy</code>(<em>format_string</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.utils.text.format_lazy" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une version de <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str.format" title="(disponible dans Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">str.format()</span></code></a> pour les cas où <code class="docutils literal notranslate"><span class="pre">format_string</span></code>, <code class="docutils literal notranslate"><span class="pre">args</span></code> ou <code class="docutils literal notranslate"><span class="pre">kwargs</span></code> contiennent des objets différés. Le premier paramètre est la chaîne à mettre en forme. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.text</span> <span class="k">import</span> <span class="n">format_lazy</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="k">import</span> <span class="n">pgettext_lazy</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="n">format_lazy</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{person}</span><span class="s1">/&lt;int:pk&gt;/&#39;</span><span class="p">,</span> <span class="n">person</span><span class="o">=</span><span class="n">pgettext_lazy</span><span class="p">(</span><span class="s1">&#39;URL&#39;</span><span class="p">,</span> <span class="s1">&#39;person&#39;</span><span class="p">)),</span>
+         <span class="n">PersonDetailView</span><span class="o">.</span><span class="n">as_view</span><span class="p">()),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Cet exemple permet aux traducteurs de traduire une partie de l’URL. Si «&nbsp;person&nbsp;» est traduit en «&nbsp;persona&nbsp;», l’expression régulière va correspondre à <code class="docutils literal notranslate"><span class="pre">persona/(?P&lt;pk&gt;\d+)/$</span></code>, par ex. <code class="docutils literal notranslate"><span class="pre">persona/5/</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.text.slugify">
+<code class="descname">slugify</code>(<em>value</em>, <em>allow_unicode=False</em>)<a class="headerlink" href="#django.utils.text.slugify" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit une chaîne en un « slug » d’URL en :</p>
+<ol class="arabic simple">
+<li>Convertissant en ASCII si <code class="docutils literal notranslate"><span class="pre">allow_unicode</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code> (par défaut).</li>
+<li>Convertissant en minuscules.</li>
+<li>Supprimant les caractères qui ne sont pas alphanumériques, des soulignements, des tirets ou des espaces blancs.</li>
+<li>Supprimant les blancs de début et de fin.</li>
+<li>Remplaçant tout espace blanc ou répétition de tirets par un seul.</li>
+</ol>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">slugify</span><span class="p">(</span><span class="s1">&#39; Joel is a slug &#39;</span><span class="p">)</span>
+<span class="go">&#39;joel-is-a-slug&#39;</span>
+</pre></div>
+</div>
+<p>Si vous souhaitez permettre les caractères Unicode, passez <code class="docutils literal notranslate"><span class="pre">allow_unicode=True</span></code>. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">slugify</span><span class="p">(</span><span class="s1">&#39;你好 World&#39;</span><span class="p">,</span> <span class="n">allow_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&#39;你好-world&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.timezone">
+<span id="s-django-utils-timezone"></span><span id="s-time-zone-selection-functions"></span><span id="module-django.utils.timezone"></span><span id="django-utils-timezone"></span><span id="time-zone-selection-functions"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.timezone</span></code><a class="headerlink" href="#module-django.utils.timezone" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="data">
+<dt id="django.utils.timezone.utc">
+<code class="descname">utc</code><a class="headerlink" href="#django.utils.timezone.utc" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Instance <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a> qui représente le temps UTC.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.get_fixed_timezone">
+<code class="descname">get_fixed_timezone</code>(<em>offset</em>)<a class="headerlink" href="#django.utils.timezone.get_fixed_timezone" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a> représentant un fuseau horaire avec un décalage UTC fixe.</p>
+<p><code class="docutils literal notranslate"><span class="pre">offset</span></code> est une différence de temps <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.timedelta</span></code></a> ou un nombre entier en minutes. Utilisez des valeurs positives pour les fuseaux horaires à l’est d’UTC et des valeurs négatives à l’ouest d’UTC.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.get_default_timezone">
+<code class="descname">get_default_timezone</code>()<a class="headerlink" href="#django.utils.timezone.get_default_timezone" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a> qui représente le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire par défaut</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.get_default_timezone_name">
+<code class="descname">get_default_timezone_name</code>()<a class="headerlink" href="#django.utils.timezone.get_default_timezone_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nom du <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire par défaut</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.get_current_timezone">
+<code class="descname">get_current_timezone</code>()<a class="headerlink" href="#django.utils.timezone.get_current_timezone" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a> qui représente le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire en cours</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.get_current_timezone_name">
+<code class="descname">get_current_timezone_name</code>()<a class="headerlink" href="#django.utils.timezone.get_current_timezone_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nom du <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire en cours</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.activate">
+<code class="descname">activate</code>(<em>timezone</em>)<a class="headerlink" href="#django.utils.timezone.activate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Définit le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actif</span></a>. Le paramètre <code class="docutils literal notranslate"><span class="pre">timezone</span></code> doit être une instance d’une sous-classe de <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a> ou un nom de fuseau horaire.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.deactivate">
+<code class="descname">deactivate</code>()<a class="headerlink" href="#django.utils.timezone.deactivate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Désactive le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actuel</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.override">
+<code class="descname">override</code>(<em>timezone</em>)<a class="headerlink" href="#django.utils.timezone.override" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Gestionnaire de contexte Python qui définit le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actif</span></a> lorsqu’il entre en action avec <a class="reference internal" href="#django.utils.timezone.activate" title="django.utils.timezone.activate"><code class="xref py py-func docutils literal notranslate"><span class="pre">activate()</span></code></a>, puis restaure le fuseau horaire précédemment actif en quittant. Si le paramètre <code class="docutils literal notranslate"><span class="pre">timezone</span></code> vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>, le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actif</span></a> est alors désactivé à l’entrée du gestionnaire avec <a class="reference internal" href="#django.utils.timezone.deactivate" title="django.utils.timezone.deactivate"><code class="xref py py-func docutils literal notranslate"><span class="pre">deactivate()</span></code></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">override</span></code> est aussi utilisable comme décorateur de fonction.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.localtime">
+<code class="descname">localtime</code>(<em>value=None</em>, <em>timezone=None</em>)<a class="headerlink" href="#django.utils.timezone.localtime" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Convertit un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> conscient vers un fuseau horaire différent, par défaut le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actif</span></a>.</p>
+<p>Lorsque <code class="docutils literal notranslate"><span class="pre">value</span></code> est omise, la valeur par défaut est <a class="reference internal" href="#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">now()</span></code></a>.</p>
+<p>Cette fonction ne fonctionne pas avec des objets date/heure naïfs&nbsp;; utilisez alors plutôt <a class="reference internal" href="#django.utils.timezone.make_aware" title="django.utils.timezone.make_aware"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_aware()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.localdate">
+<code class="descname">localdate</code>(<em>value=None</em>, <em>timezone=None</em>)<a class="headerlink" href="#django.utils.timezone.localdate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilise <a class="reference internal" href="#django.utils.timezone.localtime" title="django.utils.timezone.localtime"><code class="xref py py-func docutils literal notranslate"><span class="pre">localtime()</span></code></a> pour convertir un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> conscient en une <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime.date" title="(disponible dans Python v3.9)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">date()</span></code></a> dans un fuseau horaire différent, par défaut le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actif</span></a>.</p>
+<p>Lorsque <code class="docutils literal notranslate"><span class="pre">value</span></code> est omise, la valeur par défaut est <a class="reference internal" href="#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">now()</span></code></a>.</p>
+<p>Cette fonction ne fonctionne pas avec des objets date/heure naïfs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.now">
+<code class="descname">now</code>()<a class="headerlink" href="#django.utils.timezone.now" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> représentant le moment actuel dans le temps («&nbsp;maintenant&nbsp;»). La valeur précisément renvoyée dépend de la valeur de <a class="reference internal" href="settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a>:</p>
+<ul class="simple">
+<li>Si <a class="reference internal" href="settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> est <code class="docutils literal notranslate"><span class="pre">False</span></code>, il s’agira d’une date/heure <a class="reference internal" href="../topics/i18n/timezones.html#naive-vs-aware-datetimes"><span class="std std-ref">naïve</span></a> (c’est-à-dire une date/heure sans fuseau horaire associé) représentant le temps actuel dans le fuseau horaire local du système.</li>
+<li>Si <a class="reference internal" href="settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> est <code class="docutils literal notranslate"><span class="pre">True</span></code>, il s’agira d’une date/heure <a class="reference internal" href="../topics/i18n/timezones.html#naive-vs-aware-datetimes"><span class="std std-ref">consciente</span></a> représentant le temps actuel en UTC. Notez que <a class="reference internal" href="#django.utils.timezone.now" title="django.utils.timezone.now"><code class="xref py py-func docutils literal notranslate"><span class="pre">now()</span></code></a> renvoie toujours le temps UTC quelle que soit la valeur de <a class="reference internal" href="settings.html#std:setting-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a>; vous pouvez utiliser <a class="reference internal" href="#django.utils.timezone.localtime" title="django.utils.timezone.localtime"><code class="xref py py-func docutils literal notranslate"><span class="pre">localtime()</span></code></a> pour obtenir l’heure dans le fuseau horaire actif.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.is_aware">
+<code class="descname">is_aware</code>(<em>value</em>)<a class="headerlink" href="#django.utils.timezone.is_aware" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si <code class="docutils literal notranslate"><span class="pre">value</span></code> est consciente, <code class="docutils literal notranslate"><span class="pre">False</span></code> si elle est naïve. Cette fonction présuppose que <code class="docutils literal notranslate"><span class="pre">value</span></code> est un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.is_naive">
+<code class="descname">is_naive</code>(<em>value</em>)<a class="headerlink" href="#django.utils.timezone.is_naive" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> si <code class="docutils literal notranslate"><span class="pre">value</span></code> est naïve, <code class="docutils literal notranslate"><span class="pre">False</span></code> si elle est consciente. Cette fonction présuppose que <code class="docutils literal notranslate"><span class="pre">value</span></code> est un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.make_aware">
+<code class="descname">make_aware</code>(<em>value</em>, <em>timezone=None</em>, <em>is_dst=None</em>)<a class="headerlink" href="#django.utils.timezone.make_aware" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> conscient représentant le même moment dans le temps que <code class="docutils literal notranslate"><span class="pre">value</span></code> dans le fuseau <code class="docutils literal notranslate"><span class="pre">timezone</span></code>, <code class="docutils literal notranslate"><span class="pre">value</span></code> étant un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> naïf. Si <code class="docutils literal notranslate"><span class="pre">timezone</span></code> est défini à <code class="docutils literal notranslate"><span class="pre">None</span></code>, il prend le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actuel</span></a> comme valeur par défaut.</p>
+<p>L’exception <code class="docutils literal notranslate"><span class="pre">pytz.AmbiguousTimeError</span></code> est générée quand on essaie de rendre <code class="docutils literal notranslate"><span class="pre">value</span></code> consciente pendant une transition d’heure d’été/hiver et quand la même heure survient deux fois (passage heure d’été à hiver). En définissant <code class="docutils literal notranslate"><span class="pre">is_dst</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> ou <code class="docutils literal notranslate"><span class="pre">False</span></code>, l’exception est évitée en choisissant si l’heure est celle qui précède ou celle qui suit la transition, respectivement.</p>
+<p>L’exception <code class="docutils literal notranslate"><span class="pre">pytz.NonExistentTimeError</span></code> est générée quand on essaie de rendre <code class="docutils literal notranslate"><span class="pre">value</span></code> consciente pendant une transition d’heure d’été/hiver et quand l’heure concernée ne survient jamais. Par exemple, si l’heure 2:00 n’existe pas dans une transition, rendre 2:30 consciente dans ce fuseau horaire produira une exception. Pour éviter cela, vous pouvez utiliser <code class="docutils literal notranslate"><span class="pre">is_dst</span></code> pour indiquer comment  <code class="docutils literal notranslate"><span class="pre">make_aware()</span></code> doit interpréter une telle heure qui n’existe pas. Si <code class="docutils literal notranslate"><span class="pre">is_dst=True</span></code>, l’heure ci-dessus sera interprétée comme 2:30 du temps de transition (équivalent à 1:30 en heure locale). Inversement, si <code class="docutils literal notranslate"><span class="pre">is_dst=False</span></code>, l’heure sera interprétée comme 2:30 du temps standard (équivalent à 3:30 en heure locale).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.timezone.make_naive">
+<code class="descname">make_naive</code>(<em>value</em>, <em>timezone=None</em>)<a class="headerlink" href="#django.utils.timezone.make_naive" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> naïf représentant le même moment dans le temps que <code class="docutils literal notranslate"><span class="pre">value</span></code> dans le fuseau <code class="docutils literal notranslate"><span class="pre">timezone</span></code>, <code class="docutils literal notranslate"><span class="pre">value</span></code> étant un objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> conscient. Si <code class="docutils literal notranslate"><span class="pre">timezone</span></code> est défini à <code class="docutils literal notranslate"><span class="pre">None</span></code>, il prend le <a class="reference internal" href="../topics/i18n/timezones.html#default-current-time-zone"><span class="std std-ref">fuseau horaire actuel</span></a> comme valeur par défaut.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-module-django.utils.translation">
+<span id="s-django-utils-translation"></span><span id="module-django.utils.translation"></span><span id="django-utils-translation"></span><h2><code class="docutils literal notranslate"><span class="pre">django.utils.translation</span></code><a class="headerlink" href="#module-django.utils.translation" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour une discussion complète sur l’utilisation de ce qui suit, consultez la <a class="reference internal" href="../topics/i18n/translation.html"><span class="doc">documentation sur la traduction</span></a>.</p>
+<dl class="function">
+<dt id="django.utils.translation.gettext">
+<code class="descname">gettext</code>(<em>message</em>)<a class="headerlink" href="#django.utils.translation.gettext" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Traduit <code class="docutils literal notranslate"><span class="pre">message</span></code> et renvoie le résultat dans une chaîne.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.pgettext">
+<code class="descname">pgettext</code>(<em>context</em>, <em>message</em>)<a class="headerlink" href="#django.utils.translation.pgettext" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Traduit <code class="docutils literal notranslate"><span class="pre">message</span></code> selon <code class="docutils literal notranslate"><span class="pre">context</span></code> et renvoie le résultat dans une chaîne.</p>
+<p>Pour plus d’informations, voir <a class="reference internal" href="../topics/i18n/translation.html#contextual-markers"><span class="std std-ref">Marqueurs contextuels</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.gettext_lazy">
+<code class="descname">gettext_lazy</code>(<em>message</em>)<a class="headerlink" href="#django.utils.translation.gettext_lazy" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.pgettext_lazy">
+<code class="descname">pgettext_lazy</code>(<em>context</em>, <em>message</em>)<a class="headerlink" href="#django.utils.translation.pgettext_lazy" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Même comportement que les versions non différées ci-dessus, mais en utilisant une exécution différée.</p>
+<p>Voir <a class="reference internal" href="../topics/i18n/translation.html#lazy-translations"><span class="std std-ref">la documentation sur les traductions différées</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.gettext_noop">
+<code class="descname">gettext_noop</code>(<em>message</em>)<a class="headerlink" href="#django.utils.translation.gettext_noop" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Marque les chaînes en vue de leur traduction mais ne les traduit pas sur le moment. Cela peut être utile pour stocker des chaînes qui doivent rester dans la langue de base (parce qu’elles pourraient être utilisées de manière externe) dans des variables globales et que ces chaînes seront traduites plus tard.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.ngettext">
+<code class="descname">ngettext</code>(<em>singular</em>, <em>plural</em>, <em>number</em>)<a class="headerlink" href="#django.utils.translation.ngettext" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Traduit <code class="docutils literal notranslate"><span class="pre">singular</span></code> et <code class="docutils literal notranslate"><span class="pre">plural</span></code> et renvoie la chaîne appropriée en fonction de <code class="docutils literal notranslate"><span class="pre">number</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.npgettext">
+<code class="descname">npgettext</code>(<em>context</em>, <em>singular</em>, <em>plural</em>, <em>number</em>)<a class="headerlink" href="#django.utils.translation.npgettext" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Traduit <code class="docutils literal notranslate"><span class="pre">singulier</span></code> et <code class="docutils literal notranslate"><span class="pre">pluriel</span></code> et renvoie la chaîne appropriée en fonction de <code class="docutils literal notranslate"><span class="pre">nombre</span></code> et de <code class="docutils literal notranslate"><span class="pre">context</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.ngettext_lazy">
+<code class="descname">ngettext_lazy</code>(<em>singular</em>, <em>plural</em>, <em>number</em>)<a class="headerlink" href="#django.utils.translation.ngettext_lazy" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.npgettext_lazy">
+<code class="descname">npgettext_lazy</code>(<em>context</em>, <em>singular</em>, <em>plural</em>, <em>number</em>)<a class="headerlink" href="#django.utils.translation.npgettext_lazy" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Même comportement que les versions non différées ci-dessus, mais en utilisant une exécution différée.</p>
+<p>Voir <a class="reference internal" href="../topics/i18n/translation.html#lazy-translations"><span class="std std-ref">la documentation sur les traductions différées</span></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.activate">
+<code class="descname">activate</code>(<em>language</em>)<a class="headerlink" href="#django.utils.translation.activate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Récupère le catalogue de traduction d’une langue donnée et l’active comme catalogue de traduction courant pour le fil d’exécution en cours.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.deactivate">
+<code class="descname">deactivate</code>()<a class="headerlink" href="#django.utils.translation.deactivate" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Désactive le catalogue de traduction actif afin que des appels à _ subséquents vont refaire appel au catalogue de traduction par défaut.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.deactivate_all">
+<code class="descname">deactivate_all</code>()<a class="headerlink" href="#django.utils.translation.deactivate_all" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Place une instance de <code class="docutils literal notranslate"><span class="pre">NullTranslations()</span></code> comme catalogue de traduction actif. Cela peut être utile si l’on souhaite que des traductions différées apparaissent avec leur chaîne originale (donc non traduite) pour une raison quelconque.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.override">
+<code class="descname">override</code>(<em>language</em>, <em>deactivate=False</em>)<a class="headerlink" href="#django.utils.translation.override" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un gestionnaire de contexte Python qui utilise <a class="reference internal" href="#django.utils.translation.activate" title="django.utils.translation.activate"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.utils.translation.activate()</span></code></a> pour récupérer le catalogue de traduction d’une langue données, qui l’active comme catalogue de traduction pour le fil d’exécution en cours et qui réactive la langue précédemment active lors de sa sortie. Il est possible de définir le paramètre <code class="docutils literal notranslate"><span class="pre">deactivate</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> si l’on souhaite que la langue de traduction temporaire soit désactivée à la sortie du gestionnaire avec <a class="reference internal" href="#django.utils.translation.deactivate" title="django.utils.translation.deactivate"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.utils.translation.deactivate()</span></code></a>. Si le paramètre <code class="docutils literal notranslate"><span class="pre">language</span></code> vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>, une instance de <code class="docutils literal notranslate"><span class="pre">NullTranslations()</span></code> est activée dans le code affecté par le gestionnaire de contexte.</p>
+<p><code class="docutils literal notranslate"><span class="pre">override</span></code> est aussi utilisable comme décorateur de fonction.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.check_for_language">
+<code class="descname">check_for_language</code>(<em>lang_code</em>)<a class="headerlink" href="#django.utils.translation.check_for_language" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Contrôle s’il existe un fichier de langue global pour le code de langue donné (par ex. “fr”, “pt_BR”). Ceci est utilisé pour décider si une langue demandée par un utilisateur est disponible.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.get_language">
+<code class="descname">get_language</code>()<a class="headerlink" href="#django.utils.translation.get_language" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le code de langue actuellement sélectionné. Renvoie <code class="docutils literal notranslate"><span class="pre">None</span></code> si les traductions sont temporairement désactivées (par <a class="reference internal" href="#django.utils.translation.deactivate_all" title="django.utils.translation.deactivate_all"><code class="xref py py-func docutils literal notranslate"><span class="pre">deactivate_all()</span></code></a> ou lorsque <code class="docutils literal notranslate"><span class="pre">None</span></code> est passé à <a class="reference internal" href="#django.utils.translation.override" title="django.utils.translation.override"><code class="xref py py-func docutils literal notranslate"><span class="pre">override()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.get_language_bidi">
+<code class="descname">get_language_bidi</code>()<a class="headerlink" href="#django.utils.translation.get_language_bidi" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie l’agencement bidirectionnel de la langue sélectionnée&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">False</span></code> = agencement de gauche à droite</li>
+<li><code class="docutils literal notranslate"><span class="pre">True</span></code> = agencement de droite à gauche</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.get_language_from_request">
+<code class="descname">get_language_from_request</code>(<em>request</em>, <em>check_path=False</em>)<a class="headerlink" href="#django.utils.translation.get_language_from_request" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Analyse la requête pour trouver quelle est la langue souhaitée par l’utilisateur. Seules les langues figurant dans <code class="docutils literal notranslate"><span class="pre">settings.LANGUAGES</span></code> sont prises en compte. Si l’utilisateur demande un sous-code de langue alors que seule la langue principale est disponible, c’est la langue principale qui est renvoyée.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">check_path</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, la fonction examine d’abord l’URL demandée pour voir si son chemin commence par un code de langue figurant dans le réglage <a class="reference internal" href="settings.html#std:setting-LANGUAGES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGES</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.get_supported_language_variant">
+<code class="descname">get_supported_language_variant</code>(<em>lang_code</em>, <em>strict=False</em>)<a class="headerlink" href="#django.utils.translation.get_supported_language_variant" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">lang_code</span></code> s’il figure dans le réglage <a class="reference internal" href="settings.html#std:setting-LANGUAGES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGES</span></code></a>, en choisissant potentiellement une variante plus générique. Par exemple, “es”` est renvoyé si <code class="docutils literal notranslate"><span class="pre">lang_code</span></code> est <code class="docutils literal notranslate"><span class="pre">'es-ar'</span></code> et que <code class="docutils literal notranslate"><span class="pre">'es'</span></code> se trouve dans <a class="reference internal" href="settings.html#std:setting-LANGUAGES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGES</span></code></a> mais pas <code class="docutils literal notranslate"><span class="pre">'es-ar'</span></code>.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">strict</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code> (valeur par défaut), une variante territoriale peut être renvoyée lorsque ni le code de langue, ni sa variante générique n’est trouvée. Par exemple, si seul <code class="docutils literal notranslate"><span class="pre">'es-co'</span></code> se trouve dans <a class="reference internal" href="settings.html#std:setting-LANGUAGES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGES</span></code></a>, c’est ce dernier qui est renvoyé pour les codes de langue comme <code class="docutils literal notranslate"><span class="pre">'es'</span></code> et <code class="docutils literal notranslate"><span class="pre">'es-ar'</span></code>. Ces correspondances ne sont pas renvoyées quand <code class="docutils literal notranslate"><span class="pre">strict=True</span></code>.</p>
+<p>Génère <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#LookupError" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">LookupError</span></code></a> si rien n’est trouvé.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.to_locale">
+<code class="descname">to_locale</code>(<em>language</em>)<a class="headerlink" href="#django.utils.translation.to_locale" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Transforme un nom de langue (en-us) en un nom de locale (en_US).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="django.utils.translation.templatize">
+<code class="descname">templatize</code>(<em>src</em>)<a class="headerlink" href="#django.utils.translation.templatize" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Transforme un gabarit Django en un contenu analysable par <code class="docutils literal notranslate"><span class="pre">xgettext</span></code>. Ce processus traduit les balises de traduction de Django en invocations de fonctions <code class="docutils literal notranslate"><span class="pre">gettext</span></code> standard.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="django.utils.translation.LANGUAGE_SESSION_KEY">
+<code class="descname">LANGUAGE_SESSION_KEY</code><a class="headerlink" href="#django.utils.translation.LANGUAGE_SESSION_KEY" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Clé de session servant à stocker la langue active de la session en cours.</p>
+<div class="deprecated">
+<p><span class="versionmodified">Obsolète depuis la version 3.0: </span>La langue ne sera plus stockée dans la session avec Django 4.0. Utilisez le cookie <a class="reference internal" href="settings.html#std:setting-LANGUAGE_COOKIE_NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGE_COOKIE_NAME</span></code></a> à la place.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Utilitaires Django</a><ul>
+<li><a class="reference internal" href="#module-django.utils.cache"><code class="docutils literal notranslate"><span class="pre">django.utils.cache</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.dateparse"><code class="docutils literal notranslate"><span class="pre">django.utils.dateparse</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.decorators"><code class="docutils literal notranslate"><span class="pre">django.utils.decorators</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.encoding"><code class="docutils literal notranslate"><span class="pre">django.utils.encoding</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.feedgenerator"><code class="docutils literal notranslate"><span class="pre">django.utils.feedgenerator</span></code></a><ul>
+<li><a class="reference internal" href="#syndicationfeed"><code class="docutils literal notranslate"><span class="pre">SyndicationFeed</span></code></a></li>
+<li><a class="reference internal" href="#enclosure"><code class="docutils literal notranslate"><span class="pre">Enclosure</span></code></a></li>
+<li><a class="reference internal" href="#rssfeed"><code class="docutils literal notranslate"><span class="pre">RssFeed</span></code></a></li>
+<li><a class="reference internal" href="#rss201rev2feed"><code class="docutils literal notranslate"><span class="pre">Rss201rev2Feed</span></code></a></li>
+<li><a class="reference internal" href="#rssuserland091feed"><code class="docutils literal notranslate"><span class="pre">RssUserland091Feed</span></code></a></li>
+<li><a class="reference internal" href="#atom1feed"><code class="docutils literal notranslate"><span class="pre">Atom1Feed</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-django.utils.functional"><code class="docutils literal notranslate"><span class="pre">django.utils.functional</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.html"><code class="docutils literal notranslate"><span class="pre">django.utils.html</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.http"><code class="docutils literal notranslate"><span class="pre">django.utils.http</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.module_loading"><code class="docutils literal notranslate"><span class="pre">django.utils.module_loading</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.safestring"><code class="docutils literal notranslate"><span class="pre">django.utils.safestring</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.text"><code class="docutils literal notranslate"><span class="pre">django.utils.text</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.timezone"><code class="docutils literal notranslate"><span class="pre">django.utils.timezone</span></code></a></li>
+<li><a class="reference internal" href="#module-django.utils.translation"><code class="docutils literal notranslate"><span class="pre">django.utils.translation</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="urls.html"
+                        title="Chapitre précédent">Fonctions <code class="docutils literal notranslate"><span class="pre">django.urls</span></code> à utiliser dans les configurations d’URL</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="validators.html"
+                        title="Chapitre suivant">Validateurs</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/utils.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="urls.html" title="Fonctions &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;django.urls&lt;/span&gt;&lt;/code&gt; à utiliser dans les configurations d’URL">previous</a>
+     |
+    <a href="index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="validators.html" title="Validateurs">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

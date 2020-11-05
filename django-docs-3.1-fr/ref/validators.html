@@ -1,0 +1,502 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Validateurs &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Vues intégrées" href="views.html" />
+    <link rel="prev" title="Utilitaires Django" href="utils.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="utils.html" title="Utilitaires Django">previous</a>
+     |
+    <a href="index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="views.html" title="Vues intégrées">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-validators">
+            
+  <div class="section" id="s-module-django.core.validators">
+<span id="s-validators"></span><span id="module-django.core.validators"></span><span id="validators"></span><h1>Validateurs<a class="headerlink" href="#module-django.core.validators" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-writing-validators">
+<span id="writing-validators"></span><h2>Écriture de validateurs<a class="headerlink" href="#writing-validators" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Un validateur est un exécutable acceptant une valeur et générant <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si celle-ci ne répond pas à certains critères. Les validateurs peuvent être utiles pour réutiliser la logique de validation entre différents types de champs.</p>
+<p>Par exemple, voici un validateur qui n’autorise que les nombres pairs&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="k">import</span> <span class="n">gettext_lazy</span> <span class="k">as</span> <span class="n">_</span>
+
+<span class="k">def</span> <span class="nf">validate_even</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+            <span class="n">_</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%(value)s</span><span class="s1"> is not an even number&#39;</span><span class="p">),</span>
+            <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">value</span><span class="p">},</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+<p>Vous pouvez l’ajouter à un champ de modèle via le paramètre <a class="reference internal" href="models/fields.html#django.db.models.Field.validators" title="django.db.models.Field.validators"><code class="xref py py-attr docutils literal notranslate"><span class="pre">validators</span></code></a> du champ&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">even_field</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_even</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Comme les valeurs sont converties en Python avant que les validateurs ne soient exécutés, vous pouvez même utiliser les mêmes validateurs avec les formulaires&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">MyForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">even_field</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_even</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Vous pouvez aussi utiliser une classe avec une méthode <code class="docutils literal notranslate"><span class="pre">__call__()</span></code> pour des validateurs plus complexes ou configurables. Par exemple, <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> utilise cette technique. Si un validateur basé sur une classe est utilisé dans l’option de champ de modèle <a class="reference internal" href="models/fields.html#django.db.models.Field.validators" title="django.db.models.Field.validators"><code class="xref py py-attr docutils literal notranslate"><span class="pre">validators</span></code></a>, vérifiez qu’il puisse être <a class="reference internal" href="../topics/migrations.html#migration-serializing"><span class="std std-ref">sérialisé par le système des migrations</span></a> en lui ajoutant les méthodes <a class="reference internal" href="../topics/migrations.html#custom-deconstruct-method"><span class="std std-ref">deconstruct()</span></a> et <code class="docutils literal notranslate"><span class="pre">__eq__()</span></code>.</p>
+</div>
+<div class="section" id="s-how-validators-are-run">
+<span id="how-validators-are-run"></span><h2>Exécution des validateurs<a class="headerlink" href="#how-validators-are-run" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Consultez la <a class="reference internal" href="forms/validation.html"><span class="doc">validation des formulaires</span></a> pour plus d’informations sur la manière dont les validateurs sont exécutés dans les formulaires, et <a class="reference internal" href="models/instances.html#validating-objects"><span class="std std-ref">validation d’objets</span></a> sur leur manière d’être exécutés pour les modèles. Notez que les validateurs ne sont pas exécutés automatiquement lorsque vous enregistrez un modèle, mais si vous utilisez un formulaire <a class="reference internal" href="../topics/forms/modelforms.html#django.forms.ModelForm" title="django.forms.ModelForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></a>, celui-ci applique les validateurs sur tous les champs inclus dans le formulaire. Consultez la <a class="reference internal" href="../topics/forms/modelforms.html"><span class="doc">documentation des ModelForm</span></a> pour plus d’informations sur la manière dont la validation des modèles interagit avec les formulaires.</p>
+</div>
+<div class="section" id="s-built-in-validators">
+<span id="built-in-validators"></span><h2>Validateurs intégrés<a class="headerlink" href="#built-in-validators" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le module <a class="reference internal" href="#module-django.core.validators" title="django.core.validators: Validation utilities and base classes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.core.validators</span></code></a> contient une collection de validateurs exécutables à destination des champs de modèles et de formulaires. Ils sont utilisés en interne mais sont aussi à disposition pour vos propres champs. Ils peuvent être employés en plus ou à la place de méthodes <code class="docutils literal notranslate"><span class="pre">field.clean()</span></code> personnalisées.</p>
+<div class="section" id="s-regexvalidator">
+<span id="regexvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">RegexValidator</span></code><a class="headerlink" href="#regexvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.RegexValidator">
+<em class="property">class </em><code class="descname">RegexValidator</code>(<em>regex=None</em>, <em>message=None</em>, <em>code=None</em>, <em>inverse_match=None</em>, <em>flags=0</em>)<a class="headerlink" href="#django.core.validators.RegexValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Paramètres:</th><td class="field-body"><ul class="first last simple">
+<li><strong>regex</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.RegexValidator.regex" title="django.core.validators.RegexValidator.regex"><code class="xref py py-attr docutils literal notranslate"><span class="pre">regex</span></code></a>. Cela peut être une chaîne d’expression régulière ou une expression régulière précompilée.</li>
+<li><strong>message</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.RegexValidator.message" title="django.core.validators.RegexValidator.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a>.</li>
+<li><strong>code</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.RegexValidator.code" title="django.core.validators.RegexValidator.code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">code</span></code></a>.</li>
+<li><strong>inverse_match</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.RegexValidator.inverse_match" title="django.core.validators.RegexValidator.inverse_match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">inverse_match</span></code></a>.</li>
+<li><strong>flags</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.RegexValidator.flags" title="django.core.validators.RegexValidator.flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flags</span></code></a>. Dans ce cas, <a class="reference internal" href="#django.core.validators.RegexValidator.regex" title="django.core.validators.RegexValidator.regex"><code class="xref py py-attr docutils literal notranslate"><span class="pre">regex</span></code></a> doit être une chaîne d’expression régulière sous peine de générer une exception <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Un validateur <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> recherche dans la valeur <code class="docutils literal notranslate"><span class="pre">value</span></code> fournie avec l’expression régulière indiquée au moyen de <a class="reference external" href="https://docs.python.org/3/library/re.html#re.search" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.search()</span></code></a>. Par défaut, génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec <a class="reference internal" href="#django.core.validators.RegexValidator.message" title="django.core.validators.RegexValidator.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> et <a class="reference internal" href="#django.core.validators.RegexValidator.code" title="django.core.validators.RegexValidator.code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">code</span></code></a> quand <strong>aucune correspondance</strong> n’est trouvée. Son comportement peut être inversé en définissant <a class="reference internal" href="#django.core.validators.RegexValidator.inverse_match" title="django.core.validators.RegexValidator.inverse_match"><code class="xref py py-attr docutils literal notranslate"><span class="pre">inverse_match</span></code></a> à <code class="docutils literal notranslate"><span class="pre">True</span></code>, auquel cas une erreur <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> est générée dans le cas où une correspondance <strong>est</strong> trouvée.</p>
+<dl class="attribute">
+<dt id="django.core.validators.RegexValidator.regex">
+<code class="descname">regex</code><a class="headerlink" href="#django.core.validators.RegexValidator.regex" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le motif d’expression régulière à utiliser pour chercher dans la valeur <code class="docutils literal notranslate"><span class="pre">value</span></code> fournie, utilisant <a class="reference external" href="https://docs.python.org/3/library/re.html#re.search" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.search()</span></code></a>. Ce peut être une chaîne ou une expression régulière précompilée créée avec <a class="reference external" href="https://docs.python.org/3/library/re.html#re.compile" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">re.compile()</span></code></a>. Contient par défaut la chaîne vide qui sera trouvée dans n’importe quelle valeur possible de <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.RegexValidator.message">
+<code class="descname">message</code><a class="headerlink" href="#django.core.validators.RegexValidator.message" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le message d’erreur utilisé par <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si la validation échoue. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">&quot;Saisissez</span> <span class="pre">une</span> <span class="pre">valeur</span> <span class="pre">valide&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.RegexValidator.code">
+<code class="descname">code</code><a class="headerlink" href="#django.core.validators.RegexValidator.code" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le code d’erreur utilisé par <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si la validation échoue. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">&quot;invalid&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.RegexValidator.inverse_match">
+<code class="descname">inverse_match</code><a class="headerlink" href="#django.core.validators.RegexValidator.inverse_match" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le mode de correspondance pour <a class="reference internal" href="#django.core.validators.RegexValidator.regex" title="django.core.validators.RegexValidator.regex"><code class="xref py py-attr docutils literal notranslate"><span class="pre">regex</span></code></a>. Sa valeur par défaut est <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.RegexValidator.flags">
+<code class="descname">flags</code><a class="headerlink" href="#django.core.validators.RegexValidator.flags" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Les <a class="reference external" href="https://docs.python.org/3/library/re.html#contents-of-module-re" title="(disponible dans Python v3.9)"><span class="xref std std-ref">drapeaux regex</span></a> utilisés lors de la compilation de la chaîne d’expression régulière <a class="reference internal" href="#django.core.validators.RegexValidator.regex" title="django.core.validators.RegexValidator.regex"><code class="xref py py-attr docutils literal notranslate"><span class="pre">regex</span></code></a>. Si <a class="reference internal" href="#django.core.validators.RegexValidator.regex" title="django.core.validators.RegexValidator.regex"><code class="xref py py-attr docutils literal notranslate"><span class="pre">regex</span></code></a> est une expression régulière précompilée et que <a class="reference internal" href="#django.core.validators.RegexValidator.flags" title="django.core.validators.RegexValidator.flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flags</span></code></a> est défini, une exception <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a> est générée. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-emailvalidator">
+<span id="emailvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">EmailValidator</span></code><a class="headerlink" href="#emailvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.EmailValidator">
+<em class="property">class </em><code class="descname">EmailValidator</code>(<em>message=None</em>, <em>code=None</em>, <em>whitelist=None</em>)<a class="headerlink" href="#django.core.validators.EmailValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Paramètres:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.EmailValidator.message" title="django.core.validators.EmailValidator.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a>.</li>
+<li><strong>code</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.EmailValidator.code" title="django.core.validators.EmailValidator.code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">code</span></code></a>.</li>
+<li><strong>whitelist</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.EmailValidator.whitelist" title="django.core.validators.EmailValidator.whitelist"><code class="xref py py-attr docutils literal notranslate"><span class="pre">whitelist</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="django.core.validators.EmailValidator.message">
+<code class="descname">message</code><a class="headerlink" href="#django.core.validators.EmailValidator.message" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le message d’erreur utilisé par <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si la validation échoue. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">&quot;Saisissez</span> <span class="pre">une</span> <span class="pre">adresse</span> <span class="pre">de</span> <span class="pre">courriel</span> <span class="pre">valide&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.EmailValidator.code">
+<code class="descname">code</code><a class="headerlink" href="#django.core.validators.EmailValidator.code" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le code d’erreur utilisé par <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si la validation échoue. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">&quot;invalid&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.EmailValidator.whitelist">
+<code class="descname">whitelist</code><a class="headerlink" href="#django.core.validators.EmailValidator.whitelist" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Liste blanche de domaines de messagerie à autoriser. Par défaut, une expression régulière (l’attribut <code class="docutils literal notranslate"><span class="pre">domain_regex</span></code>) est utilisée pour valider tout ce qui apparaît après le signe &#64;. Cependant, si cette chaîne apparaît dans la liste blanche, cette validation est ignorée. Si ce paramètre n’est pas indiqué, sa valeur par défaut est <code class="docutils literal notranslate"><span class="pre">['localhost']</span></code>. D’autres domaines qui ne contiennent pas de point ne passeront pas la validation, il est donc nécessaire de les ajouter à la liste blanche s’ils sont valides selon vous.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-urlvalidator">
+<span id="urlvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">URLValidator</span></code><a class="headerlink" href="#urlvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.URLValidator">
+<em class="property">class </em><code class="descname">URLValidator</code>(<em>schemes=None</em>, <em>regex=None</em>, <em>message=None</em>, <em>code=None</em>)<a class="headerlink" href="#django.core.validators.URLValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une sous-classe de <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> s’assurant qu’une valeur réponde aux critères d’une URL, et générant un code d’erreur <code class="docutils literal notranslate"><span class="pre">'invalid'</span></code> dans le cas contraire.</p>
+<p>Les adresses de type «&nbsp;loopback&nbsp;» (boucle locale) et les espaces IP réservés sont considérés comme valides. Les adresses IPv6 littérales (<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3986.html#section-3.2.2"><strong>RFC 3986#section-3.2.2</strong></a>) et les domaines Unicode sont tous deux pris en charge.</p>
+<p>En plus des paramètres facultatifs de sa classe parente <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a>, <code class="docutils literal notranslate"><span class="pre">URLValidator</span></code> accepte un attribut facultatif supplémentaire&nbsp;:</p>
+<dl class="attribute">
+<dt id="django.core.validators.URLValidator.schemes">
+<code class="descname">schemes</code><a class="headerlink" href="#django.core.validators.URLValidator.schemes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Liste de protocoles URL/URI à valider. Lorsque ce paramètre est omis, la liste par défaut est <code class="docutils literal notranslate"><span class="pre">['http',</span> <span class="pre">'https',</span> <span class="pre">'ftp',</span> <span class="pre">'ftps']</span></code>. Le site Web de la IANA fournit comme référence la liste complète des <a class="reference external" href="https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml">protocoles d’URI valides</a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-email">
+<span id="validate-email"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_email</span></code><a class="headerlink" href="#validate-email" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_email">
+<code class="descname">validate_email</code><a class="headerlink" href="#django.core.validators.validate_email" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une instance <a class="reference internal" href="#django.core.validators.EmailValidator" title="django.core.validators.EmailValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EmailValidator</span></code></a> sans aucune personnalisation.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-slug">
+<span id="validate-slug"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_slug</span></code><a class="headerlink" href="#validate-slug" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_slug">
+<code class="descname">validate_slug</code><a class="headerlink" href="#django.core.validators.validate_slug" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une instance de <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> s’assurant qu’une valeur ne soit composée que de lettres, de chiffres, de soulignements ou de tirets.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-unicode-slug">
+<span id="validate-unicode-slug"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_unicode_slug</span></code><a class="headerlink" href="#validate-unicode-slug" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_unicode_slug">
+<code class="descname">validate_unicode_slug</code><a class="headerlink" href="#django.core.validators.validate_unicode_slug" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une instance de <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> s’assurant qu’une valeur ne soit composée que de lettres Unicode, de chiffres, de soulignements ou de tirets.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-ipv4-address">
+<span id="validate-ipv4-address"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_ipv4_address</span></code><a class="headerlink" href="#validate-ipv4-address" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_ipv4_address">
+<code class="descname">validate_ipv4_address</code><a class="headerlink" href="#django.core.validators.validate_ipv4_address" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une instance de <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> s’assurant qu’une valeur réponde aux critères d’une adresse IPv4.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-ipv6-address">
+<span id="validate-ipv6-address"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_ipv6_address</span></code><a class="headerlink" href="#validate-ipv6-address" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_ipv6_address">
+<code class="descname">validate_ipv6_address</code><a class="headerlink" href="#django.core.validators.validate_ipv6_address" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilise <code class="docutils literal notranslate"><span class="pre">django.utils.ipv6</span></code> pour vérifier la validité d’une adresse IPv6.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-ipv46-address">
+<span id="validate-ipv46-address"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_ipv46_address</span></code><a class="headerlink" href="#validate-ipv46-address" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_ipv46_address">
+<code class="descname">validate_ipv46_address</code><a class="headerlink" href="#django.core.validators.validate_ipv46_address" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilise à la fois <code class="docutils literal notranslate"><span class="pre">validate_ipv4_address</span></code> et <code class="docutils literal notranslate"><span class="pre">validate_ipv6_address</span></code> pour s’assurer qu’une valeur soit une adresse IPv4 ou IPv6 valide.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-comma-separated-integer-list">
+<span id="validate-comma-separated-integer-list"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_comma_separated_integer_list</span></code><a class="headerlink" href="#validate-comma-separated-integer-list" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_comma_separated_integer_list">
+<code class="descname">validate_comma_separated_integer_list</code><a class="headerlink" href="#django.core.validators.validate_comma_separated_integer_list" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une instance de <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> s’assurant qu’une valeur contienne une liste de nombres entiers séparés par des virgules.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-int-list-validator">
+<span id="int-list-validator"></span><h3><code class="docutils literal notranslate"><span class="pre">int_list_validator</span></code><a class="headerlink" href="#int-list-validator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="function">
+<dt id="django.core.validators.int_list_validator">
+<code class="descname">int_list_validator</code>(<em>sep='</em>, <em>'</em>, <em>message=None</em>, <em>code='invalid'</em>, <em>allow_negative=False</em>)<a class="headerlink" href="#django.core.validators.int_list_validator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance de <a class="reference internal" href="#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> s’assurant qu’une chaîne ne contienne que des nombres entiers séparés par <code class="docutils literal notranslate"><span class="pre">sep</span></code>. Les entiers négatifs sont autorisés lorsque <code class="docutils literal notranslate"><span class="pre">allow_negative</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-maxvaluevalidator">
+<span id="maxvaluevalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">MaxValueValidator</span></code><a class="headerlink" href="#maxvaluevalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.MaxValueValidator">
+<em class="property">class </em><code class="descname">MaxValueValidator</code>(<em>limit_value</em>, <em>message=None</em>)<a class="headerlink" href="#django.core.validators.MaxValueValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec le code <code class="docutils literal notranslate"><span class="pre">'max_value'</span></code> si la valeur <code class="docutils literal notranslate"><span class="pre">value</span></code> est plus grande que <code class="docutils literal notranslate"><span class="pre">limit_value</span></code>, qui peut être exécutable.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-minvaluevalidator">
+<span id="minvaluevalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">MinValueValidator</span></code><a class="headerlink" href="#minvaluevalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.MinValueValidator">
+<em class="property">class </em><code class="descname">MinValueValidator</code>(<em>limit_value</em>, <em>message=None</em>)<a class="headerlink" href="#django.core.validators.MinValueValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec le code <code class="docutils literal notranslate"><span class="pre">'min_value'</span></code> si la valeur <code class="docutils literal notranslate"><span class="pre">value</span></code> est plus petite que <code class="docutils literal notranslate"><span class="pre">limit_value</span></code>, qui peut être exécutable.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-maxlengthvalidator">
+<span id="maxlengthvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">MaxLengthValidator</span></code><a class="headerlink" href="#maxlengthvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.MaxLengthValidator">
+<em class="property">class </em><code class="descname">MaxLengthValidator</code>(<em>limit_value</em>, <em>message=None</em>)<a class="headerlink" href="#django.core.validators.MaxLengthValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec le code <code class="docutils literal notranslate"><span class="pre">'max_length'</span></code> si la longueur de la valeur <code class="docutils literal notranslate"><span class="pre">value</span></code> est plus grande que <code class="docutils literal notranslate"><span class="pre">limit_value</span></code>, qui peut être exécutable.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-minlengthvalidator">
+<span id="minlengthvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">MinLengthValidator</span></code><a class="headerlink" href="#minlengthvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.MinLengthValidator">
+<em class="property">class </em><code class="descname">MinLengthValidator</code>(<em>limit_value</em>, <em>message=None</em>)<a class="headerlink" href="#django.core.validators.MinLengthValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec le code <code class="docutils literal notranslate"><span class="pre">'min_length'</span></code> si la longueur de la valeur <code class="docutils literal notranslate"><span class="pre">value</span></code> est plus petite que <code class="docutils literal notranslate"><span class="pre">limit_value</span></code>, qui peut être exécutable.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-decimalvalidator">
+<span id="decimalvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">DecimalValidator</span></code><a class="headerlink" href="#decimalvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.DecimalValidator">
+<em class="property">class </em><code class="descname">DecimalValidator</code>(<em>max_digits</em>, <em>decimal_places</em>)<a class="headerlink" href="#django.core.validators.DecimalValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec les codes suivants&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">'max_digits'</span></code> si le nombre de chiffres est plus grand que <code class="docutils literal notranslate"><span class="pre">max_digits</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">'max_decimal_places'</span></code> si le nombre de chiffres après la virgule est plus grand que <code class="docutils literal notranslate"><span class="pre">decimal_places</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">'max_whole_digits'</span></code> si le nombre de chiffres de la partie entière est plus grand que la différence entre <code class="docutils literal notranslate"><span class="pre">max_digits</span></code> et <code class="docutils literal notranslate"><span class="pre">decimal_places</span></code>.</li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="s-fileextensionvalidator">
+<span id="fileextensionvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">FileExtensionValidator</span></code><a class="headerlink" href="#fileextensionvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.FileExtensionValidator">
+<em class="property">class </em><code class="descname">FileExtensionValidator</code>(<em>allowed_extensions</em>, <em>message</em>, <em>code</em>)<a class="headerlink" href="#django.core.validators.FileExtensionValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> avec le code <code class="docutils literal notranslate"><span class="pre">'invalid_extension'</span></code> si l’extension de <code class="docutils literal notranslate"><span class="pre">value.name</span></code> (<code class="docutils literal notranslate"><span class="pre">value</span></code> étant un objet <a class="reference internal" href="files/file.html#django.core.files.File" title="django.core.files.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">File</span></code></a>) ne se trouve pas dans <code class="docutils literal notranslate"><span class="pre">allowed_extensions</span></code>. La comparaison d’extension avec <code class="docutils literal notranslate"><span class="pre">allowed_extensions</span></code> est insensible à la casse.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Ne vous fiez pas à la validation de l’extension de fichier pour déterminer un type de fichier. Les fichiers peuvent être renommés avec n’importe quelle extension quel que soit leur contenu.</p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-validate-image-file-extension">
+<span id="validate-image-file-extension"></span><h3><code class="docutils literal notranslate"><span class="pre">validate_image_file_extension</span></code><a class="headerlink" href="#validate-image-file-extension" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="data">
+<dt id="django.core.validators.validate_image_file_extension">
+<code class="descname">validate_image_file_extension</code><a class="headerlink" href="#django.core.validators.validate_image_file_extension" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Utilise Pillow pour s’assurer que <code class="docutils literal notranslate"><span class="pre">value.name</span></code> (<code class="docutils literal notranslate"><span class="pre">value</span></code> étant un objet <a class="reference internal" href="files/file.html#django.core.files.File" title="django.core.files.File"><code class="xref py py-class docutils literal notranslate"><span class="pre">File</span></code></a>) est une <a class="reference external" href="https://pillow.readthedocs.io/en/latest/handbook/image-file-formats.html">extension d’image valide</a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-prohibitnullcharactersvalidator">
+<span id="prohibitnullcharactersvalidator"></span><h3><code class="docutils literal notranslate"><span class="pre">ProhibitNullCharactersValidator</span></code><a class="headerlink" href="#prohibitnullcharactersvalidator" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.core.validators.ProhibitNullCharactersValidator">
+<em class="property">class </em><code class="descname">ProhibitNullCharactersValidator</code>(<em>message=None</em>, <em>code=None</em>)<a class="headerlink" href="#django.core.validators.ProhibitNullCharactersValidator" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère une exception <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si <code class="docutils literal notranslate"><span class="pre">str(value)</span></code> contient un ou plusieurs caractères nuls (<code class="docutils literal notranslate"><span class="pre">'\x00'</span></code>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Paramètres:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.ProhibitNullCharactersValidator.message" title="django.core.validators.ProhibitNullCharactersValidator.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a>.</li>
+<li><strong>code</strong> – Si différent de <code class="docutils literal notranslate"><span class="pre">None</span></code>, surcharge <a class="reference internal" href="#django.core.validators.ProhibitNullCharactersValidator.code" title="django.core.validators.ProhibitNullCharactersValidator.code"><code class="xref py py-attr docutils literal notranslate"><span class="pre">code</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="django.core.validators.ProhibitNullCharactersValidator.message">
+<code class="descname">message</code><a class="headerlink" href="#django.core.validators.ProhibitNullCharactersValidator.message" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le message d’erreur utilisé par <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si la validation échoue. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">&quot;Les</span> <span class="pre">caractères</span> <span class="pre">nuls</span> <span class="pre">ne</span> <span class="pre">sont</span> <span class="pre">pas</span> <span class="pre">autorisés&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.core.validators.ProhibitNullCharactersValidator.code">
+<code class="descname">code</code><a class="headerlink" href="#django.core.validators.ProhibitNullCharactersValidator.code" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le code d’erreur utilisé par <a class="reference internal" href="exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si la validation échoue. La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">&quot;null_characters_not_allowed&quot;</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Validateurs</a><ul>
+<li><a class="reference internal" href="#writing-validators">Écriture de validateurs</a></li>
+<li><a class="reference internal" href="#how-validators-are-run">Exécution des validateurs</a></li>
+<li><a class="reference internal" href="#built-in-validators">Validateurs intégrés</a><ul>
+<li><a class="reference internal" href="#regexvalidator"><code class="docutils literal notranslate"><span class="pre">RegexValidator</span></code></a></li>
+<li><a class="reference internal" href="#emailvalidator"><code class="docutils literal notranslate"><span class="pre">EmailValidator</span></code></a></li>
+<li><a class="reference internal" href="#urlvalidator"><code class="docutils literal notranslate"><span class="pre">URLValidator</span></code></a></li>
+<li><a class="reference internal" href="#validate-email"><code class="docutils literal notranslate"><span class="pre">validate_email</span></code></a></li>
+<li><a class="reference internal" href="#validate-slug"><code class="docutils literal notranslate"><span class="pre">validate_slug</span></code></a></li>
+<li><a class="reference internal" href="#validate-unicode-slug"><code class="docutils literal notranslate"><span class="pre">validate_unicode_slug</span></code></a></li>
+<li><a class="reference internal" href="#validate-ipv4-address"><code class="docutils literal notranslate"><span class="pre">validate_ipv4_address</span></code></a></li>
+<li><a class="reference internal" href="#validate-ipv6-address"><code class="docutils literal notranslate"><span class="pre">validate_ipv6_address</span></code></a></li>
+<li><a class="reference internal" href="#validate-ipv46-address"><code class="docutils literal notranslate"><span class="pre">validate_ipv46_address</span></code></a></li>
+<li><a class="reference internal" href="#validate-comma-separated-integer-list"><code class="docutils literal notranslate"><span class="pre">validate_comma_separated_integer_list</span></code></a></li>
+<li><a class="reference internal" href="#int-list-validator"><code class="docutils literal notranslate"><span class="pre">int_list_validator</span></code></a></li>
+<li><a class="reference internal" href="#maxvaluevalidator"><code class="docutils literal notranslate"><span class="pre">MaxValueValidator</span></code></a></li>
+<li><a class="reference internal" href="#minvaluevalidator"><code class="docutils literal notranslate"><span class="pre">MinValueValidator</span></code></a></li>
+<li><a class="reference internal" href="#maxlengthvalidator"><code class="docutils literal notranslate"><span class="pre">MaxLengthValidator</span></code></a></li>
+<li><a class="reference internal" href="#minlengthvalidator"><code class="docutils literal notranslate"><span class="pre">MinLengthValidator</span></code></a></li>
+<li><a class="reference internal" href="#decimalvalidator"><code class="docutils literal notranslate"><span class="pre">DecimalValidator</span></code></a></li>
+<li><a class="reference internal" href="#fileextensionvalidator"><code class="docutils literal notranslate"><span class="pre">FileExtensionValidator</span></code></a></li>
+<li><a class="reference internal" href="#validate-image-file-extension"><code class="docutils literal notranslate"><span class="pre">validate_image_file_extension</span></code></a></li>
+<li><a class="reference internal" href="#prohibitnullcharactersvalidator"><code class="docutils literal notranslate"><span class="pre">ProhibitNullCharactersValidator</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="utils.html"
+                        title="Chapitre précédent">Utilitaires Django</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="views.html"
+                        title="Chapitre suivant">Vues intégrées</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/validators.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="utils.html" title="Utilitaires Django">previous</a>
+     |
+    <a href="index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="views.html" title="Vues intégrées">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

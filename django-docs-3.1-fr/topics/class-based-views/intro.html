@@ -1,0 +1,352 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Introduction aux vues fondées sur les classes &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Vues génériques fondées sur les classes, fournies par Django" href="generic-display.html" />
+    <link rel="prev" title="Vues fondées sur les classes" href="index.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="index.html" title="Vues fondées sur les classes">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="generic-display.html" title="Vues génériques fondées sur les classes, fournies par Django">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-class-based-views-intro">
+            
+  <div class="section" id="s-introduction-to-class-based-views">
+<span id="introduction-to-class-based-views"></span><h1>Introduction aux vues fondées sur les classes<a class="headerlink" href="#introduction-to-class-based-views" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les vues fondées sur les classes sont une autre manière d’implémenter les vues par des objets Python au lieu de fonctions. Elles ne remplacent pas les vues fondées sur les fonction, mais présentent certaines différences et avantages comparées aux vues fondées sur les fonctions&nbsp;:</p>
+<ul class="simple">
+<li>L’organisation du code en lien avec les méthodes HTTP spécifiques (<code class="docutils literal notranslate"><span class="pre">GET</span></code>, <code class="docutils literal notranslate"><span class="pre">POST</span></code>, etc.) peut se faire par des méthodes séparées au lieu d’utiliser un branchement conditionnel.</li>
+<li>Des techniques orientées objet comme les «&nbsp;mixins&nbsp;» (héritage multiple) peuvent être utilisées pour factoriser le code en composants réutilisables.</li>
+</ul>
+<div class="section" id="s-the-relationship-and-history-of-generic-views-class-based-views-and-class-based-generic-views">
+<span id="the-relationship-and-history-of-generic-views-class-based-views-and-class-based-generic-views"></span><h2>Liaisons et historique des vues génériques, des vues fondées sur les classes et de celles fondées sur les fonctions<a class="headerlink" href="#the-relationship-and-history-of-generic-views-class-based-views-and-class-based-generic-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Au départ, il n’y avait que le contrat de la vue fonction à laquelle Django transmet un requête <a class="reference internal" href="../../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a> et de laquelle il s’attend à recevoir une réponse <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>. C’était ce que Django lui-même pratiquait.</p>
+<p>Assez rapidement, on a reconnu des idiomes et des modèles courants dans le développement des vues. Les vues génériques fondées sur les fonctions ont été introduites pour abstraire ces pratiques et faciliter le développement de vues pour ces cas courants.</p>
+<p>Le problème avec les vues génériques fondées sur les fonctions, c’est qu’elles recouvrent bien les cas simples, mais qu’il n’est pas possible de les étendre ou de les personnaliser au-delà de certaines options de configurations, limitant ainsi leur utilité dans bien des applications du monde réel.</p>
+<p>Les vues génériques fondées sur les classes ont été crées avec les mêmes objectifs que celles fondées sur les fonctions, pour faciliter le développement de vues. Cependant, la manière d’implémenter cette solution par l’utilisation de mixins fournit un ensemble d’outils aboutissant à des vues génériques fondées sur les classes bien plus souples et extensibles que leur contrepartie fondées sur les fonctions.</p>
+<p>Si vous avez essayé d’utiliser les vues génériques fondées sur les fonctions par le passé et que vous les avez trouvées trop limitées, vous ne devriez pas considérer les vues génériques fondées sur les classes comme des équivalents, mais plutôt comme une nouvelle approche pour résoudre les problèmes d’origine que les vues génériques étaient censées résoudre.</p>
+<p>L’ensemble des classes de base et des mixins que Django utilise pour construire les vues génériques fondées sur les classes sont conçues pour une souplesse maximale, et présentent ainsi de nombreux points d’accrochage sous les forme d’implémentation de méthodes par défaut et d’attributs qui ne vous concerneront probablement pas dans les cas d’utilisation les plus simples. Par exemple, au lieu de se limiter à un attribut de classe pour <code class="docutils literal notranslate"><span class="pre">form_class</span></code>, l’implémentation utilise une méthode <code class="docutils literal notranslate"><span class="pre">get_form</span></code> appelant à son tour la méthode <code class="docutils literal notranslate"><span class="pre">get_form_class</span></code> qui dans son implémentation par défaut renvoie l’attribut <code class="docutils literal notranslate"><span class="pre">form_class</span></code> de la classe. Cela vous donne plusieurs options pour indiquer le formulaire à utiliser, que ce soit par un attribut ou par l’appel dynamique à une méthode que l’on peut surcharger. Ces options paraissent ajouter une complexité un peu absurde dans des situations simples, mais sans elles, les scénarios plus compliqués seraient limités.</p>
+</div>
+<div class="section" id="s-using-class-based-views">
+<span id="using-class-based-views"></span><h2>Utilisation des vues fondées sur les classes<a class="headerlink" href="#using-class-based-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>À la base, une vue fondée sur les classes permet de répondre à différentes méthodes de requête HTTP par différentes méthodes d’une classe plutôt que de faire appel à des branchements conditionnels dans une unique vue de type fonction.</p>
+<p>Alors que le code pour gérer la méthode HTTP <code class="docutils literal notranslate"><span class="pre">GET</span></code> dans une fonction de vue ressemble à quelque chose comme cela&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponse</span>
+
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GET&#39;</span><span class="p">:</span>
+        <span class="c1"># &lt;view logic&gt;</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;result&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dans une vue fondée sur les classes, cela devient&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.views</span> <span class="k">import</span> <span class="n">View</span>
+
+<span class="k">class</span> <span class="nc">MyView</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="c1"># &lt;view logic&gt;</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;result&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Comme le résolveur d’URL de Django est conçu pour envoyer la requête et ses paramètres associés à une fonction exécutable et non pas à une classe, les vues fondées sur les classes possèdent une méthode de classe <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.as_view" title="django.views.generic.base.View.as_view"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_view()</span></code></a> qui renvoie une fonction pouvant être appelée lorsqu’une requête arrive avec une URL correspondant au motif associé. La fonction crée une instance de la classe, appelle  <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.setup" title="django.views.generic.base.View.setup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">setup()</span></code></a> pour initialiser ses attributs, puis appelle sa méthode <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.dispatch" title="django.views.generic.base.View.dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dispatch()</span></code></a>. <code class="docutils literal notranslate"><span class="pre">dispatch</span></code> examine la requête pour déterminer s’il s’agit d’un <code class="docutils literal notranslate"><span class="pre">GET</span></code>, d’un <code class="docutils literal notranslate"><span class="pre">POST</span></code>, etc. et relaie la requête à une méthode correspondante si elle existe, ou génère l’erreur <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponseNotAllowed" title="django.http.HttpResponseNotAllowed"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponseNotAllowed</span></code></a> dans le cas contraire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># urls.py</span>
+<span class="kn">from</span> <span class="nn">django.urls</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">myapp.views</span> <span class="k">import</span> <span class="n">MyView</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;about/&#39;</span><span class="p">,</span> <span class="n">MyView</span><span class="o">.</span><span class="n">as_view</span><span class="p">()),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Il vaut la peine de relever que ce qui est renvoyé par la méthode est identique à ce qui est renvoyé par une vue de type fonction, en l’occurrence une instance de <a class="reference internal" href="../../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a>. Cela signifie que les <a class="reference internal" href="../http/shortcuts.html"><span class="doc">raccourcis http</span></a> ou les objets <a class="reference internal" href="../../ref/template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a> peuvent tout à fait être utilisés dans une vue fondée sur les classes.</p>
+<p>Même si une vue fondée sur les classes minimale ne nécessite aucun attribut de classe pour faire son travail, les attributs de classe sont utiles dans beaucoup d’architectures basées sur les classes et il existe deux façons de configurer ou de définir des attributs de classe.</p>
+<p>La première est la manière standard de Python d’hériter ou de surcharger des attributs et des méthodes dans les sous-classes. Ainsi si la classe parente avait un attribut <code class="docutils literal notranslate"><span class="pre">greeting</span></code> comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.views</span> <span class="k">import</span> <span class="n">View</span>
+
+<span class="k">class</span> <span class="nc">GreetingView</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+    <span class="n">greeting</span> <span class="o">=</span> <span class="s2">&quot;Good Day&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">greeting</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Vous pouvez surcharger cela dans une sous-classe&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MorningGreetingView</span><span class="p">(</span><span class="n">GreetingView</span><span class="p">):</span>
+    <span class="n">greeting</span> <span class="o">=</span> <span class="s2">&quot;Morning to ya&quot;</span>
+</pre></div>
+</div>
+<p>Une autre option est de configurer des attributs de classe comme paramètres nommés dans l’appel à <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.as_view" title="django.views.generic.base.View.as_view"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_view()</span></code></a> dans la configuration d’URL&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;about/&#39;</span><span class="p">,</span> <span class="n">GreetingView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span><span class="n">greeting</span><span class="o">=</span><span class="s2">&quot;G&#39;day&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Alors qu’une instance de classe est créée pour chaque requête qu’elle doit traiter, les attributs de classe définis par le point d’entrée <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.as_view" title="django.views.generic.base.View.as_view"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_view()</span></code></a> ne sont configurés qu’une seule fois au moment de l’importation de la configuration d’URL.</p>
+</div>
+</div>
+<div class="section" id="s-using-mixins">
+<span id="using-mixins"></span><h2>Utilisation de mixins<a class="headerlink" href="#using-mixins" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les mixins sont une forme d’héritage multiple où les comportements et les attributs de plusieurs classes parentes peuvent être combinés.</p>
+<p>Par exemple, dans les vues génériques fondées sur les classes, il existe un mixin nommé <a class="reference internal" href="../../ref/class-based-views/mixins-simple.html#django.views.generic.base.TemplateResponseMixin" title="django.views.generic.base.TemplateResponseMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponseMixin</span></code></a> dont le rôle principal est de définir la méthode <a class="reference internal" href="../../ref/class-based-views/mixins-simple.html#django.views.generic.base.TemplateResponseMixin.render_to_response" title="django.views.generic.base.TemplateResponseMixin.render_to_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render_to_response()</span></code></a>. Lorsqu’il est combiné avec le comportement de la classe de base <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View" title="django.views.generic.base.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></a>, le résultat est une classe <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.TemplateView" title="django.views.generic.base.TemplateView"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateView</span></code></a> qui distribue les requêtes vers les méthodes correspondantes (un comportement défini dans la classe de base <code class="docutils literal notranslate"><span class="pre">View</span></code>), et qui possède une méthode <a class="reference internal" href="../../ref/class-based-views/mixins-simple.html#django.views.generic.base.TemplateResponseMixin.render_to_response" title="django.views.generic.base.TemplateResponseMixin.render_to_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render_to_response()</span></code></a> utilisant un attribut <a class="reference internal" href="../../ref/class-based-views/mixins-simple.html#django.views.generic.base.TemplateResponseMixin.template_name" title="django.views.generic.base.TemplateResponseMixin.template_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">template_name</span></code></a> pour renvoyer un objet <a class="reference internal" href="../../ref/template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a> (comportement défini dans <code class="docutils literal notranslate"><span class="pre">TemplateResponseMixin</span></code>).</p>
+<p>Les mixins sont une très bonne façon de réutiliser du code entre plusieurs classes, mais il y a aussi un revers de médaille. Plus votre code est réparti entre des mixins, plus il sera difficile de lire une classe enfant et de comprendre exactement ce qu’elle fait, et plus il sera difficile de savoir quelle méthode de quel mixin surcharger si vous héritez d’une structure avec une profonde arborescence d’héritage.</p>
+<p>Notez également que vous ne pouvez hériter que d’une vue générique, c’est-à-dire qu’une seule classe parente peut hériter de <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View" title="django.views.generic.base.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">View</span></code></a> et toutes les autres classes (le cas échéant) doivent être des mixins. Si vous essayez d’hériter de plus d’une classe héritant de <code class="docutils literal notranslate"><span class="pre">View</span></code>, par exemple pour utiliser un formulaire au sommet d’une liste et combiner  <a class="reference internal" href="../../ref/class-based-views/mixins-editing.html#django.views.generic.edit.ProcessFormView" title="django.views.generic.edit.ProcessFormView"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessFormView</span></code></a> avec <a class="reference internal" href="../../ref/class-based-views/generic-display.html#django.views.generic.list.ListView" title="django.views.generic.list.ListView"><code class="xref py py-class docutils literal notranslate"><span class="pre">ListView</span></code></a>, cela ne marchera pas comme espéré.</p>
+</div>
+<div class="section" id="s-handling-forms-with-class-based-views">
+<span id="handling-forms-with-class-based-views"></span><h2>Gestion de formulaires avec les vues fondées sur les classes<a class="headerlink" href="#handling-forms-with-class-based-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une vue de type fonction qui gère des formulaires peut ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">render</span>
+
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="k">import</span> <span class="n">MyForm</span>
+
+<span class="k">def</span> <span class="nf">myview</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">MyForm</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="c1"># &lt;process form cleaned data&gt;</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s1">&#39;/success/&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">MyForm</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;form_template.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Une vue équivalente fondée sur les classes pourrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponseRedirect</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">render</span>
+<span class="kn">from</span> <span class="nn">django.views</span> <span class="k">import</span> <span class="n">View</span>
+
+<span class="kn">from</span> <span class="nn">.forms</span> <span class="k">import</span> <span class="n">MyForm</span>
+
+<span class="k">class</span> <span class="nc">MyFormView</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">MyForm</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;form_template.html&#39;</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_class</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_class</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="c1"># &lt;process form cleaned data&gt;</span>
+            <span class="k">return</span> <span class="n">HttpResponseRedirect</span><span class="p">(</span><span class="s1">&#39;/success/&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_name</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>Il s’agit d’un cas minimal, mais vous pouvez voir que vous aurez ensuite l’option de personnaliser cette vue en surchargeant l’un des ses attributs de classe, par ex. <code class="docutils literal notranslate"><span class="pre">form_class</span></code>, à travers la configuration d’URL ou par l’héritage et la surcharge de l’une ou plusieurs de ses méthodes (les deux pouvant être combinés).</p>
+</div>
+<div class="section" id="s-decorating-class-based-views">
+<span id="decorating-class-based-views"></span><h2>Décoration des vues fondées sur les classes<a class="headerlink" href="#decorating-class-based-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’extension des vues fondées sur les classes n’est pas limitée aux mixins. Il est aussi possible d’utiliser des décorateurs. Comme les vues fondées sur les classes ne sont pas des fonctions, leur décoration fonctionne différemment selon que vous utilisez <code class="docutils literal notranslate"><span class="pre">as_view()</span></code> ou que vous créez une sous-classe.</p>
+<div class="section" id="s-decorating-in-urlconf">
+<span id="decorating-in-urlconf"></span><h3>Décoration dans la configuration d’URL<a class="headerlink" href="#decorating-in-urlconf" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est possible d’adapter les vues fondées sur les classes en décorant le résultat de la méthode <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.as_view" title="django.views.generic.base.View.as_view"><code class="xref py py-meth docutils literal notranslate"><span class="pre">as_view()</span></code></a>. L’endroit le plus commode pour le faire est la configuration d’URL dans laquelle la vue est déployée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="k">import</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">permission_required</span>
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="k">import</span> <span class="n">TemplateView</span>
+
+<span class="kn">from</span> <span class="nn">.views</span> <span class="k">import</span> <span class="n">VoteView</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;about/&#39;</span><span class="p">,</span> <span class="n">login_required</span><span class="p">(</span><span class="n">TemplateView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span><span class="n">template_name</span><span class="o">=</span><span class="s2">&quot;secret.html&quot;</span><span class="p">))),</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;vote/&#39;</span><span class="p">,</span> <span class="n">permission_required</span><span class="p">(</span><span class="s1">&#39;polls.can_vote&#39;</span><span class="p">)(</span><span class="n">VoteView</span><span class="o">.</span><span class="n">as_view</span><span class="p">())),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Cette approche applique le décorateur au niveau de l’instance. Si vous souhaitez que chaque instance d’une vue soit systématiquement décorée, vous devez suivre une autre approche.</p>
+</div>
+<div class="section" id="s-decorating-the-class">
+<span id="s-id1"></span><span id="decorating-the-class"></span><span id="id1"></span><h3>Décoration de la classe<a class="headerlink" href="#decorating-the-class" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour décorer toutes les instances d’une vue fondée sur les classes, vous devez décorer la définition de classe elle-même. À cet effet, appliquez le décorateur à la méthode <a class="reference internal" href="../../ref/class-based-views/base.html#django.views.generic.base.View.dispatch" title="django.views.generic.base.View.dispatch"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dispatch()</span></code></a> de la classe.</p>
+<p>Une méthode de classe n’est pas totalement identique à une fonction autonome, il n’est donc pas possible de simplement appliquer un décorateur de fonction à la méthode, il faut préalablement le transformer en un décorateur de méthode. Le décorateur <code class="docutils literal notranslate"><span class="pre">method_decorator</span></code> transforme un décorateur de fonction en un décorateur de méthode afin qu’il puisse être utilisé sur une méthode d’instance. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.auth.decorators</span> <span class="k">import</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">django.utils.decorators</span> <span class="k">import</span> <span class="n">method_decorator</span>
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="k">import</span> <span class="n">TemplateView</span>
+
+<span class="k">class</span> <span class="nc">ProtectedView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;secret.html&#39;</span>
+
+    <span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dispatch</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Ou plus succintement, vous pouvez plutôt décorer la classe et passer le nom de la méthode à décorer dans le paramètre nommé <code class="docutils literal notranslate"><span class="pre">name</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dispatch&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ProtectedView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;secret.html&#39;</span>
+</pre></div>
+</div>
+<p>Si un ensemble de décorateurs sont utilisés à plusieurs endroits, vous pouvez définir une liste ou un tuple de décorateurs et l’utiliser au lieu d’appeler plusieurs fois <code class="docutils literal notranslate"><span class="pre">method_decorator()</span></code>. Ces deux classes sont équivalentes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">decorators</span> <span class="o">=</span> <span class="p">[</span><span class="n">never_cache</span><span class="p">,</span> <span class="n">login_required</span><span class="p">]</span>
+
+<span class="nd">@method_decorator</span><span class="p">(</span><span class="n">decorators</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dispatch&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ProtectedView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;secret.html&#39;</span>
+
+<span class="nd">@method_decorator</span><span class="p">(</span><span class="n">never_cache</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dispatch&#39;</span><span class="p">)</span>
+<span class="nd">@method_decorator</span><span class="p">(</span><span class="n">login_required</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;dispatch&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">ProtectedView</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;secret.html&#39;</span>
+</pre></div>
+</div>
+<p>Les décorateurs traitent une requête dans l’ordre où ils sont placés comme décorateurs. Dans l’exemple, <code class="docutils literal notranslate"><span class="pre">never_cache()</span></code> traitera la requête avant <code class="docutils literal notranslate"><span class="pre">login_required()</span></code>.</p>
+<p>Dans cet exemple, chaque instance de <code class="docutils literal notranslate"><span class="pre">ProtectedView</span></code> recevra une protection de connexion. Ces exemples utilisent <code class="docutils literal notranslate"><span class="pre">login_required</span></code>, mais le même comportement peut être obtenu en utilisant <a class="reference internal" href="../auth/default.html#django.contrib.auth.mixins.LoginRequiredMixin" title="django.contrib.auth.mixins.LoginRequiredMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">LoginRequiredMixin</span></code></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><code class="docutils literal notranslate"><span class="pre">method_decorator</span></code> transmet <code class="docutils literal notranslate"><span class="pre">*args</span></code> et <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> comme paramètres à la méthode décorée de la classe. Si votre méthode n’accepte pas un jeu de paramètres compatible, cela générera une exception <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction aux vues fondées sur les classes</a><ul>
+<li><a class="reference internal" href="#the-relationship-and-history-of-generic-views-class-based-views-and-class-based-generic-views">Liaisons et historique des vues génériques, des vues fondées sur les classes et de celles fondées sur les fonctions</a></li>
+<li><a class="reference internal" href="#using-class-based-views">Utilisation des vues fondées sur les classes</a></li>
+<li><a class="reference internal" href="#using-mixins">Utilisation de mixins</a></li>
+<li><a class="reference internal" href="#handling-forms-with-class-based-views">Gestion de formulaires avec les vues fondées sur les classes</a></li>
+<li><a class="reference internal" href="#decorating-class-based-views">Décoration des vues fondées sur les classes</a><ul>
+<li><a class="reference internal" href="#decorating-in-urlconf">Décoration dans la configuration d’URL</a></li>
+<li><a class="reference internal" href="#decorating-the-class">Décoration de la classe</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="index.html"
+                        title="Chapitre précédent">Vues fondées sur les classes</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="generic-display.html"
+                        title="Chapitre suivant">Vues génériques fondées sur les classes, fournies par Django</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/class-based-views/intro.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="index.html" title="Vues fondées sur les classes">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="generic-display.html" title="Vues génériques fondées sur les classes, fournies par Django">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

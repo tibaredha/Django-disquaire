@@ -1,0 +1,694 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Journalisation &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Pagination" href="pagination.html" />
+    <link rel="prev" title="Fuseaux horaires" href="i18n/timezones.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="i18n/timezones.html" title="Fuseaux horaires">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="pagination.html" title="Pagination">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-logging">
+            
+  <div class="section" id="s-module-django.utils.log">
+<span id="s-logging"></span><span id="module-django.utils.log"></span><span id="logging"></span><h1>Journalisation<a class="headerlink" href="#module-django.utils.log" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-a-quick-logging-primer">
+<span id="a-quick-logging-primer"></span><h2>Une introduction rapide sur la journalisation<a class="headerlink" href="#a-quick-logging-primer" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django utilise le module <a class="reference external" href="https://docs.python.org/3/library/logging.html#module-logging" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">logging</span></code></a> intégré de Python pour effectuer la journalisation système. L’utilisation de ce module est abordé en détails dans la propre documentation de Python. Cependant, si vous n’avez jamais utilisé le système de journalisation de Python (ou même si c’est le cas), voici un aperçu rapide.</p>
+<div class="section" id="s-the-cast-of-players">
+<span id="the-cast-of-players"></span><h3>Les acteurs en jeu<a class="headerlink" href="#the-cast-of-players" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Une configuration de journalisation Python consiste en quatre parties&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#topic-logging-parts-loggers"><span class="std std-ref">Journaliseurs</span></a></li>
+<li><a class="reference internal" href="#topic-logging-parts-handlers"><span class="std std-ref">Gestionnaires</span></a></li>
+<li><a class="reference internal" href="#topic-logging-parts-filters"><span class="std std-ref">Filtres</span></a></li>
+<li><a class="reference internal" href="#topic-logging-parts-formatters"><span class="std std-ref">Formateurs</span></a></li>
+</ul>
+<div class="section" id="s-loggers">
+<span id="s-topic-logging-parts-loggers"></span><span id="loggers"></span><span id="topic-logging-parts-loggers"></span><h4>Journaliseurs<a class="headerlink" href="#loggers" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Un journaliseur («&nbsp;logger&nbsp;») est le point d’entrée dans le système de journalisation. Chaque journaliseur est un réceptacle nommé dans lequel les messages sont écrits en vue de leur traitement.</p>
+<p>Un journaliseur est configuré avec un <em>niveau de journalisation</em> («&nbsp;log level&nbsp;»). Ce niveau définit la sévérité des messages que le journaliseur va traiter. Python définit les niveaux de journalisation suivants&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>: information système de bas niveau à des fins de débogage</li>
+<li><code class="docutils literal notranslate"><span class="pre">INFO</span></code>: information système générale</li>
+<li><code class="docutils literal notranslate"><span class="pre">WARNING</span></code>: information décrivant la présence d’un problème mineur.</li>
+<li><code class="docutils literal notranslate"><span class="pre">ERROR</span></code>: information décrivant la présence d’un problème majeur.</li>
+<li><code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>: information décrivant la présence d’un problème critique.</li>
+</ul>
+<p>Chaque message écrit dans le journaliseur est un <em>enregistrement de journal</em> («&nbsp;log record&nbsp;»). Chacun de ces enregistrements possède également un <em>niveau de journalisation</em> indiquant la sévérité de ce message spécifique. Un enregistrement de journal peut aussi contenir des métadonnées utiles décrivant l’événement à journaliser. Cela peut inclure des détails tels qu’une trace de débogage ou un code d’erreur.</p>
+<p>Lorsqu’un message est transmis au journaliseur, le niveau de journalisation du message est comparé à celui du journaliseur. Si le niveau de journalisation du message correspond ou dépasse celui du journaliseur, le message continue d’être traité. Dans le cas contraire, le message est ignoré.</p>
+<p>Dès qu’un journaliseur a déterminé qu’un message doit être traité, il est transmis à un <em>gestionnaire</em> («&nbsp;handler&nbsp;»).</p>
+</div>
+<div class="section" id="s-handlers">
+<span id="s-topic-logging-parts-handlers"></span><span id="handlers"></span><span id="topic-logging-parts-handlers"></span><h4>Gestionnaires<a class="headerlink" href="#handlers" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le gestionnaire est le moteur déterminant ce qui doit arriver à chaque message d’un journaliseur. Il décrit un comportement particulier de journalisation, tel que l’écriture d’un message à l’écran, dans un fichier ou dans un connecteur réseau.</p>
+<p>Comme les journaliseurs, les gestionnaires possèdent aussi un niveau de journalisation. Si le niveau de journalisation d’un enregistrement de journal n’est pas au moins équivalent à celui du gestionnaire, ce dernier ignore le message.</p>
+<p>Un journaliseur peut avoir plusieurs gestionnaires et le niveau de journalisation de chaque gestionnaire peut être différent. De cette façon, il est possible de fournir différentes formes de notifications selon l’importance d’un message. Par exemple, vous pouvez installer un gestionnaire qui redirige les messages de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> et <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> vers un service de radiomessagerie, alors qu’un autre gestionnaire enverra tous les messages (y compris ceux de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> et <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code>) dans un fichier pour analyse ultérieure.</p>
+</div>
+<div class="section" id="s-filters">
+<span id="s-topic-logging-parts-filters"></span><span id="filters"></span><span id="topic-logging-parts-filters"></span><h4>Filtres<a class="headerlink" href="#filters" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Un filtre permet d’ajouter un contrôle supplémentaire sur la sélection des enregistrements de journal lorsqu’ils sont transmis du journaliseur au gestionnaire.</p>
+<p>Par défaut, tout message de journal dont le niveau de journalisation est suffisant sera traité. Cependant, en installant un filtre, vous pouvez définir des critères supplémentaires dans le processus de journalisation. Par exemple, vous pourriez installer un filtre limitant l’émission de messages de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> à une source particulière.</p>
+<p>Les filtres peuvent ont aussi la possibilité de modifier l’enregistrement de journal avant son émission. Par exemple, vous pourriez écrire un filtre qui abaisse le niveau de journalisation du message de <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> à <code class="docutils literal notranslate"><span class="pre">WARNING</span></code> si certains critères sont respectés.</p>
+<p>Les filtres peuvent être installés pour les journaliseurs ou pour les gestionnaires&nbsp;; il est aussi possible d’enchaîner plusieurs filtres pour effectuer différentes actions de filtrage.</p>
+</div>
+<div class="section" id="s-formatters">
+<span id="s-topic-logging-parts-formatters"></span><span id="formatters"></span><span id="topic-logging-parts-formatters"></span><h4>Formateurs<a class="headerlink" href="#formatters" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Pour terminer, un enregistrement de journal doit être produit sous forme de texte. Les formateurs spécifient le format exact de ce texte. En général, un formateur correspond à une chaîne de format Python contenant des <a class="reference external" href="https://docs.python.org/3/library/logging.html#logrecord-attributes" title="(disponible dans Python v3.9)"><span class="xref std std-ref">attributs LogRecord</span></a>&nbsp;; cependant, vous pouvez très bien écrire vos propres formateurs afin d’implémenter un comportement de format spécifique.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-using-logging">
+<span id="using-logging"></span><h2>La journalisation en pratique<a class="headerlink" href="#using-logging" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Après avoir configuré les journaliseurs, les gestionnaires, les filtres et les formateurs, il reste à placer les appels de journalisation dans votre code. L’utilisation du système de journalisation fonctionne comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># import the logging library</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="c1"># Get an instance of a logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">arg1</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+    <span class="o">...</span>
+    <span class="k">if</span> <span class="n">bad_mojo</span><span class="p">:</span>
+        <span class="c1"># Log an error message</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Something went wrong!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Ça y est&nbsp;! Lors de chaque entrée dans la condition <code class="docutils literal notranslate"><span class="pre">bad_mojo</span></code>, une ligne d’erreur sera insérée dans le journal.</p>
+<div class="section" id="s-naming-loggers">
+<span id="naming-loggers"></span><h3>Nommage des journaliseurs<a class="headerlink" href="#naming-loggers" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’appel à <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.getLogger" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">logging.getLogger()</span></code></a> obtient (et crée si nécessaire) une instance de journaliseur. Cette instance est identifiée par un nom. Ce nom sert à identifier le journaliseur pour la configuration.</p>
+<p>Par convention, le nom du journaliseur est habituellement <code class="docutils literal notranslate"><span class="pre">__name__</span></code>, le nom du module Python contenant le journaliseur. Cela permet de filtrer et de traiter les appels de journalisation selon les modules. Cependant, si vous organisez vos messages de journalisation d’une autre manière, vous pouvez indiquer n’importe quel nom sous forme de notation pointée pour identifier un journaliseur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get an instance of a specific named logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;project.interesting.stuff&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La notation pointée des noms de journaliseurs définit une hiérarchie. Le journaliseur <code class="docutils literal notranslate"><span class="pre">project.interesting</span></code> est considéré comme le parent du journaliseur <code class="docutils literal notranslate"><span class="pre">project.interesting.stuff</span></code>.  Le journaliseur <code class="docutils literal notranslate"><span class="pre">project</span></code> est le parent du journaliseur <code class="docutils literal notranslate"><span class="pre">project.interesting</span></code>.</p>
+<p>Pourquoi cette hiérarchie est-elle importante&nbsp;? Et bien, parce que les journaliseurs peuvent être configurés pour <em>propager</em> les appels de journalisation qu’ils reçoivent vers leurs parents. De cette manière, vous pouvez définir un seul ensemble de gestionnaires à la racine de l’arborescence d’un journaliseur et capturer tous les appels de journalisation dans la sous-arborescence des journaliseurs. Un journaliseur défini dans l’espace de noms <code class="docutils literal notranslate"><span class="pre">project</span></code> intercepte tous les messages de journalisation émis au niveau des journaliseurs <code class="docutils literal notranslate"><span class="pre">project.interesting</span></code> et <code class="docutils literal notranslate"><span class="pre">project.interesting.stuff</span></code>.</p>
+<p>Cette propagation peut être contrôlée pour chaque journaliseur individuellement. Si vous souhaitez qu’un journaliseur particulier ne propage pas les messages à ses parents, vous pouvez désactiver ce comportement.</p>
+</div>
+<div class="section" id="s-making-logging-calls">
+<span id="making-logging-calls"></span><h3>Appels de journalisation<a class="headerlink" href="#making-logging-calls" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Toute instance de journaliseur contient une méthode d’appel correspondant à chaque niveau de journalisation par défaut&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">logger.debug()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">logger.info()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">logger.warning()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">logger.error()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">logger.critical()</span></code></li>
+</ul>
+<p>Deux autres appels de journalisation sont disponibles&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">logger.log()</span></code>: émet manuellement un message de journalisation au niveau indiqué.</li>
+<li><code class="docutils literal notranslate"><span class="pre">logger.exception()</span></code>: crée un message de journalisation de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> enveloppant la pile d’exception actuelle.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="s-configuring-logging">
+<span id="s-id1"></span><span id="configuring-logging"></span><span id="id1"></span><h2>Configuration de la journalisation<a class="headerlink" href="#configuring-logging" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le placement d’appels de journalisation dans le code n’est pas suffisant. Il faut aussi configurer les journaliseurs, les gestionnaires, les filtres et les formateurs pour s’assurer que le résultat de la journalisation soit utilisable.</p>
+<p>La bibliothèque de journalisation de Python fournit plusieurs techniques de configuration, que ce soit par interface programmable ou par des fichiers de configuration. Par défaut, Django utilise le <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#logging-config-dictschema" title="(disponible dans Python v3.9)"><span class="xref std std-ref">format dictConfig</span></a>.</p>
+<p>Pour configurer la journalisation, il s’agit de définir un dictionnaire de réglages de journalisation dans <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING</span></code></a>. Ces réglages décrivent les journaliseurs, les gestionnaires, les filtres et les formateurs que vous souhaitez mettre en place, ainsi que les niveaux de journalisation et d’autres propriétés que vous voulez attribuer à ces composants.</p>
+<p>Par défaut, le réglage <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING</span></code></a> est fusionné avec <a class="reference internal" href="#default-logging-configuration"><span class="std std-ref">la configuration de journalisation par défaut de Django</span></a> en se basant sur les principes suivants.</p>
+<p>Si la clé <code class="docutils literal notranslate"><span class="pre">disable_existing_loggers</span></code> du dictionnaire <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING</span></code></a> contient <code class="docutils literal notranslate"><span class="pre">True</span></code> (qui est la valeur par défaut <code class="docutils literal notranslate"><span class="pre">dictConfig</span></code> si la clé est manquante), tous les journaliseurs de la configuration par défaut seront désactivés. Désactiver un journaliseur n’est pas équivalent à sa suppression&nbsp;; le journaliseur existe toujours, mais il élimine silencieusement les messages qu’il reçoit, sans même les propager au journaliseur parent. Vous devez donc vous méfier du réglage <code class="docutils literal notranslate"><span class="pre">'disable_existing_loggers':</span> <span class="pre">True</span></code>; cela ne fait souvent pas ce qu’on aimerait. Par contre, vous pouvez définir <code class="docutils literal notranslate"><span class="pre">disable_existing_loggers</span></code> à <code class="docutils literal notranslate"><span class="pre">False</span></code> et redéfinir certains ou tous les journaliseurs par défaut. Une autre stratégie est de définir <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING_CONFIG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING_CONFIG</span></code></a> à <code class="docutils literal notranslate"><span class="pre">None</span></code> et vous <a class="reference internal" href="#disabling-logging-configuration"><span class="std std-ref">charger vous-même de la configuration de la journalisation</span></a>.</p>
+<p>La journalisation est configurée dans le cadre de la fonction <code class="docutils literal notranslate"><span class="pre">setup()</span></code> générale de Django. Ainsi, vous pouvez être certain que les journaliseurs sont toujours prêts à être utilisés par le code de votre projet.</p>
+<div class="section" id="s-examples">
+<span id="examples"></span><h3>Exemples<a class="headerlink" href="#examples" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La documentation complète du <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#logging-config-dictschema" title="(disponible dans Python v3.9)"><span class="xref std std-ref">format dictConfig</span></a> est la meilleure source d’informations concernant les dictionnaires de configuration de la journalisation. Cependant, pour vous donner un petit aperçu de ce qui est réalisable, voici quelques exemples.</p>
+<p>Pour commencer, voici une petite configuration qui permet d’afficher tous les messages de journal dans la console :</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">settings.py</span><a class="headerlink" href="#id6" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;console&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.StreamHandler&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Ceci configure le journaliseur parent <code class="docutils literal notranslate"><span class="pre">root</span></code> pour envoyer les messages de niveau <code class="docutils literal notranslate"><span class="pre">WARNING</span></code> ou plus élevé vers le gestionnaire de la console. En ajustant le niveau à <code class="docutils literal notranslate"><span class="pre">INFO</span></code> ou <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>, vous pouvez afficher plus de messages. Ceci peut se révéler utile durant le développement.</p>
+<p>Ensuite, nous pouvons ajouter plus de journalisation fine. Voici un exemple sur la façon de faire produire plus de messages par le système de journalisation pour le journaliseur nommé spécifiquement <a class="reference internal" href="#django-logger"><span class="std std-ref">django</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">settings.py</span><a class="headerlink" href="#id7" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;console&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.StreamHandler&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;root&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;django&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;DJANGO_LOG_LEVEL&#39;</span><span class="p">,</span> <span class="s1">&#39;INFO&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Par défaut, cette configuration envoie les messages du journaliseur <code class="docutils literal notranslate"><span class="pre">django</span></code> de niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code> ou plus élevé vers la console. Il s’agit du même niveau que dans la configuration de journalisation par défaut de Django, sauf que cette dernière n’affiche les messages de journalisation que si <code class="docutils literal notranslate"><span class="pre">DEBUG=True</span></code>. Django ne génère pas tant de ces messages de niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code>. Cependant, avec cette configuration, vous pouvez aussi définir la variable d’environnement <code class="docutils literal notranslate"><span class="pre">DJANGO_LOG_LEVEL=DEBUG</span></code> pour voir tous les messages de débogage  journalisés par Django, ce qui est très bavard car toutes les requêtes de base de données sont incluses.</p>
+<p>Vous n’êtes pas obligé d’envoyer la journalisation vers la console. Voici une configuration qui écrit toutes les journalisations provenant du journaliseur nommé <a class="reference internal" href="#django-logger"><span class="std std-ref">django</span></a> dans un fichier local&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">settings.py</span><a class="headerlink" href="#id8" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;file&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.FileHandler&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;/path/to/django/debug.log&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;django&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Si vous utilisez cet exemple, prenez soin de remplacer le chemin <code class="docutils literal notranslate"><span class="pre">'filename'</span></code> par un emplacement accessible en écriture par l’utilisateur faisant fonctionner l’application Django.</p>
+<p>Finalement, voici un exemple d’une configuration de journalisation plutôt complexe&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">settings.py</span><a class="headerlink" href="#id9" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;disable_existing_loggers&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+    <span class="s1">&#39;formatters&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;verbose&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;{levelname} {asctime} {module} {process:d} {thread:d} {message}&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="s1">&#39;{&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;simple&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;{levelname} {message}&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="s1">&#39;{&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;special&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;()&#39;</span><span class="p">:</span> <span class="s1">&#39;project.logging.SpecialFilter&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;require_debug_true&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;()&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.RequireDebugTrue&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;console&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;require_debug_true&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.StreamHandler&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;formatter&#39;</span><span class="p">:</span> <span class="s1">&#39;simple&#39;</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;mail_admins&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.AdminEmailHandler&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;special&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;django&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;django.request&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mail_admins&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;myproject.custom&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;console&#39;</span><span class="p">,</span> <span class="s1">&#39;mail_admins&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;INFO&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;special&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p>Cette configuration de journalisation effectue les choses suivantes&nbsp;:</p>
+<ul>
+<li><p class="first">Elle identifie la configuration comme étant au format «&nbsp;dictConfig version 1&nbsp;». C’est actuellement la seule version du format dictConfig.</p>
+</li>
+<li><p class="first">Elle définit deux formateurs&nbsp;:</p>
+<ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">simple</span></code> qui affiche le nom du niveau de journal (par ex. <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>) et le message de journal.</p>
+<p>La chaîne <code class="docutils literal notranslate"><span class="pre">format</span></code> est une chaîne de format Python normale décrivant les détails de ce qui doit être affiché pour chaque ligne de journal. La liste complète des détails pouvant être affichés se trouve dans <a class="reference external" href="https://docs.python.org/3/library/logging.html#formatter-objects" title="(disponible dans Python v3.9)"><span>Formatter Objects</span></a>.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">verbose</span></code> qui affiche le nom du niveau de journal, le message de journal ainsi que l’heure, le processus, le fil d’exécution et le module qui ont généré le message.</p>
+</li>
+</ul>
+</li>
+<li><p class="first">Elle définit deux filtres&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">project.logging.SpecialFilter</span></code> par l’alias <code class="docutils literal notranslate"><span class="pre">special</span></code>. Si ce filtre nécessite des paramètres supplémentaires, ils peuvent être fournis sous forme de clés supplémentaires dans le dictionnaire de configuration du filtre. Dans ce cas, le paramètre <code class="docutils literal notranslate"><span class="pre">foo</span></code> reçoit la valeur <code class="docutils literal notranslate"><span class="pre">bar</span></code> au moment de l’instanciation de <code class="docutils literal notranslate"><span class="pre">SpecialFilter</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">django.utils.log.RequireDebugTrue</span></code>, qui transmet plus loin les messages lorsque <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</li>
+</ul>
+</li>
+<li><p class="first">Elle définit deux gestionnaires&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">console</span></code>, un gestionnaire <a class="reference external" href="https://docs.python.org/3/library/logging.handlers.html#logging.StreamHandler" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StreamHandler</span></code></a> affichant tout message de niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code> ou plus élevé vers la sortie d’erreur (<code class="docutils literal notranslate"><span class="pre">sys.stderr</span></code>). Ce gestionnaire utilise le format d’affichage <code class="docutils literal notranslate"><span class="pre">simple</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">mail_admins</span></code>, un gestionnaire <a class="reference internal" href="#django.utils.log.AdminEmailHandler" title="django.utils.log.AdminEmailHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code></a> qui avertit par courriel les <a class="reference internal" href="../ref/settings.html#std:setting-ADMINS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ADMINS</span></code></a> du site de tout message de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> ou plus élevé. Ce gestionnaire utilise le filtre d’affichage <code class="docutils literal notranslate"><span class="pre">special</span></code>.</li>
+</ul>
+</li>
+<li><p class="first">Elle configure trois journaliseurs&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">django</span></code>, qui transmet tous les messages au gestionnaire <code class="docutils literal notranslate"><span class="pre">console</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">django.request</span></code> qui transmet tous les messages de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> au gestionnaire <code class="docutils literal notranslate"><span class="pre">mail_admins</span></code>. De plus, ce journaliseur est configuré pour ne <em>pas</em> propager les messages. Cela signifie que les messages à destination de <code class="docutils literal notranslate"><span class="pre">django.request</span></code> ne seront pas traités par le journaliseur parent <code class="docutils literal notranslate"><span class="pre">django</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">myproject.custom</span></code> qui transmet tous les messages de niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code> ou plus élevé et correspondant au filtre <code class="docutils literal notranslate"><span class="pre">special</span></code> vers deux gestionnaires, <code class="docutils literal notranslate"><span class="pre">console</span></code> et <code class="docutils literal notranslate"><span class="pre">mail_admins</span></code>. Cela signifie que tous les messages de niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code> ou plus élevé seront affichés dans la console. Les messages de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> et <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> seront de plus expédiés par courriel.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="s-custom-logging-configuration">
+<span id="custom-logging-configuration"></span><h3>Configuration personnalisée de la journalisation<a class="headerlink" href="#custom-logging-configuration" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous ne souhaitez pas utiliser le format <code class="docutils literal notranslate"><span class="pre">dictConfig</span></code> de Python pour configurer la journalisation, il est possible d’indiquer un système de configuration alternatif.</p>
+<p>Le réglage <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING_CONFIG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING_CONFIG</span></code></a> définit l’exécutable utilisé pour configurer les journaliseurs de Django. Par défaut, il indique la fonction  <a class="reference external" href="https://docs.python.org/3/library/logging.config.html#logging.config.dictConfig" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">logging.config.dictConfig()</span></code></a> de Python. Cependant, si vous souhaitez utiliser un autre procédé de configuration, vous pouvez indiquer n’importe quel autre exécutable acceptant un seul paramètre. Le contenu de <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING</span></code></a> sera fourni comme valeur de ce paramètre au moment de la configuration de la journalisation.</p>
+</div>
+<div class="section" id="s-disabling-logging-configuration">
+<span id="s-id2"></span><span id="disabling-logging-configuration"></span><span id="id2"></span><h3>Désactivation de la configuration de journalisation<a class="headerlink" href="#disabling-logging-configuration" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous ne souhaitez pas configurer de journalisation (ou que vous vouliez le faire manuellement selon votre propre méthode), vous pouvez définir <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING_CONFIG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING_CONFIG</span></code></a> à <code class="docutils literal notranslate"><span class="pre">None</span></code>. Cela va désactiver le processus de configuration de la <a class="reference internal" href="#default-logging-configuration"><span class="std std-ref">journalisation par défaut de Django</span></a>.</p>
+<p>En définissant <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING_CONFIG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING_CONFIG</span></code></a> à <code class="docutils literal notranslate"><span class="pre">None</span></code>, vous ne faites que désactiver le processus de configuration automatique, pas la journalisation elle-même. Même quand vous désactivez le processus de configuration, Django continue de faire appel à la journalisation, dont le comportement correspondra alors à ce qui est défini par défaut.</p>
+<p>Voici un exemple qui désactive la configuration de la journalisation par défaut de Django, puis configure manuellement la journalisation :</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">settings.py</span><a class="headerlink" href="#id10" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">LOGGING_CONFIG</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="kn">import</span> <span class="nn">logging.config</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Notez que le processus de configuration par défaut n’appelle  <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING_CONFIG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING_CONFIG</span></code></a> qu’une fois que les réglages sont complètement chargés. Par contraste, la configuration manuelle de la journalisation dans votre fichier de réglages va charger immédiatement la configuration de journalisation. En conséquence, votre configuration de journalisation doit apparaître <em>après</em> tout réglage dont elle dépend.</p>
+</div>
+</div>
+<div class="section" id="s-django-s-logging-extensions">
+<span id="django-s-logging-extensions"></span><h2>Extensions de journalisation de Django<a class="headerlink" href="#django-s-logging-extensions" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django fournit un certain nombre d’utilitaires pour gérer les exigences particulières de la journalisation dans le contexte d’un environnement de serveur Web.</p>
+<div class="section" id="s-id3">
+<span id="id3"></span><h3>Journaliseurs<a class="headerlink" href="#id3" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django fournit plusieurs journaliseurs intégrés&nbsp;:</p>
+<div class="section" id="s-django">
+<span id="s-django-logger"></span><span id="django"></span><span id="django-logger"></span><h4><code class="docutils literal notranslate"><span class="pre">django</span></code><a class="headerlink" href="#django" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Le journaliseur « fourre-tout » des messages de la hiérarchie <code class="docutils literal notranslate"><span class="pre">django</span></code>. Aucun message n’est envoyé avec ce nom mais utilise celui d’un des journaliseurs ci-dessous.</p>
+</div>
+<div class="section" id="s-django-request">
+<span id="s-django-request-logger"></span><span id="django-request"></span><span id="django-request-logger"></span><h4><code class="docutils literal notranslate"><span class="pre">django.request</span></code><a class="headerlink" href="#django-request" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Messages de journal liés au traitement des requêtes. Les réponses 5xx sont signalées comme des messages <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>. Les réponses 4xx sont signalées comme des messages <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>. Les requêtes journalisées vers <code class="docutils literal notranslate"><span class="pre">django.security</span></code> ne sont pas journalisées vers <code class="docutils literal notranslate"><span class="pre">django.request</span></code>.</p>
+<p>Les messages envoyés à ce journaliseur possèdent le contexte supplémentaire suivant&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">status_code</span></code>: le code de réponse HTTP associé à la requête.</li>
+<li><code class="docutils literal notranslate"><span class="pre">request</span></code>: l’objet requête qui a généré le message de journal.</li>
+</ul>
+</div>
+<div class="section" id="s-django-server">
+<span id="s-django-server-logger"></span><span id="django-server"></span><span id="django-server-logger"></span><h4><code class="docutils literal notranslate"><span class="pre">django.server</span></code><a class="headerlink" href="#django-server" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Messages de journal liés au traitement des requêtes reçues par le serveur sollicité par la commande <a class="reference internal" href="../ref/django-admin.html#django-admin-runserver"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">runserver</span></code></a>. Les réponses HTTP 5xx sont journalisées comme des messages <code class="docutils literal notranslate"><span class="pre">ERROR</span></code>. Les réponses 4xx sont journalisées comme des messages <code class="docutils literal notranslate"><span class="pre">WARNING</span></code>, et tout le reste est journalisé comme message <code class="docutils literal notranslate"><span class="pre">INFO</span></code>.</p>
+<p>Les messages envoyés à ce journaliseur possèdent le contexte supplémentaire suivant&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">status_code</span></code>: le code de réponse HTTP associé à la requête.</li>
+<li><code class="docutils literal notranslate"><span class="pre">request</span></code>: l’objet requête qui a généré le message de journal.</li>
+</ul>
+</div>
+<div class="section" id="s-django-template">
+<span id="s-django-template-logger"></span><span id="django-template"></span><span id="django-template-logger"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template</span></code><a class="headerlink" href="#django-template" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Journalise les messages liés au rendu des gabarits.</p>
+<ul class="simple">
+<li>Les variables de contexte manquantes sont journalisées comme des messages de type <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="s-django-db-backends">
+<span id="s-django-db-logger"></span><span id="django-db-backends"></span><span id="django-db-logger"></span><h4><code class="docutils literal notranslate"><span class="pre">django.db.backends</span></code><a class="headerlink" href="#django-db-backends" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Messages en lien avec l’interaction entre le code et la base de données. Par exemple, chaque instruction SQL de niveau applicatif exécutée par une requête est envoyée à ce journaliseur au niveau <code class="docutils literal notranslate"><span class="pre">DEBUG</span></code>.</p>
+<p>Les messages envoyés à ce journaliseur possèdent le contexte supplémentaire suivant&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">duration</span></code>: le temps d’exécution de l’instruction SQL concernée.</li>
+<li><code class="docutils literal notranslate"><span class="pre">sql</span></code>: l’instruction SQL exécutée.</li>
+<li><code class="docutils literal notranslate"><span class="pre">params</span></code>: les paramètres utilisés dans l’appel SQL.</li>
+</ul>
+<p>Pour des raisons de performance, la journalisation SQL n’est activée que lorsque <code class="docutils literal notranslate"><span class="pre">settings.DEBUG</span></code> est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>, peu importe le niveau de journalisation ou les gestionnaires installés.</p>
+<p>Cette journalisation ne concerne pas l’initialisation au niveau infrastructure (par ex. <code class="docutils literal notranslate"><span class="pre">SET</span> <span class="pre">TIMEZONE</span></code>) ni les requêtes de gestion de transaction (par ex. <code class="docutils literal notranslate"><span class="pre">BEGIN</span></code>, <code class="docutils literal notranslate"><span class="pre">COMMIT</span></code> ou <code class="docutils literal notranslate"><span class="pre">ROLLBACK</span></code>). Activez la journalisation des requêtes au niveau de la base de données si vous souhaitez voir toutes les requêtes à la base de données.</p>
+</div>
+<div class="section" id="s-django-security">
+<span id="s-django-security-logger"></span><span id="django-security"></span><span id="django-security-logger"></span><h4><code class="docutils literal notranslate"><span class="pre">django.security.*</span></code><a class="headerlink" href="#django-security" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les journaliseurs <code class="docutils literal notranslate"><span class="pre">security</span></code> reçoivent les messages à chaque occurrence de <a class="reference internal" href="../ref/exceptions.html#django.core.exceptions.SuspiciousOperation" title="django.core.exceptions.SuspiciousOperation"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SuspiciousOperation</span></code></a> et des autres erreurs liées à la sécurité. Il existe un sous-sérialiseur pour chaque sous-type d’erreur de sécurité, y compris toutes les <code class="docutils literal notranslate"><span class="pre">SuspiciousOperation</span></code>. Le niveau des événements journalisés dépend de l’endroit où l’exception est traitée. La plupart des occurrences sont journalisées comme des avertissements, alors que toute exception <code class="docutils literal notranslate"><span class="pre">SuspiciousOperation</span></code> atteignant le gestionnaire WSGI sera journalisée comme une erreur. Par exemple, lorsqu’un en-tête HTTP <code class="docutils literal notranslate"><span class="pre">Host</span></code> contenu dans une requête de client ne correspond pas à  <a class="reference internal" href="../ref/settings.html#std:setting-ALLOWED_HOSTS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ALLOWED_HOSTS</span></code></a>, Django renvoie une réponse 400 et un message d’erreur est journalisé dans le journaliseur <code class="docutils literal notranslate"><span class="pre">django.security.DisallowedHost</span></code>.</p>
+<p>Ces événements de journal aboutissent par défaut dans le journaliseur <code class="docutils literal notranslate"><span class="pre">django</span></code>, qui envoie les erreurs par courriel aux administrateurs lorsque <code class="docutils literal notranslate"><span class="pre">DEBUG=False</span></code>. Les requêtes aboutissant à une réponse 400 en raison d’une erreur <code class="docutils literal notranslate"><span class="pre">SuspiciousOperation</span></code> ne sont pas journalisées dans <code class="docutils literal notranslate"><span class="pre">django.request</span></code>, mais seulement dans le journaliseur <code class="docutils literal notranslate"><span class="pre">django.security</span></code>.</p>
+<p>Pour réduire au silence un type particulier de <code class="docutils literal notranslate"><span class="pre">SuspiciousOperation</span></code>, vous pouvez surcharger le journaliseur correspondant en suivant cet exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;null&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;logging.NullHandler&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">},</span>
+<span class="s1">&#39;loggers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;django.security.DisallowedHost&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;null&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;propagate&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+<p>Les autres journaliseurs <code class="docutils literal notranslate"><span class="pre">django.security</span></code> non basés sur <code class="docutils literal notranslate"><span class="pre">SuspiciousOperation</span></code> sont&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">django.security.csrf</span></code>: pour les <a class="reference internal" href="../ref/csrf.html#csrf-rejected-requests"><span class="std std-ref">échecs CSRF</span></a>.</li>
+</ul>
+</div>
+<div class="section" id="s-django-db-backends-schema">
+<span id="django-db-backends-schema"></span><h4><code class="docutils literal notranslate"><span class="pre">django.db.backends.schema</span></code><a class="headerlink" href="#django-db-backends-schema" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Journalise les requêtes SQL exécutées pendant les modifications de schéma de la base de données effectuées par le <a class="reference internal" href="migrations.html"><span class="doc">système des migrations</span></a>. Notez que les requêtes exécutées par <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> ne sont pas journalisées. Les messages de ce journaliseur possèdent <code class="docutils literal notranslate"><span class="pre">params</span></code> et <code class="docutils literal notranslate"><span class="pre">sql</span></code> dans leur contexte complémentaire (mais pas la durée comme <code class="docutils literal notranslate"><span class="pre">django.db.backends</span></code>). Ces valeurs ont la même signification que <a class="reference internal" href="#django-db-logger"><span class="std std-ref">django.db.backends</span></a> l’explique.</p>
+</div>
+</div>
+<div class="section" id="s-id4">
+<span id="id4"></span><h3>Gestionnaires<a class="headerlink" href="#id4" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django propose un gestionnaire de journalisation en plus de ceux offerts par le module <code class="docutils literal notranslate"><span class="pre">logging</span></code> de Python.</p>
+<dl class="class">
+<dt id="django.utils.log.AdminEmailHandler">
+<em class="property">class </em><code class="descname">AdminEmailHandler</code>(<em>include_html=False</em>, <em>email_backend=None</em>, <em>reporter_class=None</em>)<a class="headerlink" href="#django.utils.log.AdminEmailHandler" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce gestionnaire envoie un courriel aux administrateurs du site (<a class="reference internal" href="../ref/settings.html#std:setting-ADMINS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ADMINS</span></code></a>) pour chaque message de journal qu’il reçoit.</p>
+<p>Si le message de journalisation contient un attribut <code class="docutils literal notranslate"><span class="pre">request</span></code>, les détails complets de la requête seront inclus dans le courriel. Le sujet du courriel contiendra «&nbsp;internal IP&nbsp;» si l’adresse IP du client se trouve dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-INTERNAL_IPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INTERNAL_IPS</span></code></a>; sinon, il contiendra «&nbsp;EXTERNAL IP&nbsp;».</p>
+<p>Si la ligne de journal contient des informations sur une trace de débogage, celle-ci est incluse dans le courriel.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">include_html</span></code> de <code class="docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code> est utilisé pour contrôler si le courriel contenant la trace de débogage doit inclure une pièce jointe HTML contenant la page Web complète de débogage qui aurait été affichée si le réglage <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> valait <code class="docutils literal notranslate"><span class="pre">True</span></code>. Pour définir cette valeur dans votre configuration, incluez ce paramètre dans la définition du gestionnaire pour <code class="docutils literal notranslate"><span class="pre">django.utils.log.AdminEmailHandler</span></code>, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mail_admins&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.AdminEmailHandler&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;include_html&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+<p>Notez que cette version HTML du courriel contient une trace de débogage complète, avec les noms et valeurs des variables locales à chaque niveau de la trace, en plus des valeurs de vos réglages Django. Ces informations peuvent contenir des éléments très sensibles et il n’est pas toujours souhaitable de les envoyer par courriel. Envisagez l’utilisation d’un service comme <a class="reference external" href="https://pypi.org/project/sentry/">Sentry</a> pour obtenir le meilleur des deux mondes, de riches informations avec des traces de débogage complètes, mais avec la sécurité de ne <em>pas</em> envoyer ces informations par messagerie. Vous pouvez aussi désigner explicitement certaines informations sensibles comme devant être exclues des rapports d’erreurs&nbsp;; voir <a class="reference internal" href="../howto/error-reporting.html#filtering-error-reports"><span class="std std-ref">Filtrage des rapports d’erreurs</span></a> pour plus de détails à ce sujet.</p>
+<p>En définissant le paramètre <code class="docutils literal notranslate"><span class="pre">email_backend</span></code> de <code class="docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code>, le <a class="reference internal" href="email.html#topic-email-backends"><span class="std std-ref">moteur de messagerie</span></a> utilisé par le gestionnaire peut être surchargé, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mail_admins&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.AdminEmailHandler&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;email_backend&#39;</span><span class="p">:</span> <span class="s1">&#39;django.core.mail.backends.filebased.EmailBackend&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+<p>Par défaut, c’est une instance du moteur de messagerie indiqué dans <a class="reference internal" href="../ref/settings.html#std:setting-EMAIL_BACKEND"><code class="xref std std-setting docutils literal notranslate"><span class="pre">EMAIL_BACKEND</span></code></a> qui est utilisée.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">reporter_class</span></code> de <code class="docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code> permet de fournir une sous-classe de <code class="docutils literal notranslate"><span class="pre">django.views.debug.ExceptionReporter</span></code> pour personnaliser le texte de trace d’erreur envoyé dans le corps du courriel. Indiquez un chemin d’importation sous forme de chaîne vers la classe que vous souhaitez utiliser, comme ceci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mail_admins&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.AdminEmailHandler&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;include_html&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;reporter_class&#39;</span><span class="p">:</span> <span class="s1">&#39;somepackage.error_reporter.CustomErrorReporter&#39;</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+<div class="versionadded">
+<span class="title">New in Django 3.0:</span> <p>Le paramètre <code class="docutils literal notranslate"><span class="pre">reporter_class</span></code> a été ajouté.</p>
+</div>
+<dl class="method">
+<dt id="django.utils.log.AdminEmailHandler.send_mail">
+<code class="descname">send_mail</code>(<em>subject</em>, <em>message</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.utils.log.AdminEmailHandler.send_mail" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Envoie des courriels aux utilisateurs administrateurs. Pour personnaliser ce comportement, vous pouvez créer une sous-classe de <a class="reference internal" href="#django.utils.log.AdminEmailHandler" title="django.utils.log.AdminEmailHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code></a> et surcharger cette méthode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-id5">
+<span id="id5"></span><h3>Filtres<a class="headerlink" href="#id5" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django propose quelques filtres de journalisation en plus de ceux offerts par le module <code class="docutils literal notranslate"><span class="pre">logging</span></code> de Python.</p>
+<dl class="class">
+<dt id="django.utils.log.CallbackFilter">
+<em class="property">class </em><code class="descname">CallbackFilter</code>(<em>callback</em>)<a class="headerlink" href="#django.utils.log.CallbackFilter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce filtre accepte une fonction de rappel (qui ne doit accepter qu’un seul paramètre, l’enregistrement à journaliser) et appelle celle-ci pour chaque enregistrement qui transite par ce filtre. Le traitement de l’enregistrement s’arrête si la fonction de rappel renvoie <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Par exemple, pour exclure <a class="reference internal" href="../ref/exceptions.html#django.http.UnreadablePostError" title="django.http.UnreadablePostError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnreadablePostError</span></code></a> (généré lorsqu’un utilisateur annule un téléversement) des courriels envoyés aux administrateurs, cette fonction de filtre pourrait être créée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">UnreadablePostError</span>
+
+<span class="k">def</span> <span class="nf">skip_unreadable_post</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">exc_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc_value</span><span class="p">,</span> <span class="n">UnreadablePostError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>puis ajoutée à la configuration de journalisation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;skip_unreadable_posts&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;()&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.CallbackFilter&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;callback&#39;</span><span class="p">:</span> <span class="n">skip_unreadable_post</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+<span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mail_admins&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;skip_unreadable_posts&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.AdminEmailHandler&#39;</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.utils.log.RequireDebugFalse">
+<em class="property">class </em><code class="descname">RequireDebugFalse</code><a class="headerlink" href="#django.utils.log.RequireDebugFalse" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce filtre ne laisse passer les enregistrements que lorsque <code class="docutils literal notranslate"><span class="pre">settings.DEBUG</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Ce filtre est utilisé comme le montre l’exemple ci-dessous dans la configuration par défaut de <a class="reference internal" href="../ref/settings.html#std:setting-LOGGING"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LOGGING</span></code></a> pour garantir que <a class="reference internal" href="#django.utils.log.AdminEmailHandler" title="django.utils.log.AdminEmailHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code></a> n’envoie des courriels d’erreur aux administrateurs que lorsque <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;require_debug_false&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;()&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.RequireDebugFalse&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+<span class="s1">&#39;handlers&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;mail_admins&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;require_debug_false&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;django.utils.log.AdminEmailHandler&#39;</span>
+    <span class="p">}</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.utils.log.RequireDebugTrue">
+<em class="property">class </em><code class="descname">RequireDebugTrue</code><a class="headerlink" href="#django.utils.log.RequireDebugTrue" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ce filtre est similaire à <a class="reference internal" href="#django.utils.log.RequireDebugFalse" title="django.utils.log.RequireDebugFalse"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequireDebugFalse</span></code></a>, sauf que les enregistrements ne sont retransmis que lorsque <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="s-django-s-default-logging-configuration">
+<span id="s-default-logging-configuration"></span><span id="django-s-default-logging-configuration"></span><span id="default-logging-configuration"></span><h2>Configuration de journalisation par défaut de Django<a class="headerlink" href="#django-s-default-logging-configuration" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Par défaut, Django configure la journalisation suivante&nbsp;:</p>
+<p>Lorsque <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
+<ul class="simple">
+<li>Le journaliseur <code class="docutils literal notranslate"><span class="pre">django</span></code> envoie les messages de la hiérarchie <code class="docutils literal notranslate"><span class="pre">django</span></code> (sauf <code class="docutils literal notranslate"><span class="pre">django.server</span></code>) de niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code> ou plus vers la console.</li>
+</ul>
+<p>Lorsque <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>:</p>
+<ul class="simple">
+<li>Le journaliseur <code class="docutils literal notranslate"><span class="pre">django</span></code> envoie les messages de la hiérarchie <code class="docutils literal notranslate"><span class="pre">django</span></code> (sauf <code class="docutils literal notranslate"><span class="pre">django.server</span></code>) de niveau <code class="docutils literal notranslate"><span class="pre">ERROR</span></code> ou <code class="docutils literal notranslate"><span class="pre">CRITICAL</span></code> à <a class="reference internal" href="#django.utils.log.AdminEmailHandler" title="django.utils.log.AdminEmailHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">AdminEmailHandler</span></code></a>.</li>
+</ul>
+<p>Indépendamment de la valeur de <a class="reference internal" href="../ref/settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>:</p>
+<ul class="simple">
+<li>Le journaliseur <a class="reference internal" href="#django-server-logger"><span class="std std-ref">django.server</span></a> envoie des messages au niveau <code class="docutils literal notranslate"><span class="pre">INFO</span></code> et plus à la console.</li>
+</ul>
+<p>Tous les journaliseurs à l’exception de <a class="reference internal" href="#django-server-logger"><span class="std std-ref">django.server</span></a> propagent la journalisation vers leur parent, jusqu’au journaliseur racine <code class="docutils literal notranslate"><span class="pre">django</span></code>. Les gestionnaires <code class="docutils literal notranslate"><span class="pre">console</span></code> et <code class="docutils literal notranslate"><span class="pre">mail_admins</span></code> sont liés au journaliseur racine pour offrir le comportement décrit ci-dessus.</p>
+<p>Consultez aussi <a class="reference internal" href="#configuring-logging"><span class="std std-ref">Configuration de la journalisation</span></a> pour savoir comment compléter ou remplacer cette configuration de journalisation par défaut, définie dans <a class="reference external" href="https://github.com/django/django/blob/master/django/utils/log.py">django/utils/log.py</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Journalisation</a><ul>
+<li><a class="reference internal" href="#a-quick-logging-primer">Une introduction rapide sur la journalisation</a><ul>
+<li><a class="reference internal" href="#the-cast-of-players">Les acteurs en jeu</a><ul>
+<li><a class="reference internal" href="#loggers">Journaliseurs</a></li>
+<li><a class="reference internal" href="#handlers">Gestionnaires</a></li>
+<li><a class="reference internal" href="#filters">Filtres</a></li>
+<li><a class="reference internal" href="#formatters">Formateurs</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-logging">La journalisation en pratique</a><ul>
+<li><a class="reference internal" href="#naming-loggers">Nommage des journaliseurs</a></li>
+<li><a class="reference internal" href="#making-logging-calls">Appels de journalisation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuring-logging">Configuration de la journalisation</a><ul>
+<li><a class="reference internal" href="#examples">Exemples</a></li>
+<li><a class="reference internal" href="#custom-logging-configuration">Configuration personnalisée de la journalisation</a></li>
+<li><a class="reference internal" href="#disabling-logging-configuration">Désactivation de la configuration de journalisation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#django-s-logging-extensions">Extensions de journalisation de Django</a><ul>
+<li><a class="reference internal" href="#id3">Journaliseurs</a><ul>
+<li><a class="reference internal" href="#django"><code class="docutils literal notranslate"><span class="pre">django</span></code></a></li>
+<li><a class="reference internal" href="#django-request"><code class="docutils literal notranslate"><span class="pre">django.request</span></code></a></li>
+<li><a class="reference internal" href="#django-server"><code class="docutils literal notranslate"><span class="pre">django.server</span></code></a></li>
+<li><a class="reference internal" href="#django-template"><code class="docutils literal notranslate"><span class="pre">django.template</span></code></a></li>
+<li><a class="reference internal" href="#django-db-backends"><code class="docutils literal notranslate"><span class="pre">django.db.backends</span></code></a></li>
+<li><a class="reference internal" href="#django-security"><code class="docutils literal notranslate"><span class="pre">django.security.*</span></code></a></li>
+<li><a class="reference internal" href="#django-db-backends-schema"><code class="docutils literal notranslate"><span class="pre">django.db.backends.schema</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id4">Gestionnaires</a></li>
+<li><a class="reference internal" href="#id5">Filtres</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#django-s-default-logging-configuration">Configuration de journalisation par défaut de Django</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="i18n/timezones.html"
+                        title="Chapitre précédent">Fuseaux horaires</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="pagination.html"
+                        title="Chapitre suivant">Pagination</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/topics/logging.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="i18n/timezones.html" title="Fuseaux horaires">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="pagination.html" title="Pagination">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,963 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Le langage de gabarit de Django : pour les programmeurs Python &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="TemplateResponse et SimpleTemplateResponse" href="../template-response.html" />
+    <link rel="prev" title="Balises et filtres de gabarit intégrés" href="builtins.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="builtins.html" title="Balises et filtres de gabarit intégrés">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="../template-response.html" title="&lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;TemplateResponse&lt;/span&gt;&lt;/code&gt; et &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;SimpleTemplateResponse&lt;/span&gt;&lt;/code&gt;">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-templates-api">
+            
+  <div class="section" id="s-the-django-template-language-for-python-programmers">
+<span id="the-django-template-language-for-python-programmers"></span><h1>Le langage de gabarit de Django&nbsp;: pour les programmeurs Python<a class="headerlink" href="#the-django-template-language-for-python-programmers" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document présente le système de gabarits de Django dans une perspective technique&nbsp;: son fonctionnement et ses possibilités d’extension. Si vous recherchez la référence de la syntaxe du langage, consultez <a class="reference internal" href="language.html"><span class="doc">Le langage de gabarit de Django</span></a>.</p>
+<p>Il présuppose une compréhension des gabarits, des contextes, des variables, des balises et du rendu des gabarits. Commencez par l”<a class="reference internal" href="../../topics/templates.html#template-language-intro"><span class="std std-ref">introduction au langage de gabarit de Django</span></a> si ces concepts ne vous sont pas familiers.</p>
+<div class="section" id="s-overview">
+<span id="overview"></span><h2>Aperçu<a class="headerlink" href="#overview" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’utilisation du système de gabarits en Python est un processus à trois étapes&nbsp;:</p>
+<ol class="arabic simple">
+<li>Vous configurez un moteur <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>.</li>
+<li>Vous compilez le code du gabarit en un objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a>.</li>
+<li>Vous produisez ce gabarit en fonction d’un <a class="reference internal" href="#django.template.Context" title="django.template.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a>.</li>
+</ol>
+<p>Les projets Django se basent généralement sur l”<a class="reference internal" href="../../topics/templates.html#template-engines"><span class="std std-ref">API de haut niveau et indépendante du moteur</span></a> pour chacune de ces étapes plutôt que d’employer l’API de bas niveau du système des gabarits&nbsp;:</p>
+<ol class="arabic simple">
+<li>Pour chaque moteur <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a> du réglage <a class="reference internal" href="../settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a>, Django crée une instance <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>. <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a> englobe <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a> et l’adapte à l’API commune des moteurs de gabarits.</li>
+<li>Le module <a class="reference internal" href="../../topics/templates.html#module-django.template.loader" title="django.template.loader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.template.loader</span></code></a> fournit des fonctions telles que <a class="reference internal" href="../../topics/templates.html#django.template.loader.get_template" title="django.template.loader.get_template"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_template()</span></code></a> pour le chargement des gabarits. Elles renvoient un <code class="docutils literal notranslate"><span class="pre">django.template.backends.django.Template</span></code> qui adapte l’objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.template.Template</span></code></a> réel.</li>
+<li>Le gabarit <code class="docutils literal notranslate"><span class="pre">Template</span></code> obtenu à l’étape précédente possède une méthode <a class="reference internal" href="../../topics/templates.html#django.template.backends.base.Template.render" title="django.template.backends.base.Template.render"><code class="xref py py-meth docutils literal notranslate"><span class="pre">render()</span></code></a> qui produit un contexte et éventuellement une requête dans un objet <a class="reference internal" href="#django.template.Context" title="django.template.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> et délègue le rendu à l’objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a> sous-jacent.</li>
+</ol>
+</div>
+<div class="section" id="s-configuring-an-engine">
+<span id="configuring-an-engine"></span><h2>Configuration d’un moteur<a class="headerlink" href="#configuring-an-engine" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous utilisez le moteur <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a>, cette documentation n’est probablement pas celle que vous cherchez. Une instance de la classe <code class="docutils literal notranslate"><span class="pre">Engine</span></code> décrite ci-dessous est accessible en utilisant l’attribut <code class="docutils literal notranslate"><span class="pre">engine</span></code> du moteur, et toute valeur par défaut d’attribut mentionnée plus bas est remplacée par ce qui est transmis par <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a>.</p>
+<dl class="class">
+<dt id="django.template.Engine">
+<em class="property">class </em><code class="descname">Engine</code>(<em>dirs=None</em>, <em>app_dirs=False</em>, <em>context_processors=None</em>, <em>debug=False</em>, <em>loaders=None</em>, <em>string_if_invalid=''</em>, <em>file_charset='utf-8'</em>, <em>libraries=None</em>, <em>builtins=None</em>, <em>autoescape=True</em>)<a class="headerlink" href="#django.template.Engine" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Lors de la création d’une instance de <code class="docutils literal notranslate"><span class="pre">Engine</span></code>, tous les paramètres doivent être transmis sous forme de paramètres nommés&nbsp;:</p>
+<ul>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">dirs</span></code> définit une liste de répertoires dans lesquels le moteur recherche des fichiers sources de gabarits. Cette liste est utilisée pour configurer <a class="reference internal" href="#django.template.loaders.filesystem.Loader" title="django.template.loaders.filesystem.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">filesystem.Loader</span></code></a>.</p>
+<p>La valeur par défaut est une liste vide.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">app_dirs</span></code> n’affecte que la valeur par défaut de <code class="docutils literal notranslate"><span class="pre">loaders</span></code>. Voir ci-dessous.</p>
+<p>Sa valeur par défaut est <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">autoescape</span></code> contrôle si l’auto-échappement HTML est activé.</p>
+<p>Sa valeur par défaut est <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Ne la mettez à <code class="docutils literal notranslate"><span class="pre">False</span></code> que si vous produisez des gabarits non HTML&nbsp;!</p>
+</div>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">context_processors</span></code> est une liste de chemins Python pointés vers des objets exécutables utilisés pour remplir le contexte lorsqu’un gabarit est produit avec une requête. Ces exécutables acceptent un objet requête comme paramètre et renvoient un dictionnaire d’éléments à fusionner dans le contexte.</p>
+<p>La valeur par défaut est une liste vide.</p>
+<p>Voir <a class="reference internal" href="#django.template.RequestContext" title="django.template.RequestContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestContext</span></code></a> pour plus d’informations.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">debug</span></code> est une valeur booléenne qui active ou désactive le mode débogage des gabarits. Quand elle vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, le moteur de gabarit stocke des informations de débogage supplémentaires pouvant être utilisées pour afficher un rapport détaillé lors de toute exception générée durant le rendu des gabarits.</p>
+<p>Sa valeur par défaut est <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">loaders</span></code> est une liste de classes de chargeurs de gabarits, sous forme de chaînes. Chaque classe <code class="docutils literal notranslate"><span class="pre">Loader</span></code> sait comment importer les gabarits d’une source particulière. Il est possible d’indiquer des tuples au lieu de chaînes. Le premier élément du tuple correspond au nom de classe de <code class="docutils literal notranslate"><span class="pre">Loader</span></code> alors que les éléments suivants seront transmis à la classe <code class="docutils literal notranslate"><span class="pre">Loader</span></code> en vue de son initialisation.</p>
+<p>Sa valeur par défaut est une liste contenant&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">'django.template.loaders.filesystem.Loader'</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">'django.template.loaders.app_directories.Loader'</span></code> si et seulement si <code class="docutils literal notranslate"><span class="pre">app_dirs</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</li>
+</ul>
+<p>Si <code class="docutils literal notranslate"><span class="pre">debug</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, ces chargeurs sont enveloppés par <a class="reference internal" href="#django.template.loaders.cached.Loader" title="django.template.loaders.cached.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.template.loaders.cached.Loader</span></code></a>.</p>
+<p>Voir <a class="reference internal" href="#template-loaders"><span class="std std-ref">Types de chargeurs</span></a> pour les détails.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> est le résultat, sous forme de chaîne de caractères, que le système des gabarits utilise pour remplacer le contenu de variables non valides (par ex. mal orthographiées).</p>
+<p>Sa valeur par défaut est une chaîne vide.</p>
+<p>Voir <a class="reference internal" href="#invalid-template-variables"><span class="std std-ref">Traitement des variables non valides</span></a> pour les détails.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">file_charset</span></code> est le jeu de caractères utilisé pour lire les fichiers de gabarits depuis le disque.</p>
+<p>Sa valeur par défaut est <code class="docutils literal notranslate"><span class="pre">'utf-8'</span></code>.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">'libraries'</span></code>: un dictionnaire d’étiquettes et de chemins Python pointés de modules de balises de gabarit à inscrire auprès du moteur de gabarit. Ceci est utilisé pour ajouter de nouvelles bibliothèques ou pour fournir des étiquettes alternatives à celles qui existent. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Engine</span><span class="p">(</span>
+    <span class="n">libraries</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;myapp_tags&#39;</span><span class="p">:</span> <span class="s1">&#39;path.to.myapp.tags&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;admin.urls&#39;</span><span class="p">:</span> <span class="s1">&#39;django.contrib.admin.templatetags.admin_urls&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Les bibliothèques peuvent être chargées en passant la clé de dictionnaire correspondante à la balise <a class="reference internal" href="builtins.html#std:templatetag-load"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">load</span> <span class="pre">%}</span></code></a>.</p>
+</li>
+<li><p class="first"><code class="docutils literal notranslate"><span class="pre">'builtins'</span></code>: une liste de chemins Python pointés de modules de balises de gabarit à ajouter aux <a class="reference internal" href="builtins.html"><span class="doc">modules intégrés</span></a>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Engine</span><span class="p">(</span>
+    <span class="n">builtins</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;myapp.builtins&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Les balises et les filtres des bibliothèques intégrées peuvent être utilisés sans devoir d’abord faire appel à la balise <a class="reference internal" href="builtins.html#std:templatetag-load"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">load</span> <span class="pre">%}</span></code></a>.</p>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="django.template.Engine.get_default">
+<em class="property">static </em><code class="descclassname">Engine.</code><code class="descname">get_default</code>()<a class="headerlink" href="#django.template.Engine.get_default" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le moteur <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a> sous-jacent du premier moteur <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a> configuré. Génère <a class="reference internal" href="../exceptions.html#django.core.exceptions.ImproperlyConfigured" title="django.core.exceptions.ImproperlyConfigured"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImproperlyConfigured</span></code></a> si aucun moteur n’a été configuré.</p>
+<p>C’est obligatoire pour préserver les API qui comptent sur un moteur configuré implicitement et globalement disponible. Toute autre utilisation est fortement découragée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.Engine.from_string">
+<code class="descclassname">Engine.</code><code class="descname">from_string</code>(<em>template_code</em>)<a class="headerlink" href="#django.template.Engine.from_string" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Compile le code du gabarit donné et renvoie un objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.Engine.get_template">
+<code class="descclassname">Engine.</code><code class="descname">get_template</code>(<em>template_name</em>)<a class="headerlink" href="#django.template.Engine.get_template" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Charge un gabarit ayant le nom donné, le compile et renvoie un objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.Engine.select_template">
+<code class="descclassname">Engine.</code><code class="descname">select_template</code>(<em>template_name_list</em>)<a class="headerlink" href="#django.template.Engine.select_template" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Comme <a class="reference internal" href="#django.template.Engine.get_template" title="django.template.Engine.get_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_template()</span></code></a>, sauf qu’il accepte une liste de noms et renvoie le premier gabarit existant de la liste.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-loading-a-template">
+<span id="loading-a-template"></span><h2>Chargement d’un gabarit<a class="headerlink" href="#loading-a-template" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La manière recommandée de créer un <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a> est d’appeler les méthodes de fabrication du moteur <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>: <a class="reference internal" href="#django.template.Engine.get_template" title="django.template.Engine.get_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_template()</span></code></a>, <a class="reference internal" href="#django.template.Engine.select_template" title="django.template.Engine.select_template"><code class="xref py py-meth docutils literal notranslate"><span class="pre">select_template()</span></code></a> et <a class="reference internal" href="#django.template.Engine.from_string" title="django.template.Engine.from_string"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_string()</span></code></a>.</p>
+<p>Dans un projet Django où le réglage <a class="reference internal" href="../settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a> définit un moteur <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a>, il est possible d’instancier directement un objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a>. Si plus d’un moteur <a class="reference internal" href="../../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a> est défini, c’est le premier qui sera utilisé.</p>
+<dl class="class">
+<dt id="django.template.Template">
+<em class="property">class </em><code class="descname">Template</code><a class="headerlink" href="#django.template.Template" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Cette classe se trouve dans <code class="docutils literal notranslate"><span class="pre">django.template.Template</span></code>. Le constructeur accepte un paramètre, le code brut du gabarit&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">Template</span>
+
+<span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;My name is {{ my_name }}.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="admonition-behind-the-scenes admonition">
+<p class="first admonition-title">En coulisses</p>
+<p>Le système n’analyse qu’une seule fois le code brut du gabarit, au moment de la création de l’objet <code class="docutils literal notranslate"><span class="pre">Template</span></code>. Par la suite, le résultat est stocké en interne sous forme de structure arborescente pour des raisons de performance.</p>
+<p class="last">Même l’analyse en soi est assez rapide. La plupart de l’analyse se déroule dans un seul appel à une seule et courte expression régulière.</p>
+</div>
+</div>
+<div class="section" id="s-rendering-a-context">
+<span id="rendering-a-context"></span><h2>Rendu d’un contexte<a class="headerlink" href="#rendering-a-context" title="Lien permanent vers ce titre">¶</a></h2>
+<p>À partir du moment où vous avez un objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a> compilé, vous pouvez procéder au rendu d’un contexte. Vous pouvez réutiliser le même gabarit pour le produire à plusieurs reprises avec différents contextes.</p>
+<dl class="class">
+<dt id="django.template.Context">
+<em class="property">class </em><code class="descname">Context</code>(<em>dict_=None</em>)<a class="headerlink" href="#django.template.Context" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le constructeur de <code class="docutils literal notranslate"><span class="pre">django.template.Context</span></code> accepte un paramètre facultatif — un dictionnaire faisant correspondre des noms de variables à leurs valeurs.</p>
+<p>Pour plus de détails, voir <a class="reference internal" href="#playing-with-context"><span class="std std-ref">Manipulation des objets Context</span></a> plus bas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.Template.render">
+<code class="descclassname">Template.</code><code class="descname">render</code>(<em>context</em>)<a class="headerlink" href="#django.template.Template.render" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Appelez la méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code> de l’objet <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a> avec un <a class="reference internal" href="#django.template.Context" title="django.template.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> qui doit «&nbsp;remplir&nbsp;» le gabarit&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">Template</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;My name is {{ my_name }}.&quot;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">({</span><span class="s2">&quot;my_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Adrian&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+<span class="go">&quot;My name is Adrian.&quot;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">({</span><span class="s2">&quot;my_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Dolores&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+<span class="go">&quot;My name is Dolores.&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="section" id="s-variables-and-lookups">
+<span id="variables-and-lookups"></span><h3>Variables et sous-éléments<a class="headerlink" href="#variables-and-lookups" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les noms de variables peuvent contenir des lettres (A-Z), des chiffres (0-9), des soulignements et des points (mais elles ne peuvent pas commencer par un soulignement).</p>
+<p>Les points ont une signification particulière dans le rendu des gabarits. Un point dans un nom de variable indique l’accès à un sous-élément. Plus précisément, lorsque le système de gabarit voit un point dans un nom de variable, il recherche des sous-éléments dans cet ordre&nbsp;:</p>
+<ul class="simple">
+<li>Accès dictionnaire. Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">foo[&quot;bar&quot;]</span></code></li>
+<li>Accès attribut. Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">foo.bar</span></code></li>
+<li>Accès par index de liste. Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">foo[bar]</span></code></li>
+</ul>
+<p>Notez que «&nbsp;bar&nbsp;» dans une expression de gabarit comme <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">foo.bar</span> <span class="pre">}}</span></code> est interprété comme une chaîne littérale et même si une variable «&nbsp;bar&nbsp;» existe dans le contexte du gabarit, elle ne sera pas appelée.</p>
+<p>Le système de gabarits utilise le premier accès qui fonctionne. C’est une logique de court-circuit. Voici quelques exemples&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">Template</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;My name is {{ person.first_name }}.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;first_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="s2">&quot;last_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Johnson&quot;</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+<span class="go">&quot;My name is Joe.&quot;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PersonClass</span><span class="p">:</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">PersonClass</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">first_name</span> <span class="o">=</span> <span class="s2">&quot;Ron&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">last_name</span> <span class="o">=</span> <span class="s2">&quot;Nasty&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">({</span><span class="s2">&quot;person&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">}))</span>
+<span class="go">&quot;My name is Ron.&quot;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;The first stooge in the list is {{ stooges.0 }}.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">({</span><span class="s2">&quot;stooges&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Larry&quot;</span><span class="p">,</span> <span class="s2">&quot;Curly&quot;</span><span class="p">,</span> <span class="s2">&quot;Moe&quot;</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="go">&quot;The first stooge in the list is Larry.&quot;</span>
+</pre></div>
+</div>
+<p>Si un élément de la variable est un objet exécutable, le système de gabarits essaye de l’appeler. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PersonClass2</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="s2">&quot;Samantha&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;My name is {{ person.name }}.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">({</span><span class="s2">&quot;person&quot;</span><span class="p">:</span> <span class="n">PersonClass2</span><span class="p">}))</span>
+<span class="go">&quot;My name is Samantha.&quot;</span>
+</pre></div>
+</div>
+<p>Les variables exécutables sont légèrement plus complexes que les variables qui ne demandent que des accès directs. Voici quelques éléments à garder en tête&nbsp;:</p>
+<ul>
+<li><p class="first">Si la variable génère une exception quand elle est appelée, celle-ci est propagée, sauf si l’exception possède un attribut <code class="docutils literal notranslate"><span class="pre">silent_variable_failure</span></code> valant <code class="docutils literal notranslate"><span class="pre">True</span></code>. Dans ce dernier cas, la variable produira une chaîne équivalente au contenu de l’option de configuration <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> du moteur (chaîne vide par défaut). Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s2">&quot;My name is {{ person.first_name }}.&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PersonClass3</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">first_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">PersonClass3</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">({</span><span class="s2">&quot;person&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">}))</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">AssertionError</span>: <span class="n">foo</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">SilentAssertionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">silent_variable_failure</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PersonClass4</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">first_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="n">SilentAssertionError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">PersonClass4</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">({</span><span class="s2">&quot;person&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">}))</span>
+<span class="go">&quot;My name is .&quot;</span>
+</pre></div>
+</div>
+<p>Notez que <a class="reference internal" href="../exceptions.html#django.core.exceptions.ObjectDoesNotExist" title="django.core.exceptions.ObjectDoesNotExist"><code class="xref py py-exc docutils literal notranslate"><span class="pre">django.core.exceptions.ObjectDoesNotExist</span></code></a>, qui est la classe de base de toutes les exceptions <code class="docutils literal notranslate"><span class="pre">DoesNotExist</span></code> de l’API de base de données de Django, contient <code class="docutils literal notranslate"><span class="pre">silent_variable_failure</span> <span class="pre">=</span> <span class="pre">True</span></code>. Ainsi, si vous utilisez les gabarits de Django avec des objets modèles de Django, toute exception <code class="docutils literal notranslate"><span class="pre">DoesNotExist</span></code> échoue silencieusement.</p>
+</li>
+<li><p class="first">Une variable ne peut être appelée que si elle ne demande pas de paramètre. Sinon le système renvoie la valeur de l’option <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> du moteur.</p>
+</li>
+</ul>
+<ul id="alters-data-description">
+<li><p class="first">Des effets de bord peuvent se produire lors de l’appel à certaines variables et il serait insensé ou sécuritairement désastreux de permettre au système de gabarits d’y accéder.</p>
+<p>Un bon exemple est la méthode <a class="reference internal" href="../models/instances.html#django.db.models.Model.delete" title="django.db.models.Model.delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delete()</span></code></a> de chaque objet modèle de Django. Le système de gabarits ne devrait pas permettre de faire quelque chose comme&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">I</span> <span class="n">will</span> <span class="n">now</span> <span class="n">delete</span> <span class="n">this</span> <span class="n">valuable</span> <span class="n">data</span><span class="o">.</span> <span class="p">{{</span> <span class="n">data</span><span class="o">.</span><span class="n">delete</span> <span class="p">}}</span>
+</pre></div>
+</div>
+<p>Pour empêcher cela, définissez un attribut <code class="docutils literal notranslate"><span class="pre">alters_data</span></code> sur la variable exécutable. Le système de gabarits n’appellera pas une variable si elle contient <code class="docutils literal notranslate"><span class="pre">alters_data=True</span></code> et la remplace plutôt par le contenu de <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code>, sans conditions. Les méthodes générées dynamiquement <a class="reference internal" href="../models/instances.html#django.db.models.Model.delete" title="django.db.models.Model.delete"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delete()</span></code></a> et <a class="reference internal" href="../models/instances.html#django.db.models.Model.save" title="django.db.models.Model.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> sur les objets modèles de Django reçoivent automatiquement <code class="docutils literal notranslate"><span class="pre">alters_data=True</span></code>. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sensitive_function</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">database_record</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+<span class="n">sensitive_function</span><span class="o">.</span><span class="n">alters_data</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Vous pouvez parfois avoir envie de désactiver cette fonctionnalité pour d’autres raisons, et dire au système de gabarits de ne pas interpréter une variable, peu importe le contexte. Pour ce faire, il faut définir un attribut <code class="docutils literal notranslate"><span class="pre">do_not_call_in_templates</span></code> sur la variable exécutable, avec la valeur <code class="docutils literal notranslate"><span class="pre">True</span></code>. Le système de gabarits va alors considérer que la variable ne peut pas être appelée (ce qui permet par exemple d’accéder aux attributs de l’objet exécutable).</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-how-invalid-variables-are-handled">
+<span id="s-invalid-template-variables"></span><span id="how-invalid-variables-are-handled"></span><span id="invalid-template-variables"></span><h3>Traitement des variables non valides<a class="headerlink" href="#how-invalid-variables-are-handled" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Généralement, si une variable n’existe pas, le système des gabarits insère la valeur de l’option de configuration <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> du moteur, qui vaut  <code class="docutils literal notranslate"><span class="pre">''</span></code> (chaîne vide) par défaut.</p>
+<p>Les filtres appliqués à une variable non valide ne seront appliqués que si <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> est défini à <code class="docutils literal notranslate"><span class="pre">''</span></code> (la chaîne vide). Si <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> est défini à une autre valeur, les filtres de variable seront ignorés.</p>
+<p>Ce comportement est légèrement différent pour les balises de gabarit <code class="docutils literal notranslate"><span class="pre">if</span></code>, <code class="docutils literal notranslate"><span class="pre">for</span></code> et <code class="docutils literal notranslate"><span class="pre">regroup</span></code>. Si une variable non valide est fournie à l’une de ces balises de gabarit, la variable sera interprétée comme <code class="docutils literal notranslate"><span class="pre">None</span></code>. Les filtres sont toujours appliqués aux variables non valides dans ces balises de gabarit.</p>
+<p>Si <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> contient un substituant <code class="docutils literal notranslate"><span class="pre">'%s'</span></code>, ce dernier sera remplacé par le nom de la variable non valide.</p>
+<div class="admonition-for-debug-purposes-only admonition">
+<p class="first admonition-title">À des fins de débogage uniquement&nbsp;!</p>
+<p>Bien que <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> puisse être un outil de débogage utile, il n’est pas conseillé de l’activer de manière permanente durant le développement.</p>
+<p>Beaucoup de gabarits, y compris certains de Django, comptent sur le comportement silencieux du système de gabarit lorsqu’une variable non existante apparaît. Si <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> contient une valeur autre que <code class="docutils literal notranslate"><span class="pre">''</span></code>, vous allez rencontrer des problèmes d’affichage avec ces gabarits et ces sites.</p>
+<p class="last">Généralement, <code class="docutils literal notranslate"><span class="pre">string_if_invalid</span></code> ne devrait être activé que pour déboguer un problème spécifique d’un gabarit, puis réinitialisé une fois cette phase terminée.</p>
+</div>
+</div>
+<div class="section" id="s-built-in-variables">
+<span id="built-in-variables"></span><h3>Variables intégrées<a class="headerlink" href="#built-in-variables" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Tous les contextes contiennent <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">False</span></code> et <code class="docutils literal notranslate"><span class="pre">None</span></code>. Comme on peut s’y attendre, ces variables correspondent aux objets Python équivalents.</p>
+</div>
+<div class="section" id="s-limitations-with-string-literals">
+<span id="limitations-with-string-literals"></span><h3>Restrictions avec les chaînes littérales<a class="headerlink" href="#limitations-with-string-literals" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le langage de gabarit de Django ne possède pas de moyen pour échapper les caractères utilisés pour sa propre syntaxe. Par exemple, la balise <a class="reference internal" href="builtins.html#std:templatetag-templatetag"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">templatetag</span></code></a> est indispensable pour afficher des séquences de caractères comme <code class="docutils literal notranslate"><span class="pre">{%</span></code> ou <code class="docutils literal notranslate"><span class="pre">%}</span></code>.</p>
+<p>Un problème similaire survient lorsqu’il s’agit d’inclure ces séquences dans les paramètres d’un filtre ou d’une balise. Par exemple, lors de l’analyse d’un bloc de balise, l’analyseur de gabarit de Django cherche la première occurrence de <code class="docutils literal notranslate"><span class="pre">%}</span></code> après un <code class="docutils literal notranslate"><span class="pre">{%</span></code>. Cela empêche de pouvoir utiliser <code class="docutils literal notranslate"><span class="pre">&quot;%}&quot;</span></code> dans une chaîne littérale. Par exemple, une exception <code class="docutils literal notranslate"><span class="pre">TemplateSyntaxError</span></code> est générée pour les expressions suivantes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="o">%</span> <span class="n">include</span> <span class="s2">&quot;template.html&quot;</span> <span class="n">tvar</span><span class="o">=</span><span class="s2">&quot;Some string literal with %} in it.&quot;</span> <span class="o">%</span><span class="p">}</span>
+
+<span class="p">{</span><span class="o">%</span> <span class="k">with</span> <span class="n">tvar</span><span class="o">=</span><span class="s2">&quot;Some string literal with %} in it.&quot;</span> <span class="o">%</span><span class="p">}{</span><span class="o">%</span> <span class="n">endwith</span> <span class="o">%</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>La même problématique est révélée quand on utilise une séquence réservée dans les paramètres d’un filtre&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{{</span> <span class="n">some</span><span class="o">.</span><span class="n">variable</span><span class="o">|</span><span class="n">default</span><span class="p">:</span><span class="s2">&quot;}}&quot;</span> <span class="p">}}</span>
+</pre></div>
+</div>
+<p>Si vous avez besoin d’utiliser des chaînes qui contiennent ces séquences, vous devez les stocker dans des variables de gabarit ou utiliser une balise ou un filtre personnalisé pour détourner cette restriction.</p>
+</div>
+</div>
+<div class="section" id="s-playing-with-context-objects">
+<span id="s-playing-with-context"></span><span id="playing-with-context-objects"></span><span id="playing-with-context"></span><h2>Manipulation des objets <code class="docutils literal notranslate"><span class="pre">Context</span></code><a class="headerlink" href="#playing-with-context-objects" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La plupart du temps, les objets <a class="reference internal" href="#django.template.Context" title="django.template.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> sont créés en transmettant à <code class="docutils literal notranslate"><span class="pre">Context()</span></code> un dictionnaire contenant les données utiles. Mais il est toujours possible d’ajouter ou d’enlever des éléments d’un objet <code class="docutils literal notranslate"><span class="pre">Context</span></code> après sa création, en employant la syntaxe habituelle des dictionnaires&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">Context</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">({</span><span class="s2">&quot;foo&quot;</span><span class="p">:</span> <span class="s2">&quot;bar&quot;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">KeyError</span>: <span class="n">&#39;foo&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;newvariable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;hello&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;newvariable&#39;</span><span class="p">]</span>
+<span class="go">&#39;hello&#39;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="django.template.Context.get">
+<code class="descclassname">Context.</code><code class="descname">get</code>(<em>key</em>, <em>otherwise=None</em>)<a class="headerlink" href="#django.template.Context.get" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la valeur correspondant à <code class="docutils literal notranslate"><span class="pre">key</span></code> si <code class="docutils literal notranslate"><span class="pre">key</span></code> est dans le contexte, sinon renvoie <code class="docutils literal notranslate"><span class="pre">otherwise</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.Context.setdefault">
+<code class="descclassname">Context.</code><code class="descname">setdefault</code>(<em>key</em>, <em>default=None</em>)<a class="headerlink" href="#django.template.Context.setdefault" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Si <code class="docutils literal notranslate"><span class="pre">key</span></code> est dans le contexte, renvoie sa valeur. Sinon insère <code class="docutils literal notranslate"><span class="pre">key</span></code> avec la valeur <code class="docutils literal notranslate"><span class="pre">default</span></code> et renvoie <code class="docutils literal notranslate"><span class="pre">default</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.Context.pop">
+<code class="descclassname">Context.</code><code class="descname">pop</code>()<a class="headerlink" href="#django.template.Context.pop" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.template.Context.push">
+<code class="descclassname">Context.</code><code class="descname">push</code>()<a class="headerlink" href="#django.template.Context.push" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="django.template.ContextPopException">
+<em class="property">exception </em><code class="descname">ContextPopException</code><a class="headerlink" href="#django.template.ContextPopException" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Un objet <code class="docutils literal notranslate"><span class="pre">Context</span></code> est une pile. C’est-à-dire que vous pouvez lui appliquer les méthodes <code class="docutils literal notranslate"><span class="pre">push()</span></code> et <code class="docutils literal notranslate"><span class="pre">pop()</span></code>. En cas de <code class="docutils literal notranslate"><span class="pre">pop()</span></code> en trop, une exception <code class="docutils literal notranslate"><span class="pre">django.template.ContextPopException</span></code> est générée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">push</span><span class="p">()</span>
+<span class="go">{}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;second level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;second level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+<span class="go">{&#39;foo&#39;: &#39;second level&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;overwritten&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;overwritten&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">ContextPopException</span>
+</pre></div>
+</div>
+<p>Vous pouvez aussi utiliser <code class="docutils literal notranslate"><span class="pre">push()</span></code> comme gestionnaire de contexte pour garantir que l’instruction <code class="docutils literal notranslate"><span class="pre">pop()</span></code> correspondante soit effectivement appelée.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">c</span><span class="o">.</span><span class="n">push</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;second level&#39;</span>
+<span class="gp">... </span>    <span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;second level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;first level&#39;</span>
+</pre></div>
+</div>
+<p>Tous les paramètres passés à <code class="docutils literal notranslate"><span class="pre">push()</span></code> sont transmis au constructeur de <code class="docutils literal notranslate"><span class="pre">dict</span></code> utilisé pour construire le nouveau niveau de contexte.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">c</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s1">&#39;second level&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;second level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;first level&#39;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="django.template.Context.update">
+<code class="descclassname">Context.</code><code class="descname">update</code>(<em>other_dict</em>)<a class="headerlink" href="#django.template.Context.update" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>En plus de <code class="docutils literal notranslate"><span class="pre">push()</span></code> et <code class="docutils literal notranslate"><span class="pre">pop()</span></code>, l’objet <code class="docutils literal notranslate"><span class="pre">Context</span></code> définit également une méthode <code class="docutils literal notranslate"><span class="pre">update()</span></code>. Elle fonctionne comme <code class="docutils literal notranslate"><span class="pre">push()</span></code>, mais accepte en paramètre un dictionnaire et place ce dictionnaire sur la pile, au lieu d’un dictionnaire vide.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;updated&#39;</span><span class="p">})</span>
+<span class="go">{&#39;foo&#39;: &#39;updated&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;updated&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+<span class="go">{&#39;foo&#39;: &#39;updated&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;first level&#39;</span>
+</pre></div>
+</div>
+<p>Comme <code class="docutils literal notranslate"><span class="pre">push()</span></code>, vous pouvez utiliser <code class="docutils literal notranslate"><span class="pre">update()</span></code> comme gestionnaire de contexte pour garantir que l’instruction <code class="docutils literal notranslate"><span class="pre">pop()</span></code> correspondante soit effectivement appelée.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;second level&#39;</span><span class="p">}):</span>
+<span class="gp">... </span>    <span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;second level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+<span class="go">&#39;first level&#39;</span>
+</pre></div>
+</div>
+<p>L’utilisation de <code class="docutils literal notranslate"><span class="pre">Context</span></code> comme une pile est bien pratique avec <a class="reference internal" href="../../howto/custom-template-tags.html#howto-writing-custom-template-tags"><span class="std std-ref">certaines balises de gabarit personnalisées</span></a>.</p>
+<dl class="method">
+<dt id="django.template.Context.flatten">
+<code class="descclassname">Context.</code><code class="descname">flatten</code>()<a class="headerlink" href="#django.template.Context.flatten" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>En utilisant la méthode <code class="docutils literal notranslate"><span class="pre">flatten()</span></code>, vous pouvez obtenir l’ensemble de la pile de <code class="docutils literal notranslate"><span class="pre">Context</span></code> sous forme d’un unique dictionnaire, y compris les variables natives.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="s1">&#39;second level&#39;</span><span class="p">})</span>
+<span class="go">{&#39;bar&#39;: &#39;second level&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="go">{&#39;True&#39;: True, &#39;None&#39;: None, &#39;foo&#39;: &#39;first level&#39;, &#39;False&#39;: False, &#39;bar&#39;: &#39;second level&#39;}</span>
+</pre></div>
+</div>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">flatten()</span></code> est aussi utilisée en interne pour rendre les objets <code class="docutils literal notranslate"><span class="pre">Context</span></code> comparables.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c1</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c1</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;first level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c1</span><span class="p">[</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;second level&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c2</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c2</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;bar&#39;</span><span class="p">:</span> <span class="s1">&#39;second level&#39;</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;first level&#39;</span><span class="p">})</span>
+<span class="go">{&#39;foo&#39;: &#39;first level&#39;, &#39;bar&#39;: &#39;second level&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c1</span> <span class="o">==</span> <span class="n">c2</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Le résultat de <code class="docutils literal notranslate"><span class="pre">flatten()</span></code> peut être utile dans les tests unitaires pour comparer <code class="docutils literal notranslate"><span class="pre">Context</span></code> avec un <code class="docutils literal notranslate"><span class="pre">dict</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ContextTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_against_dictionary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">Context</span><span class="p">()</span>
+        <span class="n">c1</span><span class="p">[</span><span class="s1">&#39;update&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;value&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c1</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="p">{</span>
+            <span class="s1">&#39;True&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;False&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;update&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span>
+        <span class="p">})</span>
+</pre></div>
+</div>
+<div class="section" id="s-using-requestcontext">
+<span id="s-subclassing-context-requestcontext"></span><span id="using-requestcontext"></span><span id="subclassing-context-requestcontext"></span><h3>Utilisation de <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code><a class="headerlink" href="#using-requestcontext" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.template.RequestContext">
+<em class="property">class </em><code class="descname">RequestContext</code>(<em>request</em>, <em>dict_=None</em>, <em>processors=None</em>)<a class="headerlink" href="#django.template.RequestContext" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Django contient une classe <code class="docutils literal notranslate"><span class="pre">Context</span></code> spéciale, <code class="docutils literal notranslate"><span class="pre">django.template.RequestContext</span></code>, qui se comporte légèrement différemment de l’objet <code class="docutils literal notranslate"><span class="pre">django.template.Context</span></code> normal. La première différence est qu’elle demande un objet <a class="reference internal" href="../request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a> comme premier paramètre. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>La seconde différence est qu’elle remplit automatiquement le contexte avec quelques variables, en fonction de l’option de configuration <code class="docutils literal notranslate"><span class="pre">context_processors</span></code> du moteur.</p>
+<p>L’option <code class="docutils literal notranslate"><span class="pre">context_processors</span></code> est une liste d’objets exécutables appelés <strong>processeurs de contexte</strong> qui acceptent un objet requête en paramètre et renvoient un dictionnaire d’éléments à fusionner dans le contexte. Dans le fichier de réglages généré par défaut, le moteur de gabarit par défaut contient les processeurs de contexte suivants&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="s1">&#39;django.template.context_processors.debug&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.template.context_processors.request&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.auth.context_processors.auth&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;django.contrib.messages.context_processors.messages&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>En plus de ce contenu, <a class="reference internal" href="#django.template.RequestContext" title="django.template.RequestContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestContext</span></code></a> active toujours <code class="docutils literal notranslate"><span class="pre">'django.template.context_processors.csrf'</span></code>. Il s’agit d’un processeur de contexte lié à la sécurité exigé par l’application d’administration ainsi que d’autres applications contribuées. Il est volontairement ajouté de force pour qu’il ne puisse pas être enlevé par une erreur de configuration dans l’option <code class="docutils literal notranslate"><span class="pre">context_processors</span></code>.</p>
+<p>Chaque processeur est appliqué successivement. Cela signifie que si un processeur ajoute une variable au contexte et que le processeur suivant ajoute une variable de même nom, la seconde écrase la première. Les processeurs par défaut sont présentés ci-dessous.</p>
+<div class="admonition-when-context-processors-are-applied admonition">
+<p class="first admonition-title">Quand les processeurs de contexte sont-ils appliqués&nbsp;?</p>
+<p>Les processeurs de contexte sont appliqués au sommet des données de contexte. Cela signifie qu’un processeur de contexte peut écraser une variable que vous avez fournie dans un objet <a class="reference internal" href="#django.template.Context" title="django.template.Context"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></a> ou <a class="reference internal" href="#django.template.RequestContext" title="django.template.RequestContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestContext</span></code></a>, il faut donc faire attention de ne pas utiliser des variables dont le nom peut entrer en conflit avec ceux des processeurs de contexte installés.</p>
+<p>Si vous souhaitez que des données de contexte aient la priorité sur les processeurs de contexte, utilisez le schéma suivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">RequestContext</span>
+
+<span class="n">request_context</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+<span class="n">request_context</span><span class="o">.</span><span class="n">push</span><span class="p">({</span><span class="s2">&quot;my_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Adrian&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p class="last">Django fait cela pour permettre aux données de contexte d’écraser des processeurs de contexte dans des API comme <a class="reference internal" href="../../topics/http/shortcuts.html#django.shortcuts.render" title="django.shortcuts.render"><code class="xref py py-func docutils literal notranslate"><span class="pre">render()</span></code></a> ou <a class="reference internal" href="../template-response.html#django.template.response.TemplateResponse" title="django.template.response.TemplateResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemplateResponse</span></code></a>.</p>
+</div>
+<p>Il est également possible de donner à <a class="reference internal" href="#django.template.RequestContext" title="django.template.RequestContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestContext</span></code></a> une liste de processeurs supplémentaires en utilisant le troisième paramètre positionnel facultatif, <code class="docutils literal notranslate"><span class="pre">processors</span></code>. Dans cet exemple, l’instance <a class="reference internal" href="#django.template.RequestContext" title="django.template.RequestContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestContext</span></code></a> reçoit une variable <code class="docutils literal notranslate"><span class="pre">ip_address</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">RequestContext</span><span class="p">,</span> <span class="n">Template</span>
+
+<span class="k">def</span> <span class="nf">ip_address_processor</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;ip_address&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="p">[</span><span class="s1">&#39;REMOTE_ADDR&#39;</span><span class="p">]}</span>
+
+<span class="k">def</span> <span class="nf">client_ip_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="s1">&#39;{{ title }}: {{ ip_address }}&#39;</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">RequestContext</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Your IP Address&#39;</span><span class="p">,</span>
+    <span class="p">},</span> <span class="p">[</span><span class="n">ip_address_processor</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-built-in-template-context-processors">
+<span id="s-context-processors"></span><span id="built-in-template-context-processors"></span><span id="context-processors"></span><h3>Processeurs de contexte de gabarit intégrés<a class="headerlink" href="#built-in-template-context-processors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Voici ce que font chacun des processeurs de contexte intégrés&nbsp;:</p>
+<div class="section" id="s-django-contrib-auth-context-processors-auth">
+<span id="django-contrib-auth-context-processors-auth"></span><h4><code class="docutils literal notranslate"><span class="pre">django.contrib.auth.context_processors.auth</span></code><a class="headerlink" href="#django-contrib-auth-context-processors-auth" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="function">
+<dt id="django.contrib.auth.context_processors.auth">
+<code class="descname">auth</code>()<a class="headerlink" href="#django.contrib.auth.context_processors.auth" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra ces variables&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">user</span></code> – une instance <code class="docutils literal notranslate"><span class="pre">auth.User</span></code> représentant l’utilisateur actuellement connecté (ou une instance <code class="docutils literal notranslate"><span class="pre">AnonymousUser</span></code>, si le client n’est pas connecté).</li>
+<li><code class="docutils literal notranslate"><span class="pre">perms</span></code> – une instance de <code class="docutils literal notranslate"><span class="pre">django.contrib.auth.context_processors.PermWrapper</span></code>, représentant les permissions de l’utilisateur actuellement connecté.</li>
+</ul>
+</div>
+<div class="section" id="s-django-template-context-processors-debug">
+<span id="django-template-context-processors-debug"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.debug</span></code><a class="headerlink" href="#django-template-context-processors-debug" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="function">
+<dt id="django.template.context_processors.debug">
+<code class="descname">debug</code>()<a class="headerlink" href="#django.template.context_processors.debug" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contient ces deux variables – mais seulement si le réglage <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code> et que l’adresse IP de la requête (<code class="docutils literal notranslate"><span class="pre">request.META['REMOTE_ADDR']</span></code>) se trouve dans le réglage <a class="reference internal" href="../settings.html#std:setting-INTERNAL_IPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INTERNAL_IPS</span></code></a>:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">debug</span></code> – <code class="docutils literal notranslate"><span class="pre">True</span></code>. Vous pouvez l’utiliser dans les gabarits pour tester si vous êtes en mode  <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">sql_queries</span></code> – une liste de dictionnaires <code class="docutils literal notranslate"><span class="pre">{'sql':</span> <span class="pre">...,</span> <span class="pre">'time':</span> <span class="pre">...}</span></code> représentant chaque requête SQL effectuée jusque-là dans le traitement de la requête et le temps nécessaire à son exécution. La liste est triée par alias de base de données, puis par requête. Elle est produite de manière différée au moment de son accès.</li>
+</ul>
+</div>
+<div class="section" id="s-django-template-context-processors-i18n">
+<span id="django-template-context-processors-i18n"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.i18n</span></code><a class="headerlink" href="#django-template-context-processors-i18n" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="function">
+<dt id="django.template.context_processors.i18n">
+<code class="descname">i18n</code>()<a class="headerlink" href="#django.template.context_processors.i18n" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra ces variables&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">LANGUAGES</span></code> – la valeur du réglage <a class="reference internal" href="../settings.html#std:setting-LANGUAGES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGES</span></code></a>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">LANGUAGE_BIDI</span></code> – <code class="docutils literal notranslate"><span class="pre">True</span></code>, si la langue actuelle est une langue s’écrivant de droite à gauche, comme l’hébreu ou l’arabe. <code class="docutils literal notranslate"><span class="pre">False</span></code> s’il s’agit d’une langue s’écrivant de gauche à droite, comme l’anglais, le français ou l’allemand.</li>
+<li><code class="docutils literal notranslate"><span class="pre">LANGUAGE_CODE</span></code> – <code class="docutils literal notranslate"><span class="pre">request.LANGUAGE_CODE</span></code>, si elle existe. Sinon, la valeur du réglage <a class="reference internal" href="../settings.html#std:setting-LANGUAGE_CODE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">LANGUAGE_CODE</span></code></a>.</li>
+</ul>
+<p>Voir <a class="reference internal" href="../../topics/i18n/translation.html#i18n-template-tags"><span class="std std-ref">balises de gabarits i18n</span></a> pour des balises de gabarits qui génèrent les mêmes valeurs.</p>
+</div>
+<div class="section" id="s-django-template-context-processors-media">
+<span id="django-template-context-processors-media"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.media</span></code><a class="headerlink" href="#django-template-context-processors-media" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra une variable <code class="docutils literal notranslate"><span class="pre">MEDIA_URL</span></code>, équivalente au réglage <a class="reference internal" href="../settings.html#std:setting-MEDIA_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MEDIA_URL</span></code></a>.</p>
+</div>
+<div class="section" id="s-django-template-context-processors-static">
+<span id="django-template-context-processors-static"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.static</span></code><a class="headerlink" href="#django-template-context-processors-static" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="function">
+<dt id="django.template.context_processors.static">
+<code class="descname">static</code>()<a class="headerlink" href="#django.template.context_processors.static" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra une variable <code class="docutils literal notranslate"><span class="pre">STATIC_URL</span></code>, équivalente au réglage <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a>.</p>
+</div>
+<div class="section" id="s-django-template-context-processors-csrf">
+<span id="django-template-context-processors-csrf"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.csrf</span></code><a class="headerlink" href="#django-template-context-processors-csrf" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Ce processeur ajoute un jeton requis par la balise de gabarit <a class="reference internal" href="builtins.html#std:templatetag-csrf_token"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">csrf_token</span></code></a> pour se protéger des attaques de type <a class="reference internal" href="../csrf.html"><span class="doc">Cross Site Request Forgeries</span></a>.</p>
+</div>
+<div class="section" id="s-django-template-context-processors-request">
+<span id="django-template-context-processors-request"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.request</span></code><a class="headerlink" href="#django-template-context-processors-request" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra une variable <code class="docutils literal notranslate"><span class="pre">request</span></code> correspondant à l’objet <a class="reference internal" href="../request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a> actuel.</p>
+</div>
+<div class="section" id="s-django-template-context-processors-tz">
+<span id="django-template-context-processors-tz"></span><h4><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.tz</span></code><a class="headerlink" href="#django-template-context-processors-tz" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="function">
+<dt id="django.template.context_processors.tz">
+<code class="descname">tz</code>()<a class="headerlink" href="#django.template.context_processors.tz" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra une variable <code class="docutils literal notranslate"><span class="pre">TIME_ZONE</span></code>, fournissant le nom du fuseau horaire actuellement actif.</p>
+</div>
+<div class="section" id="s-django-contrib-messages-context-processors-messages">
+<span id="django-contrib-messages-context-processors-messages"></span><h4><code class="docutils literal notranslate"><span class="pre">django.contrib.messages.context_processors.messages</span></code><a class="headerlink" href="#django-contrib-messages-context-processors-messages" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Si ce processeur est activé, chaque <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code> contiendra ces deux variables&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">messages</span></code> – une liste de messages (sous forme de chaînes) qui ont été définis au travers de l”<a class="reference internal" href="../contrib/messages.html"><span class="doc">infrastructure des messages</span></a>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">DEFAULT_MESSAGE_LEVELS</span></code> – un tableau de correspondance entre les noms de niveaux de message et leur <a class="reference internal" href="../contrib/messages.html#message-level-constants"><span class="std std-ref">valeur numérique</span></a>.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="s-writing-your-own-context-processors">
+<span id="writing-your-own-context-processors"></span><h3>Écriture de son propre processeur de contexte<a class="headerlink" href="#writing-your-own-context-processors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Un processeur de contexte possède une interface simple&nbsp;: il s’agit d’une fonction Python acceptant un paramètre, un objet <a class="reference internal" href="../request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a>, et renvoyant un dictionnaire qui est ensuite ajouté au contexte de gabarit. Chaque processeur de contexte <em>doit</em> renvoyer un dictionnaire.</p>
+<p>Les processeurs de contexte personnalisés peuvent se trouver n’importe où dans le code. Tout ce que Django demande, c’est que l’option <code class="docutils literal notranslate"><span class="pre">'context_processors'</span></code> du réglage <a class="reference internal" href="../settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a> (ou le paramètre <code class="docutils literal notranslate"><span class="pre">context_processors</span></code> d’un moteur <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a> si vous l’utilisez directement) contienne le chemin vers le processeur personnalisé.</p>
+</div>
+</div>
+<div class="section" id="s-loading-templates">
+<span id="loading-templates"></span><h2>Chargement des gabarits<a class="headerlink" href="#loading-templates" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En général, il est conseillé de stocker les gabarits sur le système de fichiers plutôt que de faire appel à l’API <a class="reference internal" href="#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">Template</span></code></a> de bas niveau. Les gabarits doivent se trouver dans un répertoire désigné comme <strong>répertoire de gabarits</strong>.</p>
+<p>Django recherche les répertoires de gabarits à plusieurs endroits, en fonction des réglages de chargement des gabarits (voir «&nbsp;Types de chargeurs&nbsp;» ci-dessous), mais la façon la plus élémentaire de désigner des répertoires de gabarits est d’utiliser l’option <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a>.</p>
+<div class="section" id="s-the-dirs-option">
+<span id="the-dirs-option"></span><h3>L’option <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a><a class="headerlink" href="#the-dirs-option" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Indiquez à Django quels sont vos répertoires de gabarits en utilisant l’option <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a> du réglage <a class="reference internal" href="../settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a> dans votre fichier de réglages, ou le paramètre <code class="docutils literal notranslate"><span class="pre">dirs</span></code> de <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>. Il devrait contenir une liste de chaînes contenant les chemins complets vers les répertoires de gabarits&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s1">&#39;/home/html/templates/lawrence.com&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;/home/html/templates/default&#39;</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Les gabarits peuvent se trouver n’importe où, pour autant que leur emplacement soit lisible par le serveur Web. Leur extension est également à votre bon plaisir, <code class="docutils literal notranslate"><span class="pre">.html</span></code>, <code class="docutils literal notranslate"><span class="pre">.txt</span></code>, ou même sans extension du tout.</p>
+<p>Notez que ces chemins doivent utiliser les barres obliques de style Unix, même avec Windows.</p>
+</div>
+<div class="section" id="s-loader-types">
+<span id="s-template-loaders"></span><span id="loader-types"></span><span id="template-loaders"></span><h3>Types de chargeurs<a class="headerlink" href="#loader-types" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, Django utilise un chargeur de gabarit basé sur le système de fichiers, mais il existe également quelques autres chargeurs de gabarit, qui savent comment charger des gabarits à partir d’autres sources.</p>
+<p>Certains de ces autres chargeurs sont désactivés par défaut, mais vous pouvez les activer en ajoutant une option <code class="docutils literal notranslate"><span class="pre">'loaders'</span></code> à votre moteur <code class="docutils literal notranslate"><span class="pre">DjangoTemplates</span></code> dans le réglage <a class="reference internal" href="../settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a> ou en transmettant un paramètre <code class="docutils literal notranslate"><span class="pre">loaders</span></code> à <a class="reference internal" href="#django.template.Engine" title="django.template.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>. <code class="docutils literal notranslate"><span class="pre">loaders</span></code> doit contenir une liste de chaînes ou de tuples, où chaque élément représente une classe de chargeur de gabarit. Voici les chargeurs de gabarit que Django propose&nbsp;:</p>
+<p><code class="docutils literal notranslate"><span class="pre">django.template.loaders.filesystem.Loader</span></code></p>
+<dl class="class">
+<dt id="django.template.loaders.filesystem.Loader">
+<em class="property">class </em><code class="descclassname">filesystem.</code><code class="descname">Loader</code><a class="headerlink" href="#django.template.loaders.filesystem.Loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Charge les gabarits à partir du système de fichiers, en fonction de <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a>.</p>
+<p>Ce chargeur est actif par défaut. Cependant, il ne trouvera aucun gabarit tant que vous n’aurez pas défini <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a> à une liste non vide&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;templates&#39;</span><span class="p">],</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+<p>Il est aussi possible de surcharger <code class="docutils literal notranslate"><span class="pre">'DIRS'</span></code> et de définir des répertoires spécifiques à un chargeur basé sur le système de fichiers&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;loaders&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="s1">&#39;django.template.loaders.filesystem.Loader&#39;</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;templates&#39;</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">django.template.loaders.app_directories.Loader</span></code></p>
+<dl class="class">
+<dt id="django.template.loaders.app_directories.Loader">
+<em class="property">class </em><code class="descclassname">app_directories.</code><code class="descname">Loader</code><a class="headerlink" href="#django.template.loaders.app_directories.Loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Charge les gabarits à partir des dossiers d’applications Django sur le système de fichiers. Pour chaque application dans <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>, le chargeur cherche un sous-répertoire nommé <code class="docutils literal notranslate"><span class="pre">templates</span></code>. S’il le trouve, Django recherche les gabarits dans ce répertoire.</p>
+<p>Cela signifie que vous pouvez stocker les gabarits à l’intérieur des différentes applications. Cela facilite également la distribution des applications Django dotées de gabarits par défaut.</p>
+<p>Par exemple, avec ce réglage&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">INSTALLED_APPS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;myproject.polls&#39;</span><span class="p">,</span> <span class="s1">&#39;myproject.music&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>…<code class="docutils literal notranslate"><span class="pre">get_template('foo.html')</span></code> recherche  <code class="docutils literal notranslate"><span class="pre">foo.html</span></code> dans ces répertoires, dans l’ordre&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">/chemin/vers/myproject/polls/templates/</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">/chemin/vers/myproject/music/templates/</span></code></li>
+</ul>
+<p>… et utilise le premier qu’il trouve.</p>
+<p>L’ordre de <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> est important&nbsp;! Par exemple, si vous souhaitez personnaliser l’administration de Django, il peut être utile de surcharger le gabarit <code class="docutils literal notranslate"><span class="pre">admin/base_site.html</span></code> standard de <code class="docutils literal notranslate"><span class="pre">django.contrib.admin</span></code> par votre propre <code class="docutils literal notranslate"><span class="pre">admin/base_site.html</span></code> dans <code class="docutils literal notranslate"><span class="pre">myproject.polls</span></code>. Vous devez alors vous assurer que <code class="docutils literal notranslate"><span class="pre">myproject.polls</span></code> apparaisse <em>avant</em> <code class="docutils literal notranslate"><span class="pre">django.contrib.admin</span></code> dans <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>, sinon <code class="docutils literal notranslate"><span class="pre">django.contrib.admin</span></code> sera chargé en premier et votre gabarit sera ignoré.</p>
+<p>Notez que le chargeur effectue une optimisation lors de son premier lancement&nbsp;: il place en cache une liste des paquets <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> qui possèdent un sous-répertoire <code class="docutils literal notranslate"><span class="pre">templates</span></code>.</p>
+<p>Vous pouvez activer ce chargeur en définissant <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-APP_DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">APP_DIRS</span></code></a> à <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;APP_DIRS&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">django.template.loaders.cached.Loader</span></code></p>
+<dl class="class">
+<dt id="django.template.loaders.cached.Loader">
+<em class="property">class </em><code class="descclassname">cached.</code><code class="descname">Loader</code><a class="headerlink" href="#django.template.loaders.cached.Loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Par défaut (lorsque <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>), le système des gabarits lit et compile les gabarits chaque fois qu’ils sont produits. Même si le système des gabarits de Django est assez rapide, la charge de lecture et de compilation des gabarits peut être conséquente.</p>
+<p>Le chargeur de gabarits « en cache&nbsp;» est configuré en lui donnant une liste d’autres chargeurs qu’il va encapsuler. Les chargeurs encapsulés sont utilisés pour retrouver les gabarits inconnus la première fois qu’ils sont référencés. Le chargeur «&nbsp;en cache&nbsp;» stocke ensuite l’objet <code class="docutils literal notranslate"><span class="pre">Template</span></code> compilé en mémoire. Cette instance mise en cache est renvoyée lors de chaque nouvelle requête de chargement de ce même gabarit.</p>
+<p>Ce chargeur est automatiquement activé si <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS['loaders']</span></code></a> n’est pas défini et que <a class="reference internal" href="../settings.html#std:setting-TEMPLATES-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS['debug']</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code> (cette dernière option contient par défaut la valeur de <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>).</p>
+<p>Il est aussi possible d’activer le cache de gabarits avec des chargeurs de gabarit personnalisés en utilisant des réglages comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;templates&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;loaders&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;django.template.loaders.cached.Loader&#39;</span><span class="p">,</span> <span class="p">[</span>
+                <span class="s1">&#39;django.template.loaders.filesystem.Loader&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.template.loaders.app_directories.Loader&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;path.to.custom.Loader&#39;</span><span class="p">,</span>
+            <span class="p">]),</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Toutes les balises de gabarit intégrées à Django peuvent être utilisées sans problème avec le chargeur «&nbsp;en cache&nbsp;», mais si vous utilisez des balises de gabarit personnalisées provenant de paquets externes ou que vous avez écrites vous-même, il est nécessaire de vérifier que l’implémentation des objets <code class="docutils literal notranslate"><span class="pre">Node</span></code> de chaque balise respecte la concurrence («&nbsp;thread-safe&nbsp;»). Pour plus d’informations, consultez les indications sur la <a class="reference internal" href="../../howto/custom-template-tags.html#template-tag-thread-safety"><span class="std std-ref">concurrence entre fils d’exécution dans les balises de gabarit</span></a>.</p>
+</div>
+</dd></dl>
+
+<p><code class="docutils literal notranslate"><span class="pre">django.template.loaders.locmem.Loader</span></code></p>
+<dl class="class">
+<dt id="django.template.loaders.locmem.Loader">
+<em class="property">class </em><code class="descclassname">locmem.</code><code class="descname">Loader</code><a class="headerlink" href="#django.template.loaders.locmem.Loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Charge des gabarits à partir d’un dictionnaire Python. Utile pour les tests.</p>
+<p>Ce chargeur prend un dictionnaire de gabarits comme premier paramètre&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[{</span>
+    <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;loaders&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s1">&#39;django.template.loaders.locmem.Loader&#39;</span><span class="p">,</span> <span class="p">{</span>
+                <span class="s1">&#39;index.html&#39;</span><span class="p">:</span> <span class="s1">&#39;content here&#39;</span><span class="p">,</span>
+            <span class="p">}),</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">}]</span>
+</pre></div>
+</div>
+<p>Ce chargeur est désactivé par défaut.</p>
+</dd></dl>
+
+<p>Django utilise les chargeurs de gabarit dans l’ordre de leur apparition dans l’option <code class="docutils literal notranslate"><span class="pre">'loaders'</span></code>. Il utilise chaque chargeur jusqu’à ce qu’il trouve une correspondance.</p>
+</div>
+</div>
+<div class="section" id="s-custom-loaders">
+<span id="s-custom-template-loaders"></span><span id="custom-loaders"></span><span id="custom-template-loaders"></span><h2>Chargeurs personnalisés<a class="headerlink" href="#custom-loaders" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il est possible de charger des gabarits provenant de sources supplémentaires en utilisant des chargeurs de gabarit personnalisés. Les classes personnalisées de <code class="docutils literal notranslate"><span class="pre">Loader</span></code> doivent hériter de <code class="docutils literal notranslate"><span class="pre">django.template.loaders.base.Loader</span></code> et définir les méthodes <code class="docutils literal notranslate"><span class="pre">get_contents()</span></code> et <code class="docutils literal notranslate"><span class="pre">get_template_sources()</span></code>.</p>
+<div class="section" id="s-loader-methods">
+<span id="loader-methods"></span><h3>Méthodes des chargeurs<a class="headerlink" href="#loader-methods" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.template.loaders.base.Loader">
+<em class="property">class </em><code class="descname">Loader</code><a class="headerlink" href="#django.template.loaders.base.Loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Charge des gabarits à partir d’une source donnée, telle que le système de fichier ou une base de données.</p>
+<dl class="method">
+<dt id="django.template.loaders.base.Loader.get_template_sources">
+<code class="descname">get_template_sources</code>(<em>template_name</em>)<a class="headerlink" href="#django.template.loaders.base.Loader.get_template_sources" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une méthode acceptant un nom de gabarit <code class="docutils literal notranslate"><span class="pre">template_name</span></code> et renvoyant une à une des instances <a class="reference internal" href="#django.template.base.Origin" title="django.template.base.Origin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Origin</span></code></a> pour chaque source possible.</p>
+<p>Par exemple, le chargeur système de fichiers pourrait recevoir <code class="docutils literal notranslate"><span class="pre">'index.html'</span></code> comme paramètre <code class="docutils literal notranslate"><span class="pre">template_name</span></code>. Cette méthode produirait des origines pour le chemin complet de <code class="docutils literal notranslate"><span class="pre">index.html</span></code> tel qu’il devrait apparaître dans chaque répertoire de gabarits que le chargeur inspecte.</p>
+<p>La méthode n’a pas besoin de vérifier que le gabarit existe pour un chemin donné, mais elle doit s’assurer que le chemin est valide. Par exemple, le chargeur système de fichiers doit s’assurer que le chemin se trouve bien dans un répertoire de gabarits valide.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.loaders.base.Loader.get_contents">
+<code class="descname">get_contents</code>(<em>origin</em>)<a class="headerlink" href="#django.template.loaders.base.Loader.get_contents" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le contenu d’un gabarit en fonction d’une instance <a class="reference internal" href="#django.template.base.Origin" title="django.template.base.Origin"><code class="xref py py-class docutils literal notranslate"><span class="pre">Origin</span></code></a> donnée.</p>
+<p>C’est ici qu’un chargeur système de fichiers lit le contenu à partir du système de fichiers, ou qu’un chargeur base de données lit à partir de la base de données. Si aucun gabarit existant ne correspond, une erreur <a class="reference internal" href="../../topics/templates.html#django.template.TemplateDoesNotExist" title="django.template.TemplateDoesNotExist"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TemplateDoesNotExist</span></code></a> doit être générée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.template.loaders.base.Loader.get_template">
+<code class="descname">get_template</code>(<em>template_name</em>, <em>skip=None</em>)<a class="headerlink" href="#django.template.loaders.base.Loader.get_template" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un objet <code class="docutils literal notranslate"><span class="pre">Template</span></code> correspondant à <code class="docutils literal notranslate"><span class="pre">template_name</span></code> en passant en boucle ce que <a class="reference internal" href="#django.template.loaders.base.Loader.get_template_sources" title="django.template.loaders.base.Loader.get_template_sources"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_template_sources()</span></code></a> renvoie et en appelant <a class="reference internal" href="#django.template.loaders.base.Loader.get_contents" title="django.template.loaders.base.Loader.get_contents"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_contents()</span></code></a>. Le premier gabarit trouvé est renvoyé. Si aucun n’est trouvé, une exception <a class="reference internal" href="../../topics/templates.html#django.template.TemplateDoesNotExist" title="django.template.TemplateDoesNotExist"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TemplateDoesNotExist</span></code></a> est générée.</p>
+<p>Le paramètre facultatif <code class="docutils literal notranslate"><span class="pre">skip</span></code> est une liste d’origines à ignorer lors de l’extension des gabarits. Cela permet à des gabarits d’étendre d’autres gabarits du même nom. Une autre utilité est d’éviter les erreurs de récursion.</p>
+<p>En général, il est suffisant que les chargeurs de gabarit personnalisés définissent <a class="reference internal" href="#django.template.loaders.base.Loader.get_template_sources" title="django.template.loaders.base.Loader.get_template_sources"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_template_sources()</span></code></a> et <a class="reference internal" href="#django.template.loaders.base.Loader.get_contents" title="django.template.loaders.base.Loader.get_contents"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_contents()</span></code></a>. <code class="docutils literal notranslate"><span class="pre">get_template()</span></code> n’a généralement pas besoin d’être surchargée.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="admonition-building-your-own admonition">
+<p class="first admonition-title">Création de son propre chargeur</p>
+<p class="last">Pour des exemples, lisez le <a class="reference external" href="https://github.com/django/django/blob/master/django/template/loaders">code source des chargeurs intégrés à Django</a>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-template-origin">
+<span id="template-origin"></span><h2>Origine de gabarit<a class="headerlink" href="#template-origin" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les gabarits possèdent un attribut <code class="docutils literal notranslate"><span class="pre">origin</span></code> contenant des attributs qui dépendent de la source à partir de laquelle ils ont été chargés.</p>
+<dl class="class">
+<dt id="django.template.base.Origin">
+<em class="property">class </em><code class="descname">Origin</code>(<em>name</em>, <em>template_name=None</em>, <em>loader=None</em>)<a class="headerlink" href="#django.template.base.Origin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="django.template.base.Origin.name">
+<code class="descname">name</code><a class="headerlink" href="#django.template.base.Origin.name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le chemin du gabarit tel que renvoyé par le chargeur de gabarit. Pour les chargeurs qui lisent à partir du système de fichiers, il s’agit du chemin complet correspondant au gabarit.</p>
+<p>Si le gabarit est instancié directement plutôt que par l’intermédiaire d’un chargeur de gabarits, ce chemin contient <code class="docutils literal notranslate"><span class="pre">&lt;unknown_source&gt;</span></code> (source inconnue).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.template.base.Origin.template_name">
+<code class="descname">template_name</code><a class="headerlink" href="#django.template.base.Origin.template_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le chemin relatif du gabarit tel que transmis au chargeur de gabarits.</p>
+<p>Si le gabarit est instancié directement plutôt que par l’intermédiaire d’un chargeur de gabarits, cette valeur vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.template.base.Origin.loader">
+<code class="descname">loader</code><a class="headerlink" href="#django.template.base.Origin.loader" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’instance de chargeur de gabarits qui a construit cette <code class="docutils literal notranslate"><span class="pre">Origin</span></code>.</p>
+<p>Si le gabarit est instancié directement plutôt que par l’intermédiaire d’un chargeur de gabarits, cette valeur vaut <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p><a class="reference internal" href="#django.template.loaders.cached.Loader" title="django.template.loaders.cached.Loader"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.template.loaders.cached.Loader</span></code></a> exige que tous les chargeurs qu’elle enveloppe définissent cet attribut, typiquement en créant l’instance <code class="docutils literal notranslate"><span class="pre">Origin</span></code> avec <code class="docutils literal notranslate"><span class="pre">loader=self</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Le langage de gabarit de Django&nbsp;: pour les programmeurs Python</a><ul>
+<li><a class="reference internal" href="#overview">Aperçu</a></li>
+<li><a class="reference internal" href="#configuring-an-engine">Configuration d’un moteur</a></li>
+<li><a class="reference internal" href="#loading-a-template">Chargement d’un gabarit</a></li>
+<li><a class="reference internal" href="#rendering-a-context">Rendu d’un contexte</a><ul>
+<li><a class="reference internal" href="#variables-and-lookups">Variables et sous-éléments</a></li>
+<li><a class="reference internal" href="#how-invalid-variables-are-handled">Traitement des variables non valides</a></li>
+<li><a class="reference internal" href="#built-in-variables">Variables intégrées</a></li>
+<li><a class="reference internal" href="#limitations-with-string-literals">Restrictions avec les chaînes littérales</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#playing-with-context-objects">Manipulation des objets <code class="docutils literal notranslate"><span class="pre">Context</span></code></a><ul>
+<li><a class="reference internal" href="#using-requestcontext">Utilisation de <code class="docutils literal notranslate"><span class="pre">RequestContext</span></code></a></li>
+<li><a class="reference internal" href="#built-in-template-context-processors">Processeurs de contexte de gabarit intégrés</a><ul>
+<li><a class="reference internal" href="#django-contrib-auth-context-processors-auth"><code class="docutils literal notranslate"><span class="pre">django.contrib.auth.context_processors.auth</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-debug"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.debug</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-i18n"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.i18n</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-media"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.media</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-static"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.static</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-csrf"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.csrf</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-request"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.request</span></code></a></li>
+<li><a class="reference internal" href="#django-template-context-processors-tz"><code class="docutils literal notranslate"><span class="pre">django.template.context_processors.tz</span></code></a></li>
+<li><a class="reference internal" href="#django-contrib-messages-context-processors-messages"><code class="docutils literal notranslate"><span class="pre">django.contrib.messages.context_processors.messages</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#writing-your-own-context-processors">Écriture de son propre processeur de contexte</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#loading-templates">Chargement des gabarits</a><ul>
+<li><a class="reference internal" href="#the-dirs-option">L’option <code class="docutils literal notranslate"><span class="pre">DIRS</span></code></a></li>
+<li><a class="reference internal" href="#loader-types">Types de chargeurs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#custom-loaders">Chargeurs personnalisés</a><ul>
+<li><a class="reference internal" href="#loader-methods">Méthodes des chargeurs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#template-origin">Origine de gabarit</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="builtins.html"
+                        title="Chapitre précédent">Balises et filtres de gabarit intégrés</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../template-response.html"
+                        title="Chapitre suivant"><code class="docutils literal notranslate"><span class="pre">TemplateResponse</span></code> et <code class="docutils literal notranslate"><span class="pre">SimpleTemplateResponse</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/templates/api.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="builtins.html" title="Balises et filtres de gabarit intégrés">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="../template-response.html" title="&lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;TemplateResponse&lt;/span&gt;&lt;/code&gt; et &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;SimpleTemplateResponse&lt;/span&gt;&lt;/code&gt;">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

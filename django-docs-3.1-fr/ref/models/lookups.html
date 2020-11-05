@@ -1,0 +1,317 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API de référence des expressions de recherche &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Expressions de requête" href="expressions.html" />
+    <link rel="prev" title="Référence de l’API QuerySet" href="querysets.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="querysets.html" title="Référence de l’API &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;QuerySet&lt;/span&gt;&lt;/code&gt;">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="expressions.html" title="Expressions de requête">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-models-lookups">
+            
+  <div class="section" id="s-module-django.db.models.lookups">
+<span id="s-lookup-api-reference"></span><span id="module-django.db.models.lookups"></span><span id="lookup-api-reference"></span><h1>API de référence des expressions de recherche<a class="headerlink" href="#module-django.db.models.lookups" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce document contient les références d’API des expressions de recherches, l’API Django pour la construction des clauses <code class="docutils literal notranslate"><span class="pre">WHERE</span></code> des requêtes de bases de données. Pour apprendre comment <em>utiliser</em> ces expressions, consultez <a class="reference internal" href="../../topics/db/queries.html"><span class="doc">Création de requêtes</span></a>. Pour apprendre comment <em>créer</em> de nouvelles expressions, consultez <a class="reference internal" href="../../howto/custom-lookups.html"><span class="doc">Expressions de recherche personnalisées</span></a>.</p>
+<p>L’API des expressions de recherche possède deux parties&nbsp;: une classe <a class="reference internal" href="#django.db.models.lookups.RegisterLookupMixin" title="django.db.models.lookups.RegisterLookupMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterLookupMixin</span></code></a> qui inscrit les expressions et l”<a class="reference internal" href="#query-expression"><span class="std std-ref">API des expressions de recherche</span></a>, un ensemble de méthodes qu’une classe doit implémenter afin d’être inscriptible comme expression de recherche.</p>
+<p>Django possède deux classes de base qui respectent l’API d’expression de recherche et à partir desquelles toutes les expressions de recherche fournies par Django sont dérivées&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#django.db.models.Lookup" title="django.db.models.Lookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lookup</span></code></a>: pour rechercher un champ (par ex. la partie <code class="docutils literal notranslate"><span class="pre">exact</span></code> de <code class="docutils literal notranslate"><span class="pre">nom_champ__exact</span></code>)</li>
+<li><a class="reference internal" href="#django.db.models.Transform" title="django.db.models.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a>: pour transformer un champ</li>
+</ul>
+<p>Une expression de recherche est formée de trois parties&nbsp;:</p>
+<ul class="simple">
+<li>la partie des champs (par ex. <code class="docutils literal notranslate"><span class="pre">Livre.objects.filter(auteur__meilleurs_amis__prenom...</span></code>)&nbsp;;</li>
+<li>la partie de transformation (peut être omise) (par ex. <code class="docutils literal notranslate"><span class="pre">__lower__troispremierscars__reversed</span></code>)&nbsp;;</li>
+<li>la partie de recherche (par ex. <code class="docutils literal notranslate"><span class="pre">__icontains</span></code>) qui, si elle est omise, correspond à <code class="docutils literal notranslate"><span class="pre">__exact</span></code>.</li>
+</ul>
+<div class="section" id="s-registration-api">
+<span id="s-lookup-registration-api"></span><span id="registration-api"></span><span id="lookup-registration-api"></span><h2>API d’inscription<a class="headerlink" href="#registration-api" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django utilise <a class="reference internal" href="#django.db.models.lookups.RegisterLookupMixin" title="django.db.models.lookups.RegisterLookupMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterLookupMixin</span></code></a> pour donner à une classe l’interface pour inscrire des recherches avec elle-même. Les deux exemples majeurs sont <a class="reference internal" href="fields.html#django.db.models.Field" title="django.db.models.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>, la classe de base de tous les champs de modèles, et <a class="reference internal" href="#django.db.models.Transform" title="django.db.models.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a>, la classe de base de toutes les transformations de Django.</p>
+<dl class="class">
+<dt id="django.db.models.lookups.RegisterLookupMixin">
+<em class="property">class </em><code class="descclassname">lookups.</code><code class="descname">RegisterLookupMixin</code><a class="headerlink" href="#django.db.models.lookups.RegisterLookupMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin qui implémente l’API de recherche pour une classe.</p>
+<dl class="classmethod">
+<dt id="django.db.models.lookups.RegisterLookupMixin.register_lookup">
+<em class="property">classmethod </em><code class="descname">register_lookup</code>(<em>lookup</em>, <em>lookup_name=None</em>)<a class="headerlink" href="#django.db.models.lookups.RegisterLookupMixin.register_lookup" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Inscrit une nouvelle recherche pour cette classe. Par exemple, <code class="docutils literal notranslate"><span class="pre">DateField.register_lookup(YearExact)</span></code> inscrit la recherche <code class="docutils literal notranslate"><span class="pre">YearExact</span></code> pour le champ <code class="docutils literal notranslate"><span class="pre">DateField</span></code>. Elle remplace une recherche de même nom qui existe déjà. Si présent, <code class="docutils literal notranslate"><span class="pre">lookup_name</span></code> sera utilisé pour cette recherche, sinon ce sera <code class="docutils literal notranslate"><span class="pre">lookup.lookup_name</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.lookups.RegisterLookupMixin.get_lookup">
+<code class="descname">get_lookup</code>(<em>lookup_name</em>)<a class="headerlink" href="#django.db.models.lookups.RegisterLookupMixin.get_lookup" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la recherche <a class="reference internal" href="#django.db.models.Lookup" title="django.db.models.Lookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lookup</span></code></a> nommée <code class="docutils literal notranslate"><span class="pre">lookup_name</span></code> inscrite dans la classe. L’implémentation par défaut cherche récursivement dans toutes les classes parentes et vérifie si l’une d’elles possède une recherche inscrite sous le nom <code class="docutils literal notranslate"><span class="pre">lookup_name</span></code>, et renvoie la première qu’elle rencontre.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.lookups.RegisterLookupMixin.get_lookups">
+<code class="descname">get_lookups</code>()<a class="headerlink" href="#django.db.models.lookups.RegisterLookupMixin.get_lookups" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un dictionnaire faisant correspondre chaque nom de requête inscrit dans la classe avec sa classe <a class="reference internal" href="#django.db.models.Lookup" title="django.db.models.Lookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lookup</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.lookups.RegisterLookupMixin.get_transform">
+<code class="descname">get_transform</code>(<em>transform_name</em>)<a class="headerlink" href="#django.db.models.lookups.RegisterLookupMixin.get_transform" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une transformation <a class="reference internal" href="#django.db.models.Transform" title="django.db.models.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a> nommée <code class="docutils literal notranslate"><span class="pre">transform_name</span></code>. L’implémentation par défaut cherche récursivement dans toutes les classes parentes et vérifie si l’une d’elles possède une transformation inscrite sous le nom <code class="docutils literal notranslate"><span class="pre">transform_name</span></code>, et renvoie la première qu’elle rencontre.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Pour qu’une classe soit considérée comme une recherche, elle doit suivre l”<a class="reference internal" href="#query-expression"><span class="std std-ref">API d’expression de recherche</span></a>. <a class="reference internal" href="#django.db.models.Lookup" title="django.db.models.Lookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lookup</span></code></a> et <a class="reference internal" href="#django.db.models.Transform" title="django.db.models.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a> suivent naturellement cette API.</p>
+</div>
+<div class="section" id="s-the-query-expression-api">
+<span id="s-query-expression"></span><span id="the-query-expression-api"></span><span id="query-expression"></span><h2>L’API d’expression de recherche<a class="headerlink" href="#the-query-expression-api" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’API d’expression de recherche est un ensemble commun de méthodes que les classes définissent afin de pouvoir être utilisées dans les expressions de recherche avec la capacité de se traduire en expressions SQL. Les références directes aux champs, les agrégations et les expressions <code class="docutils literal notranslate"><span class="pre">Transform</span></code> sont des exemples qui respectent cette API. On dit d’une classe qu’elle respecte l’API d’expression de recherche lorsqu’elle implémente les méthodes suivantes&nbsp;:</p>
+<dl class="method">
+<dt id="django.db.models.as_sql">
+<code class="descname">as_sql</code>(<em>compiler</em>, <em>connection</em>)<a class="headerlink" href="#django.db.models.as_sql" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Génère le fragment SQL de l’expression. Renvoie un tuple <code class="docutils literal notranslate"><span class="pre">(sql,</span> <span class="pre">params)</span></code>, où <code class="docutils literal notranslate"><span class="pre">sql</span></code> est la chaîne SQL et <code class="docutils literal notranslate"><span class="pre">params</span></code> est la liste ou le tuple des paramètres de requête. <code class="docutils literal notranslate"><span class="pre">compiler</span></code> est un objet <code class="docutils literal notranslate"><span class="pre">SQLCompiler</span></code> comportant une méthode <code class="docutils literal notranslate"><span class="pre">compile()</span></code> pouvant être utilisée pour compiler d’autres expressions. <code class="docutils literal notranslate"><span class="pre">connection</span></code> est la connexion utilisée pour exécuter la requête.</p>
+<p>Il n’est normalement pas correct d’appeler <code class="docutils literal notranslate"><span class="pre">expression.as_sql()</span></code>, c’est plutôt <code class="docutils literal notranslate"><span class="pre">compiler.compile(expression)</span></code> qui doit être utilisé. La méthode <code class="docutils literal notranslate"><span class="pre">compiler.compile()</span></code> se charge d’appeler les méthodes spécifiques au fournisseur de base de données pour l’expression donnée.</p>
+<p>Des paramètres nommés personnalisés peuvent être définis pour cette méthode s’il est probable que des méthodes <code class="docutils literal notranslate"><span class="pre">as_nomfournisseur()</span></code> ou des sous-classes pourraient vouloir fournir des données pour surcharger la génération de la chaîne SQL. Voir <a class="reference internal" href="expressions.html#django.db.models.Func.as_sql" title="django.db.models.Func.as_sql"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Func.as_sql()</span></code></a> pour un exemple d’utilisation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.as_vendorname">
+<code class="descname">as_vendorname</code>(<em>compiler</em>, <em>connection</em>)<a class="headerlink" href="#django.db.models.as_vendorname" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Fonctionne comme la méthode <code class="docutils literal notranslate"><span class="pre">as_sql()</span></code>. Lorsqu’une expression est compilée avec <code class="docutils literal notranslate"><span class="pre">compiler.compile()</span></code>, Django essaie d’abord d’appeler <code class="docutils literal notranslate"><span class="pre">as_nomfournisseur()</span></code> où <code class="docutils literal notranslate"><span class="pre">nomfournisseur</span></code> correspond au nom du fournisseur de la base de données utilisée pour exécuter la requête. Pour les moteurs fournis avec Django, <code class="docutils literal notranslate"><span class="pre">nomfournisseur</span></code> peut correspondre à <code class="docutils literal notranslate"><span class="pre">postgresql</span></code>, <code class="docutils literal notranslate"><span class="pre">oracle</span></code>, <code class="docutils literal notranslate"><span class="pre">sqlite</span></code> ou <code class="docutils literal notranslate"><span class="pre">mysql</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.get_lookup">
+<code class="descname">get_lookup</code>(<em>lookup_name</em>)<a class="headerlink" href="#django.db.models.get_lookup" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Doit renvoyer la recherche nommée <code class="docutils literal notranslate"><span class="pre">lookup_name</span></code>. Par exemple, en renvoyant <code class="docutils literal notranslate"><span class="pre">self.output_field.get_lookup(lookup_name)</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.get_transform">
+<code class="descname">get_transform</code>(<em>transform_name</em>)<a class="headerlink" href="#django.db.models.get_transform" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Doit renvoyer la transformation nommée <code class="docutils literal notranslate"><span class="pre">transform_name</span></code>. Par exemple, en renvoyant <code class="docutils literal notranslate"><span class="pre">self.output_field.get_transform(transform_name)</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.db.models.output_field">
+<code class="descname">output_field</code><a class="headerlink" href="#django.db.models.output_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Définit le type de classe renvoyée par la méthode <code class="docutils literal notranslate"><span class="pre">get_lookup()</span></code>. Il doit s’agir d’une instance <a class="reference internal" href="fields.html#django.db.models.Field" title="django.db.models.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-transform-reference">
+<span id="transform-reference"></span><h2>Référence de <code class="docutils literal notranslate"><span class="pre">Transform</span></code><a class="headerlink" href="#transform-reference" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.db.models.Transform">
+<em class="property">class </em><code class="descname">Transform</code><a class="headerlink" href="#django.db.models.Transform" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Transform</span></code> est une classe générique pour implémenter des transformations de champs. Un exemple typique est <code class="docutils literal notranslate"><span class="pre">__year</span></code> (année) qui transforme un champ <code class="docutils literal notranslate"><span class="pre">DateField</span></code> en champ <code class="docutils literal notranslate"><span class="pre">IntegerField</span></code>.</p>
+<p>La notation utilisée pour placer <code class="docutils literal notranslate"><span class="pre">Transform</span></code> dans une expression de recherche est <code class="docutils literal notranslate"><span class="pre">&lt;expression&gt;__&lt;transformation&gt;</span></code> (par ex. <code class="docutils literal notranslate"><span class="pre">date__year</span></code>).</p>
+<p>Cette classe respecte l”<a class="reference internal" href="#query-expression"><span class="std std-ref">API d’expression de recherche</span></a>, ce qui signifie que vous pouvez utiliser <code class="docutils literal notranslate"><span class="pre">&lt;expression&gt;__&lt;transform1&gt;__&lt;transform2&gt;</span></code>. Il s’agit d’une <a class="reference internal" href="expressions.html#func-expressions"><span class="std std-ref">expression Func()</span></a> spécialisée qui n’accepte qu’un seul paramètre. Elle peut également être utilisée dans la partie droite d’un filtre ou directement sous forme d’annotation.</p>
+<dl class="attribute">
+<dt id="django.db.models.Transform.bilateral">
+<code class="descname">bilateral</code><a class="headerlink" href="#django.db.models.Transform.bilateral" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une valeur booléenne indiquant si cette transformation doit s’appliquer aux deux parties <code class="docutils literal notranslate"><span class="pre">lhs</span></code> et <code class="docutils literal notranslate"><span class="pre">rhs</span></code>. Les transformations bilatérales seront appliquées à <code class="docutils literal notranslate"><span class="pre">rhs</span></code> dans leur ordre d’apparition dans l’expression de requête. Par défaut, cet attribut vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>. Pour des exemples d’utilisation, voir <a class="reference internal" href="../../howto/custom-lookups.html"><span class="doc">Expressions de recherche personnalisées</span></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.db.models.Transform.lhs">
+<code class="descname">lhs</code><a class="headerlink" href="#django.db.models.Transform.lhs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La partie gauche de l’expression, ce qui est transformé. Elle doit respecter l”<a class="reference internal" href="#query-expression"><span class="std std-ref">API d’expression de recherche</span></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.db.models.Transform.lookup_name">
+<code class="descname">lookup_name</code><a class="headerlink" href="#django.db.models.Transform.lookup_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le nom de la transformation, utilisé pour l’identifier lors de l’analyse des expressions de recherche. Il ne peut pas contenir la chaîne <code class="docutils literal notranslate"><span class="pre">&quot;__&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.db.models.Transform.output_field">
+<code class="descname">output_field</code><a class="headerlink" href="#django.db.models.Transform.output_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Définit la classe que cette transformation produit. Il doit s’agir d’une instance de <a class="reference internal" href="fields.html#django.db.models.Field" title="django.db.models.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>. Par défaut, c’est la même classe que <code class="docutils literal notranslate"><span class="pre">lhs.output_field</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-lookup-reference">
+<span id="lookup-reference"></span><h2>Référence de <code class="docutils literal notranslate"><span class="pre">Lookup</span></code><a class="headerlink" href="#lookup-reference" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.db.models.Lookup">
+<em class="property">class </em><code class="descname">Lookup</code><a class="headerlink" href="#django.db.models.Lookup" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Lookup</span></code> est une classe générique pour implémenter des recherches. Une recherche est une expression de requête avec un côté gauche <a class="reference internal" href="#django.db.models.Lookup.lhs" title="django.db.models.Lookup.lhs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">lhs</span></code></a>, un côté droit <a class="reference internal" href="#django.db.models.Lookup.rhs" title="django.db.models.Lookup.rhs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rhs</span></code></a> et un nom <code class="docutils literal notranslate"><span class="pre">lookup_name</span></code> utilisé pour produire une comparaison booléenne entre <code class="docutils literal notranslate"><span class="pre">lhs</span></code> et <code class="docutils literal notranslate"><span class="pre">rhs</span></code> telle que <code class="docutils literal notranslate"><span class="pre">lhs</span> <span class="pre">in</span> <span class="pre">rhs</span></code> ou <code class="docutils literal notranslate"><span class="pre">lhs</span> <span class="pre">&gt;</span> <span class="pre">rhs</span></code>.</p>
+<p>La notation utilisée pour placer une recherche <code class="docutils literal notranslate"><span class="pre">Lookup</span></code> dans une expression de recherche est <code class="docutils literal notranslate"><span class="pre">&lt;cote_gauche&gt;__&lt;nom_recherche&gt;=&lt;cote_droit&gt;</span></code>.</p>
+<p>Cette classe ne respecte pas l”<a class="reference internal" href="#query-expression"><span class="std std-ref">API d’expression de recherche</span></a> car elle possède <code class="docutils literal notranslate"><span class="pre">=&lt;rhs&gt;</span></code> dans sa construction&nbsp;: les recherches sont toujours en fin d’expression de recherche.</p>
+<dl class="attribute">
+<dt id="django.db.models.Lookup.lhs">
+<code class="descname">lhs</code><a class="headerlink" href="#django.db.models.Lookup.lhs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le côté gauche, le contenu recherché. L’objet doit respecter l”<a class="reference internal" href="#query-expression"><span class="std std-ref">API d’expression de recherche</span></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.db.models.Lookup.rhs">
+<code class="descname">rhs</code><a class="headerlink" href="#django.db.models.Lookup.rhs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le côté droit, ce qui est comparé avec <code class="docutils literal notranslate"><span class="pre">lhs</span></code>. Il peut s’agir d’une valeur brute ou de quelque chose qui se compile en SQL, typiquement un objet <code class="docutils literal notranslate"><span class="pre">F()</span></code> ou un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.db.models.Lookup.lookup_name">
+<code class="descname">lookup_name</code><a class="headerlink" href="#django.db.models.Lookup.lookup_name" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le nom de la recherche, utilisé pour l’identifier lors de l’analyse des expressions de recherche. Il ne peut pas contenir la chaîne <code class="docutils literal notranslate"><span class="pre">&quot;__&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.Lookup.process_lhs">
+<code class="descname">process_lhs</code>(<em>compiler</em>, <em>connection</em>, <em>lhs=None</em>)<a class="headerlink" href="#django.db.models.Lookup.process_lhs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un tuple <code class="docutils literal notranslate"><span class="pre">(lhs_string,</span> <span class="pre">lhs_params)</span></code>, tel que renvoyé par <code class="docutils literal notranslate"><span class="pre">compiler.compile(lhs)</span></code>. Cette méthode peut être surchargée pour affiner le traitement de <code class="docutils literal notranslate"><span class="pre">lhs</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">compiler</span></code> est un objet <code class="docutils literal notranslate"><span class="pre">SQLCompiler</span></code> destiné à la compilation de <code class="docutils literal notranslate"><span class="pre">lhs</span></code>, comme avec <code class="docutils literal notranslate"><span class="pre">compiler.compile(lhs)</span></code>. Le paramètre <code class="docutils literal notranslate"><span class="pre">connection</span></code> peut être utilisé pour compiler du SQL selon un fournisseur particulier. Si <code class="docutils literal notranslate"><span class="pre">lhs</span></code> n’est pas <code class="docutils literal notranslate"><span class="pre">None</span></code>, ce paramètre est employé comme <code class="docutils literal notranslate"><span class="pre">lhs</span></code> à la place de <code class="docutils literal notranslate"><span class="pre">self.lhs</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.db.models.Lookup.process_rhs">
+<code class="descname">process_rhs</code>(<em>compiler</em>, <em>connection</em>)<a class="headerlink" href="#django.db.models.Lookup.process_rhs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Se comporte de la même manière que <a class="reference internal" href="#django.db.models.Lookup.process_lhs" title="django.db.models.Lookup.process_lhs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">process_lhs()</span></code></a>, mais pour le côté droit.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API de référence des expressions de recherche</a><ul>
+<li><a class="reference internal" href="#registration-api">API d’inscription</a></li>
+<li><a class="reference internal" href="#the-query-expression-api">L’API d’expression de recherche</a></li>
+<li><a class="reference internal" href="#transform-reference">Référence de <code class="docutils literal notranslate"><span class="pre">Transform</span></code></a></li>
+<li><a class="reference internal" href="#lookup-reference">Référence de <code class="docutils literal notranslate"><span class="pre">Lookup</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="querysets.html"
+                        title="Chapitre précédent">Référence de l’API <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code></a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="expressions.html"
+                        title="Chapitre suivant">Expressions de requête</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/models/lookups.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="querysets.html" title="Référence de l’API &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;QuerySet&lt;/span&gt;&lt;/code&gt;">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="expressions.html" title="Expressions de requête">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

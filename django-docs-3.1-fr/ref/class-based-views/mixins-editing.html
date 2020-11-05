@@ -1,0 +1,392 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Classes mixins d’édition &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Mixins basées sur les dates" href="mixins-date-based.html" />
+    <link rel="prev" title="Classes mixins pour objets multiples" href="mixins-multiple-object.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="mixins-multiple-object.html" title="Classes mixins pour objets multiples">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="mixins-date-based.html" title="Mixins basées sur les dates">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-class-based-views-mixins-editing">
+            
+  <div class="section" id="s-editing-mixins">
+<span id="editing-mixins"></span><h1>Classes mixins d’édition<a class="headerlink" href="#editing-mixins" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les classes mixins suivantes sont utilisées pour construire les vues d’édition de Django&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#django.views.generic.edit.FormMixin" title="django.views.generic.edit.FormMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.edit.FormMixin</span></code></a></li>
+<li><a class="reference internal" href="#django.views.generic.edit.ModelFormMixin" title="django.views.generic.edit.ModelFormMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.edit.ModelFormMixin</span></code></a></li>
+<li><a class="reference internal" href="#django.views.generic.edit.ProcessFormView" title="django.views.generic.edit.ProcessFormView"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.edit.ProcessFormView</span></code></a></li>
+<li><a class="reference internal" href="#django.views.generic.edit.DeletionMixin" title="django.views.generic.edit.DeletionMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.edit.DeletionMixin</span></code></a></li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Des exemples de la manière dont ces classes sont combinées pour former des vues d’édition se trouvent dans la documentation sur les <a class="reference internal" href="generic-editing.html"><span class="doc">Vues génériques d’édition</span></a>.</p>
+</div>
+<div class="section" id="s-formmixin">
+<span id="formmixin"></span><h2><code class="docutils literal notranslate"><span class="pre">FormMixin</span></code><a class="headerlink" href="#formmixin" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.views.generic.edit.FormMixin">
+<em class="property">class </em><code class="descclassname">django.views.generic.edit.</code><code class="descname">FormMixin</code><a class="headerlink" href="#django.views.generic.edit.FormMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin fournissant des outils pour la création et l’affichage de formulaires.</p>
+<p><strong>Classes mixins</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="mixins-simple.html#django.views.generic.base.ContextMixin" title="django.views.generic.base.ContextMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.base.ContextMixin</span></code></a></li>
+</ul>
+<p><strong>Méthodes et attributs</strong></p>
+<dl class="attribute">
+<dt id="django.views.generic.edit.FormMixin.initial">
+<code class="descname">initial</code><a class="headerlink" href="#django.views.generic.edit.FormMixin.initial" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un dictionnaire contenant les données initiales du formulaire.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.edit.FormMixin.form_class">
+<code class="descname">form_class</code><a class="headerlink" href="#django.views.generic.edit.FormMixin.form_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La classe de formulaire dont il faut créer une instance.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.edit.FormMixin.success_url">
+<code class="descname">success_url</code><a class="headerlink" href="#django.views.generic.edit.FormMixin.success_url" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’URL vers laquelle rediriger la réponse lorsque le formulaire est traité avec succès.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.edit.FormMixin.prefix">
+<code class="descname">prefix</code><a class="headerlink" href="#django.views.generic.edit.FormMixin.prefix" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le préfixe <a class="reference internal" href="../forms/api.html#django.forms.Form.prefix" title="django.forms.Form.prefix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code></a> du formulaire généré.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_initial">
+<code class="descname">get_initial</code>()<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_initial" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Récupère les données initiales pour le formulaire. Par défaut, cette méthode renvoie une copie de <a class="reference internal" href="#django.views.generic.edit.FormMixin.initial" title="django.views.generic.edit.FormMixin.initial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">initial</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_form_class">
+<code class="descname">get_form_class</code>()<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_form_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Récupère la classe de formulaire dont il faut créer une instance. Par défaut, <a class="reference internal" href="#django.views.generic.edit.FormMixin.form_class" title="django.views.generic.edit.FormMixin.form_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">form_class</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_form">
+<code class="descname">get_form</code>(<em>form_class=None</em>)<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_form" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée une instance de <code class="docutils literal notranslate"><span class="pre">form_class</span></code> en utilisant <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_form_kwargs" title="django.views.generic.edit.FormMixin.get_form_kwargs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_form_kwargs()</span></code></a>. Si <code class="docutils literal notranslate"><span class="pre">form_class</span></code> n’est pas fourni, c’est <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_form_class" title="django.views.generic.edit.FormMixin.get_form_class"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_form_class()</span></code></a> qui sera utilisée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_form_kwargs">
+<code class="descname">get_form_kwargs</code>()<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_form_kwargs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Construit les paramètres nommés requis pour créer une instance de formulaire.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">initial</span></code> est défini à <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_initial" title="django.views.generic.edit.FormMixin.get_initial"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_initial()</span></code></a>. Si la requête est de type <code class="docutils literal notranslate"><span class="pre">POST</span></code> ou <code class="docutils literal notranslate"><span class="pre">PUT</span></code>, les données de la requête (<code class="docutils literal notranslate"><span class="pre">request.POST</span></code> et <code class="docutils literal notranslate"><span class="pre">request.FILES</span></code>) seront également fournies.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_prefix">
+<code class="descname">get_prefix</code>()<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_prefix" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Détermine le préfixe <a class="reference internal" href="../forms/api.html#django.forms.Form.prefix" title="django.forms.Form.prefix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code></a> du formulaire généré. Renvoie <a class="reference internal" href="#django.views.generic.edit.FormMixin.prefix" title="django.views.generic.edit.FormMixin.prefix"><code class="xref py py-attr docutils literal notranslate"><span class="pre">prefix</span></code></a> par défaut.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_success_url">
+<code class="descname">get_success_url</code>()<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_success_url" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Détermine l’URL vers laquelle rediriger lorsque le formulaire est validé avec succès. Renvoie <a class="reference internal" href="#django.views.generic.edit.FormMixin.success_url" title="django.views.generic.edit.FormMixin.success_url"><code class="xref py py-attr docutils literal notranslate"><span class="pre">success_url</span></code></a> par défaut.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.form_valid">
+<code class="descname">form_valid</code>(<em>form</em>)<a class="headerlink" href="#django.views.generic.edit.FormMixin.form_valid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Redirige vers <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_success_url" title="django.views.generic.edit.FormMixin.get_success_url"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_success_url()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.form_invalid">
+<code class="descname">form_invalid</code>(<em>form</em>)<a class="headerlink" href="#django.views.generic.edit.FormMixin.form_invalid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Produit la réponse, en plaçant le formulaire non valide dans le contexte.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.FormMixin.get_context_data">
+<code class="descname">get_context_data</code>(<em>**kwargs</em>)<a class="headerlink" href="#django.views.generic.edit.FormMixin.get_context_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Appelle <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_form" title="django.views.generic.edit.FormMixin.get_form"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_form()</span></code></a> et ajoute le résultat aux données de contexte sous le nom <code class="docutils literal notranslate"><span class="pre">form</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-modelformmixin">
+<span id="modelformmixin"></span><h2><code class="docutils literal notranslate"><span class="pre">ModelFormMixin</span></code><a class="headerlink" href="#modelformmixin" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.views.generic.edit.ModelFormMixin">
+<em class="property">class </em><code class="descclassname">django.views.generic.edit.</code><code class="descname">ModelFormMixin</code><a class="headerlink" href="#django.views.generic.edit.ModelFormMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin de formulaire qui fonctionne avec les <code class="docutils literal notranslate"><span class="pre">ModelForms</span></code>, plutôt qu’avec des formulaires autonomes.</p>
+<p>Comme il s’agit d’une sous-classe de <a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin" title="django.views.generic.detail.SingleObjectMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">SingleObjectMixin</span></code></a>, les instances de cette classe mixin ont accès aux attributs <a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin.model" title="django.views.generic.detail.SingleObjectMixin.model"><code class="xref py py-attr docutils literal notranslate"><span class="pre">model</span></code></a> et <a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin.queryset" title="django.views.generic.detail.SingleObjectMixin.queryset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">queryset</span></code></a> décrivant le type d’objet que le formulaire <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> manipule.</p>
+<p>Si vous définissez à la fois les attributs <a class="reference internal" href="#django.views.generic.edit.ModelFormMixin.fields" title="django.views.generic.edit.ModelFormMixin.fields"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fields</span></code></a> et <a class="reference internal" href="#django.views.generic.edit.FormMixin.form_class" title="django.views.generic.edit.FormMixin.form_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">form_class</span></code></a>, une exception <a class="reference internal" href="../exceptions.html#django.core.exceptions.ImproperlyConfigured" title="django.core.exceptions.ImproperlyConfigured"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImproperlyConfigured</span></code></a> est générée.</p>
+<p><strong>Classes mixins</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="#django.views.generic.edit.FormMixin" title="django.views.generic.edit.FormMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.edit.FormMixin</span></code></a></li>
+<li><a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin" title="django.views.generic.detail.SingleObjectMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.detail.SingleObjectMixin</span></code></a></li>
+</ul>
+<p><strong>Méthodes et attributs</strong></p>
+<dl class="attribute">
+<dt id="django.views.generic.edit.ModelFormMixin.model">
+<code class="descname">model</code><a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.model" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe de modèle. Peut être fournie explicitement, sinon elle sera déterminée en examinant <code class="docutils literal notranslate"><span class="pre">self.object</span></code> ou <a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin.queryset" title="django.views.generic.detail.SingleObjectMixin.queryset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">queryset</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.edit.ModelFormMixin.fields">
+<code class="descname">fields</code><a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.fields" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une liste de noms de champs. Cet attribut est interprété de la même manière que l’attribut <code class="docutils literal notranslate"><span class="pre">Meta.fields</span></code> de la classe <a class="reference internal" href="../../topics/forms/modelforms.html#django.forms.ModelForm" title="django.forms.ModelForm"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelForm</span></code></a>.</p>
+<p>Il s’agit d’un attribut obligatoire si vous générez automatiquement la classe de formulaire (par ex. en utilisant <code class="docutils literal notranslate"><span class="pre">model</span></code>). En l’absence de cet attribut, une exception <a class="reference internal" href="../exceptions.html#django.core.exceptions.ImproperlyConfigured" title="django.core.exceptions.ImproperlyConfigured"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImproperlyConfigured</span></code></a> est générée.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.views.generic.edit.ModelFormMixin.success_url">
+<code class="descname">success_url</code><a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.success_url" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’URL vers laquelle rediriger la réponse lorsque le formulaire est traité avec succès.</p>
+<p><code class="docutils literal notranslate"><span class="pre">success_url</span></code> peut contenir des chaînes de format de type dictionnaire, qui seront substituées en utilisant les attributs de champs de l’objet. Par exemple, vous pourriez utiliser <code class="docutils literal notranslate"><span class="pre">success_url=&quot;/polls/{slug}/&quot;</span></code> pour rediriger vers une URL composée à partir du champ <code class="docutils literal notranslate"><span class="pre">slug</span></code> d’un modèle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ModelFormMixin.get_form_class">
+<code class="descname">get_form_class</code>()<a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.get_form_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Récupère la classe de formulaire dont il faudra créer une instance. Si <a class="reference internal" href="#django.views.generic.edit.FormMixin.form_class" title="django.views.generic.edit.FormMixin.form_class"><code class="xref py py-attr docutils literal notranslate"><span class="pre">form_class</span></code></a> est définie, c’est cette classe qui sera utilisée. Sinon, une instance de formulaire <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> sera créée en se basant sur le modèle associé au contenu de  <a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin.queryset" title="django.views.generic.detail.SingleObjectMixin.queryset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">queryset</span></code></a> ou de <a class="reference internal" href="mixins-single-object.html#django.views.generic.detail.SingleObjectMixin.model" title="django.views.generic.detail.SingleObjectMixin.model"><code class="xref py py-attr docutils literal notranslate"><span class="pre">model</span></code></a>, en fonction de l’attribut qui est défini.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ModelFormMixin.get_form_kwargs">
+<code class="descname">get_form_kwargs</code>()<a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.get_form_kwargs" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ajoute l’instance actuelle (<code class="docutils literal notranslate"><span class="pre">self.object</span></code>) au contenu standard de <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_form_kwargs" title="django.views.generic.edit.FormMixin.get_form_kwargs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_form_kwargs()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ModelFormMixin.get_success_url">
+<code class="descname">get_success_url</code>()<a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.get_success_url" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Détermine l’URL vers laquelle rediriger lorsque le formulaire est validé avec succès. Renvoie <a class="reference internal" href="#django.views.generic.edit.ModelFormMixin.success_url" title="django.views.generic.edit.ModelFormMixin.success_url"><code class="xref py py-attr docutils literal notranslate"><span class="pre">django.views.generic.edit.ModelFormMixin.success_url</span></code></a> s’il est défini&nbsp;; sinon, essaie d’employer la valeur <code class="docutils literal notranslate"><span class="pre">get_absolute_url()</span></code> de l’objet.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ModelFormMixin.form_valid">
+<code class="descname">form_valid</code>(<em>form</em>)<a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.form_valid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Enregistre l’instance de formulaire, définit l’objet en cours de la vue et redirige vers <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_success_url" title="django.views.generic.edit.FormMixin.get_success_url"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_success_url()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ModelFormMixin.form_invalid">
+<code class="descname">form_invalid</code>(<em>form</em>)<a class="headerlink" href="#django.views.generic.edit.ModelFormMixin.form_invalid" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Produit la réponse, en plaçant le formulaire non valide dans le contexte.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-processformview">
+<span id="processformview"></span><h2><code class="docutils literal notranslate"><span class="pre">ProcessFormView</span></code><a class="headerlink" href="#processformview" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.views.generic.edit.ProcessFormView">
+<em class="property">class </em><code class="descclassname">django.views.generic.edit.</code><code class="descname">ProcessFormView</code><a class="headerlink" href="#django.views.generic.edit.ProcessFormView" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une classe mixin qui fournit la gestion de flux habituelle des requêtes HTTP GET et POST.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Cette classe est nommée <code class="docutils literal notranslate"><span class="pre">ProcessFormView</span></code> et hérite directement de <a class="reference internal" href="base.html#django.views.generic.base.View" title="django.views.generic.base.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.base.View</span></code></a>, mais elle ne peut pas être utilisée de manière indépendante, ce qui fait qu’elle est plutôt considérée comme une classe mixin.</p>
+</div>
+<p><strong>Étend</strong></p>
+<ul class="simple">
+<li><a class="reference internal" href="base.html#django.views.generic.base.View" title="django.views.generic.base.View"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.base.View</span></code></a></li>
+</ul>
+<p><strong>Méthodes et attributs</strong></p>
+<dl class="method">
+<dt id="django.views.generic.edit.ProcessFormView.get">
+<code class="descname">get</code>(<em>request</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.views.generic.edit.ProcessFormView.get" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Produit une réponse en utilisant le contexte créé avec <a class="reference internal" href="#django.views.generic.edit.FormMixin.get_context_data" title="django.views.generic.edit.FormMixin.get_context_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_context_data()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ProcessFormView.post">
+<code class="descname">post</code>(<em>request</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.views.generic.edit.ProcessFormView.post" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Construit un formulaire, vérifie la validité du formulaire et le traite en conséquence.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.ProcessFormView.put">
+<code class="descname">put</code>(<em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.views.generic.edit.ProcessFormView.put" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’action <code class="docutils literal notranslate"><span class="pre">PUT</span></code> est également gérée, mais ne fait que transmettre tous les paramètres à <a class="reference internal" href="#django.views.generic.edit.ProcessFormView.post" title="django.views.generic.edit.ProcessFormView.post"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post()</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="s-deletionmixin">
+<span id="deletionmixin"></span><h2><code class="docutils literal notranslate"><span class="pre">DeletionMixin</span></code><a class="headerlink" href="#deletionmixin" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="class">
+<dt id="django.views.generic.edit.DeletionMixin">
+<em class="property">class </em><code class="descclassname">django.views.generic.edit.</code><code class="descname">DeletionMixin</code><a class="headerlink" href="#django.views.generic.edit.DeletionMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Permet la gestion de l’action http <code class="docutils literal notranslate"><span class="pre">DELETE</span></code>.</p>
+<p><strong>Méthodes et attributs</strong></p>
+<dl class="attribute">
+<dt id="django.views.generic.edit.DeletionMixin.success_url">
+<code class="descname">success_url</code><a class="headerlink" href="#django.views.generic.edit.DeletionMixin.success_url" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>L’URL vers laquelle rediriger lorsque l’objet concerné a été supprimé avec succès.</p>
+<p><code class="docutils literal notranslate"><span class="pre">success_url</span></code> peut contenir des chaînes de format de type dictionnaire, qui seront substituées en utilisant les attributs de champs de l’objet. Par exemple, vous pourriez utiliser <code class="docutils literal notranslate"><span class="pre">success_url=&quot;/parent/{parent_id}/&quot;</span></code> pour rediriger vers une URL composée à partir du champ <code class="docutils literal notranslate"><span class="pre">parent_id</span></code> d’un modèle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.DeletionMixin.delete">
+<code class="descname">delete</code>(<em>request</em>, <em>*args</em>, <em>**kwargs</em>)<a class="headerlink" href="#django.views.generic.edit.DeletionMixin.delete" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Récupère l’objet cible et appelle sa méthode <code class="docutils literal notranslate"><span class="pre">delete()</span></code>, puis redirige vers l’URL de succès.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.views.generic.edit.DeletionMixin.get_success_url">
+<code class="descname">get_success_url</code>()<a class="headerlink" href="#django.views.generic.edit.DeletionMixin.get_success_url" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie l’URL vers laquelle rediriger lorsque l’objet concerné a été supprimé avec succès. Renvoie <a class="reference internal" href="#django.views.generic.edit.DeletionMixin.success_url" title="django.views.generic.edit.DeletionMixin.success_url"><code class="xref py py-attr docutils literal notranslate"><span class="pre">success_url</span></code></a> par défaut.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Classes mixins d’édition</a><ul>
+<li><a class="reference internal" href="#formmixin"><code class="docutils literal notranslate"><span class="pre">FormMixin</span></code></a></li>
+<li><a class="reference internal" href="#modelformmixin"><code class="docutils literal notranslate"><span class="pre">ModelFormMixin</span></code></a></li>
+<li><a class="reference internal" href="#processformview"><code class="docutils literal notranslate"><span class="pre">ProcessFormView</span></code></a></li>
+<li><a class="reference internal" href="#deletionmixin"><code class="docutils literal notranslate"><span class="pre">DeletionMixin</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="mixins-multiple-object.html"
+                        title="Chapitre précédent">Classes mixins pour objets multiples</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="mixins-date-based.html"
+                        title="Chapitre suivant">Mixins basées sur les dates</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/class-based-views/mixins-editing.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="mixins-multiple-object.html" title="Classes mixins pour objets multiples">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="mixins-date-based.html" title="Mixins basées sur les dates">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

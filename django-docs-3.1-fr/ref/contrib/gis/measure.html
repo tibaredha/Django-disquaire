@@ -1,0 +1,402 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Objets de mesure &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="API GEOS" href="geos.html" />
+    <link rel="prev" title="Fonctions de base de données géographiques" href="functions.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="functions.html" title="Fonctions de base de données géographiques">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="geos.html" title="API GEOS">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-gis-measure">
+            
+  <div class="section" id="s-module-django.contrib.gis.measure">
+<span id="s-measurement-objects"></span><span id="module-django.contrib.gis.measure"></span><span id="measurement-objects"></span><h1>Objets de mesure<a class="headerlink" href="#module-django.contrib.gis.measure" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Le module <a class="reference internal" href="#module-django.contrib.gis.measure" title="django.contrib.gis.measure: GeoDjango's distance and area measurement objects."><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.contrib.gis.measure</span></code></a> contient des objets qui permettent une représentation pratique des unités de mesure de distance et d’aire. <a class="footnote-reference" href="#id3" id="id1">[1]</a> Spécifiquement, il implémente deux objets, <a class="reference internal" href="#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a> et <a class="reference internal" href="#django.contrib.gis.measure.Area" title="django.contrib.gis.measure.Area"><code class="xref py py-class docutils literal notranslate"><span class="pre">Area</span></code></a> qui sont aussi accessibles par les alias simplifiés <a class="reference internal" href="#django.contrib.gis.measure.D" title="django.contrib.gis.measure.D"><code class="xref py py-class docutils literal notranslate"><span class="pre">D</span></code></a> et <a class="reference internal" href="#django.contrib.gis.measure.A" title="django.contrib.gis.measure.A"><code class="xref py py-class docutils literal notranslate"><span class="pre">A</span></code></a>, respectivement.</p>
+<div class="section" id="s-example">
+<span id="example"></span><h2>Exemple<a class="headerlink" href="#example" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les objets <a class="reference internal" href="#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a> peuvent être créés en utilisant un paramètre nommé indiquant le contexte des unités. Dans l’exemple ci-dessous, deux objets distances différents sont créés dans les unités kilomètre (<code class="docutils literal notranslate"><span class="pre">km</span></code>) et miles (<code class="docutils literal notranslate"><span class="pre">mi</span></code>)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.measure</span> <span class="k">import</span> <span class="n">D</span><span class="p">,</span> <span class="n">Distance</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d1</span> <span class="o">=</span> <span class="n">Distance</span><span class="p">(</span><span class="n">km</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d1</span><span class="p">)</span>
+<span class="go">5.0 km</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d2</span> <span class="o">=</span> <span class="n">D</span><span class="p">(</span><span class="n">mi</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="c1"># `D` is an alias for `Distance`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d2</span><span class="p">)</span>
+<span class="go">5.0 mi</span>
+</pre></div>
+</div>
+<p>Pour les conversions, accédez à l’attribut correspondant à l’unité souhaitée pour obtenir la mesure convertie de la distance&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">mi</span><span class="p">)</span> <span class="c1"># Converting 5 kilometers to miles</span>
+<span class="go">3.10685596119</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">km</span><span class="p">)</span> <span class="c1"># Converting 5 miles to kilometers</span>
+<span class="go">8.04672</span>
+</pre></div>
+</div>
+<p>De plus, des opérations arithmétiques peuvent être effectuées entre des objets de distance&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d1</span> <span class="o">+</span> <span class="n">d2</span><span class="p">)</span> <span class="c1"># Adding 5 miles to 5 kilometers</span>
+<span class="go">13.04672 km</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d2</span> <span class="o">-</span> <span class="n">d1</span><span class="p">)</span> <span class="c1"># Subtracting 5 kilometers from 5 miles</span>
+<span class="go">1.89314403881 mi</span>
+</pre></div>
+</div>
+<p>Deux objets <a class="reference internal" href="#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a> multipliés ensemble génèrent un objet <a class="reference internal" href="#django.contrib.gis.measure.Area" title="django.contrib.gis.measure.Area"><code class="xref py py-class docutils literal notranslate"><span class="pre">Area</span></code></a> qui utilise une unité de mesure au carré&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">d1</span> <span class="o">*</span> <span class="n">d2</span> <span class="c1"># Returns an Area object.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">40.2336 sq_km</span>
+</pre></div>
+</div>
+<p>Pour savoir quel est l’attribut abrégé de l’unité, il est possible d’utiliser la méthode de classe <code class="docutils literal notranslate"><span class="pre">unit_attname</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Distance</span><span class="o">.</span><span class="n">unit_attname</span><span class="p">(</span><span class="s1">&#39;US Survey Foot&#39;</span><span class="p">))</span>
+<span class="go">survey_ft</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Distance</span><span class="o">.</span><span class="n">unit_attname</span><span class="p">(</span><span class="s1">&#39;centimeter&#39;</span><span class="p">))</span>
+<span class="go">cm</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-supported-units">
+<span id="s-id2"></span><span id="supported-units"></span><span id="id2"></span><h2>Unités prises en charge<a class="headerlink" href="#supported-units" title="Lien permanent vers ce titre">¶</a></h2>
+<table class="docutils">
+<colgroup>
+<col width="45%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Attribut d’unité</th>
+<th class="head">Nom complet ou alias</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">km</span></code></td>
+<td>Kilometre, Kilometer</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">mi</span></code></td>
+<td>Mile</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">m</span></code></td>
+<td>Meter, Metre</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">yd</span></code></td>
+<td>Yard</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ft</span></code></td>
+<td>Foot, Foot (International)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">survey_ft</span></code></td>
+<td>U.S. Foot, US survey foot</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">inch</span></code></td>
+<td>Inches</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">cm</span></code></td>
+<td>Centimeter</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">mm</span></code></td>
+<td>Millimetre, Millimeter</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">um</span></code></td>
+<td>Micrometer, Micrometre</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">british_ft</span></code></td>
+<td>British foot (Sears 1922)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">british_yd</span></code></td>
+<td>British yard (Sears 1922)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">british_chain_sears</span></code></td>
+<td>British chain (Sears 1922)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">indian_yd</span></code></td>
+<td>Indian yard, Yard (Indian)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">sears_yd</span></code></td>
+<td>Yard (Sears)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">clarke_ft</span></code></td>
+<td>Clarke’s Foot</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">chain</span></code></td>
+<td>Chain</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">chain_benoit</span></code></td>
+<td>Chain (Benoit)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">chain_sears</span></code></td>
+<td>Chain (Sears)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">british_chain_benoit</span></code></td>
+<td>British chain (Benoit 1895 B)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">british_chain_sears_truncated</span></code></td>
+<td>British chain (Sears 1922 truncated)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">gold_coast_ft</span></code></td>
+<td>Gold Coast foot</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">link</span></code></td>
+<td>Link</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">link_benoit</span></code></td>
+<td>Link (Benoit)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">link_sears</span></code></td>
+<td>Link (Sears)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">clarke_link</span></code></td>
+<td>Clarke’s link</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">fathom</span></code></td>
+<td>Fathom</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">rod</span></code></td>
+<td>Rod</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">furlong</span></code></td>
+<td>Furlong (sillon), Furrow Long</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">nm</span></code></td>
+<td>Nautical Mile</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">nm_uk</span></code></td>
+<td>Nautical Mile (UK)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">german_m</span></code></td>
+<td>German legal metre</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Les attributs <a class="reference internal" href="#django.contrib.gis.measure.Area" title="django.contrib.gis.measure.Area"><code class="xref py py-class docutils literal notranslate"><span class="pre">Area</span></code></a> sont les mêmes que les attributs <a class="reference internal" href="#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a>, sauf qu’ils sont préfixés par <code class="docutils literal notranslate"><span class="pre">sq_</span></code> (square = au carré). Par exemple, <code class="docutils literal notranslate"><span class="pre">Area(sq_m=2)</span></code> crée un objet <a class="reference internal" href="#django.contrib.gis.measure.Area" title="django.contrib.gis.measure.Area"><code class="xref py py-class docutils literal notranslate"><span class="pre">Area</span></code></a> représentant deux mètres carrés.</p>
+</div>
+</div>
+<div class="section" id="s-measurement-api">
+<span id="measurement-api"></span><h2>API de mesures<a class="headerlink" href="#measurement-api" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-distance">
+<span id="distance"></span><h3><code class="docutils literal notranslate"><span class="pre">Distance</span></code><a class="headerlink" href="#distance" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.measure.Distance">
+<em class="property">class </em><code class="descname">Distance</code>(<em>**kwargs</em>)<a class="reference internal" href="../../../_modules/django/contrib/gis/measure.html#Distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.contrib.gis.measure.Distance" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Pour initialiser un objet distance, passez-lui un paramètre nommé correspondant au <a class="reference internal" href="#supported-units"><span class="std std-ref">nom d’attribut de l’unité souhaitée</span></a> et contenant la valeur souhaitée. L’exemple suivant crée un objet distance représentant 5 miles&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dist</span> <span class="o">=</span> <span class="n">Distance</span><span class="p">(</span><span class="n">mi</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="django.contrib.gis.measure.Distance.__getattr__">
+<code class="descname">__getattr__</code>(<em>unit_att</em>)<a class="headerlink" href="#django.contrib.gis.measure.Distance.__getattr__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie la mesure de distance en unité correspondante à l’attribut d’unité indiqué. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">km</span><span class="p">)</span>
+<span class="go">8.04672</span>
+</pre></div>
+</div>
+<dl class="classmethod">
+<dt id="django.contrib.gis.measure.Distance.unit_attname">
+<em class="property">classmethod </em><code class="descname">unit_attname</code>(<em>unit_name</em>)<a class="headerlink" href="#django.contrib.gis.measure.Distance.unit_attname" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie le nom d’attribut d’unité de distance correspondant au nom complet d’unité indiqué. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Distance</span><span class="o">.</span><span class="n">unit_attname</span><span class="p">(</span><span class="s1">&#39;Mile&#39;</span><span class="p">)</span>
+<span class="go">&#39;mi&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.gis.measure.D">
+<em class="property">class </em><code class="descname">D</code><a class="headerlink" href="#django.contrib.gis.measure.D" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Alias de la classe <a class="reference internal" href="#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-area">
+<span id="area"></span><h3><code class="docutils literal notranslate"><span class="pre">Area</span></code><a class="headerlink" href="#area" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.gis.measure.Area">
+<em class="property">class </em><code class="descname">Area</code>(<em>**kwargs</em>)<a class="reference internal" href="../../../_modules/django/contrib/gis/measure.html#Area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#django.contrib.gis.measure.Area" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Pour initialiser un objet aire, passez-lui un paramètre nommé correspondant au <a class="reference internal" href="#supported-units"><span class="std std-ref">nom d’attribut de l’unité souhaitée</span></a> et contenant la valeur souhaitée. L’exemple suivant crée un objet aire représentant 5 miles carrés</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Area</span><span class="p">(</span><span class="n">sq_mi</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="django.contrib.gis.measure.Area.__getattr__">
+<code class="descname">__getattr__</code>(<em>unit_att</em>)<a class="headerlink" href="#django.contrib.gis.measure.Area.__getattr__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie la mesure d’aire en unité correspondante à l’attribut d’unité indiqué. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">sq_km</span><span class="p">)</span>
+<span class="go">12.949940551680001</span>
+</pre></div>
+</div>
+<dl class="classmethod">
+<dt id="django.contrib.gis.measure.Area.unit_attname">
+<em class="property">classmethod </em><code class="descname">unit_attname</code>(<em>unit_name</em>)<a class="headerlink" href="#django.contrib.gis.measure.Area.unit_attname" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie le nom d’attribut d’unité d’aire correspondant au nom complet d’unité indiqué. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Area</span><span class="o">.</span><span class="n">unit_attname</span><span class="p">(</span><span class="s1">&#39;Kilometer&#39;</span><span class="p">)</span>
+<span class="go">&#39;sq_km&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.gis.measure.A">
+<em class="property">class </em><code class="descname">A</code><a class="headerlink" href="#django.contrib.gis.measure.A" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Alias de la classe <a class="reference internal" href="#django.contrib.gis.measure.Area" title="django.contrib.gis.measure.Area"><code class="xref py py-class docutils literal notranslate"><span class="pre">Area</span></code></a>.</p>
+</dd></dl>
+
+<p class="rubric">Notes de bas de page</p>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td><a class="reference external" href="https://koordinates.com/">Robert Coup</a> est l’auteur initial des objets de mesure et a été inspiré par le travail de Brian Beck dans <a class="reference external" href="https://github.com/geopy/geopy/">geopy</a> et par celui de Geoff Biggs dans son doctorat sur les unités dimensionnées pour la robotique.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Objets de mesure</a><ul>
+<li><a class="reference internal" href="#example">Exemple</a></li>
+<li><a class="reference internal" href="#supported-units">Unités prises en charge</a></li>
+<li><a class="reference internal" href="#measurement-api">API de mesures</a><ul>
+<li><a class="reference internal" href="#distance"><code class="docutils literal notranslate"><span class="pre">Distance</span></code></a></li>
+<li><a class="reference internal" href="#area"><code class="docutils literal notranslate"><span class="pre">Area</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="functions.html"
+                        title="Chapitre précédent">Fonctions de base de données géographiques</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="geos.html"
+                        title="Chapitre suivant">API GEOS</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/gis/measure.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="functions.html" title="Fonctions de base de données géographiques">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="geos.html" title="API GEOS">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

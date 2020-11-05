@@ -1,0 +1,965 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>API de base de données GeoDjango &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="API des formulaires GeoDjango" href="forms-api.html" />
+    <link rel="prev" title="API de modèle de GeoDjango" href="model-api.html" />
+
+
+
+ 
+<script src="../../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="model-api.html" title="API de modèle de GeoDjango">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="forms-api.html" title="API des formulaires GeoDjango">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-gis-db-api">
+            
+  <div class="section" id="s-geodjango-database-api">
+<span id="geodjango-database-api"></span><h1>API de base de données GeoDjango<a class="headerlink" href="#geodjango-database-api" title="Lien permanent vers ce titre">¶</a></h1>
+<div class="section" id="s-module-django.contrib.gis.db.backends">
+<span id="s-id1"></span><span id="s-spatial-backends"></span><span id="module-django.contrib.gis.db.backends"></span><span id="id1"></span><span id="spatial-backends"></span><h2>Moteurs de base de données spatiales<a class="headerlink" href="#module-django.contrib.gis.db.backends" title="Lien permanent vers ce titre">¶</a></h2>
+<p>GeoDjango propose actuellement les moteurs de base de données spatiales suivants&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">django.contrib.gis.db.backends.postgis</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">django.contrib.gis.db.backends.mysql</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">django.contrib.gis.db.backends.oracle</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">django.contrib.gis.db.backends.spatialite</span></code></li>
+</ul>
+<div class="section" id="s-mysql-spatial-limitations">
+<span id="s-id2"></span><span id="mysql-spatial-limitations"></span><span id="id2"></span><h3>Limitations spatiales de MySQL<a class="headerlink" href="#mysql-spatial-limitations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Avant MySQL 5.6.1, les extensions spatiales ne prenaient en charge que les opérations de rectangle englobant (ce que MySQL appelle «&nbsp;minimum bounding rectangle&nbsp;» ou MBR). Spécifiquement, MySQL ne se conformait pas au standard OGC. Django prend en charge les fonctions spatiales opérant sur les géométries réelles disponibles dans les versions modernes de MySQL. Cependant, les fonction spatiales ne sont pas aussi riches que pour d’autres moteurs comme PostGIS.</p>
+<div class="versionchanged">
+<span class="title">Changed in Django 3.0:</span> <p>La prise en charge des fonctions spatiales opérant sur les géométries réelles a été ajoutée.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Les vrais index spatiaux (R-trees) ne sont pris en charge qu’avec les tables MyISAM de MySQL. <a class="footnote-reference" href="#fnmysqlidx" id="id3">[4]</a> En d’autres termes, lorsque vous utilisez les extensions spatiales de MySQL, vous devez choisir entre des requêtes spatiales rapides et l’intégrité de vos données (les tables MyISAM ne gérant pas les transactions ni les contraintes de clé étrangère).</p>
+</div>
+</div>
+<div class="section" id="s-raster-support">
+<span id="raster-support"></span><h3>Données matricielles<a class="headerlink" href="#raster-support" title="Lien permanent vers ce titre">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">RasterField</span></code> n’est actuellement implémenté que pour le moteur PostGIS. Les requêtes spatiales sont disponibles pour les champs matriciels, mais pas les fonctions de base de données spatiales ni les agrégats.</p>
+</div>
+</div>
+<div class="section" id="s-creating-and-saving-models-with-geometry-fields">
+<span id="creating-and-saving-models-with-geometry-fields"></span><h2>Création et enregistrement de modèles avec des champs géométriques<a class="headerlink" href="#creating-and-saving-models-with-geometry-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Voici un exemple de la manière dont il faut créer un objet géométrique (en supposant que le modèle <code class="docutils literal notranslate"><span class="pre">Zipcode</span></code> existe)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">zipcode.models</span> <span class="k">import</span> <span class="n">Zipcode</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">Zipcode</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="mi">77096</span><span class="p">,</span> <span class="n">poly</span><span class="o">=</span><span class="s1">&#39;POLYGON(( 10 10, 10 20, 20 20, 20 15, 10 10))&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Les objets <a class="reference internal" href="geos.html#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> peuvent aussi être utilisés pour enregistrer des modèles géométriques&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">GEOSGeometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">poly</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POLYGON(( 10 10, 10 20, 20 20, 20 15, 10 10))&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">Zipcode</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="mi">77096</span><span class="p">,</span> <span class="n">poly</span><span class="o">=</span><span class="n">poly</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>De plus, si l’objet <code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code> est dans un autre système de coordonnées (sa valeur SRID est différente) que celui du champ, il sera implicitement converti dans le SRID du champ du modèle, en utilisant la procédure de transformation de la base de données spatiale&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">poly_3084</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POLYGON(( 10 10, 10 20, 20 20, 20 15, 10 10))&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">3084</span><span class="p">)</span>  <span class="c1"># SRID 3084 is &#39;NAD83(HARN) / Texas Centric Lambert Conformal&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span> <span class="o">=</span> <span class="n">Zipcode</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="mi">78212</span><span class="p">,</span> <span class="n">poly</span><span class="o">=</span><span class="n">poly_3084</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">queries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;sql&#39;</span><span class="p">])</span> <span class="c1"># printing the last SQL statement executed (requires DEBUG=True)</span>
+<span class="go">INSERT INTO &quot;geoapp_zipcode&quot; (&quot;code&quot;, &quot;poly&quot;) VALUES (78212, ST_Transform(ST_GeomFromWKB(&#39;\\001 ... &#39;, 3084), 4326))</span>
+</pre></div>
+</div>
+<p>Ainsi, les paramètres de géométrie peuvent être transmis en utilisant un objet <code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code>, une syntaxe WKT (Well Known Text <a class="footnote-reference" href="#fnwkt" id="id4">[1]</a>), HEXEWKB (spécifique à PostGIS, un objet géométrique WKB en hexadécimal <a class="footnote-reference" href="#fnewkb" id="id5">[2]</a>), et GeoJSON (voir la <span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7946.html"><strong>RFC 7946</strong></a>). En fait, si la donnée n’est pas un objet <code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code>, le champ géométrique essaie de créer une instance <code class="docutils literal notranslate"><span class="pre">GEOSGeometry</span></code> à partir des données fournies.</p>
+<p>Pour plus d’informations sur la création d’objets <a class="reference internal" href="geos.html#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a>, consultez le <a class="reference internal" href="geos.html#geos-tutorial"><span class="std std-ref">tutoriel GEOSl</span></a>.</p>
+</div>
+<div class="section" id="s-creating-and-saving-models-with-raster-fields">
+<span id="s-creating-and-saving-raster-models"></span><span id="creating-and-saving-models-with-raster-fields"></span><span id="creating-and-saving-raster-models"></span><h2>Création et enregistrement de modèles avec des champs matriciels<a class="headerlink" href="#creating-and-saving-models-with-raster-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lors de la création de modèles matriciels, le champ matriciel convertira implicitement la donnée d’entrée en un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.GDALRaster" title="django.contrib.gis.gdal.GDALRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDALRaster</span></code></a> par évaluation différée. Ce champ accepte donc les mêmes données que le constructeur <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.GDALRaster" title="django.contrib.gis.gdal.GDALRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDALRaster</span></code></a>.</p>
+<p>Voici un exemple de la manière dont on peut créer un objet matriciel à partir d’un fichier matriciel <code class="docutils literal notranslate"><span class="pre">volcano.tif</span></code> (en supposant que le modèle <code class="docutils literal notranslate"><span class="pre">Elevation</span></code> existe)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">elevation.models</span> <span class="k">import</span> <span class="n">Elevation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dem</span> <span class="o">=</span> <span class="n">Elevation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Volcano&#39;</span><span class="p">,</span> <span class="n">rast</span><span class="o">=</span><span class="s1">&#39;/path/to/raster/volcano.tif&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dem</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Les objets <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.GDALRaster" title="django.contrib.gis.gdal.GDALRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDALRaster</span></code></a> peuvent aussi être utilisés pour enregistrer des modèles matriciels&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.gdal</span> <span class="k">import</span> <span class="n">GDALRaster</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rast</span> <span class="o">=</span> <span class="n">GDALRaster</span><span class="p">({</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Canyon&#39;</span><span class="p">,</span> <span class="s1">&#39;srid&#39;</span><span class="p">:</span> <span class="mi">4326</span><span class="p">,</span>
+<span class="gp">... </span>                   <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">],</span> <span class="s1">&#39;bands&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)}]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dem</span> <span class="o">=</span> <span class="n">Elevation</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Canyon&#39;</span><span class="p">,</span> <span class="n">rast</span><span class="o">=</span><span class="n">rast</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dem</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Notez que c’est l’équivalent de&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dem</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Canyon&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">rast</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;width&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Canyon&#39;</span><span class="p">,</span> <span class="s1">&#39;srid&#39;</span><span class="p">:</span> <span class="mi">4326</span><span class="p">,</span>
+<span class="gp">... </span>          <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">],</span> <span class="s1">&#39;bands&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)}]},</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-spatial-lookups">
+<span id="s-spatial-lookups-intro"></span><span id="spatial-lookups"></span><span id="spatial-lookups-intro"></span><h2>Recherches spatiales<a class="headerlink" href="#spatial-lookups" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les types de requêtes de GeoDjango peuvent être utilisés avec n’importe quelle méthode de gestionnaire comme <code class="docutils literal notranslate"><span class="pre">filter()</span></code>, <code class="docutils literal notranslate"><span class="pre">exclude()</span></code>, etc. Cependant, les types de requêtes spécifiques à GeoDjango ne sont disponibles que pour les champs spatiaux.</p>
+<p>Les filtres pour les champs «&nbsp;normaux&nbsp;» (par ex. <a class="reference internal" href="../../models/fields.html#django.db.models.CharField" title="django.db.models.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a>) peuvent s’enchaîner avec des filtres sur des champs géographiques. Les requêtes géographiques acceptent des entrées géométriques et matricielles des deux côtés et les types d’entrées peuvent être librement mélangés.</p>
+<p>La structure générale des requêtes géographiques est décrite ci-dessous. Une référence complète peut être consultée dans la <a class="reference internal" href="geoquerysets.html#spatial-lookups"><span class="std std-ref">référence sur les recherches spatiales</span></a>.</p>
+<div class="section" id="s-geometry-lookups">
+<span id="geometry-lookups"></span><h3>Recherches géométriques<a class="headerlink" href="#geometry-lookups" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les requêtes géographiques avec des objets géométriques prennent la forme générale suivante (modèle <code class="docutils literal notranslate"><span class="pre">Zipcode</span></code> d’exemple utilisé dans <a class="reference internal" href="model-api.html"><span class="doc">API de modèle de GeoDjango</span></a>)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Zipcode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">&lt;</span><span class="n">field</span><span class="o">&gt;</span><span class="n">__</span><span class="o">&lt;</span><span class="n">lookup_type</span><span class="o">&gt;=&lt;</span><span class="n">parameter</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Zipcode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Zipcode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">poly__contains</span><span class="o">=</span><span class="n">pnt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">poly__contains</span><span class="o">=</span><span class="n">rst</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dans ce cas, <code class="docutils literal notranslate"><span class="pre">poly</span></code> est le champ géographique, <a class="reference internal" href="geoquerysets.html#std:fieldlookup-gis-contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a> est le type de recherche spatiale, <code class="docutils literal notranslate"><span class="pre">pnt</span></code> est le paramètre (qui pourrait être un objet <a class="reference internal" href="geos.html#django.contrib.gis.geos.GEOSGeometry" title="django.contrib.gis.geos.GEOSGeometry"><code class="xref py py-class docutils literal notranslate"><span class="pre">GEOSGeometry</span></code></a> ou une chaîne GeoJSON , WKT ou HEXEWKB) et <code class="docutils literal notranslate"><span class="pre">rst</span></code> est un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.GDALRaster" title="django.contrib.gis.gdal.GDALRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDALRaster</span></code></a>.</p>
+</div>
+<div class="section" id="s-raster-lookups">
+<span id="s-spatial-lookup-raster"></span><span id="raster-lookups"></span><span id="spatial-lookup-raster"></span><h3>Recherches matricielles<a class="headerlink" href="#raster-lookups" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La syntaxe des requêtes matricielles est semblable à celle pour les géométries. La seule différence est qu’un indice de bande peut être indiqué en supplément. Si aucun indice de bande n’est indiqué, c’est la première bande (indice <code class="docutils literal notranslate"><span class="pre">0</span></code>) qui est utilisée par défaut. Dans ce cas, la syntaxe est identique à la syntaxe des requêtes géométriques.</p>
+<p>Pour indiquer l’indice de bande, un paramètre supplémentaire peut être ajouté des deux côtés de la requête. Du côté gauche, c’est la syntaxe de double soulignement qui est utilisée pour transmettre l’indice de bande. Du côté droit, un tuple contenant la matrice et l’indice de bande peut être utilisé.</p>
+<p>Cela aboutit à la forme générale suivante pour les requêtes impliquant des matrices (modèle <code class="docutils literal notranslate"><span class="pre">Elevation</span></code> d’exemple utilisé dans <a class="reference internal" href="model-api.html"><span class="doc">API de modèle de GeoDjango</span></a>)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">&lt;</span><span class="n">field</span><span class="o">&gt;</span><span class="n">__</span><span class="o">&lt;</span><span class="n">lookup_type</span><span class="o">&gt;=&lt;</span><span class="n">parameter</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">&lt;</span><span class="n">field</span><span class="o">&gt;</span><span class="n">__</span><span class="o">&lt;</span><span class="n">band_index</span><span class="o">&gt;</span><span class="n">__</span><span class="o">&lt;</span><span class="n">lookup_type</span><span class="o">&gt;=&lt;</span><span class="n">parameter</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">&lt;</span><span class="n">field</span><span class="o">&gt;</span><span class="n">__</span><span class="o">&lt;</span><span class="n">lookup_type</span><span class="o">&gt;=</span><span class="p">(</span><span class="o">&lt;</span><span class="n">raster_input</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">band_index</span><span class="o">&gt;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rast__contains</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rast__contains</span><span class="o">=</span><span class="n">rst</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rast__1__contains</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rast__contains</span><span class="o">=</span><span class="p">(</span><span class="n">rst</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">Elevation</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">rast__1__contains</span><span class="o">=</span><span class="p">(</span><span class="n">rst</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Du côté gauche de l’exemple, <code class="docutils literal notranslate"><span class="pre">rast</span></code> est le champ matriciel géographique et <a class="reference internal" href="geoquerysets.html#std:fieldlookup-gis-contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a> est le type de requête spatiale. Du côté droit, <code class="docutils literal notranslate"><span class="pre">geom</span></code> est l’entrée géométrique et <code class="docutils literal notranslate"><span class="pre">rst</span></code> est un objet <a class="reference internal" href="gdal.html#django.contrib.gis.gdal.GDALRaster" title="django.contrib.gis.gdal.GDALRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">GDALRaster</span></code></a>. L’indice de bande vaut <code class="docutils literal notranslate"><span class="pre">0</span></code> par défaut dans les deux premières requêtes et est défini à <code class="docutils literal notranslate"><span class="pre">1</span></code> dans les suivantes.</p>
+<p>Bien que toutes les requêtes spatiales puissent être utilisées avec des objets matriciels des deux côtés, certains opérateurs ne savent pas gérer des entrées matricielles. Pour les cas où l’opérateur s’attend à une entrée géométrique, la matrice est automatiquement convertie en géométrie. Il est important d’avoir cela à l’esprit lors de l’interprétation des résultats de requête.</p>
+<p>Le type de prise en charge matricielle est énuméré pour chaque requête dans la <a class="reference internal" href="#spatial-lookup-compatibility"><span class="std std-ref">table de compatibilité</span></a>. Les requêtes impliquant des matrices ne sont actuellement disponibles que pour le moteur PostGIS.</p>
+</div>
+</div>
+<div class="section" id="s-distance-queries">
+<span id="s-id6"></span><span id="distance-queries"></span><span id="id6"></span><h2>Requêtes de distance<a class="headerlink" href="#distance-queries" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-introduction">
+<span id="introduction"></span><h3>Introduction<a class="headerlink" href="#introduction" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les calculs de distance sur des données spatiales sont complexes, parce que malheureusement, la Terre n’est pas plate. Certaines requêtes de distance avec des champs dans un système de coordonnées géographiques doivent parfois être exprimées différemment en raison de limites dans PostGIS. Pour plus de détails, consultez la section <a class="reference internal" href="model-api.html#selecting-an-srid"><span class="std std-ref">Choix d’un SRID</span></a> dans la documentation <a class="reference internal" href="model-api.html"><span class="doc">API de modèle de GeoDjango</span></a>.</p>
+</div>
+<div class="section" id="s-distance-lookups">
+<span id="s-distance-lookups-intro"></span><span id="distance-lookups"></span><span id="distance-lookups-intro"></span><h3>Recherches de distance<a class="headerlink" href="#distance-lookups" title="Lien permanent vers ce titre">¶</a></h3>
+<p><em>Disponibilité</em>&nbsp;: PostGIS, MariaDB, MySQL, Oracle, SpatiaLite, PGRaster (natif)</p>
+<p>Les recherches de distance suivantes sont disponibles&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_lt"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_lt</span></code></a></li>
+<li><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_lte"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_lte</span></code></a></li>
+<li><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_gt"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_gt</span></code></a></li>
+<li><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_gte"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_gte</span></code></a></li>
+<li><a class="reference internal" href="geoquerysets.html#std:fieldlookup-dwithin"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">dwithin</span></code></a> (sauf MariaDB et MySQL)</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pour des <em>mensurations</em>, au lieu d’interroger sur les distances, utilisez la fonction <a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Distance" title="django.contrib.gis.db.models.functions.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a>.</p>
+</div>
+<p>Les recherches de distance acceptent un paramètre sous forme de tuple comprenant&nbsp;:</p>
+<ol class="arabic simple">
+<li>Un objet géométrique ou matriciel sur lequel baser les calculs&nbsp;; et</li>
+<li>Un nombre ou un objet <a class="reference internal" href="measure.html#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a> contenant la distance.</li>
+</ol>
+<p>Si un objet <a class="reference internal" href="measure.html#django.contrib.gis.measure.Distance" title="django.contrib.gis.measure.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a> est utilisé, il peut être exprimé dans n’importe quelle unité (le code SQL généré utilisera des unités converties dans celles du champ)&nbsp;; sinon, les paramètres numériques sont supposés être dans la même unité que celle du champ.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Dans PostGIS, <code class="docutils literal notranslate"><span class="pre">ST_Distance_Sphere</span></code> ne restreint <em>plus</em> les types géométriques sur lesquels les requêtes de distance géographiques sont appliquées <a class="footnote-reference" href="#fndistsphere15" id="id7">[3]</a>. Cependant, ces requêtes peuvent être très lentes, car les distances de grand cercle doivent être calculées à la volée pour <em>chaque</em> ligne de la requête. La raison en est que l’index spatial des champs géométriques traditionnels ne peut pas être exploité.</p>
+<p class="last">Pour de bien meilleures performances concernant les requêtes de distance WGS84, évaluez la possibilité d’utiliser plutôt des <a class="reference internal" href="model-api.html#geography-type"><span class="std std-ref">colonnes de type géographique</span></a> dans votre base de données car leur index spatial peut être exploité dans les requêtes de distance. Vous pouvez indiquer à GeoDjango de créer des colonnes géographiques en définissant <code class="docutils literal notranslate"><span class="pre">geography=True</span></code> dans la définition du champ.</p>
+</div>
+<p>Par exemple, si l’on dispose d’un modèle <code class="docutils literal notranslate"><span class="pre">SouthTexasCity</span></code> (exemple tiré des <a class="reference external" href="https://github.com/django/django/blob/master/tests/gis_tests/distapp/models.py">tests de distance de GeoDjango</a>) avec un système de coordonnées <em>projeté</em> valide pour les villes du sud du Texas&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.gis.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">SouthTexasCity</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="c1"># A projected coordinate system (only valid for South Texas!)</span>
+    <span class="c1"># is used, units are in meters.</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PointField</span><span class="p">(</span><span class="n">srid</span><span class="o">=</span><span class="mi">32140</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Les requêtes de distance suivantes pourraient être effectuées&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="k">import</span> <span class="n">GEOSGeometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.gis.measure</span> <span class="k">import</span> <span class="n">D</span> <span class="c1"># ``D`` is a shortcut for ``Distance``</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geoapp.models</span> <span class="k">import</span> <span class="n">SouthTexasCity</span>
+<span class="go"># Distances will be calculated from this point, which does not have to be projected.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pnt</span> <span class="o">=</span> <span class="n">GEOSGeometry</span><span class="p">(</span><span class="s1">&#39;POINT(-96.876369 29.905320)&#39;</span><span class="p">,</span> <span class="n">srid</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="go"># If numeric parameter, units of field (meters in this case) are assumed.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">SouthTexasCity</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">point__distance_lte</span><span class="o">=</span><span class="p">(</span><span class="n">pnt</span><span class="p">,</span> <span class="mi">7000</span><span class="p">))</span>
+<span class="go"># Find all Cities within 7 km, &gt; 20 miles away, and &gt; 100 chains away (an obscure unit)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">SouthTexasCity</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">point__distance_lte</span><span class="o">=</span><span class="p">(</span><span class="n">pnt</span><span class="p">,</span> <span class="n">D</span><span class="p">(</span><span class="n">km</span><span class="o">=</span><span class="mi">7</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">SouthTexasCity</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">point__distance_gte</span><span class="o">=</span><span class="p">(</span><span class="n">pnt</span><span class="p">,</span> <span class="n">D</span><span class="p">(</span><span class="n">mi</span><span class="o">=</span><span class="mi">20</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">SouthTexasCity</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">point__distance_gte</span><span class="o">=</span><span class="p">(</span><span class="n">pnt</span><span class="p">,</span> <span class="n">D</span><span class="p">(</span><span class="n">chain</span><span class="o">=</span><span class="mi">100</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Les requêtes matricielles fonctionnent de la même manière en remplaçant le champ géométrique <code class="docutils literal notranslate"><span class="pre">point</span></code> par un champ marticiel, ou l’objet <code class="docutils literal notranslate"><span class="pre">pnt</span></code> par un objet matriciel, ou les deux. Pour indiquer l’indice de bande d’une entrée matricielle dans le côté droit, un tuple ternaire peut être passé à la requête comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">qs</span> <span class="o">=</span> <span class="n">SouthTexasCity</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">point__distance_gte</span><span class="o">=</span><span class="p">(</span><span class="n">rst</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">D</span><span class="p">(</span><span class="n">km</span><span class="o">=</span><span class="mi">7</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Où la bande avec indice 2 (troisième bande) de la matrice <code class="docutils literal notranslate"><span class="pre">rst</span></code> serait utilisée pour la requête.</p>
+</div>
+</div>
+<div class="section" id="s-compatibility-tables">
+<span id="s-compatibility-table"></span><span id="compatibility-tables"></span><span id="compatibility-table"></span><h2>Tableaux de compatibilité<a class="headerlink" href="#compatibility-tables" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-spatial-lookup-compatibility">
+<span id="s-id8"></span><span id="spatial-lookup-compatibility"></span><span id="id8"></span><h3>Recherches spatiales<a class="headerlink" href="#spatial-lookup-compatibility" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le tableau suivant fournit un résumé des requêtes spatiales disponibles pour chaque moteur de base de données spatial. Les requêtes PostGIS Raster (PGRaster) sont divisées dans les trois catégories décrites dans les <a class="reference internal" href="#spatial-lookup-raster"><span class="std std-ref">détails de requêtes matricielles</span></a>: prise en charge native <code class="docutils literal notranslate"><span class="pre">N</span></code>, prise en charge native bilatérale <code class="docutils literal notranslate"><span class="pre">B</span></code> et prise en charge par conversion géométrique <code class="docutils literal notranslate"><span class="pre">C</span></code>.</p>
+<table class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="10%" />
+<col width="9%" />
+<col width="10%" />
+<col width="13%" />
+<col width="11%" />
+<col width="9%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type de recherche</th>
+<th class="head">PostGIS</th>
+<th class="head">Oracle</th>
+<th class="head">MariaDB</th>
+<th class="head">MySQL <a class="footnote-reference" href="#id10" id="id9">[5]</a></th>
+<th class="head">SpatiaLite</th>
+<th class="head">PGRaster</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-bbcontains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">bbcontains</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-bboverlaps"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">bboverlaps</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-contained"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contained</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-gis-contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-contains_properly"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains_properly</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-coveredby"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">coveredby</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-covers"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">covers</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-crosses"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">crosses</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>C</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-disjoint"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">disjoint</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_gt"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_gt</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_gte"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_gte</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_lt"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_lt</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-distance_lte"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">distance_lte</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>N</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-dwithin"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">dwithin</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-equals"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">equals</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>C</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-same_as"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">exact</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-intersects"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">intersects</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-isvalid"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">isvalid</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>X (≥ 5.7.5)</td>
+<td>X (LWGEOM)</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-overlaps"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">overlaps</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-relate"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">relate</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+<td>C</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-same_as"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">same_as</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-touches"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">touches</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-within"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">within</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-left"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">left</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>C</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-right"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">right</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>C</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-overlaps_left"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">overlaps_left</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>B</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-overlaps_right"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">overlaps_right</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>B</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-overlaps_above"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">overlaps_above</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>C</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-overlaps_below"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">overlaps_below</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>C</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-strictly_above"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">strictly_above</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>C</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#std:fieldlookup-strictly_below"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">strictly_below</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>C</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="s-database-functions">
+<span id="s-database-functions-compatibility"></span><span id="database-functions"></span><span id="database-functions-compatibility"></span><h3>Fonctions de base de données<a class="headerlink" href="#database-functions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le tableau suivant indique en résumé quelles sont les fonctions géométriques de base de données disponibles pour chaque moteur spatial.</p>
+<table class="docutils">
+<colgroup>
+<col width="40%" />
+<col width="8%" />
+<col width="16%" />
+<col width="13%" />
+<col width="12%" />
+<col width="11%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Fonction</th>
+<th class="head">PostGIS</th>
+<th class="head">Oracle</th>
+<th class="head">MariaDB</th>
+<th class="head">MySQL</th>
+<th class="head">SpatiaLite</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Area" title="django.contrib.gis.db.models.functions.Area"><code class="xref py py-class docutils literal notranslate"><span class="pre">Area</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.AsGeoJSON" title="django.contrib.gis.db.models.functions.AsGeoJSON"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsGeoJSON</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X (≥ 10.2.4)</td>
+<td>X (≥ 5.7.5)</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.AsGML" title="django.contrib.gis.db.models.functions.AsGML"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsGML</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.AsKML" title="django.contrib.gis.db.models.functions.AsKML"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsKML</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.AsSVG" title="django.contrib.gis.db.models.functions.AsSVG"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsSVG</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.AsWKB" title="django.contrib.gis.db.models.functions.AsWKB"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsWKB</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.AsWKT" title="django.contrib.gis.db.models.functions.AsWKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsWKT</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Azimuth" title="django.contrib.gis.db.models.functions.Azimuth"><code class="xref py py-class docutils literal notranslate"><span class="pre">Azimuth</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X (LWGEOM)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.BoundingCircle" title="django.contrib.gis.db.models.functions.BoundingCircle"><code class="xref py py-class docutils literal notranslate"><span class="pre">BoundingCircle</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Centroid" title="django.contrib.gis.db.models.functions.Centroid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Centroid</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Difference" title="django.contrib.gis.db.models.functions.Difference"><code class="xref py py-class docutils literal notranslate"><span class="pre">Difference</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Distance" title="django.contrib.gis.db.models.functions.Distance"><code class="xref py py-class docutils literal notranslate"><span class="pre">Distance</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Envelope" title="django.contrib.gis.db.models.functions.Envelope"><code class="xref py py-class docutils literal notranslate"><span class="pre">Envelope</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.ForcePolygonCW" title="django.contrib.gis.db.models.functions.ForcePolygonCW"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForcePolygonCW</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.GeoHash" title="django.contrib.gis.db.models.functions.GeoHash"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeoHash</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X (≥ 5.7.5)</td>
+<td>X (LWGEOM)</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Intersection" title="django.contrib.gis.db.models.functions.Intersection"><code class="xref py py-class docutils literal notranslate"><span class="pre">Intersection</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.IsValid" title="django.contrib.gis.db.models.functions.IsValid"><code class="xref py py-class docutils literal notranslate"><span class="pre">IsValid</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>X (≥ 5.7.5)</td>
+<td>X (LWGEOM)</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Length" title="django.contrib.gis.db.models.functions.Length"><code class="xref py py-class docutils literal notranslate"><span class="pre">Length</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.LineLocatePoint" title="django.contrib.gis.db.models.functions.LineLocatePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">LineLocatePoint</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.MakeValid" title="django.contrib.gis.db.models.functions.MakeValid"><code class="xref py py-class docutils literal notranslate"><span class="pre">MakeValid</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X (LWGEOM)</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.MemSize" title="django.contrib.gis.db.models.functions.MemSize"><code class="xref py py-class docutils literal notranslate"><span class="pre">MemSize</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.NumGeometries" title="django.contrib.gis.db.models.functions.NumGeometries"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumGeometries</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.NumPoints" title="django.contrib.gis.db.models.functions.NumPoints"><code class="xref py py-class docutils literal notranslate"><span class="pre">NumPoints</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Perimeter" title="django.contrib.gis.db.models.functions.Perimeter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Perimeter</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.PointOnSurface" title="django.contrib.gis.db.models.functions.PointOnSurface"><code class="xref py py-class docutils literal notranslate"><span class="pre">PointOnSurface</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Reverse" title="django.contrib.gis.db.models.functions.Reverse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reverse</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Scale" title="django.contrib.gis.db.models.functions.Scale"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scale</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.SnapToGrid" title="django.contrib.gis.db.models.functions.SnapToGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">SnapToGrid</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.SymDifference" title="django.contrib.gis.db.models.functions.SymDifference"><code class="xref py py-class docutils literal notranslate"><span class="pre">SymDifference</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Transform" title="django.contrib.gis.db.models.functions.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Translate" title="django.contrib.gis.db.models.functions.Translate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Translate</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="functions.html#django.contrib.gis.db.models.functions.Union" title="django.contrib.gis.db.models.functions.Union"><code class="xref py py-class docutils literal notranslate"><span class="pre">Union</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="s-aggregate-functions">
+<span id="aggregate-functions"></span><h3>Fonctions d’agrégation<a class="headerlink" href="#aggregate-functions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le tableau suivant indique en résumé quelles fonctions d’agrégation géographiques sont disponibles pour chaque moteur de base de données spatiale. Notez que MySQL n’en prend en charge aucune et qu’il est donc exclu du tableau.</p>
+<table class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="15%" />
+<col width="13%" />
+<col width="22%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Méthode d’agrégation</th>
+<th class="head">PostGIS</th>
+<th class="head">Oracle</th>
+<th class="head">SpatiaLite</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#django.contrib.gis.db.models.Collect" title="django.contrib.gis.db.models.Collect"><code class="xref py py-class docutils literal notranslate"><span class="pre">Collect</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#django.contrib.gis.db.models.Extent" title="django.contrib.gis.db.models.Extent"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#django.contrib.gis.db.models.Extent3D" title="django.contrib.gis.db.models.Extent3D"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extent3D</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="geoquerysets.html#django.contrib.gis.db.models.MakeLine" title="django.contrib.gis.db.models.MakeLine"><code class="xref py py-class docutils literal notranslate"><span class="pre">MakeLine</span></code></a></td>
+<td>X</td>
+<td>&#160;</td>
+<td>X</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="geoquerysets.html#django.contrib.gis.db.models.Union" title="django.contrib.gis.db.models.Union"><code class="xref py py-class docutils literal notranslate"><span class="pre">Union</span></code></a></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes de bas de page</p>
+<table class="docutils footnote" frame="void" id="fnwkt" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[1]</a></td><td><em>Voir</em> Open Geospatial Consortium, Inc., <a class="reference external" href="http://www.opengis.org/docs/99-049.pdf">OpenGIS Simple Feature Specification For SQL</a>, Document 99-049 (5 mai 1999), au Ch. 3.2.5, p. 3-11 (SQL Textual Representation of Geometry).</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="fnewkb" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[2]</a></td><td><em>Voir</em> <a class="reference external" href="https://postgis.net/docs/using_postgis_dbmanagement.html#EWKB_EWKT">PostGIS EWKB, EWKT and Canonical Forms</a>, documentation de PostGIS au chap. 4.1.2.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="fndistsphere15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[3]</a></td><td><em>Voir</em> la <a class="reference external" href="https://postgis.net/docs/ST_DistanceSphere.html">documentation de PostGIS</a> pour <code class="docutils literal notranslate"><span class="pre">ST_DistanceSphere</span></code>.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="fnmysqlidx" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[4]</a></td><td><p class="first"><em>Voir</em> <a class="reference external" href="https://dev.mysql.com/doc/refman/en/creating-spatial-indexes.html">Création d’index spatiaux</a> dans le manuel de référence de MySQL&nbsp;:</p>
+<blockquote class="last">
+<div>Pour les tables MyISAM, <code class="docutils literal notranslate"><span class="pre">SPATIAL</span> <span class="pre">INDEX</span></code> crée un index R-tree. Pour les moteurs de stockage qui prennent en charge les index non spatiaux sur les colonnes spatiales, le moteur crée un index B-tree. Un index B-tree sur des valeurs spatiales est utile pour les recherches par valeur exacte, mais pas pour les recherches sur des intervalles.</div></blockquote>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id10" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id9">[5]</a></td><td>Référez-vous à la section <a class="reference internal" href="#mysql-spatial-limitations"><span class="std std-ref">Limitations spatiales de MySQL</span></a> pour plus de détails.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API de base de données GeoDjango</a><ul>
+<li><a class="reference internal" href="#module-django.contrib.gis.db.backends">Moteurs de base de données spatiales</a><ul>
+<li><a class="reference internal" href="#mysql-spatial-limitations">Limitations spatiales de MySQL</a></li>
+<li><a class="reference internal" href="#raster-support">Données matricielles</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-and-saving-models-with-geometry-fields">Création et enregistrement de modèles avec des champs géométriques</a></li>
+<li><a class="reference internal" href="#creating-and-saving-models-with-raster-fields">Création et enregistrement de modèles avec des champs matriciels</a></li>
+<li><a class="reference internal" href="#spatial-lookups">Recherches spatiales</a><ul>
+<li><a class="reference internal" href="#geometry-lookups">Recherches géométriques</a></li>
+<li><a class="reference internal" href="#raster-lookups">Recherches matricielles</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#distance-queries">Requêtes de distance</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#distance-lookups">Recherches de distance</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#compatibility-tables">Tableaux de compatibilité</a><ul>
+<li><a class="reference internal" href="#spatial-lookup-compatibility">Recherches spatiales</a></li>
+<li><a class="reference internal" href="#database-functions">Fonctions de base de données</a></li>
+<li><a class="reference internal" href="#aggregate-functions">Fonctions d’agrégation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="model-api.html"
+                        title="Chapitre précédent">API de modèle de GeoDjango</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="forms-api.html"
+                        title="Chapitre suivant">API des formulaires GeoDjango</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../../_sources/ref/contrib/gis/db-api.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="model-api.html" title="API de modèle de GeoDjango">previous</a>
+     |
+    <a href="../../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="forms-api.html" title="API des formulaires GeoDjango">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

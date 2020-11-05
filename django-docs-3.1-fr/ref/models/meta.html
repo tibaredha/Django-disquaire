@@ -1,0 +1,252 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>L’API _meta des modèles &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Référence des objets liés" href="relations.html" />
+    <link rel="prev" title="Référence des contraintes" href="constraints.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="constraints.html" title="Référence des contraintes">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="relations.html" title="Référence des objets liés">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-models-meta">
+            
+  <div class="section" id="s-module-django.db.models.options">
+<span id="s-model-meta-api"></span><span id="module-django.db.models.options"></span><span id="model-meta-api"></span><h1>L’API <code class="docutils literal notranslate"><span class="pre">_meta</span></code> des modèles<a class="headerlink" href="#module-django.db.models.options" title="Lien permanent vers ce titre">¶</a></h1>
+<dl class="class">
+<dt id="django.db.models.options.Options">
+<em class="property">class </em><code class="descname">Options</code><a class="headerlink" href="#django.db.models.options.Options" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>L’API <code class="docutils literal notranslate"><span class="pre">_meta</span></code> des modèles est au cœur de l’ORM de Django. Elle permet à d’autres parties du système telles que les recherches, les requêtes, les formulaires et le site d’administration de comprendre les capacités de chaque modèle. L’API est accessible au travers de l’attribut <code class="docutils literal notranslate"><span class="pre">_meta</span></code> de chaque classe de modèle, qui est une instance d’objet <code class="docutils literal notranslate"><span class="pre">django.db.models.options.Options</span></code>.</p>
+<p>Les méthodes qu’elle fournit peuvent être utilisées pour&nbsp;:</p>
+<ul class="simple">
+<li>Récupérer toutes les instances de champ d’un modèle</li>
+<li>Récupérer une instance de champ unique d’un modèle par son nom</li>
+</ul>
+<div class="section" id="s-field-access-api">
+<span id="s-model-meta-field-api"></span><span id="field-access-api"></span><span id="model-meta-field-api"></span><h2>API d’accès aux champs<a class="headerlink" href="#field-access-api" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-retrieving-a-single-field-instance-of-a-model-by-name">
+<span id="retrieving-a-single-field-instance-of-a-model-by-name"></span><h3>Récupération d’une instance de champ unique d’un modèle par son nom<a class="headerlink" href="#retrieving-a-single-field-instance-of-a-model-by-name" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.db.models.options.Options.get_field">
+<code class="descclassname">Options.</code><code class="descname">get_field</code>(<em>field_name</em>)<a class="headerlink" href="#django.db.models.options.Options.get_field" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une instance de champ correspondant au nom indiqué.</p>
+<p><code class="docutils literal notranslate"><span class="pre">field_name</span></code> peut être le nom d’un champ du modèle, d’un champ d’un modèle abstrait ou hérité, ou d’un champ défini sur un autre modèle pointant vers ce modèle. Dans ce dernier cas, <code class="docutils literal notranslate"><span class="pre">field_name</span></code> est (par ordre de préférence) le nom <a class="reference internal" href="fields.html#django.db.models.ForeignKey.related_query_name" title="django.db.models.ForeignKey.related_query_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">related_query_name</span></code></a> défini par l’utilisateur, le nom <a class="reference internal" href="fields.html#django.db.models.ForeignKey.related_name" title="django.db.models.ForeignKey.related_name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">related_name</span></code></a> défini par l’utilisateur ou le nom généré automatiquement par Django.</p>
+<p>Les <a class="reference internal" href="fields.html#django.db.models.Field.hidden" title="django.db.models.Field.hidden"><code class="xref py py-attr docutils literal notranslate"><span class="pre">champs</span> <span class="pre">cachés</span></code></a> ne peuvent pas être récupérés par leur nom.</p>
+<p>Si aucun champ du nom indiqué n’a été trouvé, une exception <a class="reference internal" href="../exceptions.html#django.core.exceptions.FieldDoesNotExist" title="django.core.exceptions.FieldDoesNotExist"><code class="xref py py-class docutils literal notranslate"><span class="pre">FieldDoesNotExist</span></code></a> est générée.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+
+<span class="go"># A field on the model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
+<span class="go">&lt;django.db.models.fields.CharField: username&gt;</span>
+
+<span class="go"># A field from another model that has a relation with the current model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s1">&#39;logentry&#39;</span><span class="p">)</span>
+<span class="go">&lt;ManyToOneRel: admin.logentry&gt;</span>
+
+<span class="go"># A non existent field</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s1">&#39;does_not_exist&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+    <span class="o">...</span>
+<span class="gr">FieldDoesNotExist</span>: <span class="n">User has no field named &#39;does_not_exist&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="s-retrieving-all-field-instances-of-a-model">
+<span id="retrieving-all-field-instances-of-a-model"></span><h3>Récupération de toutes les instances de champ d’un modèle<a class="headerlink" href="#retrieving-all-field-instances-of-a-model" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.db.models.options.Options.get_fields">
+<code class="descclassname">Options.</code><code class="descname">get_fields</code>(<em>include_parents=True</em>, <em>include_hidden=False</em>)<a class="headerlink" href="#django.db.models.options.Options.get_fields" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie un tuple de champs associés à un modèle. <code class="docutils literal notranslate"><span class="pre">get_fields()</span></code> accepte deux paramètres pouvant être utilisés pour contrôler quels champs sont renvoyés&nbsp;:</p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">include_parents</span></code></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">True</span></code> par défaut. Inclut récursivement les champs définis dans les classes parentes. Lorsque ce paramètre est défini à <code class="docutils literal notranslate"><span class="pre">False</span></code>, <code class="docutils literal notranslate"><span class="pre">get_fields()</span></code> ne renvoie que les champs déclarés directement sur le modèle concerné. Les champs de modèles qui héritent directement de modèles abstraits ou de classes mandataires sont considérés comme locaux, et non pas définis sur le parent.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">include_hidden</span></code></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">False</span></code> par défaut. Lorsque ce paramètre est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">get_fields()</span></code> inclut les champs utilisés pour fournir des fonctionnalités d’autres champs. Cela comprend également les champs possédant un nom <code class="docutils literal notranslate"><span class="pre">related_name</span></code> (tels que <a class="reference internal" href="fields.html#django.db.models.ManyToManyField" title="django.db.models.ManyToManyField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManyToManyField</span></code></a> et <a class="reference internal" href="fields.html#django.db.models.ForeignKey" title="django.db.models.ForeignKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForeignKey</span></code></a>) qui commence par un «&nbsp;+&nbsp;».</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="kn">import</span> <span class="n">User</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_fields</span><span class="p">()</span>
+<span class="go">(&lt;ManyToOneRel: admin.logentry&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.AutoField: id&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: password&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.DateTimeField: last_login&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.BooleanField: is_superuser&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: username&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: first_name&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: last_name&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.EmailField: email&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.BooleanField: is_staff&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.BooleanField: is_active&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.DateTimeField: date_joined&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.related.ManyToManyField: groups&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.related.ManyToManyField: user_permissions&gt;)</span>
+
+<span class="go"># Also include hidden fields.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">include_hidden</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">(&lt;ManyToOneRel: auth.user_groups&gt;,</span>
+<span class="go"> &lt;ManyToOneRel: auth.user_user_permissions&gt;,</span>
+<span class="go"> &lt;ManyToOneRel: admin.logentry&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.AutoField: id&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: password&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.DateTimeField: last_login&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.BooleanField: is_superuser&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: username&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: first_name&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.CharField: last_name&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.EmailField: email&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.BooleanField: is_staff&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.BooleanField: is_active&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.DateTimeField: date_joined&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.related.ManyToManyField: groups&gt;,</span>
+<span class="go"> &lt;django.db.models.fields.related.ManyToManyField: user_permissions&gt;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">L’API <code class="docutils literal notranslate"><span class="pre">_meta</span></code> des modèles</a><ul>
+<li><a class="reference internal" href="#field-access-api">API d’accès aux champs</a><ul>
+<li><a class="reference internal" href="#retrieving-a-single-field-instance-of-a-model-by-name">Récupération d’une instance de champ unique d’un modèle par son nom</a></li>
+<li><a class="reference internal" href="#retrieving-all-field-instances-of-a-model">Récupération de toutes les instances de champ d’un modèle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="constraints.html"
+                        title="Chapitre précédent">Référence des contraintes</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="relations.html"
+                        title="Chapitre suivant">Référence des objets liés</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/models/meta.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="constraints.html" title="Référence des contraintes">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="relations.html" title="Référence des objets liés">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

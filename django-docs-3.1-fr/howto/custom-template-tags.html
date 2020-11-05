@@ -1,0 +1,871 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Balises et filtres de gabarit personnalisés &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Écriture d’un système de stockage personnalisé" href="custom-file-storage.html" />
+    <link rel="prev" title="Moteur de gabarit personnalisé" href="custom-template-backend.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="custom-template-backend.html" title="Moteur de gabarit personnalisé">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="custom-file-storage.html" title="Écriture d’un système de stockage personnalisé">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="howto-custom-template-tags">
+            
+  <div class="section" id="s-custom-template-tags-and-filters">
+<span id="custom-template-tags-and-filters"></span><h1>Balises et filtres de gabarit personnalisés<a class="headerlink" href="#custom-template-tags-and-filters" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Le langage de gabarits de Django offre une large palette de <a class="reference internal" href="../ref/templates/builtins.html"><span class="doc">balises et filtres intégrés</span></a> conçus pour répondre aux besoins de la logique de présentation de votre application. Néanmoins, il se peut que vous rencontriez des besoins non couverts par cet ensemble de fonctions de gabarits. Il est possible d’étendre le moteur de gabarit en définissant des balises et des filtres personnalisés en Python, puis en les rendant disponibles dans vos gabarits par la balise <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-load"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">load</span> <span class="pre">%}</span></code></a>.</p>
+<div class="section" id="s-code-layout">
+<span id="code-layout"></span><h2>Disposition du code<a class="headerlink" href="#code-layout" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’endroit le plus souvent utilisé pour placer des balises et filtres de gabarit personnalisés est à l’intérieur d’une application Django. S’ils sont liés à une application existante, il est logique de les y intégrer&nbsp;; sinon, ils peuvent être ajoutés à une nouvelle application. Lorsqu’une application Django est ajoutée à <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>, toute balise qu’elle définit à l’endroit conventionnel présenté ci-dessous est automatiquement mise à disposition du chargement depuis les gabarits.</p>
+<p>L’application doit contenir un répertoire <code class="docutils literal notranslate"><span class="pre">templatetags</span></code> au même niveau que <code class="docutils literal notranslate"><span class="pre">models.py</span></code>, <code class="docutils literal notranslate"><span class="pre">views.py</span></code>, etc. S’il n’existe pas encore, créez-le, sans oublier le fichier <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> pour que le répertoire soit bien considéré comme un paquet Python.</p>
+<div class="admonition-development-server-won-t-automatically-restart admonition">
+<p class="first admonition-title">Le serveur de développement ne va pas redémarrer automatiquement</p>
+<p class="last">Après avoir ajouté le module <code class="docutils literal notranslate"><span class="pre">templatetags</span></code>, vous devez redémarrer le serveur avant de pouvoir utiliser les balises ou les filtres dans les gabarits.</p>
+</div>
+<p>Vos balises et filtres personnalisés se trouveront dans un module à l’intérieur du répertoire <code class="docutils literal notranslate"><span class="pre">templatetags</span></code>. Le nom du fichier de module est le nom que vous utiliserez plus tard pour charger les balises, prenez donc soin de choisir un nom qui n’est pas déjà utilisé pour des balises et filtres d’une autre application.</p>
+<p>Par exemple, si vos balises/filtres personnalisés se trouvent dans un fichier nommé <code class="docutils literal notranslate"><span class="pre">poll_extras.py</span></code>, la disposition des fichiers de votre application pourrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">polls</span><span class="o">/</span>
+    <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">models</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">templatetags</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">poll_extras</span><span class="o">.</span><span class="n">py</span>
+    <span class="n">views</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Et dans votre gabarit, voici ce qu’il faudrait écrire&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">load</span> <span class="nv">poll_extras</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>L’application qui contient les balises personnalisées doit apparaître dans <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> pour que la balise <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-load"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">load</span> <span class="pre">%}</span></code></a> fonctionne. C’est un élément de sécurité&nbsp;: cela permet d’accueillir du code Python de beaucoup de bibliothèques de gabarits sur une même machine sans devoir permettre l’accès à toutes ces bibliothèques pour chaque installation Django.</p>
+<p>Il n’y a aucune limite sur le nombre de modules que l’on peut placer dans le paquet <code class="docutils literal notranslate"><span class="pre">templatetags</span></code>. Gardez simplement à l’esprit qu’une commande <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-load"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">load</span> <span class="pre">%}</span></code></a> va charger les balises/filtres du nom de module Python indiqué, et non pas du nom de l’application.</p>
+<p>Pour être valide, le module de la bibliothèque de balises doit contenir une variable au niveau module nommée <code class="docutils literal notranslate"><span class="pre">register</span></code> et qui doit être une instance de <code class="docutils literal notranslate"><span class="pre">template.Library</span></code>, dans laquelle toutes les balises et les filtres sont inscrits. Ainsi, dans la partie supérieure de votre module, écrivez ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Il est aussi possible d’inscrire les modules de balises de gabarit au moyen du paramètre <code class="docutils literal notranslate"><span class="pre">'libraries'</span></code> de <a class="reference internal" href="../topics/templates.html#django.template.backends.django.DjangoTemplates" title="django.template.backends.django.DjangoTemplates"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoTemplates</span></code></a>. Cette méthode est utile si vous souhaitez utiliser un nom autre que celui du module de balises de gabarit au moment de charger ces balises. Cela permet aussi d’inscrire des balises sans devoir installer une application.</p>
+<div class="admonition-behind-the-scenes admonition">
+<p class="first admonition-title">En coulisses</p>
+<p>Pour de multiples exemples, lisez le code source des filtres et balises par défaut de Django. Vous les trouverez respectivement dans <code class="docutils literal notranslate"><span class="pre">django/template/defaultfilters.py</span></code> et <code class="docutils literal notranslate"><span class="pre">django/template/defaulttags.py</span></code>.</p>
+<p class="last">Pour plus d’informations sur la balise <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-load"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">load</span></code></a>, lisez sa documentation.</p>
+</div>
+</div>
+<div class="section" id="s-writing-custom-template-filters">
+<span id="s-howto-writing-custom-template-filters"></span><span id="writing-custom-template-filters"></span><span id="howto-writing-custom-template-filters"></span><h2>Écriture de filtres de gabarits personnalisés<a class="headerlink" href="#writing-custom-template-filters" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les filtres personnalisés sont des fonctions Python qui acceptent un ou deux paramètres&nbsp;:</p>
+<ul class="simple">
+<li>La valeur de la variable (en entrée), pas forcément une chaîne.</li>
+<li>La valeur du paramètre&nbsp;; il peut avoir une valeur par défaut ou être simplement absent.</li>
+</ul>
+<p>Par exemple, dans le filtre <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">var|foo:&quot;bar&quot;</span> <span class="pre">}}</span></code>, le filtre <code class="docutils literal notranslate"><span class="pre">foo</span></code> reçoit la variable <code class="docutils literal notranslate"><span class="pre">var</span></code> et le paramètre <code class="docutils literal notranslate"><span class="pre">&quot;bar&quot;</span></code>.</p>
+<p>Dans la mesure où le langage de gabarit ne s’occupe pas de la gestion des exceptions, toute exception générée dans un filtre de gabarit apparaît comme erreur de serveur. C’est pourquoi les fonctions de filtres devraient éviter de générer des exceptions quand il existe une valeur de repli raisonnable à renvoyer. Dans le cas d’une valeur d’entrée représentant clairement un bogue dans un gabarit, il se peut que la génération d’une exception soit toujours la meilleure solution plutôt que d’échouer silencieusement en masquant l’erreur.</p>
+<p>Voici un exemple de définition de filtre&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">cut</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Removes all values of arg from the given string&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Et voici une exemple de la manière dont ce filtre pourrait être utilisé&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">somevariable</span><span class="o">|</span><span class="nf">cut</span><span class="s2">:&quot;0&quot;</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+<p>La plupart des filtres n’acceptent pas de paramètre. Dans ce cas, ne rajoutez pas de paramètre à votre fonction</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="n">value</span><span class="p">):</span> <span class="c1"># Only one argument.</span>
+    <span class="sd">&quot;&quot;&quot;Converts a string into all lowercase&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="s-registering-custom-filters">
+<span id="registering-custom-filters"></span><h3>Inscription de filtres personnalisés<a class="headerlink" href="#registering-custom-filters" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.template.Library.filter">
+<code class="descclassname">django.template.Library.</code><code class="descname">filter</code>()<a class="headerlink" href="#django.template.Library.filter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Après avoir écrit la définition d’un filtre, il est nécessaire de l’inscrire avec votre instance de <code class="docutils literal notranslate"><span class="pre">Library</span></code> pour qu’il soit disponible dans le langage de gabarit de Django&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;cut&#39;</span><span class="p">,</span> <span class="n">cut</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">lower</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">Library.filter()</span></code> accepte deux paramètres&nbsp;:</p>
+<ol class="arabic simple">
+<li>Le nom du filtre, une chaîne.</li>
+<li>La fonction de compilation, une fonction Python (et non pas le nom de la fonction sous forme de chaîne).</li>
+</ol>
+<p>Vous pouvez aussi utiliser <code class="docutils literal notranslate"><span class="pre">register.filter()</span></code> sous forme de décorateur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;cut&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cut</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">filter</span>
+<span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Si vous omettez le paramètre <code class="docutils literal notranslate"><span class="pre">name</span></code> comme dans le second exemple ci-dessus, Django utilisera le nom de la fonction comme nom de filtre.</p>
+<p>Pour terminer, <code class="docutils literal notranslate"><span class="pre">register.filter()</span></code> accepte aussi trois paramètres nommés&nbsp;: <code class="docutils literal notranslate"><span class="pre">is_safe</span></code>, <code class="docutils literal notranslate"><span class="pre">needs_autoescape</span></code> et <code class="docutils literal notranslate"><span class="pre">expects_localtime</span></code>. Ces paramètres sont décrits dans <a class="reference internal" href="#filters-auto-escaping"><span class="std std-ref">filtres et échappement automatique</span></a> et <a class="reference internal" href="#filters-timezones"><span class="std std-ref">filtres et fuseaux horaires</span></a> ci-dessous.</p>
+</div>
+<div class="section" id="s-template-filters-that-expect-strings">
+<span id="template-filters-that-expect-strings"></span><h3>Filtres de gabarits agissant sur des chaînes<a class="headerlink" href="#template-filters-that-expect-strings" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.template.defaultfilters.stringfilter">
+<code class="descclassname">django.template.defaultfilters.</code><code class="descname">stringfilter</code>()<a class="headerlink" href="#django.template.defaultfilters.stringfilter" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si vous écrivez un filtre de gabarit qui s’attend uniquement à une chaîne comme premier paramètre, vous devriez utiliser le décorateur <code class="docutils literal notranslate"><span class="pre">stringfilter</span></code>. Celui-ci se chargera de convertir un objet dans son équivalent chaîne de caractères avant de le passer à votre fonction&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+<span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="k">import</span> <span class="n">stringfilter</span>
+
+<span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">filter</span>
+<span class="nd">@stringfilter</span>
+<span class="k">def</span> <span class="nf">lower</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>De cette façon, vous pourrez par exemple passer un nombre entier à ce filtre et il ne générera pas d’erreur <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> (les nombres entiers n’ont pas de méthode <code class="docutils literal notranslate"><span class="pre">lower()</span></code>).</p>
+</div>
+<div class="section" id="s-filters-and-auto-escaping">
+<span id="s-filters-auto-escaping"></span><span id="filters-and-auto-escaping"></span><span id="filters-auto-escaping"></span><h3>Les filtres et l’échappement automatique<a class="headerlink" href="#filters-and-auto-escaping" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Quand vous écrivez un filtre personnalisé, réfléchissez sur la façon dont celui-ci va interagir avec le comportement d’échappement automatique de Django. Notez que deux types de chaînes peuvent circuler dans le code des gabarits&nbsp;:</p>
+<ul>
+<li><p class="first">Des <strong>chaînes brutes</strong> sont les chaînes Python natives. En sortie, et si l’échappement automatique est en vigueur, ces chaînes seront échappées, sinon elles sont laissées telles quelles.</p>
+</li>
+<li><p class="first">Des <strong>chaînes sûres</strong> sont des chaînes qui ont été marquées comme sûres et par là-même qu’elles n’ont plus besoin d’être échappées au moment de l’affichage. Tout échappement nécessaire aura déjà été effectué. Elles sont habituellement utilisées pour des chaînes qui contiennent du HTML brut devant être interprété tel quel au niveau du client.</p>
+<p>En interne, ces chaînes sont de type <a class="reference internal" href="../ref/utils.html#django.utils.safestring.SafeString" title="django.utils.safestring.SafeString"><code class="xref py py-class docutils literal notranslate"><span class="pre">SafeString</span></code></a>. Vous pouvez les identifier en utilisant du code comme&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="k">import</span> <span class="n">SafeString</span>
+
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">SafeString</span><span class="p">):</span>
+    <span class="c1"># Do something with the &quot;safe&quot; string.</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Le code des filtres de gabarits entre dans l’une des deux situations suivantes&nbsp;:</p>
+<ol class="arabic">
+<li><p class="first">Votre filtre n’introduit aucun nouveau caractère HTML non sûr (<code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">'</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;</span></code> ou <code class="docutils literal notranslate"><span class="pre">&amp;</span></code>) dans le résultat. Dans ce cas, vous pouvez laisser Django s’occuper de toute la gestion de l’échappement automatique. Tout ce que vous avez à faire est de définir le drapeau <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> lorsque vous inscrivez votre fonction de filtre, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">is_safe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">myfilter</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>Ce drapeau indique à Django que si une chaîne «&nbsp;sûre&nbsp;» (safe) est passée à votre filtre, le résultat sera toujours «&nbsp;sûr&nbsp;» et que si une chaîne non sûre est passée, Django l’échappera automatiquement si nécessaire.</p>
+<p>Vous pouvez considérer cela comme signifiant que «&nbsp;ce filtre est sûr, il n’introduit aucune éventualité de code HTML non sûr&nbsp;».</p>
+<p>La raison d’être de <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> est qu’il existe un grand nombre d’opérations normales sur les chaînes qui transforment un objet <code class="docutils literal notranslate"><span class="pre">SafeData</span></code> en un objet <code class="docutils literal notranslate"><span class="pre">str</span></code> normal, et qu’au lieu d’essayer d’identifier tous ces cas de figure, ce qui serait très difficile, Django répare les dommages après que le filtre ait fait son travail.</p>
+<p>Par exemple, imaginons un filtre qui ajoute la chaîne <code class="docutils literal notranslate"><span class="pre">xx</span></code> à la fin de n’importe quelle variable d’entrée. Comme cela n’introduit aucun caractère HTML dangereux dans le résultat (sauf s’il y en avait déjà), vous devriez marquer ce filtre avec <code class="docutils literal notranslate"><span class="pre">is_safe</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">is_safe</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">add_xx</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">xx&#39;</span> <span class="o">%</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>Lorsque ce filtre est utilisé dans un gabarit dans lequel l’échappement automatique est en vigueur, Django va échapper le contenu chaque fois que la variable dde départ n’est pas déjà marquée comme «&nbsp;sûre&nbsp;».</p>
+<p>Par défaut, <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, et vous pouvez simplement l’omettre quand il n’est pas nécessaire.</p>
+<p>Soyez prudent quand vous décidez si votre filtre conserve réellement des chaînes sûres. Si vous <em>enlevez</em> des caractères, il se peut que vous laissiez par mégarde des balises ou entités HTML mal équilibrées dans le résultat. Par exemple, en enlevant un <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> du contenu initial, cela pourrait transformer <code class="docutils literal notranslate"><span class="pre">&lt;a&gt;</span></code> en <code class="docutils literal notranslate"><span class="pre">&lt;a</span></code> qui devrait alors être échappé à l’affichage pour éviter de poser des problèmes. De même, enlever un point-virgule (<code class="docutils literal notranslate"><span class="pre">;</span></code>) peut transformer <code class="docutils literal notranslate"><span class="pre">&amp;amp;</span></code> en <code class="docutils literal notranslate"><span class="pre">&amp;amp</span></code>, ce qui n’est plus une entité valide et devrait donc de nouveau être échappé. Ce ne sera pas si subtil dans la plupart des cas, mais gardez à l’esprit ce genre de problème potentiel lorsque vous relisez votre code.</p>
+<p>Le marquage d’un filtre avec <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> force la valeur de retour du filtre en chaîne de caractères. Si votre filtre doit renvoyer un booléen ou une autre valeur non textuelle, le marquage avec <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> va probablement générer des conséquences inattendues (comme la conversion du booléen False en chaîne “False”).</p>
+</li>
+<li><p class="first">Une autre option possible est de s’occuper manuellement dans le code du filtre d’effectuer d’éventuels échappements. C’est nécessaire quand vous introduisez de nouvelles balises HTML dans le résultat. Il faut alors marquer le contenu comme sûr et exempt de besoin d’échappement afin que le code HTML introduit ne soit pas échappé plus tard, ce qui implique donc que vous gériez vous-même ce contenu.</p>
+<p>Pour marquer le résultat comme une chaîne sûre, utilisez <a class="reference internal" href="../ref/utils.html#django.utils.safestring.mark_safe" title="django.utils.safestring.mark_safe"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.utils.safestring.mark_safe()</span></code></a>.</p>
+<p>Mais restez prudent. Vous devez faire plus que simplement marquer le résultat comme sûr. Vous devez vous assurer qu’il soit <em>réellement</em> sûr et votre action dépend de l’activité de l’échappement automatique. L’idée est d’écrire des filtres qui peuvent agir dans des gabarits où l’échappement automatique est activé ou non, afin de faciliter la tâche aux rédacteurs de gabarits.</p>
+<p>Pour que vos filtres sachent si l’échappement automatique est actuellement actif, définissez le drapeau <code class="docutils literal notranslate"><span class="pre">needs_autoescape</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> lorsque vous inscrivez votre fonction de filtre (il vaut <code class="docutils literal notranslate"><span class="pre">False</span></code> par défaut). Ce drapeau indique à Django que votre fonction de filtre souhaite recevoir un paramètre mot-clé supplémentaire, <code class="docutils literal notranslate"><span class="pre">autoescape</span></code>. Ce paramètre vaudra <code class="docutils literal notranslate"><span class="pre">True</span></code> quand l’échappement automatique est en vigueur et <code class="docutils literal notranslate"><span class="pre">False</span></code> dans le cas contraire. Il est recommandé de définir la valeur par défaut du paramètre <code class="docutils literal notranslate"><span class="pre">autoescape</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code>, pour que si la fonction est appelée depuis le code Python, l’échappement soit activé par défaut.</p>
+<p>Par exemple, écrivons un filtre qui met en évidence le premier caractère d’une chaîne&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+<span class="kn">from</span> <span class="nn">django.utils.html</span> <span class="k">import</span> <span class="n">conditional_escape</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="k">import</span> <span class="n">mark_safe</span>
+
+<span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">needs_autoescape</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">initial_letter_filter</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">autoescape</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">first</span><span class="p">,</span> <span class="n">other</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">autoescape</span><span class="p">:</span>
+        <span class="n">esc</span> <span class="o">=</span> <span class="n">conditional_escape</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">esc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&lt;strong&gt;</span><span class="si">%s</span><span class="s1">&lt;/strong&gt;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">esc</span><span class="p">(</span><span class="n">first</span><span class="p">),</span> <span class="n">esc</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Le drapeau <code class="docutils literal notranslate"><span class="pre">needs_autoescape</span></code> et le paramètre nommé <code class="docutils literal notranslate"><span class="pre">autoescape</span></code> signifient que notre fonction saura si l’échappement automatique est en vigueur au moment où le filtre est appelé. Nous utilisons <code class="docutils literal notranslate"><span class="pre">autoescape</span></code> pour savoir si nous devons faire passer les données reçues par la fonction <code class="docutils literal notranslate"><span class="pre">django.utils.html.conditional_escape</span></code> (sinon, nous utilisons la fonction neutre comme fonction d’échappement). La fonction <code class="docutils literal notranslate"><span class="pre">conditional_escape()</span></code> est semblable à <code class="docutils literal notranslate"><span class="pre">escape()</span></code>, sauf que l’échappement n’a lieu que si la valeur d’entrée n’est <strong>pas</strong> déjà une instance de <code class="docutils literal notranslate"><span class="pre">SafeData</span></code>. Si une instance de <code class="docutils literal notranslate"><span class="pre">SafeData</span></code> est transmise à <code class="docutils literal notranslate"><span class="pre">conditional_escape()</span></code>, les données sont renvoyées sans être modifiées.</p>
+<p>Finalement, dans l’exemple ci-dessus, nous n’oublions pas de marquer le résultat comme sûr afin que notre code HTML soit inséré directement dans le gabarit sans échappement supplémentaire.</p>
+<p>Il n’y a pas besoin de se préoccuper du drapeau <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> dans ce cas (même si on pourrait le définir sans dommages). Chaque fois que vous gérez manuellement la question de l’échappement automatique et que vous renvoyez une chaîne sûre, le drapeau <code class="docutils literal notranslate"><span class="pre">is_safe</span></code> ne change rien, quelle que soit sa valeur.</p>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Risque de vulnérabilités XSS lors de la réutilisation de filtres intégrés</p>
+<p>Les filtres intégrés de Django contiennent <code class="docutils literal notranslate"><span class="pre">autoescape=True</span></code> par défaut afin d’obtenir le bon comportement d’échappement automatique et d’éviter ainsi une éventuelle vulnérabilité de script inter-site.</p>
+<p>Dans les versions plus anciennes de Django, réutilisez prudemment les filtres intégrés de Django car la valeur par défaut de <code class="docutils literal notranslate"><span class="pre">autoescape</span></code> est <code class="docutils literal notranslate"><span class="pre">None</span></code>. Vous devrez passer explicitement <code class="docutils literal notranslate"><span class="pre">autoescape=True</span></code> pour que le résultat soit automatiquement échappé.</p>
+<p>Par exemple, si vous voulez écrire un filtre personnalisé nommé <code class="docutils literal notranslate"><span class="pre">urlize_and_linebreaks</span></code> qui combine les filtres <a class="reference internal" href="../ref/templates/builtins.html#std:templatefilter-urlize"><code class="xref std std-tfilter docutils literal notranslate"><span class="pre">urlize</span></code></a> et <a class="reference internal" href="../ref/templates/builtins.html#std:templatefilter-linebreaksbr"><code class="xref std std-tfilter docutils literal notranslate"><span class="pre">linebreaksbr</span></code></a>, le filtre pourrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.template.defaultfilters</span> <span class="k">import</span> <span class="n">linebreaksbr</span><span class="p">,</span> <span class="n">urlize</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">needs_autoescape</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">urlize_and_linebreaks</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">autoescape</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">linebreaksbr</span><span class="p">(</span>
+        <span class="n">urlize</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">autoescape</span><span class="o">=</span><span class="n">autoescape</span><span class="p">),</span>
+        <span class="n">autoescape</span><span class="o">=</span><span class="n">autoescape</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+<p>Puis&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">comment</span><span class="o">|</span><span class="nf">urlize_and_linebreaks</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+<p>serait équivalent à&nbsp;:</p>
+<div class="last highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">comment</span><span class="o">|</span><span class="nf">urlize</span><span class="o">|</span><span class="nf">linebreaksbr</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-filters-and-time-zones">
+<span id="s-filters-timezones"></span><span id="filters-and-time-zones"></span><span id="filters-timezones"></span><h3>Filtres et fuseaux horaires<a class="headerlink" href="#filters-and-time-zones" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous écrivez un filtre personnalisé qui opère sur des objets <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>, vous allez généralement l’inscrire avec le drapeau <code class="docutils literal notranslate"><span class="pre">expects_localtime</span></code> défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">expects_localtime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">businesshours</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">9</span> <span class="o">&lt;=</span> <span class="n">value</span><span class="o">.</span><span class="n">hour</span> <span class="o">&lt;</span> <span class="mi">17</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+</pre></div>
+</div>
+<p>Lorsque ce drapeau est défini et si le premier paramètre du filtre est un objet date/heure sensible aux fuseaux horaires, Django le convertit au besoin dans le fuseau horaire actuel avant de le passer à votre filtre, selon les <a class="reference internal" href="../topics/i18n/timezones.html#time-zones-in-templates"><span class="std std-ref">règles de conversion de fuseaux horaires dans les gabarits</span></a>.</p>
+</div>
+</div>
+<div class="section" id="s-writing-custom-template-tags">
+<span id="s-howto-writing-custom-template-tags"></span><span id="writing-custom-template-tags"></span><span id="howto-writing-custom-template-tags"></span><h2>Écriture de balises de gabarits personnalisées<a class="headerlink" href="#writing-custom-template-tags" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les balises sont plus complexes que les filtres, car les balises peuvent tout faire. Django fournit un certain nombre de raccourcis qui facilitent l’écriture de la plupart des types de balises. Nous allons commencer par explorer ces raccourcis, puis expliquer comment écrire une balise à partir de rien pour les cas où les raccourcis ne conviennent pas au besoin.</p>
+<div class="section" id="s-simple-tags">
+<span id="s-howto-custom-template-tags-simple-tags"></span><span id="simple-tags"></span><span id="howto-custom-template-tags-simple-tags"></span><h3>Balises simples<a class="headerlink" href="#simple-tags" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.template.Library.simple_tag">
+<code class="descclassname">django.template.Library.</code><code class="descname">simple_tag</code>()<a class="headerlink" href="#django.template.Library.simple_tag" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Bien des balises de gabarit acceptent des paramètres (chaînes ou variables de gabarit) et renvoient un résultat après avoir effectué quelques opérations sur la base des paramètres initiaux et de certaines informations externes. Par exemple, une balise <code class="docutils literal notranslate"><span class="pre">current_time</span></code> pourrait accepter une chaîne de formatage et renvoyer l’heure sous forme de chaîne dans le bon format.</p>
+<p>Pour faciliter la création de ce type de balise, Django fournit une fonction utilitaire, <code class="docutils literal notranslate"><span class="pre">simple_tag</span></code>. Cette fonction, qui est une méthode de <code class="docutils literal notranslate"><span class="pre">django.template.Library</span></code>, accepte elle-même une fonction qui accepte autant de paramètres que nécessaire, l’enveloppe dans une fonction <code class="docutils literal notranslate"><span class="pre">render</span></code> ainsi que les autres éléments nécessaires tels que mentionnés ci-dessus et l’inscrit dans le système de gabarits.</p>
+<p>Notre fonction <code class="docutils literal notranslate"><span class="pre">current_time</span></code> pourrait donc être écrite comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">simple_tag</span>
+<span class="k">def</span> <span class="nf">current_time</span><span class="p">(</span><span class="n">format_string</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">format_string</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Quelques petites choses à signaler au sujet de la fonction utilitaire <code class="docutils literal notranslate"><span class="pre">simple_tag</span></code>:</p>
+<ul class="simple">
+<li>Le contrôle du nombre de paramètres requis, etc., a déjà été effectué au moment où notre fonction est appelée, nous n’avons donc pas à le faire.</li>
+<li>Les guillemets autour du paramètre (le cas échéant) ont déjà été enlevés, nous recevons donc une chaîne normale.</li>
+<li>Si le paramètre était une variable de gabarit, notre fonction reçoit la valeur réelle de la variable et non pas la variable elle-même.</li>
+</ul>
+<p>Au contraire des autres utilitaires de balises, <code class="docutils literal notranslate"><span class="pre">simple_tag</span></code> passe son résultat par <a class="reference internal" href="../ref/utils.html#django.utils.html.conditional_escape" title="django.utils.html.conditional_escape"><code class="xref py py-func docutils literal notranslate"><span class="pre">conditional_escape()</span></code></a> si le contexte de gabarit est en mode échappement automatique, pour garantir du HTML correct et vous protéger d’éventuelles vulnérabilités XSS.</p>
+<p>Si l’échappement complémentaire n’est pas souhaité, il est nécessaire d’utiliser <a class="reference internal" href="../ref/utils.html#django.utils.safestring.mark_safe" title="django.utils.safestring.mark_safe"><code class="xref py py-func docutils literal notranslate"><span class="pre">mark_safe()</span></code></a> pour autant que vous soyez absolument sûr que votre code ne contienne pas de vulnérabilité XSS. Pour la construction de petits bouts de HTML, il est fortement recommandé d’utiliser <a class="reference internal" href="../ref/utils.html#django.utils.html.format_html" title="django.utils.html.format_html"><code class="xref py py-func docutils literal notranslate"><span class="pre">format_html()</span></code></a> au lieu de <code class="docutils literal notranslate"><span class="pre">mark_safe()</span></code>.</p>
+<p>Si votre balise de gabarit a besoin d’accéder au contexte en cours, vous pouvez utiliser le paramètre <code class="docutils literal notranslate"><span class="pre">takes_context</span></code> lors de l’inscription de la balise&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">simple_tag</span><span class="p">(</span><span class="n">takes_context</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">current_time</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">format_string</span><span class="p">):</span>
+    <span class="n">timezone</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;timezone&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">your_get_current_time_method</span><span class="p">(</span><span class="n">timezone</span><span class="p">,</span> <span class="n">format_string</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notez que le premier paramètre <em>doit</em> être nommé <code class="docutils literal notranslate"><span class="pre">context</span></code>.</p>
+<p>Pour plus d’informations sur le fonctionnement de l’option <code class="docutils literal notranslate"><span class="pre">takes_context</span></code>, consultez la section sur les <a class="reference internal" href="#howto-custom-template-tags-inclusion-tags"><span class="std std-ref">balises d’inclusion</span></a>.</p>
+<p>Si vous avez besoin de renommer votre balise, vous pouvez lui donner un nom personnalisé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">.</span><span class="n">simple_tag</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;minusone&#39;</span><span class="p">)</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">simple_tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;minustwo&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">some_function</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span> <span class="o">-</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Les fonctions <code class="docutils literal notranslate"><span class="pre">simple_tag</span></code> peuvent accepter n’importe quel nombre de paramètres positionnels ou nommés. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">simple_tag</span>
+<span class="k">def</span> <span class="nf">my_tag</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">warning</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;warning&#39;</span><span class="p">]</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;profile&#39;</span><span class="p">]</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>Puis, dans le gabarit, n’importe quel nombre de paramètres séparés par des espaces peuvent être transmis à la balise de gabarit. Comme en Python, les valeurs des paramètres nommés sont définis par le signe égal (<code class="docutils literal notranslate"><span class="pre">=</span></code>) et doivent être placés après les paramètres positionnels. Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">my_tag</span> <span class="m">123</span> <span class="s2">&quot;abcd&quot;</span> <span class="nv">book.title</span> <span class="nv">warning</span><span class="o">=</span><span class="nv">message</span><span class="o">|</span><span class="nf">lower</span> <span class="nv">profile</span><span class="o">=</span><span class="nv">user.profile</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Il est possible de stocker le résultat de la balise dans une variable de gabarit au lieu de l’afficher directement. Cela se fait en utilisant le paramètre <code class="docutils literal notranslate"><span class="pre">as</span></code> suivi du nom de variable. Ce faisant, vous pouvez ensuite afficher ce contenu à l’endroit où vous le souhaitez&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">current_time</span> <span class="s2">&quot;%Y-%m-%d %I:%M %p&quot;</span> <span class="k">as</span> <span class="nv">the_time</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>The time is <span class="cp">{{</span> <span class="nv">the_time</span> <span class="cp">}}</span>.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-inclusion-tags">
+<span id="s-howto-custom-template-tags-inclusion-tags"></span><span id="inclusion-tags"></span><span id="howto-custom-template-tags-inclusion-tags"></span><h3>Balises d’inclusion<a class="headerlink" href="#inclusion-tags" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="method">
+<dt id="django.template.Library.inclusion_tag">
+<code class="descclassname">django.template.Library.</code><code class="descname">inclusion_tag</code>()<a class="headerlink" href="#django.template.Library.inclusion_tag" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Un autre type de balises de gabarit fréquent est le type qui affiche certaines données en effectuant le rendu d’un <em>autre</em> gabarit. Par exemple, l’interface d’administration de Django utilise des balises de gabarit personnalisées pour afficher les boutons au bas des pages de formulaires d’ajout/édition. Ces boutons ont toujours une même apparence, mais les cibles de leurs liens changent en fonction de l’objet en cours d’édition, ils représentent donc un cas typique d’utilisation d’un petit gabarit complété par certains détails sur l’objet en cours (dans le cas précis de l’interface d’administration, il s’agit de la balise <code class="docutils literal notranslate"><span class="pre">submit_row</span></code>).</p>
+<p>Ces types de balises sont appelées des «&nbsp;balises d’inclusion&nbsp;».</p>
+<p>Un exemple sera le meilleur moyen d’illustrer l’écriture de balises d’inclusion. Écrivons une balise qui affiche une liste de choix pour un objet  <code class="docutils literal notranslate"><span class="pre">Poll</span></code> donné, comme celui qui a été créé dans les <a class="reference internal" href="../intro/tutorial02.html#creating-models"><span class="std std-ref">tutoriels</span></a>. Nous utiliserons la balise comme ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">show_results</span> <span class="nv">poll</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>… et cela donnera le résultat suivant&nbsp;:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>First choice<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Second choice<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>Third choice<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Pour commencer, définissez la fonction qui accepte le paramètre et qui produit un dictionnaire de données comme résultat. Le point important ici est que nous devons uniquement renvoyer un dictionnaire, rien d’autre de plus complexe. Il sera utilisé comme contexte de gabarit pour le fragment de gabarit. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">show_results</span><span class="p">(</span><span class="n">poll</span><span class="p">):</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="n">poll</span><span class="o">.</span><span class="n">choice_set</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="n">choices</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Ensuite, créez le gabarit utilisé pour faire le rendu du résultat de la balise. Ce gabarit est une fonctionnalité figée de la balise&nbsp;: c’est le rédacteur de la balise qui le définit, pas le concepteur des gabarits. Suivant notre exemple, le gabarit est très court :</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">choice</span> <span class="k">in</span> <span class="nv">choices</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span> <span class="cp">{{</span> <span class="nv">choice</span> <span class="cp">}}</span> <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Maintenant, créez et inscrivez la balise d’inclusion en appelant la méthode <code class="docutils literal notranslate"><span class="pre">inclusion_tag()</span></code> d’un objet <code class="docutils literal notranslate"><span class="pre">Library</span></code>. Suivant notre exemple, si le gabarit ci-dessus se trouve dans un fichier nommé <code class="docutils literal notranslate"><span class="pre">results.html</span></code> dans un répertoire parcouru par le chargeur de gabarits, voici comment nous inscrivons la balise&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Here, register is a django.template.Library instance, as before</span>
+<span class="nd">@register</span><span class="o">.</span><span class="n">inclusion_tag</span><span class="p">(</span><span class="s1">&#39;results.html&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">show_results</span><span class="p">(</span><span class="n">poll</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Il est également possible d’inscrire la balise d’inclusion en utilisant une instance de <a class="reference internal" href="../ref/templates/api.html#django.template.Template" title="django.template.Template"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.template.Template</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.template.loader</span> <span class="k">import</span> <span class="n">get_template</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;results.html&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">inclusion_tag</span><span class="p">(</span><span class="n">t</span><span class="p">)(</span><span class="n">show_results</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>… lorsque nous avons initialement créé la fonction.</p>
+<p>Il peut arriver que vos balises d’inclusion nécessitent un grand nombre de paramètres, ce qui rend pénible pour les auteurs des gabarits la transmission de tous les paramètres en se souvenant de l’ordre exigé. Pour résoudre ce problème, Django fournit l’option <code class="docutils literal notranslate"><span class="pre">takes_context</span></code> pour les balises d’inclusion. Si vous définissez <code class="docutils literal notranslate"><span class="pre">takes_context</span></code> lors de la création d’une balise de gabarit, celle-ci n’aura aucun paramètre obligatoire et la fonction Python sous-jacente recevra un paramètre, le contexte du gabarit au moment où la balise a été appelée.</p>
+<p>Par exemple, disons que vous écrivez une balise d’inclusion qui sera toujours utilisée dans un contexte contenant les variables <code class="docutils literal notranslate"><span class="pre">home_link</span></code> et <code class="docutils literal notranslate"><span class="pre">home_title</span></code> pointant sur la page principale. Voici à quoi la fonction Python ressemblerait&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">inclusion_tag</span><span class="p">(</span><span class="s1">&#39;link.html&#39;</span><span class="p">,</span> <span class="n">takes_context</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">jump_link</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;link&#39;</span><span class="p">:</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;home_link&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;home_title&#39;</span><span class="p">],</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Notez que le premier paramètre de la fonction <em>doit</em> être nommé <code class="docutils literal notranslate"><span class="pre">context</span></code>.</p>
+<p>Dans la ligne <code class="docutils literal notranslate"><span class="pre">register.inclusion_tag()</span></code>, nous précisons <code class="docutils literal notranslate"><span class="pre">takes_context=True</span></code> ainsi que le nom du gabarit. Voici à quoi pourrait ressembler le gabarit <code class="docutils literal notranslate"><span class="pre">link.html</span></code>:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span>Jump directly to <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{{</span> <span class="nv">link</span> <span class="cp">}}</span><span class="s">&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">title</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>.
+</pre></div>
+</div>
+<p>Puis, chaque fois que vous souhaitez utiliser cette balise personnalisée, chargez sa bibliothèque et appelez-la sans paramètre, comme ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">jump_link</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Notez que lorsque vous utilisez <code class="docutils literal notranslate"><span class="pre">takes_context=True</span></code>, il n’y a pas besoin de transmettre de paramètres à la balise de gabarit. Cette dernière a automatiquement accès au contexte.</p>
+<p>Le paramètre <code class="docutils literal notranslate"><span class="pre">takes_context</span></code> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code> par défaut. Lorsqu’il est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>, la balise reçoit l’objet contexte, comme dans cet exemple. C’est la seule différence entre ce cas et l’exemple <code class="docutils literal notranslate"><span class="pre">inclusion_tag</span></code> précédent.</p>
+<p>Les fonctions <code class="docutils literal notranslate"><span class="pre">inclusion_tag</span></code> acceptent n’importe quel nombre de paramètres positionnels ou nommés. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">inclusion_tag</span><span class="p">(</span><span class="s1">&#39;my_template.html&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_tag</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">warning</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;warning&#39;</span><span class="p">]</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;profile&#39;</span><span class="p">]</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>Puis, dans le gabarit, n’importe quel nombre de paramètres séparés par des espaces peuvent être transmis à la balise de gabarit. Comme en Python, les valeurs des paramètres nommés sont définis par le signe égal (<code class="docutils literal notranslate"><span class="pre">=</span></code>) et doivent être placés après les paramètres positionnels. Par exemple&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">my_tag</span> <span class="m">123</span> <span class="s2">&quot;abcd&quot;</span> <span class="nv">book.title</span> <span class="nv">warning</span><span class="o">=</span><span class="nv">message</span><span class="o">|</span><span class="nf">lower</span> <span class="nv">profile</span><span class="o">=</span><span class="nv">user.profile</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-advanced-custom-template-tags">
+<span id="advanced-custom-template-tags"></span><h3>Balises de gabarits personnalisées (niveau avancé)<a class="headerlink" href="#advanced-custom-template-tags" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il peut arriver que les fonctionnalités de base de la création d’une balise de gabarit personnalisée ne suffisent pas. Ne vous en faites pas. Django vous offre un accès complet à l’interface interne nécessaire pour construire une balise de gabarit à partir de rien.</p>
+</div>
+<div class="section" id="s-a-quick-overview">
+<span id="a-quick-overview"></span><h3>Aperçu rapide<a class="headerlink" href="#a-quick-overview" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le système de gabarits fonctionne par un processus en deux étapes&nbsp;: la compilation et le rendu. Pour créer une balise de gabarit personnalisée, il s’agit de définir à la fois le comportement de la compilation et celui du rendu.</p>
+<p>Quand Django compile un gabarit, il divise le texte brut du gabarit en «&nbsp;nœuds&nbsp;». Chaque nœud est une instance de <code class="docutils literal notranslate"><span class="pre">django.template.Node</span></code> et possède une méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code>. Un gabarit compilé est une liste d’objets <code class="docutils literal notranslate"><span class="pre">Node</span></code>. Lorsque vous appelez <code class="docutils literal notranslate"><span class="pre">render()</span></code> sur un objet gabarit compilé, le gabarit appelle <code class="docutils literal notranslate"><span class="pre">render()</span></code> pour chaque <code class="docutils literal notranslate"><span class="pre">Node</span></code> de sa liste de nœuds en leur passant le contexte. Les résultats sont tous concaténés pour former le rendu du gabarit.</p>
+<p>Ainsi, pour créer une balise de gabarit personnalisée, vous définissez la manière de convertir la balise de gabarit brute en un <code class="docutils literal notranslate"><span class="pre">Node</span></code> (fonction de compilation) et ce que fait la méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code> du nœud.</p>
+</div>
+<div class="section" id="s-writing-the-compilation-function">
+<span id="writing-the-compilation-function"></span><h3>Écriture de la fonction de compilation<a class="headerlink" href="#writing-the-compilation-function" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour chaque balise de gabarit que l’analyseur de gabarit rencontre, il appelle une fonction Python avec le contenu de la balise et l’objet analyseur lui-même. Cette fonction est responsable de renvoyer une instance de <code class="docutils literal notranslate"><span class="pre">Node</span></code> en fonction du contenu de la balise.</p>
+<p>Par exemple, écrivons une implémentation complète de notre balise de gabarit, <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">current_time</span> <span class="pre">%}</span></code>, qui affiche l’heure et la date courantes formatées en fonction d’un paramètre donné à la balise, en respectant la syntaxe <a class="reference external" href="https://docs.python.org/3/library/time.html#time.strftime" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">strftime()</span></code></a>. Il est conseillé de définir la syntaxe de la balise avant toute autre chose. Dans notre cas, disons que la balise devrait être utilisée comme ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>The time is <span class="cp">{%</span> <span class="k">current_time</span> <span class="s2">&quot;%Y-%m-%d %I:%M %p&quot;</span> <span class="cp">%}</span>.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>L’analyseur de cette fonction doit capturer le paramètre et créer un objet <code class="docutils literal notranslate"><span class="pre">Node</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="k">def</span> <span class="nf">do_current_time</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># split_contents() knows not to split quoted strings.</span>
+        <span class="n">tag_name</span><span class="p">,</span> <span class="n">format_string</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split_contents</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag requires a single argument&quot;</span> <span class="o">%</span> <span class="n">token</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">format_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">format_string</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">format_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag&#39;s argument should be in quotes&quot;</span> <span class="o">%</span> <span class="n">tag_name</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">CurrentTimeNode</span><span class="p">(</span><span class="n">format_string</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Notes&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">parser</span></code> est l’objet analyseur de gabarit. Nous n’en avons pas besoin dans cet exemple.</li>
+<li><code class="docutils literal notranslate"><span class="pre">token.contents</span></code> est une chaîne formée du contenu brut de la balise. Dans notre exemple, il s’agit de <code class="docutils literal notranslate"><span class="pre">'current_time</span> <span class="pre">&quot;%Y-%m-%d</span> <span class="pre">%I:%M</span> <span class="pre">%p&quot;'</span></code>.</li>
+<li>La méthode <code class="docutils literal notranslate"><span class="pre">token.split_contents()</span></code> sépare les paramètres en fonction des espaces tout en gardant groupées les chaînes entre guillemets. La méthode plus directe <code class="docutils literal notranslate"><span class="pre">token.contents.split()</span></code> ne serait pas aussi robuste, car elle couperait naïvement à <em>chaque</em> espace, y compris ceux à l’intérieur des chaînes entre guillemets. Il est conseillé de toujours utiliser <code class="docutils literal notranslate"><span class="pre">token.split_contents()</span></code>.</li>
+<li>Cette fonction est responsable de lever l’exception <code class="docutils literal notranslate"><span class="pre">django.template.TemplateSyntaxError</span></code> à chaque erreur de syntaxe, avec des messages utiles.</li>
+<li>Les exceptions <code class="docutils literal notranslate"><span class="pre">TemplateSyntaxError</span></code> utilisent la variable <code class="docutils literal notranslate"><span class="pre">tag_name</span></code>. Ne codez pas en dur le nom de la balise dans les messages d’erreur, car cela lie le nom de la balise à votre fonction. <code class="docutils literal notranslate"><span class="pre">token.contents.split()[0]</span></code> sera toujours le nom de la balise, même lorsque celle-ci n’accepte aucun paramètre.</li>
+<li>La fonction renvoie un <code class="docutils literal notranslate"><span class="pre">CurrentTimeNode</span></code> avec tout ce que le nœud a besoin de connaître au sujet de la balise. Dans ce cas, il passe le paramètre (<code class="docutils literal notranslate"><span class="pre">&quot;%Y-%m-%d</span> <span class="pre">%I:%M</span> <span class="pre">%p&quot;</span></code>). Les guillemets ouvrant et fermant de la balise de gabarit sont enlevés par <code class="docutils literal notranslate"><span class="pre">format_string[1:-1]</span></code>.</li>
+<li>L’analyse est de très bas niveau. Les développeurs Django ont expérimenté l’écriture de petites infrastructures au-dessus de ce système d’analyse, en utilisant des techniques comme les grammaires EBNF, mais ces expériences ont rendu le moteur de gabarit trop lent. L’analyse est de bas niveau car c’est la solution la plus rapide.</li>
+</ul>
+</div>
+<div class="section" id="s-writing-the-renderer">
+<span id="writing-the-renderer"></span><h3>Écriture de la fonction de rendu<a class="headerlink" href="#writing-the-renderer" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La seconde étape dans l’écriture de balises de gabarit est définir une sous-classe de <code class="docutils literal notranslate"><span class="pre">Node</span></code> possédant une méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code>.</p>
+<p>Pour continuer l’exemple ci-dessus, nous devons définir <code class="docutils literal notranslate"><span class="pre">CurrentTimeNode</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="k">class</span> <span class="nc">CurrentTimeNode</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_string</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_string</span> <span class="o">=</span> <span class="n">format_string</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_string</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notes&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">__init__()</span></code> reçoit la chaîne <code class="docutils literal notranslate"><span class="pre">format_string</span></code> de <code class="docutils literal notranslate"><span class="pre">do_current_time()</span></code>. Passez toujours toute option ou paramètre à un <code class="docutils literal notranslate"><span class="pre">Node</span></code> par l’intermédiaire de sa méthode <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>.</li>
+<li>C’est dans la méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code> que se passe réellement le travail.</li>
+<li><code class="docutils literal notranslate"><span class="pre">render()</span></code> doit généralement échouer silencieusement, particulièrement en environnement de production. Cependant, dans certains cas, spécialement lorsque <code class="docutils literal notranslate"><span class="pre">context.template.engine.debug</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, cette méthode peut générer une exception pour faciliter le débogage. Par exemple, plusieurs balises intégrées génèrent <code class="docutils literal notranslate"><span class="pre">django.template.TemplateSyntaxError</span></code> si elles reçoivent le mauvais nombre de paramètres ou des paramètres du mauvais type.</li>
+</ul>
+<p>Au final, cette distinction entre compilation et rendu aboutit à un système de gabarit efficace, car un gabarit peut produire un rendu avec plusieurs contextes différents sans devoir être analysé plusieurs fois.</p>
+</div>
+<div class="section" id="s-auto-escaping-considerations">
+<span id="s-tags-auto-escaping"></span><span id="auto-escaping-considerations"></span><span id="tags-auto-escaping"></span><h3>Considérations sur l’échappement automatique<a class="headerlink" href="#auto-escaping-considerations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le résultat des balises de gabarit ne passe <strong>pas</strong> automatiquement par les filtres d’échappement automatique (à l’exception de <a class="reference internal" href="#django.template.Library.simple_tag" title="django.template.Library.simple_tag"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simple_tag()</span></code></a> comme expliqué plus haut) . Toutefois, il y a quand même deux ou trois choses à garder à l’esprit en écrivant des balises de gabarit.</p>
+<p>Si la méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code> de votre balise de gabarit conserve le résultat dans une variable de contexte (plutôt que de renvoyer le résultat dans une chaîne), elle devrait alors s’occuper d’appeler <code class="docutils literal notranslate"><span class="pre">mark_safe()</span></code> si nécessaire. Lorsque la variable sera finalement affichée, elle sera affectée par le réglage d’échappement automatique en vigueur à ce moment, il faut donc que les contenus qui ne doivent plus être échappés soient marqués comme tels.</p>
+<p>De même, si votre balise de gabarit crée un nouveau contexte pour procéder à certains sous-rendus, définissez l’attribut d’échappement automatique pour la valeur du contexte en cours. La méthode <code class="docutils literal notranslate"><span class="pre">__init__</span></code> de la classe <code class="docutils literal notranslate"><span class="pre">Context</span></code> accepte un paramètre nommé <code class="docutils literal notranslate"><span class="pre">autoescape</span></code> et qui est destiné à cet effet. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.template</span> <span class="k">import</span> <span class="n">Context</span>
+
+<span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">new_context</span> <span class="o">=</span> <span class="n">Context</span><span class="p">({</span><span class="s1">&#39;var&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="p">},</span> <span class="n">autoescape</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">autoescape</span><span class="p">)</span>
+    <span class="c1"># ... Do something with new_context ...</span>
+</pre></div>
+</div>
+<p>Ce n’est pas une situation très courante, mais c’est utile si vous faites vous-même le rendu d’un gabarit. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;small_fragment.html&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">Context</span><span class="p">({</span><span class="s1">&#39;var&#39;</span><span class="p">:</span> <span class="n">obj</span><span class="p">},</span> <span class="n">autoescape</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">autoescape</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Si nous avions négligé de passer la valeur actuelle de <code class="docutils literal notranslate"><span class="pre">context.autoescape</span></code> au nouveau <code class="docutils literal notranslate"><span class="pre">Context</span></code> de cet exemple, les résultats auraient <em>toujours</em> subi un échappement automatique, ce qui pourrait ne pas correspondre au comportement attendu si la balise de gabarit est utilisée à l’intérieur d’un bloc  <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-autoescape"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">autoescape</span> <span class="pre">off</span> <span class="pre">%}</span></code></a>.</p>
+</div>
+<div class="section" id="s-thread-safety-considerations">
+<span id="s-template-tag-thread-safety"></span><span id="thread-safety-considerations"></span><span id="template-tag-thread-safety"></span><h3>Considérations sur la concurrence entre «&nbsp;threads&nbsp;»<a class="headerlink" href="#thread-safety-considerations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Dès qu’un nœud est analysé, sa méthode <code class="docutils literal notranslate"><span class="pre">render</span></code> peut être appelée indéfiniment. Comme Django est parfois lancé dans un environnement avec plusieurs fils d’exécution parallèles (multi-thread), un même nœud peut être rendu plusieurs fois simultanément avec différents contextes en réponse à des requêtes séparées. Il est donc important de s’assurer que vos balises de gabarit sont robustes à la concurrence.</p>
+<p>Pour que vos balises de gabarit sachent gérer la concurrence, il ne faut jamais stocker des informations d’état dans le nœud lui-même. Par exemple, Django contient une balise de gabarit <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-cycle"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">cycle</span></code></a> qui parcourt une liste de chaînes données à chaque rendu&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">for</span> <span class="nv">o</span> <span class="k">in</span> <span class="nv">some_list</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">tr</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">cycle</span> <span class="s1">&#39;row1&#39;</span> <span class="s1">&#39;row2&#39;</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>
+        ...
+    <span class="p">&lt;/</span><span class="nt">tr</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Une implémentation naïve de <code class="docutils literal notranslate"><span class="pre">CycleNode</span></code> pourrait ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="k">class</span> <span class="nc">CycleNode</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cyclevars</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cycle_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="n">cyclevars</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cycle_iter</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Mais supposons que deux gabarits soient rendus en parallèle et qu’ils contiennent l’extrait de gabarit ci-dessus&nbsp;:</p>
+<ol class="arabic simple">
+<li>Le fil d’exécution 1 effectue sa première itération de boucle, <code class="docutils literal notranslate"><span class="pre">CycleNode.render()</span></code> renvoie «&nbsp;row1&nbsp;»</li>
+<li>Le fil d’exécution 2 effectue sa première itération de boucle, <code class="docutils literal notranslate"><span class="pre">CycleNode.render()</span></code> renvoie «&nbsp;row2&nbsp;»</li>
+<li>Le fil d’exécution 1 effectue sa seconde itération de boucle, <code class="docutils literal notranslate"><span class="pre">CycleNode.render()</span></code> renvoie «&nbsp;row1&nbsp;»</li>
+<li>Le fil d’exécution 2 effectue sa seconde itération de boucle, <code class="docutils literal notranslate"><span class="pre">CycleNode.render()</span></code> renvoie «&nbsp;row2&nbsp;»</li>
+</ol>
+<p>Le nœud CycleNode effectue son itération, mais globalement. En ce qui concerne les fils d’exécution 1 et 2, ils renvoient toujours la même valeur. Ce n’est évidemment pas ce que nous voulons&nbsp;!</p>
+<p>Pour résoudre ce problème, Django met à disposition un <code class="docutils literal notranslate"><span class="pre">render_context</span></code> qui est associé au <code class="docutils literal notranslate"><span class="pre">context</span></code> du gabarit qui est en cours de rendu. <code class="docutils literal notranslate"><span class="pre">render_context</span></code> se comporte comme un dictionnaire Python et doit être utilisé pour stocker l’état de <code class="docutils literal notranslate"><span class="pre">Node</span></code> entre les invocations de la méthode <code class="docutils literal notranslate"><span class="pre">render</span></code>.</p>
+<p>Révisons notre implémentation de <code class="docutils literal notranslate"><span class="pre">CycleNode</span></code> en utilisant <code class="docutils literal notranslate"><span class="pre">render_context</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CycleNode</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cyclevars</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cyclevars</span> <span class="o">=</span> <span class="n">cyclevars</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">render_context</span><span class="p">:</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">render_context</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">cycle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cyclevars</span><span class="p">)</span>
+        <span class="n">cycle_iter</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">render_context</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">cycle_iter</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Notez qu’il est totalement correct de stocker sous forme d’attribut de l’information globale qui ne changera pas durant le cycle de vie de <code class="docutils literal notranslate"><span class="pre">Node</span></code>. Dans le cas de <code class="docutils literal notranslate"><span class="pre">CycleNode</span></code>, le paramètre <code class="docutils literal notranslate"><span class="pre">cyclevars</span></code> ne change plus après que <code class="docutils literal notranslate"><span class="pre">Node</span></code> a été instancié, nous n’avons donc pas besoin de le placer dans <code class="docutils literal notranslate"><span class="pre">render_context</span></code>.  Mais l’information d’état qui est spécifique au gabarit en cours de rendu, comme l’état d’itération de <code class="docutils literal notranslate"><span class="pre">CycleNode</span></code>, doit être stockée dans <code class="docutils literal notranslate"><span class="pre">render_context</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Remarquez la manière dont nous avons utilisé <code class="docutils literal notranslate"><span class="pre">self</span></code> pour délimiter l’information spécifique de <code class="docutils literal notranslate"><span class="pre">CycleNode</span></code> dans <code class="docutils literal notranslate"><span class="pre">render_context</span></code>. Il peut y avoir plusieurs <code class="docutils literal notranslate"><span class="pre">CycleNodes</span></code> dans un gabarit donné, il faut donc être prudent de ne pas empiéter sur l’information d’état d’un autre nœud. La façon la plus simple de faire cela est de toujours utiliser <code class="docutils literal notranslate"><span class="pre">self</span></code> comme clé dans <code class="docutils literal notranslate"><span class="pre">render_context</span></code>. Si vous conservez la trace de plusieurs variables d’état, faites de <code class="docutils literal notranslate"><span class="pre">render_context[self]</span></code> un dictionnaire.</p>
+</div>
+</div>
+<div class="section" id="s-registering-the-tag">
+<span id="registering-the-tag"></span><h3>Inscription de la balise<a class="headerlink" href="#registering-the-tag" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour terminer, inscrivez la balise dans l’instance <code class="docutils literal notranslate"><span class="pre">Library</span></code> de votre module, comme expliqué dans la section sur l”<a class="reference internal" href="#howto-writing-custom-template-tags"><span class="std std-ref">écriture des balises de gabarit personnalisées</span></a> ci-dessus. Exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">register</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s1">&#39;current_time&#39;</span><span class="p">,</span> <span class="n">do_current_time</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">tag()</span></code> accepte deux paramètres&nbsp;:</p>
+<ol class="arabic simple">
+<li>Le nom de la balise de gabarit (une chaîne). En cas d’omission, c’est le nom de la fonction de compilation qui sera utilisé.</li>
+<li>La fonction de compilation, une fonction Python (et non pas le nom de la fonction sous forme de chaîne).</li>
+</ol>
+<p>Comme pour l’inscription de filtre, il est aussi possible d’utiliser une syntaxe de décorateur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@register</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;current_time&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">do_current_time</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="o">...</span>
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">tag</span>
+<span class="k">def</span> <span class="nf">shout</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>Si vous omettez le paramètre <code class="docutils literal notranslate"><span class="pre">name</span></code> comme dans le second exemple ci-dessus, Django utilise le nom de la fonction comme nom de balise.</p>
+</div>
+<div class="section" id="s-passing-template-variables-to-the-tag">
+<span id="passing-template-variables-to-the-tag"></span><h3>Transmission de variables de gabarit à la balise<a class="headerlink" href="#passing-template-variables-to-the-tag" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Même si vous pouvez transmettre autant de paramètres que souhaité à la balise de gabarit en utilisant <code class="docutils literal notranslate"><span class="pre">token.split_contents()</span></code>, les paramètres sont alors tous identifiés comme chaînes de caractères. Pour pouvoir passer du contenu dynamique (une variable de gabarit) comme paramètre d’une balise de gabarit, cela demande un petit peu plus d’effort.</p>
+<p>Dans les exemples précédents, l’heure actuelle a été formatée en chaîne et celle-ci a été renvoyée en tant que chaîne. Supposons que nous souhaitions passer un <a class="reference internal" href="../ref/models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a> d’un objet pour que la balise de gabarit mette en forme cette date&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>This post was last updated at <span class="cp">{%</span> <span class="k">format_time</span> <span class="nv">blog_entry.date_updated</span> <span class="s2">&quot;%Y-%m-%d %I:%M %p&quot;</span> <span class="cp">%}</span>.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Initialement, <code class="docutils literal notranslate"><span class="pre">token.split_contents()</span></code> renverra trois valeurs&nbsp;:</p>
+<ol class="arabic simple">
+<li>Le nom de la balise</li>
+<li>La chaîne <code class="docutils literal notranslate"><span class="pre">'blog_entry.date_updated'</span></code> (sans les guillemets).</li>
+<li>La chaîne de formatage <code class="docutils literal notranslate"><span class="pre">'&quot;%Y-%m-%d</span> <span class="pre">%I:%M</span> <span class="pre">%p&quot;'</span></code>. La valeur de retour de <code class="docutils literal notranslate"><span class="pre">split_contents()</span></code> contiendra les guillemets ouvrant et fermant pour de telles chaînes constantes.</li>
+</ol>
+<p>Votre balise devrait maintenant commencer à ressembler à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="k">def</span> <span class="nf">do_format_time</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># split_contents() knows not to split quoted strings.</span>
+        <span class="n">tag_name</span><span class="p">,</span> <span class="n">date_to_be_formatted</span><span class="p">,</span> <span class="n">format_string</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">split_contents</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag requires exactly two arguments&quot;</span> <span class="o">%</span> <span class="n">token</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">format_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">format_string</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">format_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag&#39;s argument should be in quotes&quot;</span> <span class="o">%</span> <span class="n">tag_name</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">FormatTimeNode</span><span class="p">(</span><span class="n">date_to_be_formatted</span><span class="p">,</span> <span class="n">format_string</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Vous devez aussi modifier la fonction de rendu pour récupérer le contenu réel de la propriété <code class="docutils literal notranslate"><span class="pre">date_updated</span></code> de l’objet <code class="docutils literal notranslate"><span class="pre">blog_entry</span></code>. Cela peut se faire en utilisant la classe <code class="docutils literal notranslate"><span class="pre">Variable()</span></code> de <code class="docutils literal notranslate"><span class="pre">django.template</span></code>.</p>
+<p>Pour utiliser la classe <code class="docutils literal notranslate"><span class="pre">Variable</span></code>, il faut l’instancier avec le nom de la variable à résoudre puis appeler <code class="docutils literal notranslate"><span class="pre">variable.resolve(context)</span></code>. Ainsi, par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FormatTimeNode</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date_to_be_formatted</span><span class="p">,</span> <span class="n">format_string</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date_to_be_formatted</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">date_to_be_formatted</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_string</span> <span class="o">=</span> <span class="n">format_string</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">actual_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_to_be_formatted</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">actual_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_string</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">template</span><span class="o">.</span><span class="n">VariableDoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+</pre></div>
+</div>
+<p>La résolution de variable lèvera une exception <code class="docutils literal notranslate"><span class="pre">VariableDoesNotExist</span></code> si elle ne peut pas résoudre la chaîne qui lui a été passée dans le contexte actuel de la page.</p>
+</div>
+<div class="section" id="s-setting-a-variable-in-the-context">
+<span id="setting-a-variable-in-the-context"></span><h3>Définition d’une variable dans le contexte<a class="headerlink" href="#setting-a-variable-in-the-context" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les exemples ci-dessus ne font qu’afficher une valeur. Il est généralement plus souple de définir des variables de gabarit dans les balises de gabarit que d’afficher des valeurs. De cette façon, les auteurs de gabarits peuvent réutiliser les valeurs créées par vos balises de gabarit.</p>
+<p>Pour définir une variable dans le contexte, attribuez des valeurs à l’objet dictionnaire du contexte dans la méthode <code class="docutils literal notranslate"><span class="pre">render()</span></code>. Voici une version mise à jour de <code class="docutils literal notranslate"><span class="pre">CurrentTimeNode</span></code> qui définit une variable de gabarit <code class="docutils literal notranslate"><span class="pre">current_time</span></code> au lieu de l’afficher&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">template</span>
+
+<span class="k">class</span> <span class="nc">CurrentTimeNode2</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_string</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_string</span> <span class="o">=</span> <span class="n">format_string</span>
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">context</span><span class="p">[</span><span class="s1">&#39;current_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+</pre></div>
+</div>
+<p>Notez que <code class="docutils literal notranslate"><span class="pre">render()</span></code> renvoie la chaîne vide. <code class="docutils literal notranslate"><span class="pre">render()</span></code> doit toujours renvoyer une chaîne. Si la balise de gabarit ne fait que définir une variable, <code class="docutils literal notranslate"><span class="pre">render()</span></code> doit renvoyer la chaîne vide.</p>
+<p>Voici comment on pourrait utiliser cette nouvelle version de la balise&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">current_time</span> <span class="s2">&quot;%Y-%m-%d %I:%M %p&quot;</span> <span class="cp">%}</span><span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>The time is <span class="cp">{{</span> <span class="nv">current_time</span> <span class="cp">}}</span>.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<div class="admonition-variable-scope-in-context admonition">
+<p class="first admonition-title">Portées des variables dans le contexte</p>
+<p class="last">Toute variable définie dans le contexte ne sera disponible que dans le même «&nbsp;bloc&nbsp;» de gabarit dans lequel elle a été définie. Ce comportement est voulu&nbsp;; il définit la portée des variables afin qu’elles n’entrent pas en conflit avec le contexte d’autres blocs.</p>
+</div>
+<p>Mais il reste un problème avec <code class="docutils literal notranslate"><span class="pre">CurrentTimeNode2</span></code>: le nom de variable <code class="docutils literal notranslate"><span class="pre">current_time</span></code> est codé en dur. Cela veut dire que vous devrez vous assurer que votre gabarit n’utilise pas <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">current_time</span> <span class="pre">}}</span></code> ailleurs, parce que <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">current_time</span> <span class="pre">%}</span></code> va écraser de manière aveugle la valeur de cette éventuelle variable. Une solution plus propre est de permettre à la balise de gabarit de définir le nom de la variable produite, comme ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">current_time</span> <span class="s2">&quot;%Y-%m-%d %I:%M %p&quot;</span> <span class="k">as</span> <span class="nv">my_current_time</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>The current time is <span class="cp">{{</span> <span class="nv">my_current_time</span> <span class="cp">}}</span>.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Pour faire cela, il faudra modifier à la fois la fonction de compilation et la classe <code class="docutils literal notranslate"><span class="pre">Node</span></code>, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+
+<span class="k">class</span> <span class="nc">CurrentTimeNode3</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_string</span><span class="p">,</span> <span class="n">var_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_string</span> <span class="o">=</span> <span class="n">format_string</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var_name</span> <span class="o">=</span> <span class="n">var_name</span>
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">context</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+<span class="k">def</span> <span class="nf">do_current_time</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="c1"># This version uses a regular expression to parse tag contents.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Splitting by None == splitting by spaces.</span>
+        <span class="n">tag_name</span><span class="p">,</span> <span class="n">arg</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag requires arguments&quot;</span> <span class="o">%</span> <span class="n">token</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.*?) as (\w+)&#39;</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag had invalid arguments&quot;</span> <span class="o">%</span> <span class="n">tag_name</span><span class="p">)</span>
+    <span class="n">format_string</span><span class="p">,</span> <span class="n">var_name</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">format_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">format_string</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">format_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">template</span><span class="o">.</span><span class="n">TemplateSyntaxError</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%r</span><span class="s2"> tag&#39;s argument should be in quotes&quot;</span> <span class="o">%</span> <span class="n">tag_name</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">CurrentTimeNode3</span><span class="p">(</span><span class="n">format_string</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">var_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La différence ici est que <code class="docutils literal notranslate"><span class="pre">do_current_time()</span></code> capture la chaîne de format et le nom de la variable, les transmettant les deux à <code class="docutils literal notranslate"><span class="pre">CurrentTimeNode3</span></code>.</p>
+<p>Finalement, si vous n’avez besoin que d’une syntaxe simple pour votre balise de gabarit de mise à jour du contexte, envisagez l’utilisation du raccourci <a class="reference internal" href="#django.template.Library.simple_tag" title="django.template.Library.simple_tag"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simple_tag()</span></code></a> qui permet d’attribuer le résultat de la balise à une variable de gabarit.</p>
+</div>
+<div class="section" id="s-parsing-until-another-block-tag">
+<span id="parsing-until-another-block-tag"></span><h3>Analyse jusqu’à la prochaine balise de bloc<a class="headerlink" href="#parsing-until-another-block-tag" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les balises de gabarit peuvent travailler en tandem. Par exemple, la balise <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-comment"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code></a> standard masque tout jusqu’à la prochaine occurrence de <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code>. Pour créer une balise de gabarit semblable, utilisez <code class="docutils literal notranslate"><span class="pre">parser.parse()</span></code> dans votre fonction de compilation.</p>
+<p>Voici comment une balise <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code> simplifiée pourrait être écrite&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">do_comment</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="n">nodelist</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">((</span><span class="s1">&#39;endcomment&#39;</span><span class="p">,))</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">delete_first_token</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">CommentNode</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">CommentNode</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">L’implémentation effective de <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-comment"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code></a> est légèrement différente dans la mesure où elle autorise des balises incorrectes à apparaître entre <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code> et <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code>. Elle fait cela en appelant <code class="docutils literal notranslate"><span class="pre">parser.skip_past('endcomment')</span></code> au lieu de <code class="docutils literal notranslate"><span class="pre">parser.parse(('endcomment',))</span></code>, suivi par <code class="docutils literal notranslate"><span class="pre">parser.delete_first_token()</span></code>, ce qui évite de générer une liste de nœuds.</p>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">parser.parse()</span></code> accepte un tuple de noms de balises bloc définissant les limites d’analyse. Elle renvoie une instance de <code class="docutils literal notranslate"><span class="pre">django.template.NodeList</span></code> contenant une liste de tous les objets <code class="docutils literal notranslate"><span class="pre">Node</span></code> que l’analyseur a rencontré avant que n’apparaisse  l’une des balises indiquées dans le tuple.</p>
+<p>Dans <code class="docutils literal notranslate"><span class="pre">nodelist</span> <span class="pre">=</span> <span class="pre">parser.parse(('endcomment',))</span></code> de l’exemple ci-dessus, <code class="docutils literal notranslate"><span class="pre">nodelist</span></code> est une liste de tous les nœuds entre <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code> et <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code>, à l’exclusion de <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code> et <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code>.</p>
+<p>Après l’appel à <code class="docutils literal notranslate"><span class="pre">parser.parse()</span></code>, l’analyseur n’a pas encore «&nbsp;consommé&nbsp;» la balise <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code>, c’est pourquoi le code doit explicitement appeler <code class="docutils literal notranslate"><span class="pre">parser.delete_first_token()</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CommentNode.render()</span></code> renvoie une chaîne vide. Tout ce qui se trouve entre <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code> et <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code> est ignoré.</p>
+</div>
+<div class="section" id="s-parsing-until-another-block-tag-and-saving-contents">
+<span id="parsing-until-another-block-tag-and-saving-contents"></span><h3>Analyse jusqu’à la prochaine balise de bloc et enregistrement du contenu<a class="headerlink" href="#parsing-until-another-block-tag-and-saving-contents" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Dans l’exemple prédédent, <code class="docutils literal notranslate"><span class="pre">do_comment()</span></code> a ignoré tout ce qui apparaissait entre <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">comment</span> <span class="pre">%}</span></code> et <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endcomment</span> <span class="pre">%}</span></code>. Au lieu de faire cela, il est possible de faire quelque chose avec le code situé entre les balises de bloc.</p>
+<p>Par exemple, voici une balise de gabarit personnalisée, <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">upper</span> <span class="pre">%}</span></code>, qui met en majuscules tout ce qui se trouve entre elle et <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">endupper</span> <span class="pre">%}</span></code>.</p>
+<p>Utilisation&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">upper</span> <span class="cp">%}</span>This will appear in uppercase, <span class="cp">{{</span> <span class="nv">your_name</span> <span class="cp">}}</span>.<span class="cp">{%</span> <span class="k">endupper</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Comme dans l’exemple précédent, nous utilisons <code class="docutils literal notranslate"><span class="pre">parser.parse()</span></code>. Mais cette fois-ci, nous passons le contenu de <code class="docutils literal notranslate"><span class="pre">nodelist</span></code> à <code class="docutils literal notranslate"><span class="pre">Node</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">do_upper</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+    <span class="n">nodelist</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">((</span><span class="s1">&#39;endupper&#39;</span><span class="p">,))</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">delete_first_token</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">UpperNode</span><span class="p">(</span><span class="n">nodelist</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">UpperNode</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">Node</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodelist</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodelist</span> <span class="o">=</span> <span class="n">nodelist</span>
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodelist</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Le seul nouveau concept ici est l’appel à <code class="docutils literal notranslate"><span class="pre">self.nodelist.render(context)</span></code> dans <code class="docutils literal notranslate"><span class="pre">UpperNode.render()</span></code>.</p>
+<p>Pour plus d’exemples de rendus complexes, consultez le code source des balises <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-for"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">for</span> <span class="pre">%}</span></code></a> dans <code class="docutils literal notranslate"><span class="pre">django/template/defaulttags.py</span></code> et <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-if"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">if</span> <span class="pre">%}</span></code></a> dans <code class="docutils literal notranslate"><span class="pre">django/template/smartif.py</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Balises et filtres de gabarit personnalisés</a><ul>
+<li><a class="reference internal" href="#code-layout">Disposition du code</a></li>
+<li><a class="reference internal" href="#writing-custom-template-filters">Écriture de filtres de gabarits personnalisés</a><ul>
+<li><a class="reference internal" href="#registering-custom-filters">Inscription de filtres personnalisés</a></li>
+<li><a class="reference internal" href="#template-filters-that-expect-strings">Filtres de gabarits agissant sur des chaînes</a></li>
+<li><a class="reference internal" href="#filters-and-auto-escaping">Les filtres et l’échappement automatique</a></li>
+<li><a class="reference internal" href="#filters-and-time-zones">Filtres et fuseaux horaires</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#writing-custom-template-tags">Écriture de balises de gabarits personnalisées</a><ul>
+<li><a class="reference internal" href="#simple-tags">Balises simples</a></li>
+<li><a class="reference internal" href="#inclusion-tags">Balises d’inclusion</a></li>
+<li><a class="reference internal" href="#advanced-custom-template-tags">Balises de gabarits personnalisées (niveau avancé)</a></li>
+<li><a class="reference internal" href="#a-quick-overview">Aperçu rapide</a></li>
+<li><a class="reference internal" href="#writing-the-compilation-function">Écriture de la fonction de compilation</a></li>
+<li><a class="reference internal" href="#writing-the-renderer">Écriture de la fonction de rendu</a></li>
+<li><a class="reference internal" href="#auto-escaping-considerations">Considérations sur l’échappement automatique</a></li>
+<li><a class="reference internal" href="#thread-safety-considerations">Considérations sur la concurrence entre «&nbsp;threads&nbsp;»</a></li>
+<li><a class="reference internal" href="#registering-the-tag">Inscription de la balise</a></li>
+<li><a class="reference internal" href="#passing-template-variables-to-the-tag">Transmission de variables de gabarit à la balise</a></li>
+<li><a class="reference internal" href="#setting-a-variable-in-the-context">Définition d’une variable dans le contexte</a></li>
+<li><a class="reference internal" href="#parsing-until-another-block-tag">Analyse jusqu’à la prochaine balise de bloc</a></li>
+<li><a class="reference internal" href="#parsing-until-another-block-tag-and-saving-contents">Analyse jusqu’à la prochaine balise de bloc et enregistrement du contenu</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="custom-template-backend.html"
+                        title="Chapitre précédent">Moteur de gabarit personnalisé</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="custom-file-storage.html"
+                        title="Chapitre suivant">Écriture d’un système de stockage personnalisé</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/howto/custom-template-tags.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="custom-template-backend.html" title="Moteur de gabarit personnalisé">previous</a>
+     |
+    <a href="index.html" title="Guides pratiques" accesskey="U">up</a>
+   |
+    <a href="custom-file-storage.html" title="Écriture d’un système de stockage personnalisé">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

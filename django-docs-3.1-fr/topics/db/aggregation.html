@@ -1,0 +1,542 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Agrégation &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Recherche" href="search.html" />
+    <link rel="prev" title="Création de requêtes" href="queries.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="queries.html" title="Création de requêtes">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="search.html" title="Recherche">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-db-aggregation">
+            
+  <div class="section" id="s-aggregation">
+<span id="aggregation"></span><h1>Agrégation<a class="headerlink" href="#aggregation" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Le guide thématique sur l”<a class="reference internal" href="queries.html"><span class="doc">API d’abstraction de base de données de Django</span></a> décrit la façon dont les requêtes Django peuvent être utilisées pour créer, récupérer, mettre à jour et supprimer des objets individuels. Il est cependant parfois nécessaire de récupérer des valeurs dérivées du résumé ou de l”<em>agrégation</em> d’une collection d’objets. Ce guide thématique décrit la manière dont des valeurs agrégées peuvent être générées et renvoyées en utilisant des requêtes Django.</p>
+<p>Tout au long de ce guide, nous nous référerons aux modèles suivants. Ces modèles sont utilisés pour gérer l’inventaire d’une série de bibliothèques en ligne&nbsp;:</p>
+<div class="highlight-python notranslate" id="queryset-model-example"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Author</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">age</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Publisher</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">pages</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">(</span><span class="n">max_digits</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">rating</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Author</span><span class="p">)</span>
+    <span class="n">publisher</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Publisher</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">CASCADE</span><span class="p">)</span>
+    <span class="n">pubdate</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateField</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Store</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+    <span class="n">books</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Book</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="s-cheat-sheet">
+<span id="cheat-sheet"></span><h2>Antisèche<a class="headerlink" href="#cheat-sheet" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Vous êtes pressé&nbsp;? Voici comment effectuer des requêtes avec agrégation, sur la base des modèles ci-dessus&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Total number of books.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="mi">2452</span>
+
+<span class="c1"># Total number of books with publisher=BaloneyPress</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">publisher__name</span><span class="o">=</span><span class="s1">&#39;BaloneyPress&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="mi">73</span>
+
+<span class="c1"># Average price across all books.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Avg</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="p">{</span><span class="s1">&#39;price__avg&#39;</span><span class="p">:</span> <span class="mf">34.35</span><span class="p">}</span>
+
+<span class="c1"># Max price across all books.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Max</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Max</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="p">{</span><span class="s1">&#39;price__max&#39;</span><span class="p">:</span> <span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;81.20&#39;</span><span class="p">)}</span>
+
+<span class="c1"># Difference between the highest priced book and the average price of all books.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">FloatField</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span>
+<span class="o">...</span>     <span class="n">price_diff</span><span class="o">=</span><span class="n">Max</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">,</span> <span class="n">output_field</span><span class="o">=</span><span class="n">FloatField</span><span class="p">())</span> <span class="o">-</span> <span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="p">{</span><span class="s1">&#39;price_diff&#39;</span><span class="p">:</span> <span class="mf">46.85</span><span class="p">}</span>
+
+<span class="c1"># All the following queries involve traversing the Book&lt;-&gt;Publisher</span>
+<span class="c1"># foreign key relationship backwards.</span>
+
+<span class="c1"># Each publisher, each with a count of books as a &quot;num_books&quot; attribute.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Count</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_books</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span>
+<span class="o">&lt;</span><span class="n">QuerySet</span> <span class="p">[</span><span class="o">&lt;</span><span class="n">Publisher</span><span class="p">:</span> <span class="n">BaloneyPress</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">Publisher</span><span class="p">:</span> <span class="n">SalamiPress</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">num_books</span>
+<span class="mi">73</span>
+
+<span class="c1"># Each publisher, with a separate count of books with a rating above and below 5</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">above_5</span> <span class="o">=</span> <span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="n">book__rating__gt</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">below_5</span> <span class="o">=</span> <span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="n">book__rating__lte</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">below_5</span><span class="o">=</span><span class="n">below_5</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">above_5</span><span class="o">=</span><span class="n">above_5</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">above_5</span>
+<span class="mi">23</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">below_5</span>
+<span class="mi">12</span>
+
+<span class="c1"># The top 5 publishers, in order by number of books.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_books</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-num_books&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">pubs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">num_books</span>
+<span class="mi">1323</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-generating-aggregates-over-a-queryset">
+<span id="generating-aggregates-over-a-queryset"></span><h2>Génération de requêtes d’agrégation sur un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code><a class="headerlink" href="#generating-aggregates-over-a-queryset" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django propose deux manières de générer des agrégations. La première est de générer un résumé des valeurs d’un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> entier. Par exemple, admettons que vous vouliez calculer le prix moyen de tous les livres disponibles à la vente. La syntaxe de requêtes de Django fournit une façon de décrire l’ensemble de tous les livres&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Ce dont nous avons besoin, c’est d’une manière de calculer un résumé des valeurs de tous les objets appartenant à ce <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>. Cela se fait en ajoutant une clause <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code> à la suite de l’objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Avg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="go">{&#39;price__avg&#39;: 34.35}</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, <code class="docutils literal notranslate"><span class="pre">all()</span></code> est redondant, cela pourrait donc être simplifié en écrivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="go">{&#39;price__avg&#39;: 34.35}</span>
+</pre></div>
+</div>
+<p>Le paramètre de la clause <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code> décrit la valeur d’agrégation que vous souhaitez calculer, dans ce cas la moyenne du champ <code class="docutils literal notranslate"><span class="pre">price</span></code> du modèle <code class="docutils literal notranslate"><span class="pre">Book</span></code>. Une liste des fonctions d’agrégation disponibles se trouve dans la <a class="reference internal" href="../../ref/models/querysets.html#aggregation-functions"><span class="std std-ref">référence de QuerySet</span></a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">aggregate()</span></code> est la clause terminale d’un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> qui, lorsqu’il est évalué, renvoie un dictionnaire de paires nom-valeur. Le nom est un identifiant de la valeur agrégée&nbsp;; la valeur est le résultat du calcul d’agrégation. Le nom est généré automatiquement à partir du nom du champ et de la fonction d’agrégation. Si vous voulez indiquer manuellement le nom de la valeur agrégée, vous pouvez le faire en précisant ce nom dans la clause d’agrégation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">average_price</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="go">{&#39;average_price&#39;: 34.35}</span>
+</pre></div>
+</div>
+<p>Si vous voulez générer plus d’une valeur agrégée, ajoutez un autre paramètre dans la clause <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code>. Ainsi, si nous voulions aussi connaître les prix maximaux et minimaux de tous les livres, nous écririons la requête suivante&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Avg</span><span class="p">,</span> <span class="n">Max</span><span class="p">,</span> <span class="n">Min</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">),</span> <span class="n">Max</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">),</span> <span class="n">Min</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+<span class="go">{&#39;price__avg&#39;: 34.35, &#39;price__max&#39;: Decimal(&#39;81.20&#39;), &#39;price__min&#39;: Decimal(&#39;12.99&#39;)}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-generating-aggregates-for-each-item-in-a-queryset">
+<span id="generating-aggregates-for-each-item-in-a-queryset"></span><h2>Génération de valeurs agrégées pour chaque élément d’un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code><a class="headerlink" href="#generating-aggregates-for-each-item-in-a-queryset" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La deuxième manière de générer des valeurs récapitulatives est de générer un récapitulatif individuel pour chaque objet d’un <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet" title="django.db.models.query.QuerySet"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuerySet</span></code></a>. Par exemple, si vous récupérez une liste de livres, il peut être utile de connaître le nombre d’auteurs ayant contribué à chaque livre. Chaque objet <code class="docutils literal notranslate"><span class="pre">Book</span></code> possède une relation plusieurs-à-plusieurs vers le modèle <code class="docutils literal notranslate"><span class="pre">Author</span></code>; nous voulons récapituler cette relation pour chaque livre de la requête.</p>
+<p>Les récapitulatifs par objet peuvent être générés par la clause <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet.annotate" title="django.db.models.query.QuerySet.annotate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">annotate()</span></code></a>. Lorsque celle-ci est mentionnée, chaque objet de la requête est annoté avec les valeurs indiquées.</p>
+<p>La syntaxe de ces annotations est identique à celle utilisée pour les clauses <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet.aggregate" title="django.db.models.query.QuerySet.aggregate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">aggregate()</span></code></a>. Chaque paramètre d”<code class="docutils literal notranslate"><span class="pre">annotate()</span></code> décrit une valeur agrégée à calculer. Par exemple, pour annoter les livres avec le nombre de leurs auteurs&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build an annotated queryset</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Count</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">q</span> <span class="o">=</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">))</span>
+<span class="c1"># Interrogate the first object in the queryset</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="o">&lt;</span><span class="n">Book</span><span class="p">:</span> <span class="n">The</span> <span class="n">Definitive</span> <span class="n">Guide</span> <span class="n">to</span> <span class="n">Django</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">authors__count</span>
+<span class="mi">2</span>
+<span class="c1"># Interrogate the second object in the queryset</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="o">&lt;</span><span class="n">Book</span><span class="p">:</span> <span class="n">Practical</span> <span class="n">Django</span> <span class="n">Projects</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">authors__count</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+<p>Comme pour <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code>, le nom de l’annotation est automatiquement dérivé du nom de la fonction d’agrégation et du nom du champ sur lequel se fait le calcul. Vous pouvez surcharger ce nom par défaut en fournissant un alias lors de la définition de l’annotation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_authors</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">num_authors</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">num_authors</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>Au contraire de <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code>, <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> n’est <em>pas</em> une clause terminale. Le résultat de la clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> est un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>. Cet objet peut très bien être modifié par une autre opération de type <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>, comme par exemple <code class="docutils literal notranslate"><span class="pre">filter()</span></code>, <code class="docutils literal notranslate"><span class="pre">order_by()</span></code> ou même d’autres appels à <code class="docutils literal notranslate"><span class="pre">annotate()</span></code>.</p>
+<div class="section" id="s-combining-multiple-aggregations">
+<span id="s-id1"></span><span id="combining-multiple-aggregations"></span><span id="id1"></span><h3>Combinaison de plusieurs agrégations<a class="headerlink" href="#combining-multiple-aggregations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>La combinaison de plusieurs agrégations avec <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> produit un <a class="reference external" href="https://code.djangoproject.com/ticket/10060">mauvais résultat</a>, car des jointures sont utilisées à la place de sous-requêtes&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">book</span> <span class="o">=</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">authors</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">book</span><span class="o">.</span><span class="n">store_set</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">),</span> <span class="n">Count</span><span class="p">(</span><span class="s1">&#39;store&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">authors__count</span>
+<span class="go">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">store__count</span>
+<span class="go">6</span>
+</pre></div>
+</div>
+<p>Pour la plupart des agrégations, il n’existe pas de solution à ce problème. Cependant, l’agrégation <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.Count" title="django.db.models.Count"><code class="xref py py-class docutils literal notranslate"><span class="pre">Count</span></code></a> possède un paramètre <code class="docutils literal notranslate"><span class="pre">distinct</span></code> qui peut être utile&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">,</span> <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">Count</span><span class="p">(</span><span class="s1">&#39;store&#39;</span><span class="p">,</span> <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">authors__count</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">store__count</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+<div class="admonition-if-in-doubt-inspect-the-sql-query admonition">
+<p class="first admonition-title">En cas de doute, inspectez la requête SQL&nbsp;!</p>
+<p class="last">Afin de comprendre ce qui se produit dans la requête, il est possible d’examiner la propriété <code class="docutils literal notranslate"><span class="pre">query</span></code> de l’objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-joins-and-aggregates">
+<span id="joins-and-aggregates"></span><h2>Jointures et agrégations<a class="headerlink" href="#joins-and-aggregates" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Jusqu’ici, nous avons eu affaire à des agrégations sur des champs appartenant au modèle sur lequel portait la requête. Cependant, la valeur à agréger peut parfois appartenir à un modèle qui est lié au modèle sur lequel porte la requête.</p>
+<p>Lors de la définition du champ à agréger dans une fonction d’agrégation, Django permet d’utiliser la même <a class="reference internal" href="queries.html#field-lookups-intro"><span class="std std-ref">notation de double soulignement</span></a> qui est utilisée pour se référer aux champs liés dans les filtres. Django se charge ensuite des jointures de tables nécessaires pour récupérer et agréger la valeur liée.</p>
+<p>Par exemple, pour trouver l’intervalle des prix pratiqués dans chaque magasin, vous pourriez utiliser l’annotation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Max</span><span class="p">,</span> <span class="n">Min</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Store</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">min_price</span><span class="o">=</span><span class="n">Min</span><span class="p">(</span><span class="s1">&#39;books__price&#39;</span><span class="p">),</span> <span class="n">max_price</span><span class="o">=</span><span class="n">Max</span><span class="p">(</span><span class="s1">&#39;books__price&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Ceci indique à Django de récupérer le modèle <code class="docutils literal notranslate"><span class="pre">Store</span></code>, de faire la jointure avec le modèle <code class="docutils literal notranslate"><span class="pre">Book</span></code> (par la relation plusieurs-à-plusieurs) et d’agréger sur le champ du prix du modèle <code class="docutils literal notranslate"><span class="pre">Book</span></code> pour produire les valeurs du minimum et du maximum.</p>
+<p>Les mêmes règles s’appliquent à la clause <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code>. Si vous vouliez connaître le prix le plus bas et le prix le plus haut de tous les livres mis en vente dans n’importe quel magasin, vous pourriez utiliser la fonction d’agrégation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Store</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">min_price</span><span class="o">=</span><span class="n">Min</span><span class="p">(</span><span class="s1">&#39;books__price&#39;</span><span class="p">),</span> <span class="n">max_price</span><span class="o">=</span><span class="n">Max</span><span class="p">(</span><span class="s1">&#39;books__price&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Les chaînes de jointure peuvent être aussi profondes que nécessaire. Par exemple, pour extraire l’âge du plus jeune auteur de tous les livres mis en vente, vous pourriez effectuer la requête&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Store</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">youngest_age</span><span class="o">=</span><span class="n">Min</span><span class="p">(</span><span class="s1">&#39;books__authors__age&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="s-following-relationships-backwards">
+<span id="following-relationships-backwards"></span><h3>Suivi des relations inverses<a class="headerlink" href="#following-relationships-backwards" title="Lien permanent vers ce titre">¶</a></h3>
+<p>D’une manière similaire aux <a class="reference internal" href="queries.html#lookups-that-span-relationships"><span class="std std-ref">Recherches traversant les relations</span></a>, les agrégations et les annotations sur les champs de modèles ou sur les modèles liés à celui sur lequel porte la requête peuvent contenir des relations «&nbsp;inverses&nbsp;» traversantes. Ici également, il est possible d’utiliser la syntaxe des noms en minuscules des modèles liés et des doubles soulignements.</p>
+<p>Par exemple, il est possible d’extraire tous les éditeurs annotés avec leur décompte respectif de tous leurs livres publiés (notez la manière d’utiliser <code class="docutils literal notranslate"><span class="pre">'book'</span></code> pour définir la relation de clé étrangère inversée)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Avg</span><span class="p">,</span> <span class="n">Count</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="n">Sum</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>(chaque <code class="docutils literal notranslate"><span class="pre">Publisher</span></code> du jeu de requête résultant possédera un attribut supplémentaire nommé <code class="docutils literal notranslate"><span class="pre">book__count</span></code>)</p>
+<p>Une autre requête pourrait porter sur le plus ancien livre publié par chaque éditeur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">oldest_pubdate</span><span class="o">=</span><span class="n">Min</span><span class="p">(</span><span class="s1">&#39;book__pubdate&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Le dictionnaire résultant possédera une clé nommée <code class="docutils literal notranslate"><span class="pre">'oldest_pubdate'</span></code>. Si l’alias n’avait pas été précisé, cette clé se serait appelée <code class="docutils literal notranslate"><span class="pre">'book__pubdate__min'</span></code>, ce qui est plutôt long.</p>
+<p>Cela ne s’applique pas seulement aux clés étrangères, mais fonctionne aussi avec les relations plusieurs-à-plusieurs. Par exemple, nous pouvons rechercher tous les auteurs annotés avec le nombre total de pages de tous les livres pour lesquels ils ont été (co-)auteurs (notez la manière d’utiliser <code class="docutils literal notranslate"><span class="pre">'book'</span></code> pour définir la relation plusieurs-à-plusieurs inversée de <code class="docutils literal notranslate"><span class="pre">Author</span></code> vers <code class="docutils literal notranslate"><span class="pre">Book</span></code>)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">total_pages</span><span class="o">=</span><span class="n">Sum</span><span class="p">(</span><span class="s1">&#39;book__pages&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Chaque <code class="docutils literal notranslate"><span class="pre">Author</span></code> du jeu de requête résultant possédera un attribut supplémentaire nommé <code class="docutils literal notranslate"><span class="pre">total_pages</span></code>. Si l’alias n’avait pas été précisé, cette clé se serait appelée <code class="docutils literal notranslate"><span class="pre">'book__pages__sum'</span></code>, ce qui est plutôt long.</p>
+<p>Nous pourrions encore extraire la moyenne des notes de tous les livres écrits par les auteurs enregistrés&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">average_rating</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;book__rating&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Le dictionnaire résultant possédera une clé nommée <code class="docutils literal notranslate"><span class="pre">'average_rating'</span></code>. Si l’alias n’avait pas été précisé, cette clé se serait appelée <code class="docutils literal notranslate"><span class="pre">'book__rating__avg'</span></code>, ce qui est plutôt long.</p>
+</div>
+</div>
+<div class="section" id="s-aggregations-and-other-queryset-clauses">
+<span id="aggregations-and-other-queryset-clauses"></span><h2>Agrégations et autres clauses de <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code><a class="headerlink" href="#aggregations-and-other-queryset-clauses" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-filter-and-exclude">
+<span id="filter-and-exclude"></span><h3><code class="docutils literal notranslate"><span class="pre">filter()</span></code> et <code class="docutils literal notranslate"><span class="pre">exclude()</span></code><a class="headerlink" href="#filter-and-exclude" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les agrégations peuvent aussi intervenir dans les filtres. Toute méthode <code class="docutils literal notranslate"><span class="pre">filter()</span></code> (ou <code class="docutils literal notranslate"><span class="pre">exclude()</span></code>) appliquée à des champs de modèle normaux fera l’effet de restreindre les objets concernés par l’agrégation.</p>
+<p>Lorsqu’il est combiné à une clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code>, un filtre fait l’effet de restreindre les objets sur lesquels l’annotation est calculée. Par exemple, vous pouvez générer une liste annotée de tous les livres ayant leur titre commençant par «&nbsp;Django&nbsp;» à l’aide de la requête&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Avg</span><span class="p">,</span> <span class="n">Count</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="s2">&quot;Django&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_authors</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Lorsqu’il est combiné à une clause <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code>, un filtre fait l’effet de restreindre les objets sur lesquels l’agrégation est calculée. Par exemple, vous pouvez générer le prix moyen de tous les livres ayant leur titre commençant par « Django » à l’aide de la requête&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">name__startswith</span><span class="o">=</span><span class="s2">&quot;Django&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;price&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="s-filtering-on-annotations">
+<span id="s-id2"></span><span id="filtering-on-annotations"></span><span id="id2"></span><h4>Filtrage sur les annotations<a class="headerlink" href="#filtering-on-annotations" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les valeurs annotées peuvent également être filtrées. L’alias de l’annotation peut être utilisé dans les clauses <code class="docutils literal notranslate"><span class="pre">filter()</span></code> et <code class="docutils literal notranslate"><span class="pre">exclude()</span></code> de la même manière que pour n’importe quel autre champ de modèle.</p>
+<p>Par exemple, pour générer une liste de livres ayant plus d’un auteur, vous pouvez écrire la requête&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_authors</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">num_authors__gt</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cette requête génère un jeu de requête annoté, puis filtre le résultat sur la base de l’annotation.</p>
+<p>Si vous avez besoin de deux annotations avec deux filtres séparés, vous pouvez utiliser le paramètre <code class="docutils literal notranslate"><span class="pre">filter</span></code> avec n’importe quel agrégat. Par exemple, pour générer une liste d’auteurs avec le décompte des livres bien notés</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">highly_rated</span> <span class="o">=</span> <span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="n">book__rating__gte</span><span class="o">=</span><span class="mi">7</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_books</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">),</span> <span class="n">highly_rated_books</span><span class="o">=</span><span class="n">highly_rated</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Chaque <code class="docutils literal notranslate"><span class="pre">Author</span></code> dans le jeu de résultats possédera les deux attributs <code class="docutils literal notranslate"><span class="pre">num_books</span></code> et <code class="docutils literal notranslate"><span class="pre">highly_rated_books</span></code>.</p>
+<div class="admonition-choosing-between-filter-and-queryset-filter admonition">
+<p class="first admonition-title">Choix entre <code class="docutils literal notranslate"><span class="pre">filter</span></code> et <code class="docutils literal notranslate"><span class="pre">QuerySet.filter()</span></code></p>
+<p class="last">Évitez d’utiliser le paramètre <code class="docutils literal notranslate"><span class="pre">filter</span></code> avec une seule annotation ou agrégation. Il est plus efficace d’utiliser <code class="docutils literal notranslate"><span class="pre">QuerySet.filter()</span></code> pour exclure des lignes. Le paramètre d’agrégation <code class="docutils literal notranslate"><span class="pre">filter</span></code> n’est utile que lorsqu’on utilise au moins deux agrégations sur les mêmes relations avec des conditions différentes.</p>
+</div>
+</div>
+<div class="section" id="s-order-of-annotate-and-filter-clauses">
+<span id="order-of-annotate-and-filter-clauses"></span><h4>Ordre des clauses <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> et <code class="docutils literal notranslate"><span class="pre">filter()</span></code><a class="headerlink" href="#order-of-annotate-and-filter-clauses" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Lors de la rédaction de requête complexe impliquant à la fois des clauses <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> et <code class="docutils literal notranslate"><span class="pre">filter()</span></code>, une attention particulière doit être donnée à l’ordre dans lequel les clauses sont appliquées à l’objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code>.</p>
+<p>Lorsqu’une clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> est appliquée à une requête, l’annotation est calculée sur l’état de la requête au point exact où l’annotation est demandée. L’implication pratique de ceci est que <code class="docutils literal notranslate"><span class="pre">filter()</span></code> et <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> ne sont pas des opérations commutatives.</p>
+<p>Étant donné&nbsp;:</p>
+<ul class="simple">
+<li>Un «&nbsp;Publisher&nbsp;» A possède deux livres avec notations 4 et 5.</li>
+<li>Un « Publisher » B possède deux livres avec notations 1 et 4.</li>
+<li>Un « Publisher » A possède un livre avec notation 1.</li>
+</ul>
+<p>Voici un exemple avec l’agrégation <code class="docutils literal notranslate"><span class="pre">Count</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_books</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">,</span> <span class="n">distinct</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">book__rating__gt</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">num_books</span>
+<span class="go">(&lt;Publisher: A&gt;, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">num_books</span>
+<span class="go">(&lt;Publisher: B&gt;, 2)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">book__rating__gt</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_books</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;book&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">num_books</span>
+<span class="go">(&lt;Publisher: A&gt;, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">num_books</span>
+<span class="go">(&lt;Publisher: B&gt;, 1)</span>
+</pre></div>
+</div>
+<p>Les deux requêtes renvoient une liste d’objets «&nbsp;Publisher&nbsp;» ayant au moins un livre avec une note dépassant 3.0, ce qui fait que Publisher C est exclu.</p>
+<p>Dans la première requête, l’annotation précède le filtre, ce qui fait que le filtre n’a aucun effet sur l’annotation. <code class="docutils literal notranslate"><span class="pre">distinct=True</span></code> est obligatoire pour éviter une <a class="reference internal" href="#combining-multiple-aggregations"><span class="std std-ref">anomalie de requête</span></a>.</p>
+<p>La seconde requête compte le nombre de livres ayant une note dépassant 3.0 pour chaque Publisher. Le filtre précède l’annotation, ce qui fait que le filtre limite les objets pris en compte lors du calcul de l’annotation.</p>
+<p>Voici un autre exemple avec l’agrégation <code class="docutils literal notranslate"><span class="pre">Avg</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">avg_rating</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;book__rating&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">book__rating__gt</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">avg_rating</span>
+<span class="go">(&lt;Publisher: A&gt;, 4.5)  # (5+4)/2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">avg_rating</span>
+<span class="go">(&lt;Publisher: B&gt;, 2.5)  # (1+4)/2</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">book__rating__gt</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">avg_rating</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;book__rating&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">avg_rating</span>
+<span class="go">(&lt;Publisher: A&gt;, 4.5)  # (5+4)/2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">avg_rating</span>
+<span class="go">(&lt;Publisher: B&gt;, 4.0)  # 4/1 (book with rating 1 excluded)</span>
+</pre></div>
+</div>
+<p>La première requête calcule la note moyenne de tous les livres de chaque éditeur pour les éditeurs ayant au moins un livre avec une note dépassant 3.0. La seconde requête calcule la moyenne des notes des livres d’un éditeur pour tous les livres dont la note dépasse 3.0.</p>
+<p>Il est difficile de deviner comment l’ORM va traduire des jeux de requêtes complexes en instructions SQL&nbsp;; en cas de doute, inspectez le code SQL produit avec <code class="docutils literal notranslate"><span class="pre">str(queryset.query)</span></code> et écrivez de nombreux tests.</p>
+</div>
+</div>
+<div class="section" id="s-order-by">
+<span id="order-by"></span><h3><code class="docutils literal notranslate"><span class="pre">order_by()</span></code><a class="headerlink" href="#order-by" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les annotations peuvent être utilisées comme base de tri. Lorsque vous définissez une clause <code class="docutils literal notranslate"><span class="pre">order_by()</span></code>, les agrégations que vous indiquez peuvent référencer n’importe quel alias défini dans le cadre d’une clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> de la requête.</p>
+<p>Par exemple, pour trier un jeu de requête de livres par le nombre d’auteurs ayant contribué au livre, vous pourriez écrire la requête suivante&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_authors</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;num_authors&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-values">
+<span id="values"></span><h3><code class="docutils literal notranslate"><span class="pre">values()</span></code><a class="headerlink" href="#values" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En principe, les annotations sont générées pour chaque objet&nbsp;; un jeu de requête annoté renvoie un résultat par objet du jeu de requête original. Cependant, lorsqu’une clause <code class="docutils literal notranslate"><span class="pre">values()</span></code> est utilisée pour restreindre les colonnes renvoyées dans le jeu de requête, la méthode d’évaluation des annotations est légèrement différente. Au lieu de renvoyer un résultat annoté pour chaque résultat du jeu de requête original, les résultats d’origine sont groupés selon les combinaisons uniques des champs indiqués dans la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code>. Puis l’annotation est fournie pour chaque groupe unique&nbsp;; l’annotation est donc calculée sur tous les membres du groupe.</p>
+<p>Par exemple, considérons une requête sur les auteurs cherchant à trouver la moyenne des notes des livres écrits par chaque auteur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">average_rating</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;book__rating&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Ceci renvoie un résultat pour chaque auteur de la base de données, annoté par la note moyenne de leurs livres.</p>
+<p>Cependant, le résultat sera légèrement différent si vous utilisez une clause <code class="docutils literal notranslate"><span class="pre">values()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">average_rating</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;book__rating&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Dans cet exemple, les auteurs sont groupés par nom, vous allez donc obtenir un résultat annoté pour chaque nom d’auteur <em>unique</em>. Cela signifie que si vous avez deux auteurs de même nom, leurs résultats seront fusionnés en un seul dans la requête résultante&nbsp;; la moyenne sera calculée sur tous les livres écrits par les deux auteurs.</p>
+<div class="section" id="s-order-of-annotate-and-values-clauses">
+<span id="order-of-annotate-and-values-clauses"></span><h4>Ordre des clauses <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> et <code class="docutils literal notranslate"><span class="pre">values()</span></code><a class="headerlink" href="#order-of-annotate-and-values-clauses" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Comme pour la clause <code class="docutils literal notranslate"><span class="pre">filter()</span></code>, l’ordre d’apparition des clauses <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> et <code class="docutils literal notranslate"><span class="pre">values()</span></code> dans une requête est important. Si la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code> précède <code class="docutils literal notranslate"><span class="pre">annotate()</span></code>, l’annotation est calculée par rapport aux groupements définis par la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code>.</p>
+<p>Cependant, si la clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> précède la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code>, les annotations sont générées sur la totalité du jeu de requête. Dans ce cas, la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code> ne restreint que les champs dans le résultat final.</p>
+<p>Par exemple, si nous inversons l’ordre des clauses <code class="docutils literal notranslate"><span class="pre">values()</span></code> et <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> dans notre exemple précédent&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Author</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">average_rating</span><span class="o">=</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;book__rating&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;average_rating&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cela produit maintenant un résultat unique pour chaque auteur&nbsp;; cependant, seuls le nom de l’auteur et l’annotation <code class="docutils literal notranslate"><span class="pre">average_rating</span></code> sont renvoyés dans les données de résultat.</p>
+<p>Remarquez également que <code class="docutils literal notranslate"><span class="pre">average_rating</span></code> a été explicitement inclus dans la liste des valeurs à renvoyer. C’est obligatoire à cause de l’ordre des clauses <code class="docutils literal notranslate"><span class="pre">values()</span></code> et <code class="docutils literal notranslate"><span class="pre">annotate()</span></code>.</p>
+<p>Si la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code> précède la clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code>, toute annotation sera automatiquement ajoutée au résultat de la requête. Toutefois, si la clause <code class="docutils literal notranslate"><span class="pre">values()</span></code> est appliquée après la clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code>, vous devez inclure explicitement la colonne agrégée.</p>
+</div>
+<div class="section" id="s-interaction-with-default-ordering-or-order-by">
+<span id="s-aggregation-ordering-interaction"></span><span id="interaction-with-default-ordering-or-order-by"></span><span id="aggregation-ordering-interaction"></span><h4>Interaction avec le tri par défaut ou <code class="docutils literal notranslate"><span class="pre">order_by()</span></code><a class="headerlink" href="#interaction-with-default-ordering-or-order-by" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Les champs mentionnés dans la partie <code class="docutils literal notranslate"><span class="pre">order_by()</span></code> d’une requête (ou ceux faisant partie du tri par défaut d’un modèle) sont utilisés lors de la sélection des données du résultat, même s’ils ne sont pas spécifiés explicitement dans l’appel à <code class="docutils literal notranslate"><span class="pre">values()</span></code>. Ces champs supplémentaires sont aussi pris en compte pour regrouper les résultats similaires et peuvent faire apparaître de manière distincte des lignes qui seraient regroupées sans la présence de ces champs. C’est particulièrement flagrant lorsqu’il s’agit de compter des objets.</p>
+<p>Pour fournir un exemple, supposons que vous ayez un modèle comme celui-ci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">()</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>L’élément important est ici le tri par défaut sur le champ <code class="docutils literal notranslate"><span class="pre">name</span></code>. Si vous souhaitez compter le nombre d’apparitions distinctes de la valeur <code class="docutils literal notranslate"><span class="pre">data</span></code>, vous pourriez écrire ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Warning: not quite correct!</span>
+<span class="n">Item</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">Count</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>…ce qui regroupe les objets <code class="docutils literal notranslate"><span class="pre">Item</span></code> par leurs valeurs <code class="docutils literal notranslate"><span class="pre">data</span></code> communes, puis compte le nombre de valeurs <code class="docutils literal notranslate"><span class="pre">id</span></code> dans chaque groupe. Sauf que ça ne marchera pas comme prévu. Le tri par défaut selon <code class="docutils literal notranslate"><span class="pre">name</span></code> intervient aussi dans le regroupement, ce qui fait que la requête regroupe sur les paires distinctes <code class="docutils literal notranslate"><span class="pre">(data,</span> <span class="pre">name)</span></code>, ce qui ne correspond pas à l’intention de départ. Voici en réalité ce qu’il faut écrire pour obtenir la requête espérée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Item</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">Count</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">order_by</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>…effaçant ainsi tout ordre de tri dans la requête. Il serait aussi possible de trier sur le champ <code class="docutils literal notranslate"><span class="pre">data</span></code> sans conséquence néfaste, dans la mesure où ce champ est déjà impliqué dans la requête.</p>
+<p>Ce comportement est le même que ce qui est noté dans la documentation des requêtes concernant <a class="reference internal" href="../../ref/models/querysets.html#django.db.models.query.QuerySet.distinct" title="django.db.models.query.QuerySet.distinct"><code class="xref py py-meth docutils literal notranslate"><span class="pre">distinct()</span></code></a>, la règle générale étant identique&nbsp;: il n’est normalement pas souhaité que des colonnes supplémentaires soient inclues dans le résultat, il faut donc effacer l’ordre de tri ou en tout cas s’assurer que les champs de tri sont déjà impliqués dans l’appel à <code class="docutils literal notranslate"><span class="pre">values()</span></code>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Vous pourriez raisonnablement vous demander pourquoi Django ne supprime pas ces colonnes parasites à notre place. La raison principale est de conserver la cohérence avec <code class="docutils literal notranslate"><span class="pre">distinct()</span></code> et d’autres endroits&nbsp;: Django ne supprime <strong>jamais</strong> les contraintes de tri que vous avez indiquées (et nous ne pouvons pas modifier le comportement de ces autres méthodes car cela trahirait notre politique de <a class="reference internal" href="../../misc/api-stability.html"><span class="doc">Stabilité de l’API</span></a>).</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-aggregating-annotations">
+<span id="aggregating-annotations"></span><h3>Agrégation des annotations<a class="headerlink" href="#aggregating-annotations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez aussi générer une agrégation des résultats d’une annotation. Lorsque vous définissez une clause <code class="docutils literal notranslate"><span class="pre">aggregate()</span></code>, cette agrégation peut se référer à n’importe quel alias défini dans une clause <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> de la même requête.</p>
+<p>Par exemple, si vous souhaitiez calculer le nombre moyen d’auteurs par livre, vous annoteriez premièrement les livres avec le nombre d’auteurs, puis vous agrégeriez ce nombre en vous référant au champ annoté&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.db.models</span> <span class="k">import</span> <span class="n">Avg</span><span class="p">,</span> <span class="n">Count</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Book</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">num_authors</span><span class="o">=</span><span class="n">Count</span><span class="p">(</span><span class="s1">&#39;authors&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Avg</span><span class="p">(</span><span class="s1">&#39;num_authors&#39;</span><span class="p">))</span>
+<span class="go">{&#39;num_authors__avg&#39;: 1.66}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Agrégation</a><ul>
+<li><a class="reference internal" href="#cheat-sheet">Antisèche</a></li>
+<li><a class="reference internal" href="#generating-aggregates-over-a-queryset">Génération de requêtes d’agrégation sur un objet <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code></a></li>
+<li><a class="reference internal" href="#generating-aggregates-for-each-item-in-a-queryset">Génération de valeurs agrégées pour chaque élément d’un <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code></a><ul>
+<li><a class="reference internal" href="#combining-multiple-aggregations">Combinaison de plusieurs agrégations</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#joins-and-aggregates">Jointures et agrégations</a><ul>
+<li><a class="reference internal" href="#following-relationships-backwards">Suivi des relations inverses</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#aggregations-and-other-queryset-clauses">Agrégations et autres clauses de <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code></a><ul>
+<li><a class="reference internal" href="#filter-and-exclude"><code class="docutils literal notranslate"><span class="pre">filter()</span></code> et <code class="docutils literal notranslate"><span class="pre">exclude()</span></code></a><ul>
+<li><a class="reference internal" href="#filtering-on-annotations">Filtrage sur les annotations</a></li>
+<li><a class="reference internal" href="#order-of-annotate-and-filter-clauses">Ordre des clauses <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> et <code class="docutils literal notranslate"><span class="pre">filter()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#order-by"><code class="docutils literal notranslate"><span class="pre">order_by()</span></code></a></li>
+<li><a class="reference internal" href="#values"><code class="docutils literal notranslate"><span class="pre">values()</span></code></a><ul>
+<li><a class="reference internal" href="#order-of-annotate-and-values-clauses">Ordre des clauses <code class="docutils literal notranslate"><span class="pre">annotate()</span></code> et <code class="docutils literal notranslate"><span class="pre">values()</span></code></a></li>
+<li><a class="reference internal" href="#interaction-with-default-ordering-or-order-by">Interaction avec le tri par défaut ou <code class="docutils literal notranslate"><span class="pre">order_by()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#aggregating-annotations">Agrégation des annotations</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="queries.html"
+                        title="Chapitre précédent">Création de requêtes</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="search.html"
+                        title="Chapitre suivant">Recherche</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/db/aggregation.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="queries.html" title="Création de requêtes">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="search.html" title="Recherche">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

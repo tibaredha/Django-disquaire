@@ -1,0 +1,795 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Bases de données &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="django-admin et manage.py" href="django-admin.html" />
+    <link rel="prev" title="Protection contre le « Cross site request forgery » (CSRF)" href="csrf.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="csrf.html" title="Protection contre le «&amp;nbsp;Cross site request forgery&amp;nbsp;» (CSRF)">previous</a>
+     |
+    <a href="index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="django-admin.html" title="&lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;django-admin&lt;/span&gt;&lt;/code&gt; et &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;manage.py&lt;/span&gt;&lt;/code&gt;">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-databases">
+            
+  <div class="section" id="s-databases">
+<span id="databases"></span><h1>Bases de données<a class="headerlink" href="#databases" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Django prend officiellement en charge les bases de données suivantes :</p>
+<ul class="simple">
+<li><a class="reference internal" href="#postgresql-notes"><span class="std std-ref">PostgreSQL</span></a></li>
+<li><a class="reference internal" href="#mariadb-notes"><span class="std std-ref">MariaDB</span></a></li>
+<li><a class="reference internal" href="#mysql-notes"><span class="std std-ref">MySQL</span></a></li>
+<li><a class="reference internal" href="#oracle-notes"><span class="std std-ref">Oracle</span></a></li>
+<li><a class="reference internal" href="#sqlite-notes"><span class="std std-ref">SQLite</span></a></li>
+</ul>
+<p>Il existe également un certain nombre de <a class="reference internal" href="#third-party-notes"><span class="std std-ref">moteurs de base de données fournis par des sources tierces</span></a>.</p>
+<p>Django tente d’activer autant de fonctionnalités que possible sur tous les types de base de données. Cependant, tous les types de base de données ne sont pas semblables, et nous avons dû prendre des décisions de conception sur les fonctionnalités à activer et les hypothèses sur lesquelles nous pouvions nous baser en toute sécurité.</p>
+<p>Ce fichier décrit quelques-unes des caractéristiques qui pourraient être pertinentes pour l’utilisation de Django. Il ne remplace pas la documentation ou les manuels de référence spécifiques aux différents serveurs de base de données.</p>
+<div class="section" id="s-general-notes">
+<span id="general-notes"></span><h2>Remarques générales<a class="headerlink" href="#general-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-persistent-connections">
+<span id="s-persistent-database-connections"></span><span id="persistent-connections"></span><span id="persistent-database-connections"></span><h3>Connexions persistantes<a class="headerlink" href="#persistent-connections" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les connexions persistantes évitent de devoir rétablir une connexion à la base de données pour chaque requête. Elles sont contrôlées par le réglage <a class="reference internal" href="settings.html#std:setting-CONN_MAX_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code></a> qui définit la durée de vie maximale d’une connexion. Ce réglage peut être défini indépendamment pour chaque base de données.</p>
+<p>La valeur par défaut est <code class="docutils literal notranslate"><span class="pre">0</span></code>, pour préserver le comportement historique de la fermeture de la connexion de base de données à la fin de chaque requête. Pour activer les connexions persistantes, définissez <a class="reference internal" href="settings.html#std:setting-CONN_MAX_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code></a> à un nombre entier positif de secondes. Pour que les connexions persistantes soient illimitées dans le temps, définissez-le à <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<div class="section" id="s-connection-management">
+<span id="connection-management"></span><h4>Gestion des connexions<a class="headerlink" href="#connection-management" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Django ouvre une connexion à la base de données lors de la première requête de base de données. Il garde cette connexion ouverte et la réutilise pour les requêtes suivantes. Django ferme la connexion dès que la limite de durée définie par <a class="reference internal" href="settings.html#std:setting-CONN_MAX_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code></a> est dépassée ou que la connexion n’est plus utilisable.</p>
+<p>Dans le détail, Django ouvre automatiquement une connexion à la base de données chaque fois qu’il en a besoin et qu’il n’en a pas déjà une – soit parce que c’est la première connexion, soit parce que la connexion précédente a été fermée.</p>
+<p>Avant chaque requête à la base de données, Django clôture la connexion si celle-ci a atteint la limite de durée. Si votre base de données termine les connexions inactives après une certaine durée, vous devez définir <a class="reference internal" href="settings.html#std:setting-CONN_MAX_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code></a> à une valeur inférieure, de sorte que Django ne cherche pas à utiliser une connexion qui a été interrompue par le serveur de base de données (ce problème ne peut affecter que les sites à très faible trafic).</p>
+<p>À la fin de chaque requête à la base de données, Django clôture la connexion si celle-ci a atteint la limite de durée ou si elle est dans un état d’erreur irrécupérable. Si des erreurs de base de données ont eu lieu lors du traitement des requêtes, Django vérifie si la connexion fonctionne encore, et la ferme si ce n’est pas le cas. De cette manière, les erreurs de base de données affectent au plus une requête&nbsp;; si la connexion devient inutilisable, la prochaine requête obtient une nouvelle connexion.</p>
+</div>
+<div class="section" id="s-caveats">
+<span id="caveats"></span><h4>Mises en garde<a class="headerlink" href="#caveats" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Comme chaque fil d’exécution gère sa propre connexion, la base de données doit prendre en charge au moins autant de connexions simultanées qu’il n’y a de fils d’exécution (threads) de travail pour Django.</p>
+<p>Parfois, la majorité des vues n’accèdent pas à une certaine base de données, par exemple parce que c’est la base de données d’un système externe, ou grâce à la mise en cache. Dans ce cas, vous devez définir <a class="reference internal" href="settings.html#std:setting-CONN_MAX_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CONN_MAX_AGE</span></code></a> à une valeur faible, voire à <code class="docutils literal notranslate"><span class="pre">0</span></code>, car cela n’a aucun sens de maintenir une connexion qui est peu susceptible d’être réutilisée. Cela contribuera à garder un petit nombre de connexions simultanées à cette base de données.</p>
+<p>Le serveur de développement crée un nouveau fil d’exécution pour chaque requête qu’il gère, annulant l’effet des connexions persistantes. Ne les activez pas pendant le développement.</p>
+<p>Lorsque Django établit une connexion à la base de données, il met en place les paramètres appropriés en fonction du type de base de données utilisé. Si vous activez les connexions persistantes, cette phase de configuration n’est pas répétée pour chaque requête. Si vous modifiez des paramètres tels que le niveau d’isolement de la connexion ou le fuseau horaire, vous devez soit restaurer les paramètres par défaut de Django à la fin de chaque requête, soit forcer une valeur appropriée avant chaque requête, soit désactiver les connexions persistantes.</p>
+</div>
+</div>
+<div class="section" id="s-encoding">
+<span id="encoding"></span><h3>Codage de caractères<a class="headerlink" href="#encoding" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django suppose que toutes les bases de données utilisent le codage UTF-8. L’utilisation d’autres codages peut entraîner un comportement inattendu comme des erreurs de base de données «&nbsp;valeur trop longue&nbsp;» pour des données qui sont valides dans Django. Consultez les notes ci-dessous spécifiques à chaque base de données pour obtenir des informations sur la façon de configurer correctement votre base de données.</p>
+</div>
+</div>
+<div class="section" id="s-postgresql-notes">
+<span id="s-id1"></span><span id="postgresql-notes"></span><span id="id1"></span><h2>Notes sur PostgreSQL<a class="headerlink" href="#postgresql-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django prend en charge PostgreSQL 9.5 et plus récent. <a class="reference external" href="https://www.psycopg.org/">psycopg2</a> 2.5.4 ou plus récent est requis, même s’il est recommandé d’utiliser la version la plus récente.</p>
+<div class="section" id="s-postgresql-connection-settings">
+<span id="postgresql-connection-settings"></span><h3>Paramètres de connexion PostgreSQL<a class="headerlink" href="#postgresql-connection-settings" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Voir <a class="reference internal" href="settings.html#std:setting-HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">HOST</span></code></a> pour plus de détails.</p>
+</div>
+<div class="section" id="s-optimizing-postgresql-s-configuration">
+<span id="optimizing-postgresql-s-configuration"></span><h3>Optimisation de la configuration de PostgreSQL<a class="headerlink" href="#optimizing-postgresql-s-configuration" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django a besoin des paramètres suivants pour se connecter aux bases de données&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">client_encoding</span></code>: <code class="docutils literal notranslate"><span class="pre">'UTF8'</span></code>,</li>
+<li><code class="docutils literal notranslate"><span class="pre">default_transaction_isolation</span></code>: <code class="docutils literal notranslate"><span class="pre">'read</span> <span class="pre">committed'</span></code> par défaut, ou la valeur définie dans les options de connexion (voir ci-dessous),</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">timezone</span></code>:</dt>
+<dd><ul class="first last">
+<li>lorsque <a class="reference internal" href="settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, <code class="docutils literal notranslate"><span class="pre">'UTC'</span></code> par défaut ou la valeur <a class="reference internal" href="settings.html#std:setting-DATABASE-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a> définie pour la connexion,</li>
+<li>lorsque <a class="reference internal" href="settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">False</span></code>, la valeur du réglage global <a class="reference internal" href="settings.html#std:setting-TIME_ZONE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TIME_ZONE</span></code></a>.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Si ces paramètres ont déjà les valeurs correctes, Django n’aura pas à les indiquer pour chaque nouvelle connexion, ce qui améliore légèrement les performances. Vous pouvez les configurer directement dans <code class="file docutils literal notranslate"><span class="pre">postgresql.conf</span></code> ou plus commodément pour chaque utilisateur de base de données avec <a class="reference external" href="https://www.postgresql.org/docs/current/sql-alterrole.html">ALTER ROLE</a>.</p>
+<p>Django fonctionne très bien sans cette optimisation, mais chaque nouvelle connexion va faire quelques requêtes supplémentaires pour définir ces paramètres.</p>
+</div>
+<div class="section" id="s-isolation-level">
+<span id="s-database-isolation-level"></span><span id="isolation-level"></span><span id="database-isolation-level"></span><h3>Niveau d’isolement<a class="headerlink" href="#isolation-level" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme pour PostgreSQL lui-même, le <a href="#id16"><span class="problematic" id="id17">`niveau d'isolement`_</span></a> de Django vaut par défaut <code class="docutils literal notranslate"><span class="pre">READ</span> <span class="pre">COMMITTED</span></code>. Si vous avez besoin d’un plus haut niveau d’isolement tel que <code class="docutils literal notranslate"><span class="pre">REPEATABLE</span> <span class="pre">READ</span></code> ou <code class="docutils literal notranslate"><span class="pre">SERIALIZABLE</span></code>, définissez-le dans la partie <a class="reference internal" href="settings.html#std:setting-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS</span></code></a> de la configuration de base de données <a class="reference internal" href="settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">psycopg2.extensions</span>
+
+<span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># ...</span>
+    <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;isolation_level&#39;</span><span class="p">:</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">extensions</span><span class="o">.</span><span class="n">ISOLATION_LEVEL_SERIALIZABLE</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Sous des niveaux d’isolement plus élevés, votre application doit être préparée à gérer des exceptions générées lors d’échecs de sérialisation. Cette option est prévue pour des utilisateurs avancés.</p>
+</div>
+</div>
+<div class="section" id="s-indexes-for-varchar-and-text-columns">
+<span id="indexes-for-varchar-and-text-columns"></span><h3>Index pour les colonnes <code class="docutils literal notranslate"><span class="pre">varchar</span></code> et <code class="docutils literal notranslate"><span class="pre">text</span></code><a class="headerlink" href="#indexes-for-varchar-and-text-columns" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque vous indiquez  <code class="docutils literal notranslate"><span class="pre">db_index=True</span></code> sur vos champs de modèle, Django génère généralement un seul <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">INDEX</span></code>. Toutefois, si le type de champ de base de données est <code class="docutils literal notranslate"><span class="pre">varchar</span></code> ou <code class="docutils literal notranslate"><span class="pre">text</span></code> (par exemple, pour les champs de type <code class="docutils literal notranslate"><span class="pre">CharField</span></code>, <code class="docutils literal notranslate"><span class="pre">FileField</span></code> ou <code class="docutils literal notranslate"><span class="pre">TextField</span></code>), Django crée alors un index supplémentaire qui utilise une <a class="reference external" href="https://www.postgresql.org/docs/current/indexes-opclass.html">classe opérateur de PostgreSQL</a> appropriée pour la colonne. Cet index supplémentaire est nécessaire pour le bon fonctionnement des recherches qui utilisent l’opérateur SQL <code class="docutils literal notranslate"><span class="pre">LIKE</span></code>, comme le font les recherches avec <code class="docutils literal notranslate"><span class="pre">contains</span></code> et <code class="docutils literal notranslate"><span class="pre">startswith</span></code>.</p>
+</div>
+<div class="section" id="s-migration-operation-for-adding-extensions">
+<span id="migration-operation-for-adding-extensions"></span><h3>Opération de migration pour ajouter des extensions<a class="headerlink" href="#migration-operation-for-adding-extensions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous avez besoin d’ajouter une extension PostgreSQL (comme <code class="docutils literal notranslate"><span class="pre">hstore</span></code>, <code class="docutils literal notranslate"><span class="pre">postgis</span></code>, etc.) en utilisant une migration, utilisez l’opération <a class="reference internal" href="contrib/postgres/operations.html#django.contrib.postgres.operations.CreateExtension" title="django.contrib.postgres.operations.CreateExtension"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateExtension</span></code></a>.</p>
+</div>
+<div class="section" id="s-server-side-cursors">
+<span id="s-postgresql-server-side-cursors"></span><span id="server-side-cursors"></span><span id="postgresql-server-side-cursors"></span><h3>Curseurs côté serveur<a class="headerlink" href="#server-side-cursors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsqu’on utilise <a class="reference internal" href="models/querysets.html#django.db.models.query.QuerySet.iterator" title="django.db.models.query.QuerySet.iterator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuerySet.iterator()</span></code></a>, Django ouvre un <a class="reference external" href="https://www.psycopg.org/docs/usage.html#server-side-cursors" title="(disponible dans Psycopg v2.8)"><span class="xref std std-ref">curseur côté serveur</span></a>. Par défaut, PostgreSQL suppose que seuls les premiers 10% des résultats des requêtes de curseur seront récupérées. Le planificateur de requête passe moins de temps à planifier la requête et commence à renvoyer des résultats plus rapidement, mais cela peut aussi diminuer les performances si plus de 10% des résultats sont récupérés. Les suppositions de PostgreSQL sur le nombre de lignes récupérées d’une requête de curseur sont contrôlées par l’option <a class="reference external" href="https://www.postgresql.org/docs/current/runtime-config-query.html#GUC-CURSOR-TUPLE-FRACTION">cursor_tuple_fraction</a>.</p>
+<div class="section" id="s-transaction-pooling-and-server-side-cursors">
+<span id="s-transaction-pooling-server-side-cursors"></span><span id="transaction-pooling-and-server-side-cursors"></span><span id="transaction-pooling-server-side-cursors"></span><h4>Transactions groupées et curseurs côté serveur<a class="headerlink" href="#transaction-pooling-and-server-side-cursors" title="Lien permanent vers ce titre">¶</a></h4>
+<p>L’utilisation d’un concentrateur (pooler) de connexion en mode groupement de transactions (par ex. <a class="reference external" href="https://pgbouncer.github.io/">PgBouncer</a>) nécessite de désactiver les curseurs côté serveur pour cette connexion.</p>
+<p>Les curseurs côté serveur sont propres à une connexion et restent ouverts à la fin d’une transaction lorsque <a class="reference internal" href="settings.html#std:setting-DATABASE-AUTOCOMMIT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">AUTOCOMMIT</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>. Une prochaine transaction peut demander l’obtention de davantage de résultats de la part du curseur côté serveur. En mode groupement de transactions, il n’y a aucune garantie que les transactions suivantes réutilisent la même connexion. Si une autre connexion est utilisée, une erreur survient lorsque la transaction fait référence au curseur côté serveur, car ces types de curseurs ne sont accessibles que pour la connexion dans laquelle ils ont été créés.</p>
+<p>Une solution est de désactiver les curseurs côté serveur pour une connexion dans <a class="reference internal" href="settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a> en définissant <a class="reference internal" href="settings.html#std:setting-DATABASE-DISABLE_SERVER_SIDE_CURSORS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DISABLE_SERVER_SIDE_CURSORS</span></code></a> à <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Pour bénéficier des curseurs côté serveur en mode de groupement des transactions, il est possible de définir une <a class="reference internal" href="../topics/db/multi-db.html"><span class="doc">autre connexion à la base de données</span></a> afin d’effectuer des requêtes utilisant les curseurs côté serveur. Cette connexion doit se faire soit directement à la base de données soit vers un concentrateur de connexions en mode de groupement par session.</p>
+<p>Une autre option est d’envelopper chaque <code class="docutils literal notranslate"><span class="pre">QuerySet</span></code> utilisant des curseurs côté serveur dans un bloc <a class="reference internal" href="../topics/db/transactions.html#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a>, car ceci désactive le mode <code class="docutils literal notranslate"><span class="pre">autocommit</span></code> pour la durée de la transaction. De cette façon, le curseur côté serveur ne sera actif que pour la durée de la transaction.</p>
+</div>
+</div>
+<div class="section" id="s-manually-specifying-values-of-auto-incrementing-primary-keys">
+<span id="s-manually-specified-autoincrement-pk"></span><span id="manually-specifying-values-of-auto-incrementing-primary-keys"></span><span id="manually-specified-autoincrement-pk"></span><h3>Indication manuelle des valeurs de clé primaire avec autoincrémentation<a class="headerlink" href="#manually-specifying-values-of-auto-incrementing-primary-keys" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django utilise le <a class="reference external" href="https://www.postgresql.org/docs/current/datatype-numeric.html#DATATYPE-SERIAL">type de données SERIAL</a> de PostgreSQL pour stocker les clés primaires autoincrémentées. Une colonne <code class="docutils literal notranslate"><span class="pre">SERIAL</span></code> est remplie par des valeurs d’une <a class="reference external" href="https://www.postgresql.org/docs/current/sql-createsequence.html">séquence</a> qui garde la trace de la prochaine valeur disponible. L’attribution manuelle d’une valeur à un champ autoincrémenté ne met pas à jour la séquence du champ, ce qui peut causer un conflit plus tard. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.auth.models</span> <span class="k">import</span> <span class="n">User</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;alice&#39;</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">&lt;User: alice&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The sequence hasn&#39;t been updated; its next value is 1.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s1">&#39;bob&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">IntegrityError: duplicate key value violates unique constraint</span>
+<span class="go">&quot;auth_user_pkey&quot; DETAIL:  Key (id)=(1) already exists.</span>
+</pre></div>
+</div>
+<p>Si vous devez indiquer de telles valeurs, réinitialisez ensuite la séquence pour éviter de réutiliser une valeur qui se trouve déjà dans la table. La commande d’administration <a class="reference internal" href="django-admin.html#django-admin-sqlsequencereset"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">sqlsequencereset</span></code></a> génère les commandes SQL qui font cela.</p>
+</div>
+<div class="section" id="s-test-database-templates">
+<span id="test-database-templates"></span><h3>Modèles de base de données de test<a class="headerlink" href="#test-database-templates" title="Lien permanent vers ce titre">¶</a></h3>
+<p>On peut utiliser le réglage <a class="reference internal" href="settings.html#std:setting-TEST_TEMPLATE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEST['TEMPLATE']</span></code></a> pour indiquer un <a class="reference external" href="https://www.postgresql.org/docs/current/sql-createdatabase.html">modèle</a> (par ex. <code class="docutils literal notranslate"><span class="pre">'template0'</span></code>) à partir duquel la base de données de test est créée.</p>
+</div>
+<div class="section" id="s-speeding-up-test-execution-with-non-durable-settings">
+<span id="speeding-up-test-execution-with-non-durable-settings"></span><h3>Accélération de l’exécution des tests par des réglages temporaires<a class="headerlink" href="#speeding-up-test-execution-with-non-durable-settings" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez accélérer l’exécution des tests en <a class="reference external" href="http://docs.postgresql.fr/11/non-durability.html">configurant PostgreSQL avec perte acceptée</a>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">C’est dangereux&nbsp;: votre base de données sera plus sujette aux pertes de données ou aux corruptions dans le case de plantage de serveur ou de coupure de courant. N’utilisez cela que sur des machines de développement où vous pouvez facilement restaurer l’ensemble de toutes les bases de données dans la grappe (cluster).</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-mariadb-notes">
+<span id="s-id3"></span><span id="mariadb-notes"></span><span id="id3"></span><h2>Notes MariaDB<a class="headerlink" href="#mariadb-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="versionadded">
+<span class="title">New in Django 3.0.</span> </div>
+<p>Django prend en charge les versions 10.2 et plus récentes de MariaDB.</p>
+<p>Pour utiliser MariaDB, employez le moteur MySQL qui est partagé entre les deux. Consultez les <a class="reference internal" href="#mysql-notes"><span class="std std-ref">notes MySQL</span></a> pour plus de détails.</p>
+</div>
+<div class="section" id="s-mysql-notes">
+<span id="s-id4"></span><span id="mysql-notes"></span><span id="id4"></span><h2>Notes sur MySQL<a class="headerlink" href="#mysql-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-version-support">
+<span id="version-support"></span><h3>Versions prises en charge<a class="headerlink" href="#version-support" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django prend en charge les versions 5.6 et plus récentes de MySQL.</p>
+<p>La fonctionnalité <code class="docutils literal notranslate"><span class="pre">inspectdb</span></code> de Django utilise la base de données <code class="docutils literal notranslate"><span class="pre">information_schema</span></code>, qui contient des données détaillées sur tous les schémas de la base de données.</p>
+<p>Django s’attend à ce que la base de données accepte l’Unicode (codage UTF-8) et lui délègue la charge de faire respecter les transactions et l’intégrité référentielle. Il est important d’être conscient du fait que ces deux derniers aspects ne sont pas réellement appliqués par MySQL lorsque le moteur de stockage MyISAM est utilisé, voir la section suivante.</p>
+</div>
+<div class="section" id="s-storage-engines">
+<span id="s-mysql-storage-engines"></span><span id="storage-engines"></span><span id="mysql-storage-engines"></span><h3>Les moteurs de stockage<a class="headerlink" href="#storage-engines" title="Lien permanent vers ce titre">¶</a></h3>
+<p>MySQL possède plusieurs <a class="reference external" href="https://dev.mysql.com/doc/refman/en/storage-engines.html">moteurs de stockage</a>. Vous pouvez changer le moteur de stockage par défaut dans la configuration du serveur.</p>
+<p>Le moteur de stockage par défaut de MySQL est <a class="reference external" href="https://dev.mysql.com/doc/refman/en/innodb-storage-engine.html">InnoDB</a>. Ce moteur est pleinement transactionnel et prend en charge les références de clé étrangère. Il s’agit du choix recommandé. Cependant, le compteur d’incrémentation automatique de InnoDB est perdu au redémarrage de MySQL car il ne conserve pas la valeur <code class="docutils literal notranslate"><span class="pre">AUTO_INCREMENT</span></code> mais la recalcule comme «&nbsp;max(id)+1&nbsp;». Cela peut aboutir à une réutilisation inappropriée de valeurs <a class="reference internal" href="models/fields.html#django.db.models.AutoField" title="django.db.models.AutoField"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoField</span></code></a>.</p>
+<p>Les désavantages principaux de <a class="reference external" href="https://dev.mysql.com/doc/refman/en/myisam-storage-engine.html">MyISAM</a> sont qu’il ne prend pas en charge les transactions et ne vérifie pas les contraintes de clé étrangère.</p>
+</div>
+<div class="section" id="s-mysql-db-api-drivers">
+<span id="s-id6"></span><span id="mysql-db-api-drivers"></span><span id="id6"></span><h3>Pilotes DB API MySQL<a class="headerlink" href="#mysql-db-api-drivers" title="Lien permanent vers ce titre">¶</a></h3>
+<p>MySQL propose plusieurs pilotes qui implémentent l’API Python de base de données documentée dans <span class="target" id="index-2"></span><a class="pep reference external" href="https://www.python.org/dev/peps/pep-0249"><strong>PEP 249</strong></a>:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://pypi.org/project/mysqlclient/">mysqlclient</a> est un pilote natif. Il s’agit du <strong>choix recommandé</strong>.</li>
+<li><a class="reference external" href="https://dev.mysql.com/downloads/connector/python">MySQL Connector/Python</a> est un pilote en Python pur écrit par Oracle qui n’a pas besoin de la bibliothèque client MySQL ni d’autres modules Python en dehors de la bibliothèque standard.</li>
+</ul>
+<p>Ces pilotes respectent la concurrence entre fils d’exécution (thread-safe) et gèrent le regroupement de connexions (pooling).</p>
+<p>En plus d’un pilote DB API, Django a besoin d’un adaptateur pour accéder aux pilotes de bases de données à partir de son ORM. Django fournit un adaptateur pour mysqlclient alors que MySQL Connector/Python inclut le <a class="reference external" href="https://dev.mysql.com/doc/connector-python/en/connector-python-django-backend.html">sien</a>.</p>
+<div class="section" id="s-id7">
+<span id="id7"></span><h4>mysqlclient<a class="headerlink" href="#id7" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Django nécessite la version 1.4.0 ou ultérieure de <a class="reference external" href="https://pypi.org/project/mysqlclient/">mysqlclient</a>.</p>
+</div>
+<div class="section" id="s-id8">
+<span id="id8"></span><h4>MySQL Connector/Python<a class="headerlink" href="#id8" title="Lien permanent vers ce titre">¶</a></h4>
+<p>MySQL Connector/Python est disponible sur cette <a class="reference external" href="https://dev.mysql.com/downloads/connector/python/">page de téléchargement</a>. L’adaptateur Django est disponible dans les versions 1.1.X et ultérieures. Il est possible qu’il ne prenne pas en charge la toute dernière version de Django.</p>
+</div>
+</div>
+<div class="section" id="s-time-zone-definitions">
+<span id="s-mysql-time-zone-definitions"></span><span id="time-zone-definitions"></span><span id="mysql-time-zone-definitions"></span><h3>Définitions de fuseaux horaires<a class="headerlink" href="#time-zone-definitions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous prévoyez d’utiliser la <a class="reference internal" href="../topics/i18n/timezones.html"><span class="doc">prise en charge des fuseaux horaires</span></a> de Django, utilisez <a class="reference external" href="https://dev.mysql.com/doc/refman/en/mysql-tzinfo-to-sql.html">mysql_tzinfo_to_sql</a> pour charger les tableaux de fuseaux horaires dans la base de données MySQL. Cela doit être fait une seule fois par serveur MySQL, pas pour chaque base de données.</p>
+</div>
+<div class="section" id="s-creating-your-database">
+<span id="creating-your-database"></span><h3>Création d’une base de données<a class="headerlink" href="#creating-your-database" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez <a class="reference external" href="https://dev.mysql.com/doc/refman/en/create-database.html">créer une base de données</a> à l’aide des outils de ligne de commande et de cette commande SQL&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CREATE</span> <span class="n">DATABASE</span> <span class="o">&lt;</span><span class="n">dbname</span><span class="o">&gt;</span> <span class="n">CHARACTER</span> <span class="n">SET</span> <span class="n">utf8</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Cela garantit que toutes les tables et colonnes utilisent le codage UTF-8 par défaut.</p>
+<div class="section" id="s-collation-settings">
+<span id="s-mysql-collation"></span><span id="collation-settings"></span><span id="mysql-collation"></span><h4>Paramètres de tri<a class="headerlink" href="#collation-settings" title="Lien permanent vers ce titre">¶</a></h4>
+<p>La méthode de tri («&nbsp;collation&nbsp;») d’une colonne détermine l’ordre dans lequel les données sont triées ainsi que les comparaisons d’égalité entre les chaînes. Ce paramètre peut être défini à l’échelle de la base de données mais aussi par table et par colonne. Ceci est <a class="reference external" href="https://dev.mysql.com/doc/refman/en/charset.html">documenté complètement</a> dans la documentation MySQL. Dans tous les cas, la méthode de tri est définie en modifiant directement les tables de la base de données&nbsp;; Django ne fournit aucun moyen de faire cela au niveau de la définition du modèle.</p>
+<p>Par défaut, avec une base de données UTF-8, MySQL utilise la collation <code class="docutils literal notranslate"><span class="pre">utf8_general_ci</span></code>. En conséquence, toutes les comparaisons d’égalité de chaînes se fait de manière insensible à la casse. C’est-à-dire que «&nbsp;Fred&nbsp;» et «&nbsp;freD&nbsp;» sont jugés équivalents pour la base de données. Si vous avez placé une contrainte unique sur un champ, il ne serait pas permis d’insérer à la fois «&nbsp;aa&nbsp;» et «&nbsp;AA&nbsp;» dans cette même colonne, dans la mesure où leur comparaison dit qu’elles sont identiques (et donc pas uniques) avec la collation par défaut. Si vous souhaitez effectuer des comparaisons sensibles à la casse sur une colonne ou table particulière, modifiez la collation de la colonne ou table en <code class="docutils literal notranslate"><span class="pre">utf8_bin</span></code>.</p>
+<p>Notez que selon les <a class="reference external" href="https://dev.mysql.com/doc/refman/en/charset-unicode-sets.html">Jeux de caractères Unicode MySQL</a>, les comparaisons avec la collation <code class="docutils literal notranslate"><span class="pre">utf8_general_ci</span></code> sont plus rapides, mais légèrement moins correctes que les comparaisons avec <code class="docutils literal notranslate"><span class="pre">utf8_unicode_ci</span></code>. Si cela est acceptable pour votre application, il est préférable d’utiliser <code class="docutils literal notranslate"><span class="pre">utf8_general_ci</span></code> car elle est plus rapide. Dans le cas contraire (par exemple si vous avez besoin de l’ordre du dictionnaire allemand), utilisez <code class="docutils literal notranslate"><span class="pre">utf8_unicode_ci</span></code> car cette collation est plus juste.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Les sous-formulaires de modèles valident les champs uniques de manière sensible à la casse. Ainsi, lors de l’utilisation d’une collation de base de données insensible à la casse, des sous-formulaires contenant des valeurs de champs uniques qui ne diffèrent que par leur casse vont passer la validation avec succès, mais au moment de l’enregistrement par <code class="docutils literal notranslate"><span class="pre">save()</span></code>, une exception <code class="docutils literal notranslate"><span class="pre">IntegrityError</span></code> va se produire.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-connecting-to-the-database">
+<span id="connecting-to-the-database"></span><h3>Connexion à la base de données<a class="headerlink" href="#connecting-to-the-database" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Reportez-vous à la <a class="reference internal" href="settings.html"><span class="doc">documentation des réglages</span></a>.</p>
+<p>Les paramètres de connexion sont utilisés dans cet ordre&nbsp;:</p>
+<ol class="arabic simple">
+<li><a class="reference internal" href="settings.html#std:setting-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS</span></code></a>.</li>
+<li><a class="reference internal" href="settings.html#std:setting-NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">NAME</span></code></a>, <a class="reference internal" href="settings.html#std:setting-USER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USER</span></code></a>, <a class="reference internal" href="settings.html#std:setting-PASSWORD"><code class="xref std std-setting docutils literal notranslate"><span class="pre">PASSWORD</span></code></a>, <a class="reference internal" href="settings.html#std:setting-HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">HOST</span></code></a>,
+<a class="reference internal" href="settings.html#std:setting-PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">PORT</span></code></a></li>
+<li>Fichiers d’options de MySQL.</li>
+</ol>
+<p>En d’autres termes, si vous définissez le nom de la base de données dans <a class="reference internal" href="settings.html#std:setting-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS</span></code></a>, cette définition a la priorité sur <a class="reference internal" href="settings.html#std:setting-NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">NAME</span></code></a>, qui aurait lui-même la priorité sur n’importe quelle valeur d’un <a class="reference external" href="https://dev.mysql.com/doc/refman/en/option-files.html">fichier d’options MySQL</a>.</p>
+<p>Voici un exemple de configuration qui utilise un fichier d’options MySQL&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># settings.py</span>
+<span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.mysql&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;read_default_file&#39;</span><span class="p">:</span> <span class="s1">&#39;/path/to/my.cnf&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="c1"># my.cnf</span>
+<span class="p">[</span><span class="n">client</span><span class="p">]</span>
+<span class="n">database</span> <span class="o">=</span> <span class="n">NAME</span>
+<span class="n">user</span> <span class="o">=</span> <span class="n">USER</span>
+<span class="n">password</span> <span class="o">=</span> <span class="n">PASSWORD</span>
+<span class="n">default</span><span class="o">-</span><span class="n">character</span><span class="o">-</span><span class="nb">set</span> <span class="o">=</span> <span class="n">utf8</span>
+</pre></div>
+</div>
+<p>Quelques autres <a class="reference external" href="https://mysqlclient.readthedocs.io/user_guide.html#functions-and-attributes">options de connexion MySQLdb</a> peuvent se révéler utiles, telles que <code class="docutils literal notranslate"><span class="pre">ssl</span></code>, <code class="docutils literal notranslate"><span class="pre">init_command</span></code> ou <code class="docutils literal notranslate"><span class="pre">sql_mode</span></code>.</p>
+<div class="section" id="s-setting-sql-mode">
+<span id="s-mysql-sql-mode"></span><span id="setting-sql-mode"></span><span id="mysql-sql-mode"></span><h4>Définition de <code class="docutils literal notranslate"><span class="pre">sql_mode</span></code><a class="headerlink" href="#setting-sql-mode" title="Lien permanent vers ce titre">¶</a></h4>
+<p>À partir de MySQL 5.7 et pour les nouvelles installations de MySQL 5.6, la valeur par défaut de l’option <code class="docutils literal notranslate"><span class="pre">sql_mode</span></code> contient <code class="docutils literal notranslate"><span class="pre">STRICT_TRANS_TABLES</span></code>. Cette option transforme les avertissements en erreurs lorsque des données sont tronquées lors de leur insertion. Django recommande fortement d’activer un <a class="reference external" href="https://dev.mysql.com/doc/refman/en/sql-mode.html#sql-mode-strict">mode strict</a> pour MySQL afin d’éviter des pertes de données (<code class="docutils literal notranslate"><span class="pre">STRICT_TRANS_TABLES</span></code> ou <code class="docutils literal notranslate"><span class="pre">STRICT_ALL_TABLES</span></code>).</p>
+<p>SI vous avez besoin de personnaliser le mode SQL, vuos pouvez définir la variable <code class="docutils literal notranslate"><span class="pre">sql_mode</span></code> comme toute autre option MySQL&nbsp;: soit dans un fichier de configuration, soit par la ligne <code class="docutils literal notranslate"><span class="pre">'init_command':</span> <span class="pre">&quot;SET</span> <span class="pre">sql_mode='STRICT_TRANS_TABLES'&quot;</span></code> dans la partie <a class="reference internal" href="settings.html#std:setting-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS</span></code></a> de la configuration de base de données dans <a class="reference internal" href="settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a>.</p>
+</div>
+<div class="section" id="s-mysql-isolation-level">
+<span id="s-id9"></span><span id="mysql-isolation-level"></span><span id="id9"></span><h4>Niveau d’isolement<a class="headerlink" href="#mysql-isolation-level" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Lors d’un fonctionnement avec charge concurrentielle, les transactions de base de données de différentes sessions (par exemple des fils d’exécution séparés traitant différentes requêtes) peuvent interagir entre elles. Ces interactions sont affectées par le <a class="reference external" href="https://dev.mysql.com/doc/refman/en/innodb-transaction-isolation-levels.html">niveau d’isolation de transaction</a> de chaque session. Il est possible de définir le niveau d’isolation de transaction d’une connexion avec la clé <code class="docutils literal notranslate"><span class="pre">'isolation_level'</span></code> de la partie <a class="reference internal" href="settings.html#std:setting-OPTIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">OPTIONS</span></code></a> de la configuration de base de données dans <a class="reference internal" href="settings.html#std:setting-DATABASES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASES</span></code></a>. Les valeurs autorisées pour cette clé sont les quatre niveaux d’isolation standards&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">'read</span> <span class="pre">uncommitted'</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">'read</span> <span class="pre">committed'</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">'repeatable</span> <span class="pre">read'</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">'serializable'</span></code></li>
+</ul>
+<p>ou <code class="docutils literal notranslate"><span class="pre">None</span></code> pour utiliser le niveau d’isolation configuré sur le serveur. Cependant, Django fonctionne mieux avec <code class="docutils literal notranslate"><span class="pre">read</span> <span class="pre">committed</span></code> (choix Django par défaut) plutôt que la valeur par défaut de MySQL qui est <code class="docutils literal notranslate"><span class="pre">repeatable</span> <span class="pre">read</span></code>. Des pertes de données sont possibles avec le niveau <code class="docutils literal notranslate"><span class="pre">repeatable</span> <span class="pre">read</span></code>. En particulier, vous pouvez rencontrer des cas où <a class="reference internal" href="models/querysets.html#django.db.models.query.QuerySet.get_or_create" title="django.db.models.query.QuerySet.get_or_create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_or_create()</span></code></a> génère une exception <a class="reference internal" href="exceptions.html#django.db.IntegrityError" title="django.db.IntegrityError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">IntegrityError</span></code></a> mais l’objet n’apparaît pas dans de futurs appels à <a class="reference internal" href="models/querysets.html#django.db.models.query.QuerySet.get" title="django.db.models.query.QuerySet.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="s-creating-your-tables">
+<span id="creating-your-tables"></span><h3>Création des tables<a class="headerlink" href="#creating-your-tables" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque Django génère le schéma, il ne précise pas de moteur de stockage, donc les tables seront créées avec le moteur de stockage par défaut de votre serveur de base de données. La solution la plus simple est de définir le moteur souhaité comme moteur de stockage par défaut pour votre serveur de base de données.</p>
+<p>Si vous utilisez un service d’hébergement et que vous ne pouvez pas modifier le moteur de stockage par défaut sur votre serveur, vous avez plusieurs possibilités.</p>
+<ul>
+<li><p class="first">Après la création des tables, exécutez une commande SQL <code class="docutils literal notranslate"><span class="pre">ALTER</span> <span class="pre">TABLE</span></code> pour convertir une table vers un nouveau moteur de stockage (comme InnoDB)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ALTER</span> <span class="n">TABLE</span> <span class="o">&lt;</span><span class="n">tablename</span><span class="o">&gt;</span> <span class="n">ENGINE</span><span class="o">=</span><span class="n">INNODB</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Cela peut être fastidieux si vous avez beaucoup de tables.</p>
+</li>
+<li><p class="first">Une autre possibilité est d’utiliser l’option <code class="docutils literal notranslate"><span class="pre">init_command</span></code> de MySQLdb avant de créer les tables&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+   <span class="s1">&#39;init_command&#39;</span><span class="p">:</span> <span class="s1">&#39;SET default_storage_engine=INNODB&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Ceci définit le moteur de stockage par défaut lors de la connexion à la base de données. Une fois que les tables ont été créées, vous devriez supprimer cette option car elle ajoute une requête lors de chaque connexion à la base de données, alors que c’est uniquement nécessaire lors de la création d’une table.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-table-names">
+<span id="table-names"></span><h3>Noms de tables<a class="headerlink" href="#table-names" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Certains <a class="reference external" href="https://bugs.mysql.com/bug.php?id=48875">problèmes connus</a>, même dans les dernières versions de MySQL peuvent engendrer une modification d’un nom de table lorsque certaines instructions SQL sont exécutées sous certaines conditions. Il est recommandé d’utiliser des noms de table en minuscules, si possible, pour éviter les problèmes qui pourraient résulter de ce comportement. Django utilise des noms de tables en minuscules quand il génère automatiquement les noms de table à partir des modèles, c’est donc un élément à prendre en compte surtout si vous surchargez le nom de la table en utilisant le paramètre <a class="reference internal" href="models/options.html#django.db.models.Options.db_table" title="django.db.models.Options.db_table"><code class="xref py py-class docutils literal notranslate"><span class="pre">db_table</span></code></a>.</p>
+</div>
+<div class="section" id="s-savepoints">
+<span id="savepoints"></span><h3>Points de sauvegarde («&nbsp;savepoints&nbsp;»)<a class="headerlink" href="#savepoints" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’ORM de Django tout comme MySQL (lorsque le <a class="reference internal" href="#mysql-storage-engines"><span class="std std-ref">moteur de stockage</span></a> InnoDB est utilisé) prennent en charge les <a class="reference internal" href="../topics/db/transactions.html#topics-db-transactions-savepoints"><span class="std std-ref">points de sauvegarde</span></a> des bases de données.</p>
+<p>Si vous utilisez le moteur de stockage MyISAM, vous recevrez des erreurs générées par la base de données si vous essayez d’utiliser les <a class="reference internal" href="../topics/db/transactions.html#topics-db-transactions-savepoints"><span class="std std-ref">méthodes de l’API des transactions liées aux points de sauvegarde</span></a>.  En effet, comme la détection du moteur de stockage d’une table ou d’une base de données MySQL est une opération très coûteuse en ressources, il a été décidé de ne pas convertir dynamiquement ces méthodes en méthodes neutres en se basant sur ce genre de détection.</p>
+</div>
+<div class="section" id="s-notes-on-specific-fields">
+<span id="notes-on-specific-fields"></span><h3>Notes sur des champs particuliers<a class="headerlink" href="#notes-on-specific-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<div class="section" id="s-character-fields">
+<span id="s-mysql-character-fields"></span><span id="character-fields"></span><span id="mysql-character-fields"></span><h4>Champs de type caractère<a class="headerlink" href="#character-fields" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Tous les champs qui sont stockés dans des types de colonnes <code class="docutils literal notranslate"><span class="pre">VARCHAR</span></code> peuvent voir leur taille maximale (<code class="docutils literal notranslate"><span class="pre">max_length</span></code>) limitée à 255 caractères si vous utilisez <code class="docutils literal notranslate"><span class="pre">unique=True</span></code> pour ce champ. Cela concerne les champs <a class="reference internal" href="models/fields.html#django.db.models.CharField" title="django.db.models.CharField"><code class="xref py py-class docutils literal notranslate"><span class="pre">CharField</span></code></a> et <a class="reference internal" href="models/fields.html#django.db.models.SlugField" title="django.db.models.SlugField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SlugField</span></code></a>. Consultez la <a class="reference external" href="https://dev.mysql.com/doc/refman/en/create-index.html#create-index-column-prefixes">documentation MySQL</a> pour plus de détails.</p>
+</div>
+<div class="section" id="s-textfield-limitations">
+<span id="textfield-limitations"></span><h4>Limites des champs<a class="headerlink" href="#textfield-limitations" title="Lien permanent vers ce titre">¶</a></h4>
+<p>MySQL ne peut indexer que les N premiers caractères d’une colonne <code class="docutils literal notranslate"><span class="pre">BLOB</span></code> ou <code class="docutils literal notranslate"><span class="pre">TEXT</span></code>. Comme <code class="docutils literal notranslate"><span class="pre">TextField</span></code> n’a pas de longueur définie, il n’est pas possible de marquer un tel champ avec <code class="docutils literal notranslate"><span class="pre">unique=True</span></code>. MySQL produirait l’erreur&nbsp;: «&nbsp;BLOB/TEXT column “&lt;db_column&gt;” used in key specification without a key length&nbsp;».</p>
+</div>
+<div class="section" id="s-fractional-seconds-support-for-time-and-datetime-fields">
+<span id="s-mysql-fractional-seconds"></span><span id="fractional-seconds-support-for-time-and-datetime-fields"></span><span id="mysql-fractional-seconds"></span><h4>Prise en charge des fractions de secondes pour les champs heure et date/heure<a class="headerlink" href="#fractional-seconds-support-for-time-and-datetime-fields" title="Lien permanent vers ce titre">¶</a></h4>
+<p>À partir de la version 5.6.4, MySQL est capable de stocker des fractions de secondes, pour autant que les définitions de colonnes contiennent une indication adéquate (par ex.  <code class="docutils literal notranslate"><span class="pre">DATETIME(6)</span></code>). Dans les versions précédentes, ce n’était pas pris en charge du tout.</p>
+<p>Django ne va pas mettre à jour lui-même les colonnes existantes pour que les fractions de secondes soient incluses si le serveur de base de données le prend en charge. Si vous souhaitez les activer dans une base de données existante, c’est à vous de mettre à jour la colonne manuellement dans la base de données en exécutant une commande du style&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ALTER TABLE `your_table` MODIFY `your_datetime_column` DATETIME(6)
+</pre></div>
+</div>
+<p>ou en utilisant une opération <a class="reference internal" href="migration-operations.html#django.db.migrations.operations.RunSQL" title="django.db.migrations.operations.RunSQL"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSQL</span></code></a> dans une <a class="reference internal" href="../topics/migrations.html#data-migrations"><span class="std std-ref">migration de données</span></a>.</p>
+</div>
+<div class="section" id="s-timestamp-columns">
+<span id="timestamp-columns"></span><h4>Colonnes <code class="docutils literal notranslate"><span class="pre">TIMESTAMP</span></code><a class="headerlink" href="#timestamp-columns" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Si vous utilisez une base de données existante qui contient des colonnes <code class="docutils literal notranslate"><span class="pre">TIMESTAMP</span></code>, vous devez définir <a class="reference internal" href="settings.html#std:setting-USE_TZ"><code class="xref std std-setting docutils literal notranslate"><span class="pre">USE_TZ</span> <span class="pre">=</span> <span class="pre">False</span></code></a> pour éviter de corrompre des données. <a class="reference internal" href="django-admin.html#django-admin-inspectdb"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">inspectdb</span></code></a> fait correspondre ces colonnes à des champs <a class="reference internal" href="models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a> et si vous activez la prise en charge des fuseaux horaires, aussi bien MySQL que Django vont tenter de convertir les valeurs depuis le fuseau UTC vers le temps local.</p>
+</div>
+</div>
+<div class="section" id="s-row-locking-with-queryset-select-for-update">
+<span id="row-locking-with-queryset-select-for-update"></span><h3>Verrouillage de ligne avec <code class="docutils literal notranslate"><span class="pre">QuerySet.select_for_update()</span></code><a class="headerlink" href="#row-locking-with-queryset-select-for-update" title="Lien permanent vers ce titre">¶</a></h3>
+<p>MySQL et MariaDB ne gèrent pas certaines options de l’instruction <code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">...</span> <span class="pre">FOR</span> <span class="pre">UPDATE</span></code>. Si <code class="docutils literal notranslate"><span class="pre">select_for_update()</span></code> est utilisé avec une option non prise en charge, une exception <a class="reference internal" href="exceptions.html#django.db.NotSupportedError" title="django.db.NotSupportedError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NotSupportedError</span></code></a> est générée.</p>
+<table class="docutils">
+<colgroup>
+<col width="44%" />
+<col width="26%" />
+<col width="29%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">MariaDB</th>
+<th class="head">MySQL</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SKIP</span> <span class="pre">LOCKED</span></code></td>
+<td>&#160;</td>
+<td>X (≥8.0.1)</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">NOWAIT</span></code></td>
+<td>X (≥10.3)</td>
+<td>X (≥8.0.1)</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">OF</span></code></td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<p>Lors de l’utilisation de <code class="docutils literal notranslate"><span class="pre">select_for_update()</span></code> avec MySQL, assurez-vous de filtrer la requête avec au moins un champ contenu dans les contraintes d’unicité ou uniquement avec des champs dotés d’index. Sinon, un verrou exclusif en écriture sera acquis pour toute la table durant toute la transaction.</p>
+</div>
+<div class="section" id="s-automatic-typecasting-can-cause-unexpected-results">
+<span id="automatic-typecasting-can-cause-unexpected-results"></span><h3>Le retypage automatique peut produire des résultats inattendus<a class="headerlink" href="#automatic-typecasting-can-cause-unexpected-results" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lors de l’exécution d’une requête sur un type chaîne mais avec une valeur nombre entier, MySQL force les types de toutes les valeurs de la table à des nombres entiers avant d’effectuer la comparaison. Si la table contient les valeurs <code class="docutils literal notranslate"><span class="pre">'abc'</span></code>, <code class="docutils literal notranslate"><span class="pre">'def'</span></code> et que la requête cherche <code class="docutils literal notranslate"><span class="pre">WHERE</span> <span class="pre">macolonne=0</span></code>, les deux lignes vont correspondre. De la même manière, <code class="docutils literal notranslate"><span class="pre">WHERE</span> <span class="pre">macolonne=1</span></code> correspond à la valeur <code class="docutils literal notranslate"><span class="pre">'abc1'</span></code>. C’est pourquoi les champs de type chaîne inclus dans Django forcent toujours la valeur à une chaîne avant de l’utiliser dans une requête.</p>
+<p>Si vous implémentez des champs de modèle personnalisés héritant directement de <a class="reference internal" href="models/fields.html#django.db.models.Field" title="django.db.models.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>, que vous surchargez <a class="reference internal" href="models/fields.html#django.db.models.Field.get_prep_value" title="django.db.models.Field.get_prep_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_prep_value()</span></code></a> ou que vous utilisez <a class="reference internal" href="models/expressions.html#django.db.models.expressions.RawSQL" title="django.db.models.expressions.RawSQL"><code class="xref py py-class docutils literal notranslate"><span class="pre">RawSQL</span></code></a>, <a class="reference internal" href="models/querysets.html#django.db.models.query.QuerySet.extra" title="django.db.models.query.QuerySet.extra"><code class="xref py py-meth docutils literal notranslate"><span class="pre">extra()</span></code></a> ou <a class="reference internal" href="../topics/db/sql.html#django.db.models.Manager.raw" title="django.db.models.Manager.raw"><code class="xref py py-meth docutils literal notranslate"><span class="pre">raw()</span></code></a>, vous devez vous assurer d’effectuer les forçages de type appropriés.</p>
+</div>
+</div>
+<div class="section" id="s-sqlite-notes">
+<span id="s-id10"></span><span id="sqlite-notes"></span><span id="id10"></span><h2>Notes sur SQLite<a class="headerlink" href="#sqlite-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django prend en charge les versions 3.8.3 et plus récentes de SQLite.</p>
+<p><a class="reference external" href="https://www.sqlite.org/">SQLite</a> fournit une excellente alternative pour le développement d’applications qui sont essentiellement en lecture seule ou qui nécessitent une installation de plus petite taille. Comme avec tous les serveurs de base de données, cependant, il y a quelques différences spécifiques à SQLite à prendre en compte.</p>
+<div class="section" id="s-substring-matching-and-case-sensitivity">
+<span id="s-sqlite-string-matching"></span><span id="substring-matching-and-case-sensitivity"></span><span id="sqlite-string-matching"></span><h3>Recherche de portions de chaînes de caractères et sensibilité à la casse<a class="headerlink" href="#substring-matching-and-case-sensitivity" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour toutes les versions de SQLite, il y a un comportement peu intuitif lorsque l’on essaie de faire correspondre certains types de chaînes. Ce comportement est déclenché lors de l’utilisation des filtres <a class="reference internal" href="models/querysets.html#std:fieldlookup-iexact"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">iexact</span></code></a> ou <a class="reference internal" href="models/querysets.html#std:fieldlookup-contains"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">contains</span></code></a> dans des QuerySets. Le comportement se divise en deux cas&nbsp;:</p>
+<p>1. For substring matching, all matches are done case-insensitively. That is a
+filter such as <code class="docutils literal notranslate"><span class="pre">filter(name__contains=&quot;aa&quot;)</span></code> will match a name of <code class="docutils literal notranslate"><span class="pre">&quot;Aabb&quot;</span></code>.</p>
+<p>2. For strings containing characters outside the ASCII range, all exact string
+matches are performed case-sensitively, even when the case-insensitive options
+are passed into the query. So the <a class="reference internal" href="models/querysets.html#std:fieldlookup-iexact"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">iexact</span></code></a> filter will behave exactly
+the same as the <a class="reference internal" href="models/querysets.html#std:fieldlookup-exact"><code class="xref std std-lookup docutils literal notranslate"><span class="pre">exact</span></code></a> filter in these cases.</p>
+<p>Il existe quelques solutions de contournement <a class="reference external" href="https://www.sqlite.org/faq.html#q18">documentées sur sqlite.org</a>, mais elles ne sont pas exploitées par le moteur SQLite par défaut de Django, car cela impliquerait des difficultés certaines pour le faire de manière robuste. Django présente donc le comportement SQLite par défaut et il faut en être bien conscient lors de filtrage de sous-chaînes ou de chaînes insensibles à la casse.</p>
+</div>
+<div class="section" id="s-decimal-handling">
+<span id="s-sqlite-decimal-handling"></span><span id="decimal-handling"></span><span id="sqlite-decimal-handling"></span><h3>Gestion des nombres décimaux<a class="headerlink" href="#decimal-handling" title="Lien permanent vers ce titre">¶</a></h3>
+<p>SQLite n’a pas vraiment de type nombre décimal en interne. Les valeurs décimales sont converties dans le type de données <code class="docutils literal notranslate"><span class="pre">REAL</span></code> (nombre à virgule flottante 8-octets IEEE), comme présenté dans la <a class="reference external" href="https://www.sqlite.org/datatype3.html#storage_classes_and_datatypes">documentation des types de données SQLite</a>, ce qui explique pourquoi l’arithmétique sur des nombres décimaux à virgule flottante n’est pas géré correctement (problèmes d’arrondis).</p>
+</div>
+<div class="section" id="s-database-is-locked-errors">
+<span id="database-is-locked-errors"></span><h3>Erreurs «&nbsp;Database is locked&nbsp;» (la base de données est verrouillée)<a class="headerlink" href="#database-is-locked-errors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>SQLite est supposé être une base de données légère et ne peut donc pas gérer un niveau élevé de concurrence. Les erreurs <code class="docutils literal notranslate"><span class="pre">OperationalError:</span> <span class="pre">database</span> <span class="pre">is</span> <span class="pre">locked</span></code> indiquent que l’application subit une concurrence plus élevée que ce que <code class="docutils literal notranslate"><span class="pre">sqlite</span></code> ne peut gérer dans sa configuration par défaut. Cette erreur signifie qu’un processus ou un fil d’exécution possède un verrou exclusif sur la connexion de base de données et qu’un autre fil d’exécution a dû attendre trop longtemps que le verrou se libère.</p>
+<p>L’adaptateur SQLite de Python comporte une valeur d’expiration par défaut qui détermine le temps maximal d’attente de déverrouillage d’un autre fil d’exécution avant qu’il n’expire en générant une erreur <code class="docutils literal notranslate"><span class="pre">OperationalError:</span> <span class="pre">database</span> <span class="pre">is</span> <span class="pre">locked</span></code>.</p>
+<p>Si vous obtenez cette erreur, vous pouvez résoudre le problème en&nbsp;:</p>
+<ul>
+<li><p class="first">Passant à un autre moteur de base de données. À un certain stade, SQLite devient vraiment trop léger pour des applications du monde réel, et ce type d’erreur de concurrence indique que ce point a été atteint.</p>
+</li>
+<li><p class="first">Réécrivant le code pour réduire la concurrence et s’assurer que les transactions de base de données restent aussi brèves que possible.</p>
+</li>
+<li><p class="first">Augmentant la valeur d’expiration par défaut en définissant l’option de base de données <code class="docutils literal notranslate"><span class="pre">timeout</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1"># ...</span>
+    <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="c1"># ...</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Cela prolongera un peu le temps d’attente de SQLite avant de produire des erreurs «&nbsp;database is locked&nbsp;»&nbsp;; mais le problème de base n’en est pas résolu pour autant.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="s-queryset-select-for-update-not-supported">
+<span id="queryset-select-for-update-not-supported"></span><h3><code class="docutils literal notranslate"><span class="pre">QuerySet.select_for_update()</span></code> non pris en charge<a class="headerlink" href="#queryset-select-for-update-not-supported" title="Lien permanent vers ce titre">¶</a></h3>
+<p>SQLite ne prend pas en charge la syntaxe <code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">...</span> <span class="pre">FOR</span> <span class="pre">UPDATE</span></code>. L’appel de cette méthode n’a aucun effet.</p>
+</div>
+<div class="section" id="s-pyformat-parameter-style-in-raw-queries-not-supported">
+<span id="pyformat-parameter-style-in-raw-queries-not-supported"></span><h3>Le style de paramètre «&nbsp;pyformat&nbsp;» dans les requêtes brutes n’est pas pris en charge<a class="headerlink" href="#pyformat-parameter-style-in-raw-queries-not-supported" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour la plupart des moteurs, les requêtes brutes (<code class="docutils literal notranslate"><span class="pre">Manager.raw()</span></code> ou <code class="docutils literal notranslate"><span class="pre">cursor.execute()</span></code>) peuvent exploiter le style de paramètre «&nbsp;pyformat&nbsp;» où les substituants dans la requête sont écrits sous la forme <code class="docutils literal notranslate"><span class="pre">'%(nom)s'</span></code> et les paramètres sont transmis sous forme de dictionnaire au lieu de liste. SQLite ne prend pas cette syntaxe en charge.</p>
+</div>
+<div class="section" id="s-isolation-when-using-queryset-iterator">
+<span id="s-sqlite-isolation"></span><span id="isolation-when-using-queryset-iterator"></span><span id="sqlite-isolation"></span><h3>Isolation lors de l’utilisation de <code class="docutils literal notranslate"><span class="pre">QuerySet.iterator()</span></code><a class="headerlink" href="#isolation-when-using-queryset-iterator" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il existe des situations spéciales décrites dans <a class="reference external" href="https://sqlite.org/isolation.html">Isolation dans SQLite</a> lorsqu’on modifie une table tout en la parcourant avec <a class="reference internal" href="models/querysets.html#django.db.models.query.QuerySet.iterator" title="django.db.models.query.QuerySet.iterator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuerySet.iterator()</span></code></a>. Si une ligne est ajoutée, modifiée ou détruite dans la boucle, cette ligne peut apparaître ou non, ou même apparaître deux fois dans les résultats suivants en provenance de l’itérateur. Votre code doit gérer cela.</p>
+</div>
+<div class="section" id="s-enabling-json1-extension-on-sqlite">
+<span id="s-sqlite-json1"></span><span id="enabling-json1-extension-on-sqlite"></span><span id="sqlite-json1"></span><h3>Activation de l’extension JSON1 avec SQLite<a class="headerlink" href="#enabling-json1-extension-on-sqlite" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour utiliser <a class="reference internal" href="models/fields.html#django.db.models.JSONField" title="django.db.models.JSONField"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONField</span></code></a> avec SQLite, il est nécessaire d’activer l”<a class="reference external" href="https://www.sqlite.org/json1.html">extension JSON1</a> de la bibliothèque <a class="reference external" href="https://docs.python.org/3/library/sqlite3.html#module-sqlite3" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sqlite3</span></code></a> de Python. Si cette extension n’est pas activée dans votre installation, une erreur système (<code class="docutils literal notranslate"><span class="pre">fields.E180</span></code>) sera produite.</p>
+<p>Pour activer l’extension JSON1, vous pouvez suivre les instructions de <a class="reference external" href="https://code.djangoproject.com/wiki/JSON1Extension">cette page de Wiki</a>.</p>
+</div>
+</div>
+<div class="section" id="s-oracle-notes">
+<span id="s-id12"></span><span id="oracle-notes"></span><span id="id12"></span><h2>Notes sur Oracle<a class="headerlink" href="#oracle-notes" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django prend en charge les versions 12.2 et plus récentes du <a class="reference external" href="https://www.oracle.com/">serveur de base de données Oracle</a>. Il est nécessaire de posséder au minimum la version 6.0 du pilote Python <a class="reference external" href="https://oracle.github.io/python-cx_Oracle/">cx_Oracle</a>.</p>
+<p>Pour que la commande <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">migrate</span></code> fonctionne, l’utilisateur de base de données Oracle doit posséder les permissions d’exécuter les commandes suivantes&nbsp;:</p>
+<ul class="simple">
+<li>CREATE TABLE</li>
+<li>CREATE SEQUENCE</li>
+<li>CREATE PROCEDURE</li>
+<li>CREATE TRIGGER</li>
+</ul>
+<p>Pour exécuter la suite de tests d’un projet, l’utilisateur doit généralement posséder les privilèges <em>supplémentaires</em> suivants&nbsp;:</p>
+<ul class="simple">
+<li>CREATE USER</li>
+<li>ALTER USER</li>
+<li>DROP USER</li>
+<li>CREATE TABLESPACE</li>
+<li>DROP TABLESPACE</li>
+<li>CREATE SESSION WITH ADMIN OPTION</li>
+<li>CREATE TABLE WITH ADMIN OPTION</li>
+<li>CREATE SEQUENCE WITH ADMIN OPTION</li>
+<li>CREATE PROCEDURE WITH ADMIN OPTION</li>
+<li>CREATE TRIGGER WITH ADMIN OPTION</li>
+</ul>
+<p>Même si le rôle <code class="docutils literal notranslate"><span class="pre">RESOURCE</span></code> possède les privilèges requis <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">TABLE</span></code>, <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">SEQUENCE</span></code>, <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">PROCEDURE</span></code> et <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">TRIGGER</span></code>, et qu’un utilisateur disposant de <code class="docutils literal notranslate"><span class="pre">RESOURCE</span> <span class="pre">WITH</span> <span class="pre">ADMIN</span> <span class="pre">OPTION</span></code> peut accorder le privilège <code class="docutils literal notranslate"><span class="pre">RESOURCE</span></code>, cet utilisateur ne peut pas accorder de privilèges individuels (par ex. <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">TABLE</span></code>), ce qui fait que <code class="docutils literal notranslate"><span class="pre">RESOURCE</span> <span class="pre">WITH</span> <span class="pre">ADMIN</span> <span class="pre">OPTION</span></code> n’est généralement pas suffisant pour exécuter les tests.</p>
+<p>Certaines suites de tests créent aussi des vues ou des vues matérialisées&nbsp;; pour exécuter celles-ci, l’utilisateur a aussi besoin des privilèges <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">VIEW</span> <span class="pre">WITH</span> <span class="pre">ADMIN</span> <span class="pre">OPTION</span></code> et <code class="docutils literal notranslate"><span class="pre">CREATE</span> <span class="pre">MATERIALIZED</span> <span class="pre">VIEW</span> <span class="pre">WITH</span> <span class="pre">ADMIN</span> <span class="pre">OPTION</span></code>. C’est nécessaire en particulier pour la propre suite de tests de Django.</p>
+<p>Tous ces privilèges sont inclus dans le rôle DBA, qui est adéquat dans le cadre d’une base de données de développement privée.</p>
+<p>Le moteur de base de données Oracle utilise les paquets <code class="docutils literal notranslate"><span class="pre">SYS.DBMS_LOB</span></code> et <code class="docutils literal notranslate"><span class="pre">SYS.DBMS_RANDOM</span></code>, il faut donc que l’utilisateur possède les droits d’exécution pour lui. Il est normalement accessible par défaut à tous les utilisateurs, mais si ce n’est pas le cas, il faut attribuer les permissions comme ceci&nbsp;:</p>
+<div class="highlight-sql notranslate"><div class="highlight"><pre><span></span><span class="k">GRANT</span> <span class="k">EXECUTE</span> <span class="k">ON</span> <span class="n">SYS</span><span class="p">.</span><span class="n">DBMS_LOB</span> <span class="k">TO</span> <span class="k">user</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">EXECUTE</span> <span class="k">ON</span> <span class="n">SYS</span><span class="p">.</span><span class="n">DBMS_RANDOM</span> <span class="k">TO</span> <span class="k">user</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="s-id13">
+<span id="id13"></span><h3>Connexion à la base de données<a class="headerlink" href="#id13" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour se connecter en utilisant le nom de service de la base de données Oracle, le fichier <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> doit ressembler à quelque chose comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.oracle&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;xe&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="s1">&#39;a_user&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="s1">&#39;a_password&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HOST&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PORT&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Dans ce cas, il faut laisser vide les deux clés <a class="reference internal" href="settings.html#std:setting-HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">HOST</span></code></a> et <a class="reference internal" href="settings.html#std:setting-PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">PORT</span></code></a>. Cependant, si vous n’utilisez pas de fichier <code class="docutils literal notranslate"><span class="pre">tnsnames.ora</span></code> ou une méthode de nommage similaire et que vous vouliez vous connecter en utilisant le SID («&nbsp;xe&nbsp;» dans cet exemple), remplissez alors à la fois <a class="reference internal" href="settings.html#std:setting-HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">HOST</span></code></a> et <a class="reference internal" href="settings.html#std:setting-PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">PORT</span></code></a>, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;django.db.backends.oracle&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;xe&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;USER&#39;</span><span class="p">:</span> <span class="s1">&#39;a_user&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="s1">&#39;a_password&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HOST&#39;</span><span class="p">:</span> <span class="s1">&#39;dbprod01ned.mycompany.com&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PORT&#39;</span><span class="p">:</span> <span class="s1">&#39;1540&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Il faut soit remplir les deux clés <a class="reference internal" href="settings.html#std:setting-HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">HOST</span></code></a> et <a class="reference internal" href="settings.html#std:setting-PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">PORT</span></code></a>, soit les laisser toutes deux vides. Django utilise un descripteur de connexion différent en fonction de ce choix.</p>
+<div class="section" id="s-full-dsn-and-easy-connect">
+<span id="full-dsn-and-easy-connect"></span><h4>DSN complet et Easy Connect<a class="headerlink" href="#full-dsn-and-easy-connect" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Un chaîn DSN complète ou Easy Connect peut être utilisée dans <a class="reference internal" href="settings.html#std:setting-NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">NAME</span></code></a> si à la fois <a class="reference internal" href="settings.html#std:setting-HOST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">HOST</span></code></a> et <a class="reference internal" href="settings.html#std:setting-PORT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">PORT</span></code></a> sont vides. Ce format est requis par exemple lors de l’utilisation de RAC ou de bases de données enfichables sans <code class="docutils literal notranslate"><span class="pre">tnsnames.ora</span></code>.</p>
+<p>Exemple d’une chaîne Easy Connect</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="s1">&#39;localhost:1521/orclpdb1&#39;</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>Exemple d’une chaîne DSN complète</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;NAME&#39;</span><span class="p">:</span> <span class="p">(</span>
+    <span class="s1">&#39;(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))&#39;</span>
+    <span class="s1">&#39;(CONNECT_DATA=(SERVICE_NAME=orclpdb1)))&#39;</span>
+<span class="p">),</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-threaded-option">
+<span id="threaded-option"></span><h3>Option threaded<a class="headerlink" href="#threaded-option" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous prévoyez de faire fonctionner Django dans un environnement à fils d’exécution multiples (multithread), par exemple avec Apache et le module MPM par défaut sur tout système d’exploitation moderne), vous <strong>devez</strong> définir à <code class="docutils literal notranslate"><span class="pre">True</span></code> l’option <code class="docutils literal notranslate"><span class="pre">threaded</span></code> de votre configuration de base de données Oracle&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;threaded&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+<p>Si vous ne le faites pas, vous risquez d’obtenir des plantées et d’autres comportements bizarres.</p>
+</div>
+<div class="section" id="s-insert-returning-into">
+<span id="insert-returning-into"></span><h3>INSERT … RETURNING INTO<a class="headerlink" href="#insert-returning-into" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, le moteur Oracle utilise une clause <code class="docutils literal notranslate"><span class="pre">RETURNING</span> <span class="pre">INTO</span></code> pour obtenir efficacement la valeur d’un champ <code class="docutils literal notranslate"><span class="pre">AutoField</span></code> lors de l’insertion de nouvelles lignes. Ce comportement peut aboutir à des erreurs <code class="docutils literal notranslate"><span class="pre">DatabaseError</span></code> dans certaines configurations particulières, comme lors de l’insertion dans une table distante ou dans une vue avec le déclencheur <code class="docutils literal notranslate"><span class="pre">INSTEAD</span> <span class="pre">OF</span></code>. La clause <code class="docutils literal notranslate"><span class="pre">RETURNING</span> <span class="pre">INTO</span></code> peut être désactivée en définissant l’option <code class="docutils literal notranslate"><span class="pre">use_returning_into</span></code> de la configuration de base de données à <code class="docutils literal notranslate"><span class="pre">False</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s1">&#39;use_returning_into&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">},</span>
+</pre></div>
+</div>
+<p>Dans ce cas, le moteur Oracle utilise une requête <code class="docutils literal notranslate"><span class="pre">SELECT</span></code> séparée pour récupérer les valeurs <code class="docutils literal notranslate"><span class="pre">AutoField</span></code>.</p>
+</div>
+<div class="section" id="s-naming-issues">
+<span id="naming-issues"></span><h3>Questions de nommage<a class="headerlink" href="#naming-issues" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Oracle impose une longueur limite de 30 caractères pour les noms. Pour respecter cela, le moteur tronque les identifiants de base de données si nécessaire, remplaçant les quatre caractères finaux du nom tronqué par une valeur de hachage MD5 reproductible. De plus, le moteur transforme les identifiants de base de données tout en majuscules.</p>
+<p>Pour empêcher ces transformations (ce qui n’est généralement nécessaire que lorsqu’on a affaire à des bases de données existantes ou quand il faut accéder à des tables appartenant à d’autres utilisateurs), entourez la valeur de <code class="docutils literal notranslate"><span class="pre">db_table</span></code> par des guillemets&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LegacyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;&quot;name_left_in_lowercase&quot;&#39;</span>
+
+<span class="k">class</span> <span class="nc">ForeignModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">db_table</span> <span class="o">=</span> <span class="s1">&#39;&quot;OTHER_USER&quot;.&quot;NAME_ONLY_SEEMS_OVER_30&quot;&#39;</span>
+</pre></div>
+</div>
+<p>Les noms entre guillemets peuvent également être utilisés avec les autres moteurs de base de données pris en charge par Django&nbsp;; mais ces guillemets n’ont un effet qu’avec Oracle.</p>
+<p>Lors de l’exécution de <code class="docutils literal notranslate"><span class="pre">migrate</span></code>, une erreur <code class="docutils literal notranslate"><span class="pre">ORA-06552</span></code> peut se produire si certains mots-clés Oracle sont employés comme noms de champs de modèle ou comme valeur de l’option <code class="docutils literal notranslate"><span class="pre">db_column</span></code>. Django place entre guillemets tous les identifiants utilisés dans les requêtes pour empêcher la plupart de ce genre de problèmes, mais cette erreur peut quand même se produire lorsqu’un type de données Oracle est utilisé comme nom de colonne. Plus particulièrement, essayez d’éviter d’utiliser les noms <code class="docutils literal notranslate"><span class="pre">date</span></code>, <code class="docutils literal notranslate"><span class="pre">timestamp</span></code>, <code class="docutils literal notranslate"><span class="pre">number</span></code> ou <code class="docutils literal notranslate"><span class="pre">float</span></code> comme noms de champs.</p>
+</div>
+<div class="section" id="s-null-and-empty-strings">
+<span id="s-oracle-null-empty-strings"></span><span id="null-and-empty-strings"></span><span id="oracle-null-empty-strings"></span><h3>NULL et les chaînes vides<a class="headerlink" href="#null-and-empty-strings" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Django préfère généralement utiliser la chaîne vide (<code class="docutils literal notranslate"><span class="pre">''</span></code>) plutôt que <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, mais Oracle considère ces deux valeurs comme identiques. Pour contourner cela, le moteur Oracle ignore l’option explicite <code class="docutils literal notranslate"><span class="pre">null</span></code> pour les champs où la chaîne vide est une valeur possible et génère les instructions SQL comme si <code class="docutils literal notranslate"><span class="pre">null=True</span></code>. Lors de la lecture à partir de la base de données, Django part du principe qu’une valeur <code class="docutils literal notranslate"><span class="pre">NULL</span></code> dans l’un de ces champs équivaut en réalité à la chaîne vide et les données sont silencieusement converties pour respecter ce principe.</p>
+</div>
+<div class="section" id="s-id14">
+<span id="id14"></span><h3>Limites des champs<a class="headerlink" href="#id14" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Le moteur Oracle stocke les champs <code class="docutils literal notranslate"><span class="pre">TextFields</span></code> dans des colonnes <code class="docutils literal notranslate"><span class="pre">NCLOB</span></code>. Oracle impose certaines limites à l’utilisation de telles colonnes LOB en général&nbsp;:</p>
+<ul class="simple">
+<li>Les colonnes LOB ne peuvent pas être utilisées comme clés primaires.</li>
+<li>Les colonnes LOB ne peuvent pas être utilisées dans les index.</li>
+<li>Les colonnes LOB ne peuvent pas être utilisées dans une liste <code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">DISTINCT</span></code>. Cela signifie qu’une tentative d’utiliser la méthode <code class="docutils literal notranslate"><span class="pre">QuerySet.distinct</span></code> pour un modèle qui contient des colonnes <code class="docutils literal notranslate"><span class="pre">TextField</span></code> produira une erreur <code class="docutils literal notranslate"><span class="pre">ORA-00932``avec</span> <span class="pre">Oracle.</span> <span class="pre">Pour</span> <span class="pre">contourner</span> <span class="pre">ce</span> <span class="pre">problème,</span> <span class="pre">utilisez</span> <span class="pre">la</span> <span class="pre">méthode</span> <span class="pre">``QuerySet.defer</span></code> de concert avec <code class="docutils literal notranslate"><span class="pre">distinct()</span></code> afin d’éviter que des colonnes <code class="docutils literal notranslate"><span class="pre">TextField</span></code> ne se retrouvent incluses dans la liste <code class="docutils literal notranslate"><span class="pre">SELECT</span> <span class="pre">DISTINCT</span></code>.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="s-subclassing-the-built-in-database-backends">
+<span id="s-subclassing-database-backends"></span><span id="subclassing-the-built-in-database-backends"></span><span id="subclassing-database-backends"></span><h2>Création de sous-classe d’un moteur de base de données intégré<a class="headerlink" href="#subclassing-the-built-in-database-backends" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django est livré avec des moteurs de base de données intégrés. Il est possible d’en créer des sous-classes pour modifier leur comportement, leurs fonctionnalités ou leur configuration.</p>
+<p>Imaginez par exemple que vous deviez modifier une seule fonctionnalité de base de données. Premièrement, il s’agit de créer un nouveau répertoire contenant un module <code class="docutils literal notranslate"><span class="pre">base</span></code>. Par exemple</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysite</span><span class="o">/</span>
+    <span class="o">...</span>
+    <span class="n">mydbengine</span><span class="o">/</span>
+        <span class="fm">__init__</span><span class="o">.</span><span class="n">py</span>
+        <span class="n">base</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Le module <code class="docutils literal notranslate"><span class="pre">base.py</span></code> doit contenir une classe nommée <code class="docutils literal notranslate"><span class="pre">DatabaseWrapper</span></code> qui hérite d’un moteur existant à partir du module <code class="docutils literal notranslate"><span class="pre">django.db.backends</span></code>. Voici un exemple d’une sous-classe du moteur PostgreSQL dans le but de modifier une fonctionnalité de classe <code class="docutils literal notranslate"><span class="pre">allows_group_by_selected_pks_on_model</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">monsite/mydbengine/base.py</span><a class="headerlink" href="#id15" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db.backends.postgresql</span> <span class="kn">import</span> <span class="n">base</span><span class="p">,</span> <span class="n">features</span>
+
+<span class="k">class</span> <span class="nc">DatabaseFeatures</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">DatabaseFeatures</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">allows_group_by_selected_pks_on_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+<span class="k">class</span> <span class="nc">DatabaseWrapper</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">DatabaseWrapper</span><span class="p">):</span>
+    <span class="n">features_class</span> <span class="o">=</span> <span class="n">DatabaseFeatures</span>
+</pre></div>
+</div>
+</div>
+<p>Pour terminer, vous devez indiquer une valeur <a class="reference internal" href="settings.html#std:setting-DATABASE-ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DATABASE-ENGINE</span></code></a> dans votre fichier <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DATABASES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;ENGINE&#39;</span><span class="p">:</span> <span class="s1">&#39;mydbengine&#39;</span><span class="p">,</span>
+        <span class="o">...</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Vous pouvez voir la liste actuelle des moteurs de base de données en examinant le répertoire <a class="reference external" href="https://github.com/django/django/blob/master/django/db/backends">django/db/backends</a>.</p>
+</div>
+<div class="section" id="s-using-a-3rd-party-database-backend">
+<span id="s-third-party-notes"></span><span id="using-a-3rd-party-database-backend"></span><span id="third-party-notes"></span><h2>Utilisation d’un moteur de base de données externe<a class="headerlink" href="#using-a-3rd-party-database-backend" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En plus des bases de données prises en charge officiellement, il existe des moteurs externes à Django qui permettent d’utiliser d’autres bases de données avec Django&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://pypi.org/project/django-cockroachdb/">CockroachDB</a></li>
+<li><a class="reference external" href="https://pypi.org/project/django-firebird/">Firebird</a></li>
+<li><a class="reference external" href="https://pypi.org/project/django-mssql-backend/">Microsoft SQL Server</a></li>
+</ul>
+<p>Les versions de Django et les fonctionnalités ORM prises en charges par ces moteurs inofficiels varient considérablement. Si vous avez des questions concernant les capacités spécifiques de ces moteurs inofficiels ou des questions de support, vous devrez vous adresser aux canaux d’aide offerts par chacun de ces projets externes.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Bases de données</a><ul>
+<li><a class="reference internal" href="#general-notes">Remarques générales</a><ul>
+<li><a class="reference internal" href="#persistent-connections">Connexions persistantes</a><ul>
+<li><a class="reference internal" href="#connection-management">Gestion des connexions</a></li>
+<li><a class="reference internal" href="#caveats">Mises en garde</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#encoding">Codage de caractères</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#postgresql-notes">Notes sur PostgreSQL</a><ul>
+<li><a class="reference internal" href="#postgresql-connection-settings">Paramètres de connexion PostgreSQL</a></li>
+<li><a class="reference internal" href="#optimizing-postgresql-s-configuration">Optimisation de la configuration de PostgreSQL</a></li>
+<li><a class="reference internal" href="#isolation-level">Niveau d’isolement</a></li>
+<li><a class="reference internal" href="#indexes-for-varchar-and-text-columns">Index pour les colonnes <code class="docutils literal notranslate"><span class="pre">varchar</span></code> et <code class="docutils literal notranslate"><span class="pre">text</span></code></a></li>
+<li><a class="reference internal" href="#migration-operation-for-adding-extensions">Opération de migration pour ajouter des extensions</a></li>
+<li><a class="reference internal" href="#server-side-cursors">Curseurs côté serveur</a><ul>
+<li><a class="reference internal" href="#transaction-pooling-and-server-side-cursors">Transactions groupées et curseurs côté serveur</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#manually-specifying-values-of-auto-incrementing-primary-keys">Indication manuelle des valeurs de clé primaire avec autoincrémentation</a></li>
+<li><a class="reference internal" href="#test-database-templates">Modèles de base de données de test</a></li>
+<li><a class="reference internal" href="#speeding-up-test-execution-with-non-durable-settings">Accélération de l’exécution des tests par des réglages temporaires</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mariadb-notes">Notes MariaDB</a></li>
+<li><a class="reference internal" href="#mysql-notes">Notes sur MySQL</a><ul>
+<li><a class="reference internal" href="#version-support">Versions prises en charge</a></li>
+<li><a class="reference internal" href="#storage-engines">Les moteurs de stockage</a></li>
+<li><a class="reference internal" href="#mysql-db-api-drivers">Pilotes DB API MySQL</a><ul>
+<li><a class="reference internal" href="#id7">mysqlclient</a></li>
+<li><a class="reference internal" href="#id8">MySQL Connector/Python</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#time-zone-definitions">Définitions de fuseaux horaires</a></li>
+<li><a class="reference internal" href="#creating-your-database">Création d’une base de données</a><ul>
+<li><a class="reference internal" href="#collation-settings">Paramètres de tri</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#connecting-to-the-database">Connexion à la base de données</a><ul>
+<li><a class="reference internal" href="#setting-sql-mode">Définition de <code class="docutils literal notranslate"><span class="pre">sql_mode</span></code></a></li>
+<li><a class="reference internal" href="#mysql-isolation-level">Niveau d’isolement</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-your-tables">Création des tables</a></li>
+<li><a class="reference internal" href="#table-names">Noms de tables</a></li>
+<li><a class="reference internal" href="#savepoints">Points de sauvegarde («&nbsp;savepoints&nbsp;»)</a></li>
+<li><a class="reference internal" href="#notes-on-specific-fields">Notes sur des champs particuliers</a><ul>
+<li><a class="reference internal" href="#character-fields">Champs de type caractère</a></li>
+<li><a class="reference internal" href="#textfield-limitations">Limites des champs</a></li>
+<li><a class="reference internal" href="#fractional-seconds-support-for-time-and-datetime-fields">Prise en charge des fractions de secondes pour les champs heure et date/heure</a></li>
+<li><a class="reference internal" href="#timestamp-columns">Colonnes <code class="docutils literal notranslate"><span class="pre">TIMESTAMP</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#row-locking-with-queryset-select-for-update">Verrouillage de ligne avec <code class="docutils literal notranslate"><span class="pre">QuerySet.select_for_update()</span></code></a></li>
+<li><a class="reference internal" href="#automatic-typecasting-can-cause-unexpected-results">Le retypage automatique peut produire des résultats inattendus</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sqlite-notes">Notes sur SQLite</a><ul>
+<li><a class="reference internal" href="#substring-matching-and-case-sensitivity">Recherche de portions de chaînes de caractères et sensibilité à la casse</a></li>
+<li><a class="reference internal" href="#decimal-handling">Gestion des nombres décimaux</a></li>
+<li><a class="reference internal" href="#database-is-locked-errors">Erreurs «&nbsp;Database is locked&nbsp;» (la base de données est verrouillée)</a></li>
+<li><a class="reference internal" href="#queryset-select-for-update-not-supported"><code class="docutils literal notranslate"><span class="pre">QuerySet.select_for_update()</span></code> non pris en charge</a></li>
+<li><a class="reference internal" href="#pyformat-parameter-style-in-raw-queries-not-supported">Le style de paramètre «&nbsp;pyformat&nbsp;» dans les requêtes brutes n’est pas pris en charge</a></li>
+<li><a class="reference internal" href="#isolation-when-using-queryset-iterator">Isolation lors de l’utilisation de <code class="docutils literal notranslate"><span class="pre">QuerySet.iterator()</span></code></a></li>
+<li><a class="reference internal" href="#enabling-json1-extension-on-sqlite">Activation de l’extension JSON1 avec SQLite</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#oracle-notes">Notes sur Oracle</a><ul>
+<li><a class="reference internal" href="#id13">Connexion à la base de données</a><ul>
+<li><a class="reference internal" href="#full-dsn-and-easy-connect">DSN complet et Easy Connect</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#threaded-option">Option threaded</a></li>
+<li><a class="reference internal" href="#insert-returning-into">INSERT … RETURNING INTO</a></li>
+<li><a class="reference internal" href="#naming-issues">Questions de nommage</a></li>
+<li><a class="reference internal" href="#null-and-empty-strings">NULL et les chaînes vides</a></li>
+<li><a class="reference internal" href="#id14">Limites des champs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#subclassing-the-built-in-database-backends">Création de sous-classe d’un moteur de base de données intégré</a></li>
+<li><a class="reference internal" href="#using-a-3rd-party-database-backend">Utilisation d’un moteur de base de données externe</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="csrf.html"
+                        title="Chapitre précédent">Protection contre le «&nbsp;Cross site request forgery&nbsp;» (CSRF)</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="django-admin.html"
+                        title="Chapitre suivant"><code class="docutils literal notranslate"><span class="pre">django-admin</span></code> et <code class="docutils literal notranslate"><span class="pre">manage.py</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ref/databases.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="csrf.html" title="Protection contre le «&amp;nbsp;Cross site request forgery&amp;nbsp;» (CSRF)">previous</a>
+     |
+    <a href="index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="django-admin.html" title="&lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;django-admin&lt;/span&gt;&lt;/code&gt; et &lt;code class=&#34;docutils literal notranslate&#34;&gt;&lt;span class=&#34;pre&#34;&gt;manage.py&lt;/span&gt;&lt;/code&gt;">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

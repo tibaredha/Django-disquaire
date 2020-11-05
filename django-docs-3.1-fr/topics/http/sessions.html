@@ -1,0 +1,763 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Utilisation des sessions &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Utilisation des formulaires" href="../forms/index.html" />
+    <link rel="prev" title="Intergiciels (« Middleware »)" href="middleware.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="middleware.html" title="Intergiciels («&amp;nbsp;Middleware&amp;nbsp;»)">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="../forms/index.html" title="Utilisation des formulaires">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-http-sessions">
+            
+  <div class="section" id="s-module-django.contrib.sessions">
+<span id="s-how-to-use-sessions"></span><span id="module-django.contrib.sessions"></span><span id="how-to-use-sessions"></span><h1>Utilisation des sessions<a class="headerlink" href="#module-django.contrib.sessions" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Django prend complètement en charge les sessions anonymes. L’infrastructure des sessions permet de stocker et de récupérer des données arbitraires sur la base «&nbsp;un site-un visiteur&nbsp;». Les données sont stockées côté serveur&nbsp;; l’envoi et la réception des cookies sont transparents. Les cookies contiennent un identifiant de session, et non pas les données elles-mêmes (sauf si vous utilisez le <a class="reference internal" href="#cookie-session-backend"><span class="std std-ref">moteur basé sur les cookies</span></a>).</p>
+<div class="section" id="s-enabling-sessions">
+<span id="enabling-sessions"></span><h2>Activation des sessions<a class="headerlink" href="#enabling-sessions" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les sessions sont implémentées par l’intermédiaire d’un composant <a class="reference internal" href="../../ref/middleware.html"><span class="doc">middleware</span></a>.</p>
+<p>Pour activer la fonctionnalité des sessions, faites ce qui suit&nbsp;:</p>
+<ul class="simple">
+<li>Contrôlez que le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> contient bien <code class="docutils literal notranslate"><span class="pre">'django.contrib.sessions.middleware.SessionMiddleware'</span></code>. Le fichier <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> créé par défaut par <code class="docutils literal notranslate"><span class="pre">django-admin</span> <span class="pre">startproject</span></code> active <code class="docutils literal notranslate"><span class="pre">SessionMiddleware</span></code>.</li>
+</ul>
+<p>Si vous ne souhaitez pas utiliser les sessions, vous pouvez très bien enlever la ligne <code class="docutils literal notranslate"><span class="pre">SessionMiddleware</span></code> de <a class="reference internal" href="../../ref/settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a> et la ligne <code class="docutils literal notranslate"><span class="pre">'django.contrib.sessions'</span></code> de <a class="reference internal" href="../../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>. Cela économisera un peu de travail à Django.</p>
+</div>
+<div class="section" id="s-configuring-the-session-engine">
+<span id="s-configuring-sessions"></span><span id="configuring-the-session-engine"></span><span id="configuring-sessions"></span><h2>Configuration du moteur de sessions<a class="headerlink" href="#configuring-the-session-engine" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Par défaut, Django stocke les sessions dans la base de données (avec le modèle <code class="docutils literal notranslate"><span class="pre">django.contrib.sessions.models.Session</span></code>). Bien que cela puisse être pratique, il est plus rapide dans certaines configurations de stocker les données de sessions ailleurs&nbsp;; il est donc possible de configurer Django pour stocker les données de sessions sur le système de fichiers ou dans un cache.</p>
+<div class="section" id="s-using-database-backed-sessions">
+<span id="using-database-backed-sessions"></span><h3>Utilisation des sessions en base de données<a class="headerlink" href="#using-database-backed-sessions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous souhaitez placer le contenu des sessions en base de données, vous devez ajouter <code class="docutils literal notranslate"><span class="pre">'django.contrib.sessions'</span></code> dans le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</p>
+<p>Après avoir configuré votre installation, lancez <code class="docutils literal notranslate"><span class="pre">manage.py</span> <span class="pre">migrate</span></code> pour installer l’unique table de base de données qui stocke les données des sessions.</p>
+</div>
+<div class="section" id="s-using-cached-sessions">
+<span id="s-cached-sessions-backend"></span><span id="using-cached-sessions"></span><span id="cached-sessions-backend"></span><h3>Utilisation des sessions en cache<a class="headerlink" href="#using-cached-sessions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour de meilleures performances, il est recommandé d’utiliser le moteur de sessions basé sur le cache.</p>
+<p>Pour stocker les données de sessions en utilisant le système de cache de Django, il s’agit d’abord de s’assurer que le cache est configuré&nbsp;; voir la <a class="reference internal" href="../cache.html"><span class="doc">documentation du cache</span></a> pour plus de détails.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Les données de sessions ne devraient être stockées en cache que quand le moteur de cache Memcached est utilisé. Le moteur de cache en mémoire locale ne retient pas assez longtemps les données pour qu’il représente un bon choix, et il est plus rapide d’utiliser directement le moteur de sessions basé sur des fichiers ou sur la base de données que de faire transiter le tout par les moteurs de cache basés sur des fichiers ou sur la base de données. De plus, le moteur de cache en mémoire locale ne gère PAS correctement le mode multi-processus et n’est donc probablement pas un bon choix dans un environnement de production.</p>
+</div>
+<p>Si plusieurs caches sont définis dans <a class="reference internal" href="../../ref/settings.html#std:setting-CACHES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">CACHES</span></code></a>, Django utilise le cache par défaut. Pour utiliser un autre cache, définissez <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_CACHE_ALIAS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_CACHE_ALIAS</span></code></a> avec le nom de ce cache.</p>
+<p>Après avoir configuré le cache, il vous reste deux possibilités pour stocker les données en cache&nbsp;:</p>
+<ul class="simple">
+<li>Définissez <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a> à <code class="docutils literal notranslate"><span class="pre">&quot;django.contrib.sessions.backends.cache&quot;</span></code> pour un système de stockage de sessions simple. Les données de session seront stockées directement dans le cache. Cependant, la persistance de ces données n’est pas garantie&nbsp;: les données en cache peuvent être vidées si le cache est rempli ou si le serveur de cache est redémarré.</li>
+<li>Pour obtenir des données de sessions à la fois en cache et persistantes, définir <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a> à <code class="docutils literal notranslate"><span class="pre">&quot;django.contrib.sessions.backends.cached_db&quot;</span></code>. Il s’agit là d’un cache à écriture directe, chaque écriture dans le cache sera également écrite en base de données. Les sessions ne sont lues dans la base de données que si elles ne sont pas déjà dans le cache.</li>
+</ul>
+<p>Les deux stockages de sessions sont assez rapides, mais le cache simple est le plus rapide car il ne s’occupe pas de persistance. Dans la plupart des cas, le moteur <code class="docutils literal notranslate"><span class="pre">cached_db</span></code> sera suffisamment rapide, mais si vous avez besoin de performances optimales et qu’il est acceptable pour vous que les données de sessions soient effacées de temps en temps, le moteur <code class="docutils literal notranslate"><span class="pre">cache</span></code> est fait pour vous.</p>
+<p>Si vous utilisez le moteur de session <code class="docutils literal notranslate"><span class="pre">cached_db</span></code>, vous devrez aussi suivre les instructions de configuration décrites dans <a class="reference internal" href="#using-database-backed-sessions">Utilisation des sessions en base de données</a>.</p>
+</div>
+<div class="section" id="s-using-file-based-sessions">
+<span id="using-file-based-sessions"></span><h3>Utilisation des sessions basées sur des fichiers<a class="headerlink" href="#using-file-based-sessions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour utiliser les sessions basées sur des fichiers, définissez le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a> à <code class="docutils literal notranslate"><span class="pre">&quot;django.contrib.sessions.backends.file&quot;</span></code>.</p>
+<p>Il peut aussi être souhaitable de définir le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_FILE_PATH"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_FILE_PATH</span></code></a> (dont la valeur par défaut est le résultat de <code class="docutils literal notranslate"><span class="pre">tempfile.gettempdir()</span></code>, généralement <code class="docutils literal notranslate"><span class="pre">/tmp</span></code>) pour contrôler l’emplacement où Django stocke les fichiers de sessions. Vérifiez que le serveur Web dispose des permissions en lecture et écriture à cet endroit.</p>
+</div>
+<div class="section" id="s-using-cookie-based-sessions">
+<span id="s-cookie-session-backend"></span><span id="using-cookie-based-sessions"></span><span id="cookie-session-backend"></span><h3>Utilisation des sessions basées sur les cookies<a class="headerlink" href="#using-cookie-based-sessions" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Pour utiliser les sessions basées sur les cookies, définissez le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a> à <code class="docutils literal notranslate"><span class="pre">&quot;django.contrib.sessions.backends.signed_cookies&quot;</span></code>. Les données de sessions seront stockées en utilisant les outils de Django pour la  <a class="reference internal" href="../signing.html"><span class="doc">signature cryptographique</span></a> et le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SECRET_KEY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SECRET_KEY</span></code></a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Il est recommandé de laisser le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_HTTPONLY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_HTTPONLY</span></code></a> à la valeur <code class="docutils literal notranslate"><span class="pre">True</span></code> pour empêcher l’accès à des données stockées à partir du JavaScript.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>** Si la clé secrète <code class="docutils literal notranslate"><span class="pre">SECRET_KEY</span></code> n’est plus secrète et que vous utilisez** <a class="reference internal" href="#django.contrib.sessions.serializers.PickleSerializer" title="django.contrib.sessions.serializers.PickleSerializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PickleSerializer</span></code></a>, <strong>cela peut aboutir à de l’exécution arbitraire de code à distance.</strong></p>
+<p>Un attaquant en possession de la clé secrète <a class="reference internal" href="../../ref/settings.html#std:setting-SECRET_KEY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SECRET_KEY</span></code></a> peut non seulement générer des données de session falsifiées qui seront admises par votre site, mais peut aussi exécuter du code arbitraire à distance, dans la mesure où les données sont sérialisées par <code class="docutils literal notranslate"><span class="pre">pickle</span></code>.</p>
+<p>Si vous utilisez des sessions basées sur les cookies, il faut faire d’autant plus attention à toujours conserver la clé secrète absolument secrète, pour tout système accessible à distance.</p>
+<p>** les données de sessions sont signées mais non chiffrées**</p>
+<p>Lors de l’utilisation du moteur basé sur les cookies, les données de sessions peuvent être lues par le client.</p>
+<p>Un code MAC (Message Authentication Code) est utilisé pour protéger les données contre des modifications par le client, afin que les données de sessions soient caduques quand elles ont été modifiées. La même protection intervient si le client qui stocke le cookie (par ex. le navigateur de l’utilisateur) ne peut pas stocker tout le cookie de session et tronque des données. Même si Django compresse les données, il est toujours possible de dépasser la <span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2965.html#section-5.3"><strong>limite habituelle de 4096 octets</strong></a> par cookie.</p>
+<p><strong>Aucune garantie de fraîcheur</strong></p>
+<p>Il faut également relever que bien que le code MAC puisse garantir l’authenticité des données (qu’elles ont bien été générées par votre site) ainsi que l’intégrité de ces données (qu’elles sont complètes et correctes), il ne peut pas garantir leur fraîcheur, c’est-à-dire que vous recevez la dernière version que vous avez envoyée au client. Cela signifie que pour certaines utilisations des données de session, le moteur par cookie pourrait vous rendre vulnérable à des <a class="reference external" href="https://en.wikipedia.org/wiki/Replay_attack">attaques par rejeu</a>. Au contraire d’autres moteurs de session qui conservent une version de chaque session du côté serveur et qui les infirment lorsqu’un utilisateur se déconnecte, les sessions basées sur les cookies ne sont pas infirmées lorsqu’un utilisateur se déconnecte. Ainsi, si un attaquant vole un cookie d’utilisateur, il peut utiliser celui-ci pour se connecter sous le nom de cet utilisateur même quand ce dernier s’est déconnecté. Les cookies ne sont considérées comme obsolètes qu’au moment où leur âge dépasse <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_AGE</span></code></a>.</p>
+<p><strong>Performance</strong></p>
+<p class="last">Finalement, la taille d’un cookie peut influencer la <a class="reference external" href="https://yuiblog.com/blog/2007/03/01/performance-research-part-3/">rapidité de votre site</a>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="s-using-sessions-in-views">
+<span id="using-sessions-in-views"></span><h2>Utilisation des sessions dans les vues<a class="headerlink" href="#using-sessions-in-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque <code class="docutils literal notranslate"><span class="pre">SessionMiddleware</span></code> est actif, chaque objet <a class="reference internal" href="../../ref/request-response.html#django.http.HttpRequest" title="django.http.HttpRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpRequest</span></code></a>, le premier paramètre de toute fonction vue de Django, possède un attribut <code class="docutils literal notranslate"><span class="pre">session</span></code> qui est un objet de type dictionnaire.</p>
+<p>Vous pouvez lire et écrire dans <code class="docutils literal notranslate"><span class="pre">request.session</span></code> à n’importe quel moment dans votre vue. Vous pouvez le modifier plusieurs fois.</p>
+<dl class="class">
+<dt id="django.contrib.sessions.backends.base.SessionBase">
+<em class="property">class </em><code class="descclassname">backends.base.</code><code class="descname">SessionBase</code><a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>C’est la classe de base pour tous les objets session. Elle possède les méthodes de dictionnaire standard suivantes&nbsp;:</p>
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.__getitem__">
+<code class="descname">__getitem__</code>(<em>key</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.__getitem__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.__setitem__">
+<code class="descname">__setitem__</code>(<em>key</em>, <em>value</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.__setitem__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">request.session['fav_color']</span> <span class="pre">=</span> <span class="pre">'blue'</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.__delitem__">
+<code class="descname">__delitem__</code>(<em>key</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.__delitem__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">del</span> <span class="pre">request.session['fav_color']</span></code>. Si la clé indiquée ne se trouve pas déjà dans l’objet session, une exception <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> est levée.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.__contains__">
+<code class="descname">__contains__</code>(<em>key</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.__contains__" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">'fav_color'</span> <span class="pre">in</span> <span class="pre">request.session</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.get">
+<code class="descname">get</code>(<em>key</em>, <em>default=None</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.get" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">fav_color</span> <span class="pre">=</span> <span class="pre">request.session.get('fav_color',</span> <span class="pre">'red')</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.pop">
+<code class="descname">pop</code>(<em>key</em>, <em>default=__not_given</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.pop" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">fav_color</span> <span class="pre">=</span> <span class="pre">request.session.pop('fav_color',</span> <span class="pre">'blue')</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.keys">
+<code class="descname">keys</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.keys" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.items">
+<code class="descname">items</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.items" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.setdefault">
+<code class="descname">setdefault</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.setdefault" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.clear">
+<code class="descname">clear</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.clear" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Elle possède aussi ces méthodes&nbsp;:</p>
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.flush">
+<code class="descname">flush</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.flush" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Supprime les données de la session actuelle et supprime le cookie de session. C’est utile pour s’assurer que les données de session précédentes ne puissent plus être relues par le navigateur de l’utilisateur (par exemple, c’est ce que fait <a class="reference internal" href="../auth/default.html#django.contrib.auth.logout" title="django.contrib.auth.logout"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.contrib.auth.logout()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.set_test_cookie">
+<code class="descname">set_test_cookie</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.set_test_cookie" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée un cookie de test pour déterminer si le navigateur de l’utilisateur prend en charge les cookies. En raison du fonctionnement des cookies, vous ne pourrez pas déterminer cela avant la prochaine requête de l’utilisateur. Consultez <a class="reference internal" href="#setting-test-cookies">Génération de cookies de test</a> ci-dessous pour obtenir plus d’informations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.test_cookie_worked">
+<code class="descname">test_cookie_worked</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.test_cookie_worked" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> ou <code class="docutils literal notranslate"><span class="pre">False</span></code>, selon que le navigateur de l’utilisateur a accepté le cookie de test ou non. En raison du fonctionnement des cookies, vous aurez dû appeler <code class="docutils literal notranslate"><span class="pre">set_test_cookie()</span></code> sur une requête de page précédente. Consultez <a class="reference internal" href="#setting-test-cookies">Génération de cookies de test</a> ci-dessous pour obtenir plus d’informations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.delete_test_cookie">
+<code class="descname">delete_test_cookie</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.delete_test_cookie" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Supprime le cookie de test. Utilisé pour faire le ménage derrière soi.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.get_session_cookie_age">
+<code class="descname">get_session_cookie_age</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.get_session_cookie_age" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><div class="versionadded">
+<span class="title">New in Django 3.0.</span> </div>
+<p>Renvoie l’âge des cookies de session, en secondes. La valeur par défaut est <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_AGE</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.set_expiry">
+<code class="descname">set_expiry</code>(<em>value</em>)<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.set_expiry" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Définit la durée d’expiration de la session. Il est possible de passer plusieurs valeurs différentes&nbsp;:</p>
+<ul class="simple">
+<li>Si <code class="docutils literal notranslate"><span class="pre">value</span></code> est un nombre entier, la session va expirer après ce nombre de secondes d’inactivité. Par exemple, l’appel de <code class="docutils literal notranslate"><span class="pre">request.session.set_expiry(300)</span></code> va provoquer l’expiration de la session dans 5 minutes.</li>
+<li>Si <code class="docutils literal notranslate"><span class="pre">value</span></code> est un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> ou <code class="docutils literal notranslate"><span class="pre">timedelta</span></code>, la session va expirer à cette date et heure spécifique. Notez que les valeurs <code class="docutils literal notranslate"><span class="pre">datetime</span></code> et <code class="docutils literal notranslate"><span class="pre">timedelta</span></code> ne sont sérialisables que si vous utilisez la sérialisation <a class="reference internal" href="#django.contrib.sessions.serializers.PickleSerializer" title="django.contrib.sessions.serializers.PickleSerializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PickleSerializer</span></code></a>.</li>
+<li>Si la <code class="docutils literal notranslate"><span class="pre">value</span></code> est <code class="docutils literal notranslate"><span class="pre">0</span></code>, le cookie de session de l’utilisateur va expirer au moment où celui-ci ferme son navigateur Web.</li>
+<li>Si <code class="docutils literal notranslate"><span class="pre">value</span></code> est <code class="docutils literal notranslate"><span class="pre">None</span></code>, la session se fie à nouveau à la politique d’expiration globale des sessions.</li>
+</ul>
+<p>La lecture d’une session n’est pas considérée comme une activité en regard de la notion d’expiration. L’expiration de la session est calculée à partir du moment de la dernière <em>modification</em> de la session.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.get_expiry_age">
+<code class="descname">get_expiry_age</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.get_expiry_age" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le nombre de secondes restant jusqu’à l’expiration de la session. Pour les sessions sans expiration particulière (ou celles qui expirent à la fermeture du navigateur), cette valeur sera égale à <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_AGE</span></code></a>.</p>
+<p>Cette fonction accepte deux paramètres nommés facultatifs&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">modification</span></code>: dernière modification de la session, comme objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>. Par défaut, c’est l’heure actuelle.</li>
+<li><code class="docutils literal notranslate"><span class="pre">expiry</span></code>: information d’expiration de la session, comme objet <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>, valeur <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> (en secondes) ou <code class="docutils literal notranslate"><span class="pre">None</span></code>. Par défaut, cette valeur est égale à celle stockée dans la session par <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.set_expiry" title="django.contrib.sessions.backends.base.SessionBase.set_expiry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_expiry()</span></code></a>, le cas échéant, sinon <code class="docutils literal notranslate"><span class="pre">None</span></code>.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.get_expiry_date">
+<code class="descname">get_expiry_date</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.get_expiry_date" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie la date à laquelle la session expire. Pour les sessions sans expiration particulière (ou celles qui expirent à la fermeture du navigateur), cette valeur sera égale à <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_AGE</span></code></a> secondes à partir de maintenant.</p>
+<p>Cette fonction accepte les mêmes paramètres mots-clés que <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.get_expiry_age" title="django.contrib.sessions.backends.base.SessionBase.get_expiry_age"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_expiry_age()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.get_expire_at_browser_close">
+<code class="descname">get_expire_at_browser_close</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.get_expire_at_browser_close" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie <code class="docutils literal notranslate"><span class="pre">True</span></code> ou <code class="docutils literal notranslate"><span class="pre">False</span></code> selon que le cookie de session utilisateur expire au moment de la fermeture du navigateur Web de l’utilisateur ou non.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.clear_expired">
+<code class="descname">clear_expired</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.clear_expired" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Supprime les sessions expirées du stockage des sessions. Cette méthode de classe est appelée par <a class="reference internal" href="../../ref/django-admin.html#django-admin-clearsessions"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">clearsessions</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.base.SessionBase.cycle_key">
+<code class="descname">cycle_key</code>()<a class="headerlink" href="#django.contrib.sessions.backends.base.SessionBase.cycle_key" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée une nouvelle clé de session tout en conservant les données de session actuelles. <a class="reference internal" href="../auth/default.html#django.contrib.auth.login" title="django.contrib.auth.login"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.contrib.auth.login()</span></code></a> appelle cette méthode pour lutter contre les attaques par fixation de session.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="s-session-serialization">
+<span id="s-id1"></span><span id="session-serialization"></span><span id="id1"></span><h3>Sérialisation des sessions<a class="headerlink" href="#session-serialization" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Par défaut, Django sérialise les données de session en JSON. Vous pouvez utiliser le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_SERIALIZER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_SERIALIZER</span></code></a> pour personnaliser le format de sérialisation de session. Même en considérant les limites décrites dans <a class="reference internal" href="#custom-serializers"><span class="std std-ref">Écriture de son propre sérialiseur</span></a>, nous recommandons fortement d’en rester à la sérialisation JSON, <em>d’autant plus si vous utilisez le moteur cookie</em>.</p>
+<p>Par exemple, voici un scénario d’attaque si vous utilisez <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> pour sérialiser les données de session. Si vous utilisez le <a class="reference internal" href="#cookie-session-backend"><span class="std std-ref">moteur de session basé sur des cookies signés</span></a> et que la clé <a class="reference internal" href="../../ref/settings.html#std:setting-SECRET_KEY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SECRET_KEY</span></code></a> est connue d’un attaquant (il n’y a aucune vulnérabilité connue dans Django qui divulguerait cette information), cet attaquant pourrait insérer une chaîne dans la session, ce qui pourrait conduire, au moment de la désérialisation («&nbsp;unpickling&nbsp;»), à une exécution de code arbitraire sur le serveur. La technique pour faire cela est simple et aisément disponible sur Internet. Même si le stockage de sessions par cookies signe les données de session pour empêcher leur falsification, une divulgation de la clé <a class="reference internal" href="../../ref/settings.html#std:setting-SECRET_KEY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SECRET_KEY</span></code></a> crée immédiatement une vulnérabilité d’exécution de code à distance.</p>
+<div class="section" id="s-bundled-serializers">
+<span id="bundled-serializers"></span><h4>Sérialiseurs intégrés<a class="headerlink" href="#bundled-serializers" title="Lien permanent vers ce titre">¶</a></h4>
+<dl class="class">
+<dt id="django.contrib.sessions.serializers.JSONSerializer">
+<em class="property">class </em><code class="descclassname">serializers.</code><code class="descname">JSONSerializer</code><a class="headerlink" href="#django.contrib.sessions.serializers.JSONSerializer" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un adaptateur du sérialiseur JSON provenant de <a class="reference internal" href="../signing.html#module-django.core.signing" title="django.core.signing: Django's signing framework."><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.core.signing</span></code></a>. Ne peut sérialiser que des types de données simples.</p>
+<p>De plus, comme JSON ne gère que des clés textuelles, il faut savoir que des clés non textuelles dans <code class="docutils literal notranslate"><span class="pre">request.session</span></code> ne fonctionneront pas comme prévu&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># initial assignment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># subsequent requests following serialization &amp; deserialization</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># of session data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># KeyError</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">]</span>
+<span class="go">&#39;bar&#39;</span>
+</pre></div>
+</div>
+<p>De même, les données qui ne peuvent pas être codées en JSON telles que des octets non UTF-8 comme <code class="docutils literal notranslate"><span class="pre">'\xd9'</span></code> (ce qui produit <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UnicodeDecodeError" title="(disponible dans Python v3.9)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code></a>), ne peuvent pas être stockées.</p>
+<p>Consultez la section <a class="reference internal" href="#custom-serializers"><span class="std std-ref">Écriture de son propre sérialiseur</span></a> pour plus de détails sur les limites de la sérialisation JSON.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.sessions.serializers.PickleSerializer">
+<em class="property">class </em><code class="descclassname">serializers.</code><code class="descname">PickleSerializer</code><a class="headerlink" href="#django.contrib.sessions.serializers.PickleSerializer" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Accepte n’importe quel objet Python, mais, comme expliqué ci-dessus, peut conduire à des vulnérabilités d’exécution de code à distance si la clé <a class="reference internal" href="../../ref/settings.html#std:setting-SECRET_KEY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SECRET_KEY</span></code></a> est révélée à un attaquant.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="s-write-your-own-serializer">
+<span id="s-custom-serializers"></span><span id="write-your-own-serializer"></span><span id="custom-serializers"></span><h4>Écriture de son propre sérialiseur<a class="headerlink" href="#write-your-own-serializer" title="Lien permanent vers ce titre">¶</a></h4>
+<p>Notez qu’au contraire de <a class="reference internal" href="#django.contrib.sessions.serializers.PickleSerializer" title="django.contrib.sessions.serializers.PickleSerializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PickleSerializer</span></code></a>, <a class="reference internal" href="#django.contrib.sessions.serializers.JSONSerializer" title="django.contrib.sessions.serializers.JSONSerializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONSerializer</span></code></a> ne sait pas traiter n’importe quel type de donnée Python. Comme c’est souvent le cas, il faut contrebalancer commodité et sécurité. Si vous souhaitez stocker des types de données plus spécialisées comme <code class="docutils literal notranslate"><span class="pre">datetime</span></code> ou <code class="docutils literal notranslate"><span class="pre">Decimal</span></code> dans des sessions en JSON, vous devrez écrire votre propre sérialiseur (ou convertir ces valeurs en objets sérialisables en JSON avant de les stocker dans <code class="docutils literal notranslate"><span class="pre">request.session</span></code>). Bien que la sérialisation de telles valeurs soit relativement directe à réaliser (<a class="reference internal" href="../serialization.html#django.core.serializers.json.DjangoJSONEncoder" title="django.core.serializers.json.DjangoJSONEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DjangoJSONEncoder</span></code></a> donne des pistes), l’écriture d’un décodeur qui puisse reconstruire la valeur initiale de manière fiable est plus délicate. Par exemple, vous risquez de créer un objet <code class="docutils literal notranslate"><span class="pre">datetime</span></code> pour ce qui était en fait une chaîne dont le format ressemblait à celui que vous avez choisi pour représenter les objets <code class="docutils literal notranslate"><span class="pre">datetime</span></code>.</p>
+<p>Une classe de sérialisation doit implémenter deux méthodes, <code class="docutils literal notranslate"><span class="pre">dumps(self,</span> <span class="pre">obj)</span></code> et <code class="docutils literal notranslate"><span class="pre">loads(self,</span> <span class="pre">data)</span></code>, pour respectivement sérialiser et désérialiser le dictionnaire des données de session.</p>
+</div>
+</div>
+<div class="section" id="s-session-object-guidelines">
+<span id="session-object-guidelines"></span><h3>Lignes directrices des objets sessions<a class="headerlink" href="#session-object-guidelines" title="Lien permanent vers ce titre">¶</a></h3>
+<ul class="simple">
+<li>Utilisez des chaînes Python normales comme clés de dictionnaire pour <code class="docutils literal notranslate"><span class="pre">request.session</span></code>. Il s’agit plus d’une convention que d’une règle stricte.</li>
+<li>Les clés de dictionnaire de session commençant par un soulignement sont réservés pour l’usage interne de Django.</li>
+<li>Ne surchargez pas <code class="docutils literal notranslate"><span class="pre">request.session</span></code> avec un nouvel objet et n’accédez pas ou ne modifiez pas ses attributs. Utilisez-le comme un dictionnaire Python.</li>
+</ul>
+</div>
+<div class="section" id="s-examples">
+<span id="examples"></span><h3>Exemples<a class="headerlink" href="#examples" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Cette vue très simple définit une variable <code class="docutils literal notranslate"><span class="pre">has_commented</span></code> à <code class="docutils literal notranslate"><span class="pre">True</span></code> après qu’un utilisateur a soumis un commentaire. Elle n’autorise pas plus d’un commentaire par utilisateur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">post_comment</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">new_comment</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;has_commented&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;You&#39;ve already commented.&quot;</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">comments</span><span class="o">.</span><span class="n">Comment</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="n">new_comment</span><span class="p">)</span>
+    <span class="n">c</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;has_commented&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s1">&#39;Thanks for your comment!&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cette vue très simple connecte un «&nbsp;membre&nbsp;» du site&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">Member</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s1">&#39;username&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">password</span> <span class="o">==</span> <span class="n">request</span><span class="o">.</span><span class="n">POST</span><span class="p">[</span><span class="s1">&#39;password&#39;</span><span class="p">]:</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;member_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;You&#39;re logged in.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;Your username and password didn&#39;t match.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>…et celle-ci déconnecte un membre, compte tenu de l’exemple <code class="docutils literal notranslate"><span class="pre">login()</span></code> ci-dessus&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;member_id&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;You&#39;re logged out.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La fonction standard <a class="reference internal" href="../auth/default.html#django.contrib.auth.logout" title="django.contrib.auth.logout"><code class="xref py py-meth docutils literal notranslate"><span class="pre">django.contrib.auth.logout()</span></code></a> fait en réalité un peu plus que cela pour empêcher des divulgations de données fortuites. Elle appelle la méthode <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.flush" title="django.contrib.sessions.backends.base.SessionBase.flush"><code class="xref py py-meth docutils literal notranslate"><span class="pre">flush()</span></code></a> de <code class="docutils literal notranslate"><span class="pre">request.session</span></code>. Nous utilisons cet exemple comme démonstration du fonctionnement des objets sessions, il ne faut pas le considérer comme une implémentation complète de <code class="docutils literal notranslate"><span class="pre">logout()</span></code>.</p>
+</div>
+</div>
+<div class="section" id="s-setting-test-cookies">
+<span id="setting-test-cookies"></span><h2>Génération de cookies de test<a class="headerlink" href="#setting-test-cookies" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Par commodité, Django fournit un moyen de tester si le navigateur de l’utilisateur accepte les cookies. Appelez la méthode <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.set_test_cookie" title="django.contrib.sessions.backends.base.SessionBase.set_test_cookie"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_test_cookie()</span></code></a> de <code class="docutils literal notranslate"><span class="pre">request.session</span></code> dans une vue, puis appelez <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.test_cookie_worked" title="django.contrib.sessions.backends.base.SessionBase.test_cookie_worked"><code class="xref py py-meth docutils literal notranslate"><span class="pre">test_cookie_worked()</span></code></a> dans une des vues suivantes, mais pas dans le même appel de vue.</p>
+<p>Cette séparation bizarre entre <code class="docutils literal notranslate"><span class="pre">set_test_cookie()</span></code> et <code class="docutils literal notranslate"><span class="pre">test_cookie_worked()</span></code> est nécessaire en raison du fonctionnement des cookies. Lorsque vous définissez un cookie, il n’est en fait pas possible de savoir si le navigateur l’a accepté avant de recevoir la prochaine requête du navigateur.</p>
+<p>Il est recommandé d’utiliser <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.delete_test_cookie" title="django.contrib.sessions.backends.base.SessionBase.delete_test_cookie"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delete_test_cookie()</span></code></a> pour faire le ménage derrière soi. Faites-le après avoir vérifié que le cookie de test a fonctionné.</p>
+<p>Voici un exemple d’utilisation typique&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="k">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">render</span>
+
+<span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">test_cookie_worked</span><span class="p">():</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete_test_cookie</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;You&#39;re logged in.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;Please enable cookies and try again.&quot;</span><span class="p">)</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">set_test_cookie</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;foo/login_form.html&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-using-sessions-out-of-views">
+<span id="using-sessions-out-of-views"></span><h2>Utilisation des sessions en dehors des vues<a class="headerlink" href="#using-sessions-out-of-views" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>Les exemples de cette section importent directement l’objet <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code> à partir du moteur <code class="docutils literal notranslate"><span class="pre">django.contrib.sessions.backends.db</span></code>. Dans votre propre code, il est préférable d’importer <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code> à partir du moteur de sessions désigné par <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a>, comme ci-dessous&nbsp;:</p>
+<div class="last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">importlib</span> <span class="k">import</span> <span class="n">import_module</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="k">import</span> <span class="n">settings</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SessionStore</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SESSION_ENGINE</span><span class="p">)</span><span class="o">.</span><span class="n">SessionStore</span>
+</pre></div>
+</div>
+</div>
+<p>Une API est disponible pour manipuler les données de sessions en dehors des vues&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.db</span> <span class="k">import</span> <span class="n">SessionStore</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SessionStore</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># stored as seconds since epoch since datetimes are not serializable in JSON.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;last_login&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1376587691</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">session_key</span>
+<span class="go">&#39;2b1189a188b44ad18c35e113ac6ceead&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SessionStore</span><span class="p">(</span><span class="n">session_key</span><span class="o">=</span><span class="s1">&#39;2b1189a188b44ad18c35e113ac6ceead&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;last_login&#39;</span><span class="p">]</span>
+<span class="go">1376587691</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">SessionStore.create()</span></code> est conçue pour créer une nouvelle session (c’est-à-dire qui n’est pas chargée du stockage de session et avec <code class="docutils literal notranslate"><span class="pre">session_key=None</span></code>). <code class="docutils literal notranslate"><span class="pre">save()</span></code> est conçue pour enregistrer une session existante (c’est-à-dire qui est chargée du stockage de session). Il est aussi possible d’appeler <code class="docutils literal notranslate"><span class="pre">save()</span></code> pour une nouvelle session, mais avec un petit risque de générer une clé de session qui entre en conflit avec une autre. <code class="docutils literal notranslate"><span class="pre">create()</span></code> appelle <code class="docutils literal notranslate"><span class="pre">save()</span></code> et boucle jusqu’à ce qu’une clé <code class="docutils literal notranslate"><span class="pre">session_key</span></code> inutilisée soit produite.</p>
+<p>Si vous utilisez le moteur <code class="docutils literal notranslate"><span class="pre">django.contrib.sessions.backends.db</span></code>, chaque session est un modèle Django normal. Le modèle <code class="docutils literal notranslate"><span class="pre">Session</span></code> est défini dans <code class="docutils literal notranslate"><span class="pre">django/contrib/sessions/models.py</span></code>. Comme c’est un modèle normal, vous pouvez accéder aux sessions en utilisant l’API habituelle de base de données Django&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">django.contrib.sessions.models</span> <span class="k">import</span> <span class="n">Session</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Session</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="s1">&#39;2b1189a188b44ad18c35e113ac6ceead&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">expire_date</span>
+<span class="go">datetime.datetime(2005, 8, 20, 13, 35, 12)</span>
+</pre></div>
+</div>
+<p>Notez que vous devrez appeler <a class="reference internal" href="#django.contrib.sessions.base_session.AbstractBaseSession.get_decoded" title="django.contrib.sessions.base_session.AbstractBaseSession.get_decoded"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_decoded()</span></code></a> pour obtenir le dictionnaire de session. Cela est nécessaire car le dictionnaire est stocké dans un format codé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">session_data</span>
+<span class="go">&#39;KGRwMQpTJ19hdXRoX3VzZXJfaWQnCnAyCkkxCnMuMTExY2ZjODI2Yj...&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">get_decoded</span><span class="p">()</span>
+<span class="go">{&#39;user_id&#39;: 42}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-when-sessions-are-saved">
+<span id="when-sessions-are-saved"></span><h2>Enregistrement des sessions<a class="headerlink" href="#when-sessions-are-saved" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Par défaut, Django n’enregistre la session dans la base de données qu’au moment où la session a été modifiée, c’est-à-dire qu’au moins une des valeurs de son dictionnaire a été définie ou supprimée&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Session is modified.</span>
+<span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span>
+
+<span class="c1"># Session is modified.</span>
+<span class="k">del</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span>
+
+<span class="c1"># Session is modified.</span>
+<span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c1"># Gotcha: Session is NOT modified, because this alters</span>
+<span class="c1"># request.session[&#39;foo&#39;] instead of request.session.</span>
+<span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="p">[</span><span class="s1">&#39;foo&#39;</span><span class="p">][</span><span class="s1">&#39;bar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;baz&#39;</span>
+</pre></div>
+</div>
+<p>Dans le dernier cas de l’exemple ci-dessus, nous pouvons indiquer explicitement à l’objet session qu’il a été modifié en définissant son attribut <code class="docutils literal notranslate"><span class="pre">modified</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">request</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">modified</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>Pour modifier ce comportement par défaut, définissez le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_SAVE_EVERY_REQUEST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_SAVE_EVERY_REQUEST</span></code></a> à <code class="docutils literal notranslate"><span class="pre">True</span></code>. Dans ce cas, Django enregistre la session dans la base de données lors de chaque requête.</p>
+<p>Notez que le cookie de session n’est envoyé que lorsqu’une session a été créée ou modifiée. Si <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_SAVE_EVERY_REQUEST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_SAVE_EVERY_REQUEST</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, le cookie de session sera envoyé lors de chaque requête.</p>
+<p>De même, la partie <code class="docutils literal notranslate"><span class="pre">expires</span></code> d’un cookie de session est mis à jour chaque fois que le cookie de session est envoyé.</p>
+<p>La session n’est pas enregistrée si le code de statut de la réponse est 500.</p>
+</div>
+<div class="section" id="s-browser-length-sessions-vs-persistent-sessions">
+<span id="s-browser-length-vs-persistent-sessions"></span><span id="browser-length-sessions-vs-persistent-sessions"></span><span id="browser-length-vs-persistent-sessions"></span><h2>Expiration ou persistance des sessions<a class="headerlink" href="#browser-length-sessions-vs-persistent-sessions" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_EXPIRE_AT_BROWSER_CLOSE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_EXPIRE_AT_BROWSER_CLOSE</span></code></a> permet de contrôler le type des sessions utilisées par l’infrastructure des sessions, soit les sessions expirant à la fermeture du navigateur ou les sessions persistantes.</p>
+<p>Par défaut, <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_EXPIRE_AT_BROWSER_CLOSE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_EXPIRE_AT_BROWSER_CLOSE</span></code></a> est défini à <code class="docutils literal notranslate"><span class="pre">False</span></code>, ce qui signifie que les cookies de session seront stockés dans les navigateurs des utilisateurs pour une durée de <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_AGE</span></code></a>. Utilisé quand on ne souhaite pas que les utilisateurs doivent se connecter chaque fois qu’ils ouvrent leur navigateur.</p>
+<p>Si <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_EXPIRE_AT_BROWSER_CLOSE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_EXPIRE_AT_BROWSER_CLOSE</span></code></a> est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>, Django utilise des cookies expirant à la fermeture du navigateur. Utilisé quand on souhaite que les utilisateurs doivent se connecter chaque fois qu’ils ouvrent leur navigateur.</p>
+<p>Ce réglage est une valeur par défaut globale et peut être surchargé au niveau de chaque session en appelant explicitement la méthode <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.set_expiry" title="django.contrib.sessions.backends.base.SessionBase.set_expiry"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_expiry()</span></code></a> de <code class="docutils literal notranslate"><span class="pre">request.session</span></code> comme décrit ci-dessus dans <a class="reference internal" href="#using-sessions-in-views">utilisation des sessions dans les vues</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Certains navigateurs (Chrome, par exemple) peuvent être réglés afin de ne pas fermer les sessions de navigation entre fermeture et réouverture du navigateur. Dans certains cas, cela peut interférer avec le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_EXPIRE_AT_BROWSER_CLOSE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_EXPIRE_AT_BROWSER_CLOSE</span></code></a>  et empêcher les sessions d’expirer à la fermeture du navigateur. Il est important de le savoir lors des tests d’applications Django qui ont le réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_EXPIRE_AT_BROWSER_CLOSE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_EXPIRE_AT_BROWSER_CLOSE</span></code></a> actif.</p>
+</div>
+</div>
+<div class="section" id="s-clearing-the-session-store">
+<span id="s-id2"></span><span id="clearing-the-session-store"></span><span id="id2"></span><h2>Effacement du stockage des sessions<a class="headerlink" href="#clearing-the-session-store" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Au fur et à mesure que des utilisateurs créent de nouvelles sessions sur votre site Web, les données de sessions s’accumulent dans votre stockage de sessions. Si vous utilisez le moteur en base de données, la table de base de données <code class="docutils literal notranslate"><span class="pre">django_session</span></code> prend du volume. Si vous utilisez le moteur basé sur des fichiers, le nombre des fichiers dans le répertoire temporaire va augmenter constamment.</p>
+<p>Pour comprendre ce problème, examinons ce qui se passe avec le moteur en base de données. Lorsqu’un utilisateur se connecte, Django ajoute un enregistrement dans la table <code class="docutils literal notranslate"><span class="pre">django_session</span></code>. Il met à jour cet enregistrement chaque fois que les données de la session sont modifiées. Si l’utilisateur se déconnecte explicitement, Django efface l’enregistrement. Mais si l’utilisateur ne le fait <em>pas</em>, l’enregistrement n’est jamais effacé. Le principe est identique avec le moteur basé sur les fichiers.</p>
+<p>Django ne fournit <em>pas</em> de système automatique d’effacement des sessions expirées. C’est donc à vous de le faire à intervalle régulier. Django met à disposition une commande de gestion de nettoyage dans ce but&nbsp;: <a class="reference internal" href="../../ref/django-admin.html#django-admin-clearsessions"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">clearsessions</span></code></a>. Il est recommandé de lancer cette commande régulièrement, par exemple dans une tâche «&nbsp;cron&nbsp;» journalière.</p>
+<p>Notez que le moteur basé sur le cache n’est pas sujet à ce problème, car les caches suppriment automatiquement les données obsolètes. Pareil pour le moteur basé sur les cookies, car les données de sessions sont stockées par les navigateurs des utilisateurs.</p>
+</div>
+<div class="section" id="s-settings">
+<span id="settings"></span><h2>Réglages<a class="headerlink" href="#settings" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Quelques <a class="reference internal" href="../../ref/settings.html#settings-sessions"><span class="std std-ref">réglages Django</span></a> permettent de contrôler le comportement des sessions&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_CACHE_ALIAS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_CACHE_ALIAS</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_AGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_AGE</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_DOMAIN"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_DOMAIN</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_HTTPONLY"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_HTTPONLY</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_NAME"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_NAME</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_PATH"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_PATH</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_SAMESITE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_SAMESITE</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_SECURE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_SECURE</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_EXPIRE_AT_BROWSER_CLOSE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_EXPIRE_AT_BROWSER_CLOSE</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_FILE_PATH"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_FILE_PATH</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_SAVE_EVERY_REQUEST"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_SAVE_EVERY_REQUEST</span></code></a></li>
+<li><a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_SERIALIZER"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_SERIALIZER</span></code></a></li>
+</ul>
+</div>
+<div class="section" id="s-session-security">
+<span id="s-topics-session-security"></span><span id="session-security"></span><span id="topics-session-security"></span><h2>Sécurité des sessions<a class="headerlink" href="#session-security" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les sous-domaines d’un site peuvent définir des cookies pour le client valables pour tout le domaine. Cela rend possible les attaques par fixation de session si des cookies peuvent être créés par des sous-domaines qui ne sont pas sous contrôle de personnes de confiance.</p>
+<p>Par exemple, un attaquant pourrait se connecter à <code class="docutils literal notranslate"><span class="pre">good.example.com</span></code> et obtenir une session valable pour son compte. Si l’attaquant contrôle <code class="docutils literal notranslate"><span class="pre">bad.example.com</span></code>, il peut l’utiliser pour vous envoyer sa clé de session puisqu’un sous-domaine a le droit de définir des cookies pour <code class="docutils literal notranslate"><span class="pre">*.example.com</span></code>. Lorsque vous visitez <code class="docutils literal notranslate"><span class="pre">good.example.com</span></code>, vous serez connecté sous le compte de l’attaquant et vous pourriez saisir involontairement des données personnelles sensibles (par ex. des données de carte de crédit) enregistrées dans le compte de l’attaquant.</p>
+<p>Une autre attaque possible apparaît dans le cas où <code class="docutils literal notranslate"><span class="pre">good.example.com</span></code> définit son réglage <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_COOKIE_DOMAIN"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_COOKIE_DOMAIN</span></code></a> à <code class="docutils literal notranslate"><span class="pre">&quot;example.com&quot;</span></code>, ce qui pourrait avoir comme conséquence d’envoyer les cookies de session à <code class="docutils literal notranslate"><span class="pre">bad.example.com</span></code>.</p>
+</div>
+<div class="section" id="s-technical-details">
+<span id="technical-details"></span><h2>Détails techniques<a class="headerlink" href="#technical-details" title="Lien permanent vers ce titre">¶</a></h2>
+<ul class="simple">
+<li>Le dictionnaire de session accepte n’importe quelle données sérialisable en <a class="reference external" href="https://docs.python.org/3/library/json.html#module-json" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">json</span></code></a> lors de l’utilisation de <a class="reference internal" href="#django.contrib.sessions.serializers.JSONSerializer" title="django.contrib.sessions.serializers.JSONSerializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">JSONSerializer</span></code></a> ou n’importe quel objet Python sérialisable par <code class="docutils literal notranslate"><span class="pre">pickle</span></code> en cas d’utilisation de <a class="reference internal" href="#django.contrib.sessions.serializers.PickleSerializer" title="django.contrib.sessions.serializers.PickleSerializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PickleSerializer</span></code></a>. Consultez la documentation du module <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> pour plus d’informations.</li>
+<li>Les données des sessions sont stockées dans une table de base de données nommée <code class="docutils literal notranslate"><span class="pre">django_session</span></code> .</li>
+<li>Django n’envoie un cookie qu’en cas de nécessité. Si vous ne définissez pas de données de session, le cookie de session ne sera pas envoyé.</li>
+</ul>
+<div class="section" id="s-the-sessionstore-object">
+<span id="the-sessionstore-object"></span><h3>L’objet <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code><a class="headerlink" href="#the-sessionstore-object" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque Django manipule les sessions en interne, il emploie un objet de stockage de session provenant du moteur de sessions correspondant. Par convention, la classe d’objet de stockage de session est appelée <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code> et se trouve dans le module désigné par <a class="reference internal" href="../../ref/settings.html#std:setting-SESSION_ENGINE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">SESSION_ENGINE</span></code></a>.</p>
+<p>Toutes les classes <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code> disponibles dans Django héritent de <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase" title="django.contrib.sessions.backends.base.SessionBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SessionBase</span></code></a> et implémentent des méthodes de manipulation de données, en l’occurrence&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">exists()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">create()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">save()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">delete()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">load()</span></code></li>
+<li><a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase.clear_expired" title="django.contrib.sessions.backends.base.SessionBase.clear_expired"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clear_expired()</span></code></a></li>
+</ul>
+<p>Dans l’optique de créer un moteur de sessions personnalisé ou d’en adapter un existant, vous pouvez créer une nouvelle classe héritant de <a class="reference internal" href="#django.contrib.sessions.backends.base.SessionBase" title="django.contrib.sessions.backends.base.SessionBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SessionBase</span></code></a> ou de toute autre classe <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code> existante.</p>
+<p>Il est possible d’étendre les moteurs de sessions existants, mais pour les moteurs se basant sur une base de données, cela exige généralement un peu plus de travail (lisez la section suivante pour plus de détails).</p>
+</div>
+</div>
+<div class="section" id="s-extending-database-backed-session-engines">
+<span id="s-id3"></span><span id="extending-database-backed-session-engines"></span><span id="id3"></span><h2>Extension des moteurs de sessions s’appuyant sur une base de données<a class="headerlink" href="#extending-database-backed-session-engines" title="Lien permanent vers ce titre">¶</a></h2>
+<p>La création d’un moteur de sessions personnalisé s’appuyant sur une base de données en se basant sur ceux qui sont inclus dans Django (c’est-à-dire <code class="docutils literal notranslate"><span class="pre">db</span></code> et <code class="docutils literal notranslate"><span class="pre">cached_db</span></code>) peut se faire en héritant de <a class="reference internal" href="#django.contrib.sessions.base_session.AbstractBaseSession" title="django.contrib.sessions.base_session.AbstractBaseSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractBaseSession</span></code></a> et de l’une des classes <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">AbstractBaseSession</span></code> et <code class="docutils literal notranslate"><span class="pre">BaseSessionManager</span></code> peuvent être importés à partir de <code class="docutils literal notranslate"><span class="pre">django.contrib.sessions.base_session</span></code> afin qu’ils puissent être importés sans devoir inclure <code class="docutils literal notranslate"><span class="pre">django.contrib.sessions</span></code> dans <a class="reference internal" href="../../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</p>
+<dl class="class">
+<dt id="django.contrib.sessions.base_session.AbstractBaseSession">
+<em class="property">class </em><code class="descclassname">base_session.</code><code class="descname">AbstractBaseSession</code><a class="headerlink" href="#django.contrib.sessions.base_session.AbstractBaseSession" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Le modèle abstrait de base d’une session.</p>
+<dl class="attribute">
+<dt id="django.contrib.sessions.base_session.AbstractBaseSession.session_key">
+<code class="descname">session_key</code><a class="headerlink" href="#django.contrib.sessions.base_session.AbstractBaseSession.session_key" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>La clé primaire. Le champ lui-même peut contenir jusqu’à 40 caractères. L’implémentation actuelle génère une chaîne de 32 caractères (une séquence aléatoire de chiffres et de lettre ASCII minuscules).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.sessions.base_session.AbstractBaseSession.session_data">
+<code class="descname">session_data</code><a class="headerlink" href="#django.contrib.sessions.base_session.AbstractBaseSession.session_data" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une chaîne contenant un dictionnaire de session codé et sérialisé.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="django.contrib.sessions.base_session.AbstractBaseSession.expire_date">
+<code class="descname">expire_date</code><a class="headerlink" href="#django.contrib.sessions.base_session.AbstractBaseSession.expire_date" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Une date/heure indiquant la date d’expiration de la session.</p>
+<p>Les sessions qui ont expiré ne sont plus accessibles aux utilisateurs&nbsp;; elles peuvent tout de même rester stockées dans la base de données jusqu’au lancement de la commande d’administration <a class="reference internal" href="../../ref/django-admin.html#django-admin-clearsessions"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">clearsessions</span></code></a>.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="django.contrib.sessions.base_session.AbstractBaseSession.get_session_store_class">
+<em class="property">classmethod </em><code class="descname">get_session_store_class</code>()<a class="headerlink" href="#django.contrib.sessions.base_session.AbstractBaseSession.get_session_store_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une classe de stockage de session à utiliser avec ce modèle de session.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.base_session.AbstractBaseSession.get_decoded">
+<code class="descname">get_decoded</code>()<a class="headerlink" href="#django.contrib.sessions.base_session.AbstractBaseSession.get_decoded" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie les données de session décodées.</p>
+<p>Le décodage est effectué par la classe de stockage de session.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Vous pouvez aussi personnaliser le gestionnaire du modèle en héritant de <a class="reference internal" href="#django.contrib.sessions.base_session.BaseSessionManager" title="django.contrib.sessions.base_session.BaseSessionManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSessionManager</span></code></a>:</p>
+<dl class="class">
+<dt id="django.contrib.sessions.base_session.BaseSessionManager">
+<em class="property">class </em><code class="descclassname">base_session.</code><code class="descname">BaseSessionManager</code><a class="headerlink" href="#django.contrib.sessions.base_session.BaseSessionManager" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><dl class="method">
+<dt id="django.contrib.sessions.base_session.BaseSessionManager.encode">
+<code class="descname">encode</code>(<em>session_dict</em>)<a class="headerlink" href="#django.contrib.sessions.base_session.BaseSessionManager.encode" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie le dictionnaire de session indiqué sous forme de chaîne codée et sérialisée.</p>
+<p>Le codage est effectué par la classe de stockage de session en lien à la classe de modèle.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.base_session.BaseSessionManager.save">
+<code class="descname">save</code>(<em>session_key</em>, <em>session_dict</em>, <em>expire_date</em>)<a class="headerlink" href="#django.contrib.sessions.base_session.BaseSessionManager.save" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Enregistre les données de session correspondant à la clé de session indiquée ou supprimer la session dans le cas où les données sont vides.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>La personnalisation des classes <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code> se fait en surchargeant les méthodes et les propriétés décrites ci-après&nbsp;:</p>
+<dl class="class">
+<dt id="django.contrib.sessions.backends.db.SessionStore">
+<em class="property">class </em><code class="descclassname">backends.db.</code><code class="descname">SessionStore</code><a class="headerlink" href="#django.contrib.sessions.backends.db.SessionStore" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Implémentation du stockage de session s’appuyant sur une base de données.</p>
+<dl class="classmethod">
+<dt id="django.contrib.sessions.backends.db.SessionStore.get_model_class">
+<em class="property">classmethod </em><code class="descname">get_model_class</code>()<a class="headerlink" href="#django.contrib.sessions.backends.db.SessionStore.get_model_class" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Surchargez cette méthode afin de renvoyer un modèle de session personnalisé en cas de besoin.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="django.contrib.sessions.backends.db.SessionStore.create_model_instance">
+<code class="descname">create_model_instance</code>(<em>data</em>)<a class="headerlink" href="#django.contrib.sessions.backends.db.SessionStore.create_model_instance" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Renvoie une nouvelle instance d’objet modèle de session, qui représente l’état actuel de la session.</p>
+<p>En surchargeant cette méthode, on peut modifier les données du modèle de session avant qu’elles ne soient enregistrées dans la base de données.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="django.contrib.sessions.backends.cached_db.SessionStore">
+<em class="property">class </em><code class="descclassname">backends.cached_db.</code><code class="descname">SessionStore</code><a class="headerlink" href="#django.contrib.sessions.backends.cached_db.SessionStore" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Implémentation du stockage de session s’appuyant sur une base de données et du cache.</p>
+<dl class="attribute">
+<dt id="django.contrib.sessions.backends.cached_db.SessionStore.cache_key_prefix">
+<code class="descname">cache_key_prefix</code><a class="headerlink" href="#django.contrib.sessions.backends.cached_db.SessionStore.cache_key_prefix" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Un préfixe ajouté à une clé de session pour construire une chaîne de clé de cache.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="s-example">
+<span id="example"></span><h3>Exemple<a class="headerlink" href="#example" title="Lien permanent vers ce titre">¶</a></h3>
+<p>L’exemple ci-dessous montre un moteur de session personnalisé s’appuyant sur une base de données, incluant une colonne de base de données supplémentaire pour stocker un identifiant de compte (et ainsi fournissant une option pour interroger la base de données pour toutes les sessions actives d’un compte)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.sessions.backends.db</span> <span class="k">import</span> <span class="n">SessionStore</span> <span class="k">as</span> <span class="n">DBStore</span>
+<span class="kn">from</span> <span class="nn">django.contrib.sessions.base_session</span> <span class="k">import</span> <span class="n">AbstractBaseSession</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">CustomSession</span><span class="p">(</span><span class="n">AbstractBaseSession</span><span class="p">):</span>
+    <span class="n">account_id</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">db_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_session_store_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SessionStore</span>
+
+<span class="k">class</span> <span class="nc">SessionStore</span><span class="p">(</span><span class="n">DBStore</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_model_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">CustomSession</span>
+
+    <span class="k">def</span> <span class="nf">create_model_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">create_model_instance</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">account_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_auth_user_id&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">account_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">account_id</span> <span class="o">=</span> <span class="n">account_id</span>
+        <span class="k">return</span> <span class="n">obj</span>
+</pre></div>
+</div>
+<p>Si vous faites une migration à partir du stockage de sessions <code class="docutils literal notranslate"><span class="pre">cached_db</span></code> intégré à Django vers un stockage personnalisé basé sur <code class="docutils literal notranslate"><span class="pre">cached_db</span></code>, il est conseillé de surcharger le préfixe de clé de cache afin d’éviter d’éventuels conflits d’espace de noms&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SessionStore</span><span class="p">(</span><span class="n">CachedDBStore</span><span class="p">):</span>
+    <span class="n">cache_key_prefix</span> <span class="o">=</span> <span class="s1">&#39;mysessions.custom_cached_db_backend&#39;</span>
+
+    <span class="c1"># ...</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-session-ids-in-urls">
+<span id="session-ids-in-urls"></span><h2>Identifiants de session dans les URL<a class="headerlink" href="#session-ids-in-urls" title="Lien permanent vers ce titre">¶</a></h2>
+<p>L’infrastructure des sessions de Django est complètement et uniquement basé sur les cookies. Il ne se rabat pas sur le système des identifiants de session dans les URL comme le fait PHP. C’est une décision conceptuelle volontaire. Cette technique défigure les URL et rend votre site vulnérable aux vols d’identifiants de session par l’intermédiaire de l’en-tête «&nbsp;Referer&nbsp;».</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Utilisation des sessions</a><ul>
+<li><a class="reference internal" href="#enabling-sessions">Activation des sessions</a></li>
+<li><a class="reference internal" href="#configuring-the-session-engine">Configuration du moteur de sessions</a><ul>
+<li><a class="reference internal" href="#using-database-backed-sessions">Utilisation des sessions en base de données</a></li>
+<li><a class="reference internal" href="#using-cached-sessions">Utilisation des sessions en cache</a></li>
+<li><a class="reference internal" href="#using-file-based-sessions">Utilisation des sessions basées sur des fichiers</a></li>
+<li><a class="reference internal" href="#using-cookie-based-sessions">Utilisation des sessions basées sur les cookies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-sessions-in-views">Utilisation des sessions dans les vues</a><ul>
+<li><a class="reference internal" href="#session-serialization">Sérialisation des sessions</a><ul>
+<li><a class="reference internal" href="#bundled-serializers">Sérialiseurs intégrés</a></li>
+<li><a class="reference internal" href="#write-your-own-serializer">Écriture de son propre sérialiseur</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#session-object-guidelines">Lignes directrices des objets sessions</a></li>
+<li><a class="reference internal" href="#examples">Exemples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#setting-test-cookies">Génération de cookies de test</a></li>
+<li><a class="reference internal" href="#using-sessions-out-of-views">Utilisation des sessions en dehors des vues</a></li>
+<li><a class="reference internal" href="#when-sessions-are-saved">Enregistrement des sessions</a></li>
+<li><a class="reference internal" href="#browser-length-sessions-vs-persistent-sessions">Expiration ou persistance des sessions</a></li>
+<li><a class="reference internal" href="#clearing-the-session-store">Effacement du stockage des sessions</a></li>
+<li><a class="reference internal" href="#settings">Réglages</a></li>
+<li><a class="reference internal" href="#session-security">Sécurité des sessions</a></li>
+<li><a class="reference internal" href="#technical-details">Détails techniques</a><ul>
+<li><a class="reference internal" href="#the-sessionstore-object">L’objet <code class="docutils literal notranslate"><span class="pre">SessionStore</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extending-database-backed-session-engines">Extension des moteurs de sessions s’appuyant sur une base de données</a><ul>
+<li><a class="reference internal" href="#example">Exemple</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#session-ids-in-urls">Identifiants de session dans les URL</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="middleware.html"
+                        title="Chapitre précédent">Intergiciels («&nbsp;Middleware&nbsp;»)</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../forms/index.html"
+                        title="Chapitre suivant">Utilisation des formulaires</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/http/sessions.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="middleware.html" title="Intergiciels («&amp;nbsp;Middleware&amp;nbsp;»)">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="../forms/index.html" title="Utilisation des formulaires">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

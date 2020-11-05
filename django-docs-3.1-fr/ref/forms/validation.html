@@ -1,0 +1,406 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>La validation de formulaires et de champs &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Intergiciels (« middleware »)" href="../middleware.html" />
+    <link rel="prev" title="Composants de formulaires (« widgets »)" href="widgets.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="widgets.html" title="Composants de formulaires («&amp;nbsp;widgets&amp;nbsp;»)">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="../middleware.html" title="Intergiciels («&amp;nbsp;middleware&amp;nbsp;»)">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-forms-validation">
+            
+  <div class="section" id="s-form-and-field-validation">
+<span id="form-and-field-validation"></span><h1>La validation de formulaires et de champs<a class="headerlink" href="#form-and-field-validation" title="Lien permanent vers ce titre">¶</a></h1>
+<p>La validation de formulaire intervient lorsque les données sont nettoyées. Si vous souhaitez personnaliser ce processus, il y a plusieurs points d’entrée où des changements peuvent se faire, chacun visant un objectif différent. Trois types de méthodes de nettoyage sont exécutés durant le traitement d’un formulaire. Elles sont normalement exécutées lorsque la méthode <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> d’un formulaire est appelée. Il y a d’autres opérations qui peuvent aussi provoquer le nettoyage et la validation (l’accès à l’attribut <code class="docutils literal notranslate"><span class="pre">errors</span></code> ou l’appel direct à <code class="docutils literal notranslate"><span class="pre">full_clean()</span></code>), mais en principe, cela ne fait pas partie du processus normal.</p>
+<p>En général, toute méthode de nettoyage peut générer l’exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> si un problème survient lors du traitement des valeurs, en passant des informations adéquates au constructeur de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>. <a class="reference internal" href="#raising-validation-error"><span class="std std-ref">Voir ci-dessous</span></a> pour les bonnes pratiques de génération de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>. Si aucune exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> n’est produite, la méthode doit renvoyer la valeur nettoyée (normalisée) sous forme d’objet Python.</p>
+<p>La plupart de la validation peut se faire à l’aide de <a class="reference internal" href="#validators">validateurs</a>, des fonctions utilitaires pouvant être réutilisées. Il s’agit de fonctions (ou objets exécutables) acceptant un seul paramètre et générant une exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> en cas de saisie non valide. Les validateurs sont exécutés après l’appel aux méthodes <code class="docutils literal notranslate"><span class="pre">to_python</span></code> et <code class="docutils literal notranslate"><span class="pre">validate</span></code> du champ.</p>
+<p>La validation d’un formulaire est partagée en plusieurs étapes, qui peuvent être personnalisées ou surchargées&nbsp;:</p>
+<ul>
+<li><p class="first">La méthode <code class="docutils literal notranslate"><span class="pre">to_python()</span></code> d’un champ <code class="docutils literal notranslate"><span class="pre">Field</span></code> est la première étape de toute validation. Elle transforme la valeur dans le bon type de données et génère <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> si ce n’est pas possible. Cette méthode accepte la valeur brute provenant du composant et renvoie la valeur convertie. Par exemple, un champ <code class="docutils literal notranslate"><span class="pre">FloatField</span></code> transforme la donnée en un objet Python <code class="docutils literal notranslate"><span class="pre">float</span></code> ou génère une exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>.</p>
+</li>
+<li><p class="first">La méthode <code class="docutils literal notranslate"><span class="pre">validate()</span></code> d’un champ <code class="docutils literal notranslate"><span class="pre">Field</span></code> se charge de la validation spécifique du champ qui ne convient pas pour un validateur. Elle accepte une valeur ayant déjà été convertie dans le bon type et génère une exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> en cas d’erreur. Cette méthode ne renvoie rien et ne doit pas modifier la valeur. Elle peut être surchargée pour gérer de la logique de validation que vous ne pouvez ou ne voulez pas placer dans un validateur.</p>
+</li>
+<li><p class="first">La méthode <code class="docutils literal notranslate"><span class="pre">run_validators()</span></code> d’un champ lance tous les validateurs du champ et rassemble toutes les erreurs dans une seule exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>. Il n’est en principe pas utile de surcharger cette méthode.</p>
+</li>
+<li><p class="first">La méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> d’une sous-classe de champ est responsable de l’exécution de <code class="docutils literal notranslate"><span class="pre">to_python()</span></code>, <code class="docutils literal notranslate"><span class="pre">validate()</span></code> et <code class="docutils literal notranslate"><span class="pre">run_validators()</span></code> dans le bon ordre et de la propagation des erreurs. Si à tout moment l’une de ces méthodes génère une exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>, la validation s’arrête et cette erreur est propagée. Cette méthode renvoie les données nettoyées qui sont ensuite insérées dans le dictionnaire <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> du formulaire.</p>
+</li>
+<li><p class="first">La méthode <code class="docutils literal notranslate"><span class="pre">clean_&lt;nom_du_champ&gt;()</span></code> est appelée pour une sous-classe de formulaire – où <code class="docutils literal notranslate"><span class="pre">&lt;nom_du_champ&gt;</span></code> est remplacé par le nom de l’attribut de champ de formulaire. Cette méthode s’occupe de tout nettoyage spécifique à cet attribut, sans considération du type de champ concerné. Cette méthode ne reçoit aucun paramètre. Vous devez chercher vous-même la valeur du champ dans <code class="docutils literal notranslate"><span class="pre">self.cleaned_data</span></code> et vous rappeler qu’il s’agira à ce moment d’un objet Python, pas de la chaîne initialement soumise avec le formulaire (la valeur figure dans <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> parce que la méthode générale <code class="docutils literal notranslate"><span class="pre">clean()</span></code> du champ aura déjà nettoyé la valeur une première fois).</p>
+<p>Par exemple, si vous souhaitiez valider que le contenu d’un champ <code class="docutils literal notranslate"><span class="pre">CharField</span></code> nommé <code class="docutils literal notranslate"><span class="pre">serialnumber</span></code> est unique, <code class="docutils literal notranslate"><span class="pre">clean_serialnumber()</span></code> serait le bon endroit pour le faire. Vous n’avez pas besoin d’un champ spécifique (c’est un <code class="docutils literal notranslate"><span class="pre">CharField</span></code>), mais vous avez besoin d’une séquence de validation propre au champ de formulaire et, si possible, de nettoyer/normaliser les données.</p>
+<p>La valeur renvoyée par cette méthode remplace la valeur existante dans <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>, il doit donc s’agir soit de la valeur de <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> (même si cette méthode ne l’a pas modifiée), soit d’une nouvelle valeur propre.</p>
+</li>
+<li><p class="first">La méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> de la sous-classe de formulaire peut effectuer toute validation nécessitant d’accéder à plusieurs champs de formulaire. C’est ici que vous pouvez placer des contrôles du genre&nbsp;: si le champ <code class="docutils literal notranslate"><span class="pre">A</span></code> est renseigné , le champ <code class="docutils literal notranslate"><span class="pre">B</span></code> doit contenir une adresse de messagerie valide. Cette méthode peut renvoyer un dictionnaire complètement différent si elle le souhaite, et ce résultat sera utilisé comme contenu de <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>.</p>
+<p>Comme les méthodes de validation des champs ont été exécutées au moment où <code class="docutils literal notranslate"><span class="pre">clean()</span></code> est appelée, vous avez aussi accès à l’attribut <code class="docutils literal notranslate"><span class="pre">errors</span></code> du formulaire qui contient toutes les erreurs générées lors du nettoyage individuel des champs.</p>
+<p>Notez que toute erreur générée par votre version de <a class="reference internal" href="api.html#django.forms.Form.clean" title="django.forms.Form.clean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.clean()</span></code></a> ne sera associée à aucun champ particulier. Elles sont attribuées à un «&nbsp;champ&nbsp;» spécial nommé <code class="docutils literal notranslate"><span class="pre">__all__</span></code> auquel il est possible d’accéder par la méthode <a class="reference internal" href="api.html#django.forms.Form.non_field_errors" title="django.forms.Form.non_field_errors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">non_field_errors()</span></code></a> en cas de besoin. Si vous souhaitez lier une erreur à un champ spécifique du formulaire, vous devrez appeler <a class="reference internal" href="api.html#django.forms.Form.add_error" title="django.forms.Form.add_error"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_error()</span></code></a>.</p>
+<p>Notez également qu’il faut tenir compte de considérations particulières lors de la surcharge de la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> d’une sous-classe de <code class="docutils literal notranslate"><span class="pre">ModelForm</span></code> (voir la <a class="reference internal" href="../../topics/forms/modelforms.html#overriding-modelform-clean-method"><span class="std std-ref">documentation de ModelForm</span></a> pour plus d’informations).</p>
+</li>
+</ul>
+<p>Ces méthodes sont exécutées dans l’ordre metnionné ci-dessus, un champ après l’autre. C’est-à-dire que pour chaque champ du formulaire (dans l’ordre où ils ont été déclarés dans la définition du formulaire), la méthode <code class="docutils literal notranslate"><span class="pre">Field.clean()</span></code> (ou sa version surchargée) est exécutée, puis <code class="docutils literal notranslate"><span class="pre">clean_&lt;nom_du_champ&gt;()</span></code>. Finalement, après que ces deux méthodes ont été exécutées pour chaque champ, la méthode <a class="reference internal" href="api.html#django.forms.Form.clean" title="django.forms.Form.clean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.clean()</span></code></a> ou sa version surchargée est exécutée dans tous les cas, même si les méthodes précédentes ont généré des erreurs.</p>
+<p>Des exemples pour chacune de ces méthodes sont présentés ci-dessous.</p>
+<p>Comme mentionné, chacune de ces méthodes peut générer une exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>. Pour chaque champ, si la méthode <code class="docutils literal notranslate"><span class="pre">Field.clean()</span></code> gènère une erreur <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>, la méthode de nettoyage spécifique au champ n’est pas appelée. Cependant, les méthodes de nettoyage de tous les autres champs sont tout de même exécutées.</p>
+<div class="section" id="s-raising-validationerror">
+<span id="s-raising-validation-error"></span><span id="raising-validationerror"></span><span id="raising-validation-error"></span><h2>Génération de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code><a class="headerlink" href="#raising-validationerror" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Pour une plus grande flexibilité des messages d’erreur et pour qu’il soit plus facile de les surcharger, voici quelques lignes de conduite&nbsp;:</p>
+<ul>
+<li><p class="first">Fournissez un <code class="docutils literal notranslate"><span class="pre">code</span></code> d’erreur descriptif au constructeur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good</span>
+<span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value&#39;</span><span class="p">),</span> <span class="n">code</span><span class="o">=</span><span class="s1">&#39;invalid&#39;</span><span class="p">)</span>
+
+<span class="c1"># Bad</span>
+<span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Ne fusionnez pas les variables dans les messages&nbsp;; utilisez des substituants ainsi que le paramètre <code class="docutils literal notranslate"><span class="pre">params</span></code> du constructeur&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good</span>
+<span class="n">ValidationError</span><span class="p">(</span>
+    <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value: </span><span class="si">%(value)s</span><span class="s1">&#39;</span><span class="p">),</span>
+    <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;42&#39;</span><span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># Bad</span>
+<span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Préférez la substitution par clé de dictionnaire plutôt que le formatage positionnel. Cela permet de placer les variables dans n’importe quel ordre ou même de les omettre entièrement lors de la réécriture d’un message&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good</span>
+<span class="n">ValidationError</span><span class="p">(</span>
+    <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value: </span><span class="si">%(value)s</span><span class="s1">&#39;</span><span class="p">),</span>
+    <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;42&#39;</span><span class="p">},</span>
+<span class="p">)</span>
+
+<span class="c1"># Bad</span>
+<span class="n">ValidationError</span><span class="p">(</span>
+    <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">),</span>
+    <span class="n">params</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;42&#39;</span><span class="p">,),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Englobez le message dans un appel <code class="docutils literal notranslate"><span class="pre">gettext</span></code> pour activer sa traduction&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good</span>
+<span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value&#39;</span><span class="p">))</span>
+
+<span class="c1"># Bad</span>
+<span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Invalid value&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Pour résumer le tout&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+    <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value: </span><span class="si">%(value)s</span><span class="s1">&#39;</span><span class="p">),</span>
+    <span class="n">code</span><span class="o">=</span><span class="s1">&#39;invalid&#39;</span><span class="p">,</span>
+    <span class="n">params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="s1">&#39;42&#39;</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Le respect de ces lignes de conduite est particulièrement utile si vous écrivez des formulaires, des champs de formulaire ou des champs de modèle réutilisables.</p>
+<p>Même si ce n’est pas recommandé, si vous vous trouvez à la fin de la chaîne de validation (par ex. la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> de votre formulaire) et que vous savez que vous n’aurez <em>jamais</em> besoin de surcharger le message d’erreur, vous pouvez toujours opter pour la version plus directe&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Invalid value: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Les méthodes <a class="reference internal" href="api.html#django.forms.Form.errors.as_data" title="django.forms.Form.errors.as_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.errors.as_data()</span></code></a> et <a class="reference internal" href="api.html#django.forms.Form.errors.as_json" title="django.forms.Form.errors.as_json"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Form.errors.as_json()</span></code></a> bénéficient grandement d’objets <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> complètement renseignés (avec un nom <code class="docutils literal notranslate"><span class="pre">code</span></code> et un dictionnaire <code class="docutils literal notranslate"><span class="pre">params</span></code>).</p>
+<div class="section" id="s-raising-multiple-errors">
+<span id="raising-multiple-errors"></span><h3>Génération de plusieurs erreurs<a class="headerlink" href="#raising-multiple-errors" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous détectez plusieurs erreurs durant une méthode de nettoyage et que vous souhaitiez toutes les signaler à celui qui a soumis le formulaire, il est possible de transmettre une liste d’erreurs au constructeur de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>.</p>
+<p>Comme mentionné plus haut, il est recommandé de passer une liste d’instances <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> avec les paramètres <code class="docutils literal notranslate"><span class="pre">code</span></code> et <code class="docutils literal notranslate"><span class="pre">params</span></code>, mais une liste de chaînes fera aussi l’affaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good</span>
+<span class="k">raise</span> <span class="n">ValidationError</span><span class="p">([</span>
+    <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Error 1&#39;</span><span class="p">),</span> <span class="n">code</span><span class="o">=</span><span class="s1">&#39;error1&#39;</span><span class="p">),</span>
+    <span class="n">ValidationError</span><span class="p">(</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;Error 2&#39;</span><span class="p">),</span> <span class="n">code</span><span class="o">=</span><span class="s1">&#39;error2&#39;</span><span class="p">),</span>
+<span class="p">])</span>
+
+<span class="c1"># Bad</span>
+<span class="k">raise</span> <span class="n">ValidationError</span><span class="p">([</span>
+    <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Error 1&#39;</span><span class="p">),</span>
+    <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Error 2&#39;</span><span class="p">),</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-using-validation-in-practice">
+<span id="using-validation-in-practice"></span><h2>Utilisation de la validation en pratique<a class="headerlink" href="#using-validation-in-practice" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les sections précédentes ont expliqué comment fonctionne la validation de manière générale pour les formulaires. Comme il est parfois plus simple de remettre les choses à leur place en examinant du code en contexte, voici une série de petits exemples qui font usage de chacune des fonctionnalités présentées précédemment.</p>
+<div class="section" id="s-using-validators">
+<span id="s-validators"></span><span id="using-validators"></span><span id="validators"></span><h3>Utilisation des validateurs<a class="headerlink" href="#using-validators" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les champs de formulaire (et de modèle) de Django gèrent des fonctions et classes utilitaires connus sous le nom de validateurs. Un validateur est un objet exécutable acceptant une valeur et ne renvoyant rien du tout si la valeur est valide ou générant une exception <a class="reference internal" href="../exceptions.html#django.core.exceptions.ValidationError" title="django.core.exceptions.ValidationError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code></a> si elle ne l’est pas. Ces validateurs peuvent être transmis à un constructeur de champ par l’intermédiaire du paramètre <code class="docutils literal notranslate"><span class="pre">validators</span></code> du champ ou définis dans une classe <a class="reference internal" href="fields.html#django.forms.Field" title="django.forms.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a> par leur attribut <code class="docutils literal notranslate"><span class="pre">default_validators</span></code>.</p>
+<p>Des validateurs peuvent être employés pour valider des valeurs d’un champ&nbsp;; examinons par exemple le champ <code class="docutils literal notranslate"><span class="pre">SlugField</span></code> de Django&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.core</span> <span class="k">import</span> <span class="n">validators</span>
+<span class="kn">from</span> <span class="nn">django.forms</span> <span class="k">import</span> <span class="n">CharField</span>
+
+<span class="k">class</span> <span class="nc">SlugField</span><span class="p">(</span><span class="n">CharField</span><span class="p">):</span>
+    <span class="n">default_validators</span> <span class="o">=</span> <span class="p">[</span><span class="n">validators</span><span class="o">.</span><span class="n">validate_slug</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Comme vous pouvez le voir, <code class="docutils literal notranslate"><span class="pre">SlugField</span></code> est un <code class="docutils literal notranslate"><span class="pre">CharField</span></code> doté d’un validateur particulier validant que le texte soumis obéit à certaines règles textuelles. Cela peut aussi se faire lors de la définition du champ, ainsi&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">slug</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">SlugField</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>est équivalent à&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">slug</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validators</span><span class="o">.</span><span class="n">validate_slug</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Des cas courants comme la validation d’une adresse électronique ou d’une expression régulière peuvent être traités avec des classes de validation existantes de Django. Par exemple, <code class="docutils literal notranslate"><span class="pre">validators.validate_slug</span></code> est une instance de <a class="reference internal" href="../validators.html#django.core.validators.RegexValidator" title="django.core.validators.RegexValidator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegexValidator</span></code></a> construite avec son premier paramètre équivalent au motif <code class="docutils literal notranslate"><span class="pre">^[-a-zA-Z0-9_]+$</span></code>. Consultez la section sur l”<a class="reference internal" href="../validators.html"><span class="doc">écriture de validateurs</span></a> pour voir une liste de ce qui est déjà disponible et pour des exemples de la façon d’écrire un validateur.</p>
+</div>
+<div class="section" id="s-form-field-default-cleaning">
+<span id="form-field-default-cleaning"></span><h3>Nettoyage par défaut des champs de formulaire<a class="headerlink" href="#form-field-default-cleaning" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Créons tout d’abord un champ de formulaire personnalisé qui valide que sa valeur d’entrée est une chaîne contenant des adresses électroniques séparées par des virgules. La classe complète ressemble à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.core.validators</span> <span class="k">import</span> <span class="n">validate_email</span>
+
+<span class="k">class</span> <span class="nc">MultiEmailField</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Field</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_python</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Normalize data to a list of strings.&quot;&quot;&quot;</span>
+        <span class="c1"># Return an empty list if no input was given.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if value consists only of valid emails.&quot;&quot;&quot;</span>
+        <span class="c1"># Use the parent&#39;s handling of required fields, etc.</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">email</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">validate_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pour chaque formulaire utilisant ce champ, ces méthodes seront exécutées avant que quoi que ce soit puisse être fait avec les données du champ. Il s’agit de nettoyage spécifique à ce type de champ, quelle que soit la manière dont il sera utilisé par la suite.</p>
+<p>Créons un formulaire <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code> pour montrer comment ce champ peut être utilisé&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ContactForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">CharField</span><span class="p">()</span>
+    <span class="n">sender</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">EmailField</span><span class="p">()</span>
+    <span class="n">recipients</span> <span class="o">=</span> <span class="n">MultiEmailField</span><span class="p">()</span>
+    <span class="n">cc_myself</span> <span class="o">=</span> <span class="n">forms</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Utilisez <code class="docutils literal notranslate"><span class="pre">MultiEmailField</span></code> comme n’importe quel autre champ. Lorsque la méthode <code class="docutils literal notranslate"><span class="pre">is_valid()</span></code> est appelée pour le formulaire, la méthode <code class="docutils literal notranslate"><span class="pre">MultiEmailField.clean()</span></code> sera aussi exécutée dans le contexte du processus de nettoyage, et celle-ci appellera à son tour les méthodes personnalisées <code class="docutils literal notranslate"><span class="pre">to_python()</span></code> et <code class="docutils literal notranslate"><span class="pre">validate()</span></code>.</p>
+</div>
+<div class="section" id="s-cleaning-a-specific-field-attribute">
+<span id="cleaning-a-specific-field-attribute"></span><h3>Nettoyage d’un attribut de champ spécifique<a class="headerlink" href="#cleaning-a-specific-field-attribute" title="Lien permanent vers ce titre">¶</a></h3>
+<p>En poursuivant l’exemple précédent, supposons que dans notre formulaire <code class="docutils literal notranslate"><span class="pre">ContactForm</span></code>, nous aimerions être certain que le champ <code class="docutils literal notranslate"><span class="pre">recipients</span></code> contienne toujours l’adresse <code class="docutils literal notranslate"><span class="pre">&quot;fred&#64;example.com&quot;</span></code>. Il s’agit de validation spécifique à notre formulaire, ce qui explique que nous ne voulions pas la placer dans la classe générique <code class="docutils literal notranslate"><span class="pre">MultiEmailField</span></code>. Au lieu de cela, nous écrivons une méthode de nettoyage qui agit sur le champ <code class="docutils literal notranslate"><span class="pre">recipients</span></code>, comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span>
+
+<span class="k">class</span> <span class="nc">ContactForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="c1"># Everything as before.</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">clean_recipients</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="p">[</span><span class="s1">&#39;recipients&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;fred@example.com&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;You have forgotten about Fred!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Always return a value to use as the new cleaned data, even if</span>
+        <span class="c1"># this method didn&#39;t change it.</span>
+        <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-cleaning-and-validating-fields-that-depend-on-each-other">
+<span id="s-validating-fields-with-clean"></span><span id="cleaning-and-validating-fields-that-depend-on-each-other"></span><span id="validating-fields-with-clean"></span><h3>Nettoyage et validation de champs qui dépendent l’un de l’autre<a class="headerlink" href="#cleaning-and-validating-fields-that-depend-on-each-other" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Supposons que nous ajoutions une autre exigence à notre formulaire de contact&nbsp;: si le champ <code class="docutils literal notranslate"><span class="pre">cc_myself</span></code> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>, le champ <code class="docutils literal notranslate"><span class="pre">subject</span></code> doit contenir le mot <code class="docutils literal notranslate"><span class="pre">&quot;help&quot;</span></code>. Nous effectuons de la validation s’appliquant à plus d’un champ à la fois, c’est pourquoi la méthode <a class="reference internal" href="api.html#django.forms.Form.clean" title="django.forms.Form.clean"><code class="xref py py-meth docutils literal notranslate"><span class="pre">clean()</span></code></a> du formulaire est le bon endroit pour cela. Remarquez que nous parlons bien maintenant de la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> du formulaire, alors qu’auparavant nous avions écrit une méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> pour un champ. Il est important de bien faire la différence entre le champ et le formulaire lorsqu’il s’agit de la validation de contenu. Les champs sont des points de données uniques, les formulaires sont des ensembles de champs.</p>
+<p>Au moment où la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> du formulaire est appelée, toutes les méthodes de nettoyage de chaque champ auront déjà été exécutées (cf. les deux sections précédentes), ce qui fait que <code class="docutils literal notranslate"><span class="pre">self.cleaned_data</span></code> sera rempli par toute donnée ayant respecté la validation jusque là. Il faut donc aussi se rappeler de tenir compte du fait que les champs que vous souhaitez valider pourraient ne pas avoir passé l’étape préalable de la vérification au niveau du champ individuel.</p>
+<p>Il y a deux manières de signaler des erreurs à ce stade. La méthode probablement la plus courante est d’afficher l’erreur au sommet du formulaire. Pour créer une telle erreur, vous pouvez générer une exception <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code> à partir de la méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span>
+
+<span class="k">class</span> <span class="nc">ContactForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="c1"># Everything as before.</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cleaned_data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">cc_myself</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cc_myself&quot;</span><span class="p">)</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subject&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cc_myself</span> <span class="ow">and</span> <span class="n">subject</span><span class="p">:</span>
+            <span class="c1"># Only do something if both fields are valid so far.</span>
+            <span class="k">if</span> <span class="s2">&quot;help&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subject</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span>
+                    <span class="s2">&quot;Did not send for &#39;help&#39; in the subject despite &quot;</span>
+                    <span class="s2">&quot;CC&#39;ing yourself.&quot;</span>
+                <span class="p">)</span>
+</pre></div>
+</div>
+<p>Dans ce code, si l’erreur de validation est générée, le formulaire affichera un message d’erreur au sommet du formulaire (dans le cas normal) décrivant le problème. De telles erreurs sont des erreurs non liées à des champs qui sont affichées dans les gabarits par <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">form.non_field_errors</span> <span class="pre">}}</span></code>.</p>
+<p>L’appel à <code class="docutils literal notranslate"><span class="pre">super().clean()</span></code> dans l’exemple de code garantit que toute logique de validation dans les classes parentes est conservée. Si votre formulaire hérite d’un autre qui ne renvoie pas de dictionnaire <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> dans sa méthode <code class="docutils literal notranslate"><span class="pre">clean()</span></code> (c’est facultatif), n’attribuez pas le résultat de l’appel à <code class="docutils literal notranslate"><span class="pre">super()</span></code> à <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code> et utilisez plutôt <code class="docutils literal notranslate"><span class="pre">self.cleaned_data</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+    <span class="n">cc_myself</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cc_myself&quot;</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>La seconde approche pour signaler les erreurs de validation pourrait impliquer d’attribuer le message d’erreur à l’un des champs. Dans ce cas, attribuons un message d’erreur à la fois aux deux lignes «&nbsp;subject&nbsp;» et «&nbsp;cc_myself&nbsp;» dans l’affichage du formulaire. Soyez prudent si vous faites cela en pratique, car cela pourrait amener de la confusion dans la présentation du formulaire. Nous montrons ici ce qui est possible, mais nous vous laissons la responsabilité de constater vous-même ce qui est faisable dans votre contexte particulier. Notre nouveau code (remplaçant l’exemple précédent) ressemble à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="k">import</span> <span class="n">forms</span>
+
+<span class="k">class</span> <span class="nc">ContactForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="c1"># Everything as before.</span>
+    <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cleaned_data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+        <span class="n">cc_myself</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cc_myself&quot;</span><span class="p">)</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="n">cleaned_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subject&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cc_myself</span> <span class="ow">and</span> <span class="n">subject</span> <span class="ow">and</span> <span class="s2">&quot;help&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subject</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Must put &#39;help&#39; in subject when cc&#39;ing yourself.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;cc_myself&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Le second paramètre de <code class="docutils literal notranslate"><span class="pre">add_error()</span></code> peut être une chaîne, ou de préférence une instance de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code>. Consultez <a class="reference internal" href="#raising-validation-error"><span class="std std-ref">Génération de ValidationError</span></a> pour plus de détails. Notez que <code class="docutils literal notranslate"><span class="pre">add_error()</span></code> enlève automatiquement le champ de <code class="docutils literal notranslate"><span class="pre">cleaned_data</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">La validation de formulaires et de champs</a><ul>
+<li><a class="reference internal" href="#raising-validationerror">Génération de <code class="docutils literal notranslate"><span class="pre">ValidationError</span></code></a><ul>
+<li><a class="reference internal" href="#raising-multiple-errors">Génération de plusieurs erreurs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-validation-in-practice">Utilisation de la validation en pratique</a><ul>
+<li><a class="reference internal" href="#using-validators">Utilisation des validateurs</a></li>
+<li><a class="reference internal" href="#form-field-default-cleaning">Nettoyage par défaut des champs de formulaire</a></li>
+<li><a class="reference internal" href="#cleaning-a-specific-field-attribute">Nettoyage d’un attribut de champ spécifique</a></li>
+<li><a class="reference internal" href="#cleaning-and-validating-fields-that-depend-on-each-other">Nettoyage et validation de champs qui dépendent l’un de l’autre</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="widgets.html"
+                        title="Chapitre précédent">Composants de formulaires («&nbsp;widgets&nbsp;»)</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="../middleware.html"
+                        title="Chapitre suivant">Intergiciels («&nbsp;middleware&nbsp;»)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/forms/validation.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="widgets.html" title="Composants de formulaires («&amp;nbsp;widgets&amp;nbsp;»)">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="../middleware.html" title="Intergiciels («&amp;nbsp;middleware&amp;nbsp;»)">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

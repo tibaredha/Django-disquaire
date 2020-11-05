@@ -1,0 +1,620 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>L’application de gestion des fichiers statiques (staticfiles) &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="L’infrastructure de syndication par flux" href="syndication.html" />
+    <link rel="prev" title="L’infrastructure des « sites »" href="sites.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="sites.html" title="L’infrastructure des «&amp;nbsp;sites&amp;nbsp;»">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="syndication.html" title="L’infrastructure de syndication par flux">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="ref-contrib-staticfiles">
+            
+  <div class="section" id="s-module-django.contrib.staticfiles">
+<span id="s-the-staticfiles-app"></span><span id="module-django.contrib.staticfiles"></span><span id="the-staticfiles-app"></span><h1>L’application de gestion des fichiers statiques (<code class="docutils literal notranslate"><span class="pre">staticfiles</span></code>)<a class="headerlink" href="#module-django.contrib.staticfiles" title="Lien permanent vers ce titre">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">django.contrib.staticfiles</span></code> recueille les fichiers statiques à partir de chacune des applications (et de tous les autres endroits que vous spécifiez) en un seul endroit qui peut facilement être utilisé en production.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<p class="last">Pour une introduction à l’application et quelques exemples d’utilisation des fichiers statiques, voir  <a class="reference internal" href="../../howto/static-files/index.html"><span class="doc">Gestion des fichiers statiques (par ex. images, JavaScript, CSS)</span></a>. Pour obtenir des instructions sur le déploiement des fichiers statiques, voir <a class="reference internal" href="../../howto/static-files/deployment.html"><span class="doc">Déploiement des fichiers statiques</span></a>.</p>
+</div>
+<div class="section" id="s-settings">
+<span id="s-staticfiles-settings"></span><span id="settings"></span><span id="staticfiles-settings"></span><h2>Réglages<a class="headerlink" href="#settings" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Voir <a class="reference internal" href="../settings.html#settings-staticfiles"><span class="std std-ref">réglages de staticfiles</span></a> pour plus de détails sur les réglages suivants&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../settings.html#std:setting-STATIC_ROOT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_ROOT</span></code></a></li>
+<li><a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a></li>
+<li><a class="reference internal" href="../settings.html#std:setting-STATICFILES_DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_DIRS</span></code></a></li>
+<li><a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a></li>
+<li><a class="reference internal" href="../settings.html#std:setting-STATICFILES_FINDERS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_FINDERS</span></code></a></li>
+</ul>
+</div>
+<div class="section" id="s-management-commands">
+<span id="management-commands"></span><h2>Commandes d’administration<a class="headerlink" href="#management-commands" title="Lien permanent vers ce titre">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">django.contrib.staticfiles</span></code> propose trois commandes d’administration.</p>
+<div class="section" id="s-collectstatic">
+<span id="collectstatic"></span><h3><code class="docutils literal notranslate"><span class="pre">collectstatic</span></code><a class="headerlink" href="#collectstatic" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="django-admin">
+<dt id="django-admin-collectstatic">
+<code class="descname">django-admin collectstatic</code><a class="headerlink" href="#django-admin-collectstatic" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Recueille les fichiers statiques dans le répertoire <a class="reference internal" href="../settings.html#std:setting-STATIC_ROOT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_ROOT</span></code></a>.</p>
+<p>Lorsque deux fichiers ont le même nom, le problème est résolu par défaut d’une façon similaire à la façon dont fonctionne la résolution des gabarits&nbsp;: le premier fichier trouvé est utilisé. En cas d’incertitude, la commande <a class="reference internal" href="#django-admin-findstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">findstatic</span></code></a> peut vous montrer quels sont les fichiers trouvés.</p>
+<p>Lors des prochains lancements de <code class="docutils literal notranslate"><span class="pre">collectstatic</span></code> (si <code class="docutils literal notranslate"><span class="pre">STATIC_ROOT</span></code> n’est pas vide), les fichiers ne sont copiés que si leur date de modification est plus récente que la date de modification du fichier dans <code class="docutils literal notranslate"><span class="pre">STATIC_ROOT</span></code>. Ainsi, si vous supprimez une application de <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>, il est recommandé d’utiliser l’option <a class="reference internal" href="#cmdoption-collectstatic-clear"><code class="xref std std-option docutils literal notranslate"><span class="pre">collectstatic</span> <span class="pre">--clear</span></code></a> afin de supprimer les fichiers statiques obsolètes.</p>
+<p>La recherche des fichiers utilise le réglage <a class="reference internal" href="../settings.html#std:setting-STATICFILES_FINDERS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_FINDERS</span></code></a>. Par défaut, Django parcourt tous les emplacements définis dans <a class="reference internal" href="../settings.html#std:setting-STATICFILES_DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_DIRS</span></code></a> et dans le répertoire <code class="docutils literal notranslate"><span class="pre">'static'</span></code> des applications figurant dans le réglage <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> .</p>
+<p>La commande d’administration <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a> appelle la méthode <a class="reference internal" href="#django.contrib.staticfiles.storage.StaticFilesStorage.post_process" title="django.contrib.staticfiles.storage.StaticFilesStorage.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> du système de stockage <a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a> après chacune de ses exécutions et lui passe une liste des chemins qu’elle a trouvés. La méthode reçoit également toutes les options de ligne de commande de <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a>. C’est utilisé par la classe <a class="reference internal" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage" title="django.contrib.staticfiles.storage.ManifestStaticFilesStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code></a> par défaut.</p>
+<p>Par défaut, les fichiers collectés reçoivent les autorisations du réglage <a class="reference internal" href="../settings.html#std:setting-FILE_UPLOAD_PERMISSIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">FILE_UPLOAD_PERMISSIONS</span></code></a>  et les répertoires reçoivent les autorisations de <a class="reference internal" href="../settings.html#std:setting-FILE_UPLOAD_DIRECTORY_PERMISSIONS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">FILE_UPLOAD_DIRECTORY_PERMISSIONS</span></code></a>. Si vous souhaitez des autorisations différentes pour ces fichiers ou répertoires, vous pouvez créer une sous-classe des <a class="reference internal" href="#staticfiles-storages"><span class="std std-ref">classes de stockage des fichiers statiques</span></a> et spécifier les paramètres <code class="docutils literal notranslate"><span class="pre">file_permissions_mode</span></code> ou <code class="docutils literal notranslate"><span class="pre">directory_permissions_mode</span></code>. Par exemple&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.staticfiles</span> <span class="k">import</span> <span class="n">storage</span>
+
+<span class="k">class</span> <span class="nc">MyStaticFilesStorage</span><span class="p">(</span><span class="n">storage</span><span class="o">.</span><span class="n">StaticFilesStorage</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;file_permissions_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mo">0o640</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;directory_permissions_mode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mo">0o760</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Définissez ensuite le réglage <a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a> à <code class="docutils literal notranslate"><span class="pre">'chemin.vers.MyStaticFilesStorage'</span></code>.</p>
+<p>Certaines options couramment utilisées sont&nbsp;:</p>
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-noinput">
+<code class="descname">--noinput</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">--no-input</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-collectstatic-noinput" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ne pose AUCUNE question à l’utilisateur.</p>
+</dd></dl>
+
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-ignore">
+<code class="descname">--ignore</code><code class="descclassname"> PATTERN</code><code class="descclassname">, </code><code class="descname">-i</code><code class="descclassname"> PATTERN</code><a class="headerlink" href="#cmdoption-collectstatic-ignore" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Ignore les fichiers, les répertoires ou les chemins correspondant à ce motif de style «&nbsp;glob&nbsp;». Peut être utilisé plusieurs fois pour ignorer plusieurs chemins. Si vous indiquez un chemin, utilisez toujours des barres obliques normales, même sur Windows.</p>
+</dd></dl>
+
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-dry-run">
+<code class="descname">--dry-run</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">-n</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-collectstatic-dry-run" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Exécute la commande normalement, mais sans toucher réellement au système de fichiers.</p>
+</dd></dl>
+
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-clear">
+<code class="descname">--clear</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">-c</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-collectstatic-clear" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Efface les fichiers existants avant d’essayer de copier ou de lier le fichier d’origine.</p>
+</dd></dl>
+
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-link">
+<code class="descname">--link</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">-l</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-collectstatic-link" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>Crée un lien symbolique vers chaque fichier au lieu de copier.</p>
+</dd></dl>
+
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-no-post-process">
+<code class="descname">--no-post-process</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-collectstatic-no-post-process" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>N’appelle pas la méthode <a class="reference internal" href="#django.contrib.staticfiles.storage.StaticFilesStorage.post_process" title="django.contrib.staticfiles.storage.StaticFilesStorage.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a> du moteur de stockage configuré dans <a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a>.</p>
+</dd></dl>
+
+<dl class="django-admin-option">
+<dt id="cmdoption-collectstatic-no-default-ignore">
+<code class="descname">--no-default-ignore</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-collectstatic-no-default-ignore" title="Lien permanent vers cette définition">¶</a></dt>
+<dd><p>N’ignore pas les motifs de style «&nbsp;glob&nbsp;» `` “CVS”<code class="docutils literal notranslate"><span class="pre">,</span> <span class="pre">``'.*'</span></code> et <code class="docutils literal notranslate"><span class="pre">'*~'</span></code> qui sont normalement toujours ignorés.</p>
+</dd></dl>
+
+<p>Pour une liste complète des options, reportez-vous à l’aide des commandes elles-mêmes en exécutant&nbsp;:</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py collectstatic --help
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py collectstatic --help
+</pre></div>
+</section>
+</div>
+<div class="section" id="s-customizing-the-ignored-pattern-list">
+<span id="s-customize-staticfiles-ignore-patterns"></span><span id="customizing-the-ignored-pattern-list"></span><span id="customize-staticfiles-ignore-patterns"></span><h4>Personnalisation de la liste des motifs ignorés<a class="headerlink" href="#customizing-the-ignored-pattern-list" title="Lien permanent vers ce titre">¶</a></h4>
+<p>La liste des motifs ignorés par défaut, <code class="docutils literal notranslate"><span class="pre">['CVS',</span> <span class="pre">'.*',</span> <span class="pre">'*~']</span></code>, peut être personnalisée de manière plus permanente que de fournir l’option en ligne de commande <code class="docutils literal notranslate"><span class="pre">--ignore</span></code> lors de chaque invocation de <code class="docutils literal notranslate"><span class="pre">collectstatic</span></code>. Ajoutez une classe <a class="reference internal" href="../applications.html#django.apps.AppConfig" title="django.apps.AppConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppConfig</span></code></a> personnalisée, surchargez l’attribut <code class="docutils literal notranslate"><span class="pre">ignore_patterns</span></code> de la classe et remplacez <code class="docutils literal notranslate"><span class="pre">'django.contrib.staticfiles'</span></code> dans le réglage <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> par le chemin de cette classe&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.staticfiles.apps</span> <span class="k">import</span> <span class="n">StaticFilesConfig</span>
+
+<span class="k">class</span> <span class="nc">MyStaticFilesConfig</span><span class="p">(</span><span class="n">StaticFilesConfig</span><span class="p">):</span>
+    <span class="n">ignore_patterns</span> <span class="o">=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span>  <span class="c1"># your custom ignore list</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="s-findstatic">
+<span id="findstatic"></span><h3><code class="docutils literal notranslate"><span class="pre">findstatic</span></code><a class="headerlink" href="#findstatic" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="django-admin">
+<dt id="django-admin-findstatic">
+<code class="descname">django-admin findstatic staticfile [staticfile ...]</code><a class="headerlink" href="#django-admin-findstatic" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Recherche un ou plusieurs chemins relatifs en fonction des chercheurs activés.</p>
+<p>Par exemple&nbsp;:</p>
+<div class="console-block" id="console-block-1">
+<input class="c-tab-unix" id="c-tab-1-unix" type="radio" name="console-1" checked>
+<label for="c-tab-1-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-1-win" type="radio" name="console-1">
+<label for="c-tab-1-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-1-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py findstatic css/base.css admin/js/core.js
+<span class="go">Found &#39;css/base.css&#39; here:</span>
+<span class="go">  /home/special.polls.com/core/static/css/base.css</span>
+<span class="go">  /home/polls.com/core/static/css/base.css</span>
+<span class="go">Found &#39;admin/js/core.js&#39; here:</span>
+<span class="go">  /home/polls.com/src/django/contrib/admin/media/js/core.js</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-1-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py findstatic css\base.css admin\js\core.js
+<span class="go">Found &#39;css/base.css&#39; here:</span>
+<span class="go">  /home/special.polls.com/core/static/css/base.css</span>
+<span class="go">  /home/polls.com/core/static/css/base.css</span>
+<span class="go">Found &#39;admin/js/core.js&#39; here:</span>
+<span class="go">  /home/polls.com/src/django/contrib/admin/media/js/core.js</span>
+</pre></div>
+</section>
+</div>
+<dl class="django-admin-option">
+<dt id="cmdoption-findstatic-arg-findstatic">
+<code class="descname">findstatic</code><code class="descclassname"> --first</code><a class="headerlink" href="#cmdoption-findstatic-arg-findstatic" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Par défaut, tous les emplacements trouvés sont utilisés. Pour ne renvoyer que le premier chemin relatif trouvé, utilisez l’option <code class="docutils literal notranslate"><span class="pre">--first</span></code>:</p>
+<div class="console-block" id="console-block-2">
+<input class="c-tab-unix" id="c-tab-2-unix" type="radio" name="console-2" checked>
+<label for="c-tab-2-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-2-win" type="radio" name="console-2">
+<label for="c-tab-2-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-2-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py findstatic css/base.css --first
+<span class="go">Found &#39;css/base.css&#39; here:</span>
+<span class="go">  /home/special.polls.com/core/static/css/base.css</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-2-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py findstatic css\base.css --first
+<span class="go">Found &#39;css/base.css&#39; here:</span>
+<span class="go">  /home/special.polls.com/core/static/css/base.css</span>
+</pre></div>
+</section>
+</div>
+<p>Il s’agit d’une outil de débogage&nbsp;; vous verrez exactement quel fichier statique sera trouvé pour un chemin donné.</p>
+<p>En mettant le drapeau <code class="docutils literal notranslate"><span class="pre">--verbosity</span></code> à 0, vous pouvez supprimer les explications complémentaires et obtenir uniquement les noms de chemins&nbsp;:</p>
+<div class="console-block" id="console-block-3">
+<input class="c-tab-unix" id="c-tab-3-unix" type="radio" name="console-3" checked>
+<label for="c-tab-3-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-3-win" type="radio" name="console-3">
+<label for="c-tab-3-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-3-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py findstatic css/base.css --verbosity <span class="m">0</span>
+<span class="go">/home/special.polls.com/core/static/css/base.css</span>
+<span class="go">/home/polls.com/core/static/css/base.css</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-3-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py findstatic css\base.css --verbosity 0
+<span class="go">/home/special.polls.com/core/static/css/base.css</span>
+<span class="go">/home/polls.com/core/static/css/base.css</span>
+</pre></div>
+</section>
+</div>
+<p>D’autre part, en mettant l’option <code class="docutils literal notranslate"><span class="pre">--verbosity</span></code> à 2, vous pouvez obtenir la liste de tous les répertoires qui ont été recherchés&nbsp;:</p>
+<div class="console-block" id="console-block-4">
+<input class="c-tab-unix" id="c-tab-4-unix" type="radio" name="console-4" checked>
+<label for="c-tab-4-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-4-win" type="radio" name="console-4">
+<label for="c-tab-4-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-4-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py findstatic css/base.css --verbosity <span class="m">2</span>
+<span class="go">Found &#39;css/base.css&#39; here:</span>
+<span class="go">  /home/special.polls.com/core/static/css/base.css</span>
+<span class="go">  /home/polls.com/core/static/css/base.css</span>
+<span class="go">Looking in the following locations:</span>
+<span class="go">  /home/special.polls.com/core/static</span>
+<span class="go">  /home/polls.com/core/static</span>
+<span class="go">  /some/other/path/static</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-4-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py findstatic css\base.css --verbosity 2
+<span class="go">Found &#39;css/base.css&#39; here:</span>
+<span class="go">  /home/special.polls.com/core/static/css/base.css</span>
+<span class="go">  /home/polls.com/core/static/css/base.css</span>
+<span class="go">Looking in the following locations:</span>
+<span class="go">  /home/special.polls.com/core/static</span>
+<span class="go">  /home/polls.com/core/static</span>
+<span class="go">  /some/other/path/static</span>
+</pre></div>
+</section>
+</div>
+</div>
+<div class="section" id="s-runserver">
+<span id="s-staticfiles-runserver"></span><span id="runserver"></span><span id="staticfiles-runserver"></span><h3><code class="docutils literal notranslate"><span class="pre">runserver</span></code><a class="headerlink" href="#runserver" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="django-admin">
+<dt>
+<code class="descname">django-admin runserver [addrport]</code></dt>
+<dd></dd></dl>
+
+<p>Remplace la commande de base <a class="reference internal" href="../django-admin.html#django-admin-runserver"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">runserver</span></code></a> si l’application <code class="docutils literal notranslate"><span class="pre">staticfiles</span></code> est <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">installée</span></code></a>, et ajoute automatiquement le service des fichiers statiques. Le service des fichiers n’utilise pas le réglage <a class="reference internal" href="../settings.html#std:setting-MIDDLEWARE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIDDLEWARE</span></code></a>.</p>
+<p>La commande ajoute ces options :</p>
+<dl class="django-admin-option">
+<dt id="cmdoption-runserver-nostatic">
+<code class="descname">--nostatic</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-runserver-nostatic" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Utilisez l’option <code class="docutils literal notranslate"><span class="pre">--nostatic</span></code> pour désactiver entièrement le service des fichiers statiques avec  l’application <a class="reference internal" href="#"><span class="doc">staticfiles</span></a>. Cette option n’est disponible que si l’application <a class="reference internal" href="#"><span class="doc">staticfiles</span></a> fait partie du réglage <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> de votre projet.</p>
+<p>Exemple d’utilisation&nbsp;:</p>
+<div class="console-block" id="console-block-5">
+<input class="c-tab-unix" id="c-tab-5-unix" type="radio" name="console-5" checked>
+<label for="c-tab-5-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-5-win" type="radio" name="console-5">
+<label for="c-tab-5-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-5-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> django-admin runserver --nostatic
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-5-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> django-admin runserver --nostatic
+</pre></div>
+</section>
+</div>
+<dl class="django-admin-option">
+<dt id="cmdoption-runserver-insecure">
+<code class="descname">--insecure</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-runserver-insecure" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Utilisez l’option <code class="docutils literal notranslate"><span class="pre">--insecure</span></code> pour forcer le service des fichiers statiques avec l’application <a class="reference internal" href="#"><span class="doc">staticfiles</span></a> même quand le réglage <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> est à <code class="docutils literal notranslate"><span class="pre">False</span></code>. En utilisant cette option, vous reconnaissez le fait que c’est <strong>totalement inefficace</strong> et très probablement <strong>non sécurisé</strong>. Cette option est uniquement destinée au développement en local et ne devrait <strong>jamais être utilisée en production</strong>. Elle n’est disponible que si l’application <a class="reference internal" href="#"><span class="doc">staticfiles</span></a> se trouve dans le réglage <a class="reference internal" href="../settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> de votre projet.</p>
+<p><code class="docutils literal notranslate"><span class="pre">--insecure</span></code> ne fonctionne pas avec <a class="reference internal" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage" title="django.contrib.staticfiles.storage.ManifestStaticFilesStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code></a>.</p>
+<p>Exemple d’utilisation&nbsp;:</p>
+<div class="console-block" id="console-block-6">
+<input class="c-tab-unix" id="c-tab-6-unix" type="radio" name="console-6" checked>
+<label for="c-tab-6-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-6-win" type="radio" name="console-6">
+<label for="c-tab-6-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-6-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> django-admin runserver --insecure
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-6-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> django-admin runserver --insecure
+</pre></div>
+</section>
+</div>
+</div>
+</div>
+<div class="section" id="s-storages">
+<span id="s-staticfiles-storages"></span><span id="storages"></span><span id="staticfiles-storages"></span><h2>Stockages<a class="headerlink" href="#storages" title="Lien permanent vers ce titre">¶</a></h2>
+<div class="section" id="s-staticfilesstorage">
+<span id="staticfilesstorage"></span><h3><code class="docutils literal notranslate"><span class="pre">StaticFilesStorage</span></code><a class="headerlink" href="#staticfilesstorage" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.staticfiles.storage.StaticFilesStorage">
+<em class="property">class </em><code class="descclassname">storage.</code><code class="descname">StaticFilesStorage</code><a class="headerlink" href="#django.contrib.staticfiles.storage.StaticFilesStorage" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Une sous-classe du moteur de stockage <a class="reference internal" href="../files/storage.html#django.core.files.storage.FileSystemStorage" title="django.core.files.storage.FileSystemStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">FileSystemStorage</span></code></a> qui utilise le réglage <a class="reference internal" href="../settings.html#std:setting-STATIC_ROOT"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_ROOT</span></code></a> comme emplacement de base dans le système de fichiers et le réglage <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a> comme URL de base.</p>
+<dl class="method">
+<dt id="django.contrib.staticfiles.storage.StaticFilesStorage.post_process">
+<code class="descclassname">storage.StaticFilesStorage.</code><code class="descname">post_process</code>(<em>paths</em>, <em>**options</em>)<a class="headerlink" href="#django.contrib.staticfiles.storage.StaticFilesStorage.post_process" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si cette méthode est définie pour un stockage, elle est appelée par la commande de gestion <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a> après chaque exécution et reçoit les stockages locaux et les chemins des fichiers trouvés sous forme de dictionnaire, de même que les options de la ligne de commande. Elle renvoie des tuples de trois valeurs : <code class="docutils literal notranslate"><span class="pre">chemin_original,</span> <span class="pre">chemin_traité,</span> <span class="pre">traité</span></code>. Les valeurs de chemins sont des chaînes et <code class="docutils literal notranslate"><span class="pre">traité</span></code> est un booléen indiquant si la valeur a reçu un post-traitement, ou une exception si le post-traitement a échoué.</p>
+<p>Le stockage <a class="reference internal" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage" title="django.contrib.staticfiles.storage.ManifestStaticFilesStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code></a> utilise cette classe en coulisses pour remplacer les chemins par leur équivalent «&nbsp;haché&nbsp;» et mettre à jour le cache de manière appropriée.</p>
+</div>
+<div class="section" id="s-manifeststaticfilesstorage">
+<span id="manifeststaticfilesstorage"></span><h3><code class="docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code><a class="headerlink" href="#manifeststaticfilesstorage" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.staticfiles.storage.ManifestStaticFilesStorage">
+<em class="property">class </em><code class="descclassname">storage.</code><code class="descname">ManifestStaticFilesStorage</code><a class="headerlink" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Une sous-classe du moteur de stockage <a class="reference internal" href="#django.contrib.staticfiles.storage.StaticFilesStorage" title="django.contrib.staticfiles.storage.StaticFilesStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">StaticFilesStorage</span></code></a> qui modifie les noms des fichiers qu’elle traite en ajoutant le hachage MD5 du contenu du fichier au nom de fichier. Par exemple, le fichier <code class="docutils literal notranslate"><span class="pre">css/styles.css</span></code> serait également enregistré en tant que <code class="docutils literal notranslate"><span class="pre">css/styles.55e7cbb9ba48.css</span></code>.</p>
+<p>Le but de ce stockage est de continuer à servir les anciens fichiers au cas où certaines pages se réfèrent encore à ces fichiers, par exemple parce qu’elles sont mises en cache par vous-même ou un serveur mandataire externe. En outre, cela est très utile si vous souhaitez appliquer des <a class="reference external" href="https://developer.yahoo.com/performance/rules.html#expires">en-têtes à date d’expiration très lointaine</a> aux fichiers déployés pour accélérer le temps de chargement des pages lors des visites ultérieures.</p>
+<p>Le moteur de stockage remplace automatiquement dans les fichiers enregistrés les chemins qui correspondent aux autres fichiers enregistrés par les chemins des copies en cache (en utilisant la méthode <a class="reference internal" href="#django.contrib.staticfiles.storage.StaticFilesStorage.post_process" title="django.contrib.staticfiles.storage.StaticFilesStorage.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">post_process()</span></code></a>). Les expressions régulières utilisées pour rechercher ces chemins (<code class="docutils literal notranslate"><span class="pre">django.contrib.staticfiles.storage.HashedFilesMixin.patterns</span></code>) couvrent par défaut la règle <a class="reference external" href="https://www.w3.org/TR/CSS2/cascade.html#at-import">&#64;import</a> et l’instruction <a class="reference external" href="https://www.w3.org/TR/CSS2/syndata.html#uri">url()</a> des <a class="reference external" href="https://www.w3.org/Style/CSS/">feuilles de style CSS</a>. Par exemple, le fichier <code class="docutils literal notranslate"><span class="pre">'css/styles.css'</span></code> avec le contenu</p>
+<div class="highlight-css notranslate"><div class="highlight"><pre><span></span><span class="p">@</span><span class="k">import</span> <span class="nt">url</span><span class="o">(</span><span class="s2">&quot;../admin/css/base.css&quot;</span><span class="o">)</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>serait remplacé par l’appel de la méthode <a class="reference internal" href="../files/storage.html#django.core.files.storage.Storage.url" title="django.core.files.storage.Storage.url"><code class="xref py py-meth docutils literal notranslate"><span class="pre">url()</span></code></a> du moteur de stockage <code class="docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code>, enregistrant finalement un fichier <code class="docutils literal notranslate"><span class="pre">'css/styles.55e7cbb9ba48.css'</span></code> avec le contenu suivant&nbsp;:</p>
+<div class="highlight-css notranslate"><div class="highlight"><pre><span></span><span class="p">@</span><span class="k">import</span> <span class="nt">url</span><span class="o">(</span><span class="s2">&quot;../admin/css/base.27e20196a850.css&quot;</span><span class="o">)</span><span class="p">;</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="django.contrib.staticfiles.storage.ManifestStaticFilesStorage.max_post_process_passes">
+<code class="descclassname">storage.ManifestStaticFilesStorage.</code><code class="descname">max_post_process_passes</code><a class="headerlink" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.max_post_process_passes" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Comme les fichiers statiques peuvent se référer à d’autres fichiers statiques qui ont besoin d’un remplacement de chemins, plusieurs passes de remplacements de chemins peuvent être nécessaires jusqu’à ce que les hachages de fichier convergent. Pour éviter une boucle sans fin en raison de hachages non convergeant (par exemple, si <code class="docutils literal notranslate"><span class="pre">'foo.css'</span></code> se réfère à <code class="docutils literal notranslate"><span class="pre">'bar.css'</span></code> qui référence <code class="docutils literal notranslate"><span class="pre">'foo.css'</span></code>), un nombre maximum de passes est défini avant qu’un post-traitement soit abandonné. Dans le cas d’un nombre de références élevé, il pourrait être nécessaire d’augmenter ce nombre de passes. Ceci peut se faire en créant une sous-classe de <code class="docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code> et en définissant l’attribut <code class="docutils literal notranslate"><span class="pre">max_post_process_passes</span></code>. Sa valeur par défaut est 5.</p>
+<p>Pour activer le stockage <code class="docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code>, vous devez vous assurer que les conditions suivantes sont remplies&nbsp;:</p>
+<ul class="simple">
+<li>le réglage <a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a> contient <code class="docutils literal notranslate"><span class="pre">'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'</span></code></li>
+<li>le réglage <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a>  contient <code class="docutils literal notranslate"><span class="pre">False</span></code></li>
+<li>vous avez recueilli tous les fichiers statiques en utilisant la commande d’administration <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a></li>
+</ul>
+<p>Comme la création du hachage MD5 peut diminuer la performance de votre site Web, <code class="docutils literal notranslate"><span class="pre">staticfiles</span></code> stocke automatiquement la correspondance des noms hachés pour chaque fichier traité dans un fichier nommé  <code class="docutils literal notranslate"><span class="pre">staticfiles.json</span></code>. Cela se produit une seule fois au moment où vous exécutez la commande <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a>.</p>
+<dl class="attribute">
+<dt id="django.contrib.staticfiles.storage.ManifestStaticFilesStorage.manifest_strict">
+<code class="descclassname">storage.ManifestStaticFilesStorage.</code><code class="descname">manifest_strict</code><a class="headerlink" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.manifest_strict" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Si un fichier n’est pas trouvé dans le manifeste <code class="docutils literal notranslate"><span class="pre">staticfiles.json</span></code> lors de l’exécution, une exception <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> est générée. Ce comportement peut être désactivé en créant une sous-classe de <code class="docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code> et en définissant l’attribut <code class="docutils literal notranslate"><span class="pre">manifest_strict</span></code> à <code class="docutils literal notranslate"><span class="pre">False</span></code> – les chemins non existants seront laissés inchangés.</p>
+<p>Comme il faut que la commande <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a> ait été lancée, ce stockage ne doit normalement pas être utilisé lors de l’exécution des tests car <code class="docutils literal notranslate"><span class="pre">collectstatic</span></code> n’est pas exécutée dans une configuration de test normale. Lors des tests, vérifiez que le réglage <a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a> est défini sur autre chose, comme par exemple la valeur par défaut  <code class="docutils literal notranslate"><span class="pre">'django.contrib.staticfiles.storage.StaticFilesStorage'</span></code>.</p>
+<dl class="method">
+<dt id="django.contrib.staticfiles.storage.ManifestStaticFilesStorage.file_hash">
+<code class="descclassname">storage.ManifestStaticFilesStorage.</code><code class="descname">file_hash</code>(<em>name</em>, <em>content=None</em>)<a class="headerlink" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage.file_hash" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>La méthode utilisée lors de la création du nom haché d’un fichier. Doit renvoyer une empreinte de hachage pour le nom de fichier donné et son contenu. Par défaut, on calcule un hachage MD5 à partir du contenu comme mentionné ci-dessus. N’hésitez pas à redéfinir cette méthode pour utiliser votre propre algorithme de hachage.</p>
+</div>
+<div class="section" id="s-manifestfilesmixin">
+<span id="manifestfilesmixin"></span><h3><code class="docutils literal notranslate"><span class="pre">ManifestFilesMixin</span></code><a class="headerlink" href="#manifestfilesmixin" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.staticfiles.storage.ManifestFilesMixin">
+<em class="property">class </em><code class="descclassname">storage.</code><code class="descname">ManifestFilesMixin</code><a class="headerlink" href="#django.contrib.staticfiles.storage.ManifestFilesMixin" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Utilisez cette classe mixin avec un stockage personnalisé pour ajouter au nom de fichier une empreinte MD5 du contenu du fichier, comme le fait <a class="reference internal" href="#django.contrib.staticfiles.storage.ManifestStaticFilesStorage" title="django.contrib.staticfiles.storage.ManifestStaticFilesStorage"><code class="xref py py-class docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code></a>.</p>
+</div>
+</div>
+<div class="section" id="s-finders-module">
+<span id="finders-module"></span><h2>Le module <code class="docutils literal notranslate"><span class="pre">finders</span></code><a class="headerlink" href="#finders-module" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le module <code class="docutils literal notranslate"><span class="pre">finders</span></code> (découverte des fichiers statiques) de <code class="docutils literal notranslate"><span class="pre">staticfiles</span></code> possède un attribut <code class="docutils literal notranslate"><span class="pre">searched_locations</span></code> qui est une liste de chemins de répertoires dans lesquels des fichiers statiques ont été recherchés. Exemple d’utilisation&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.staticfiles</span> <span class="k">import</span> <span class="n">finders</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">finders</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;css/base.css&#39;</span><span class="p">)</span>
+<span class="n">searched_locations</span> <span class="o">=</span> <span class="n">finders</span><span class="o">.</span><span class="n">searched_locations</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-other-helpers">
+<span id="other-helpers"></span><h2>Autres utilitaires<a class="headerlink" href="#other-helpers" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il existe quelques autres utilitaires en plus de l’application <a class="reference internal" href="#module-django.contrib.staticfiles" title="django.contrib.staticfiles: An app for handling static files."><code class="xref py py-mod docutils literal notranslate"><span class="pre">staticfiles</span></code></a> pour gérer les fichiers statiques&nbsp;:</p>
+<ul class="simple">
+<li>Le processeur de contexte <a class="reference internal" href="../templates/api.html#django.template.context_processors.static" title="django.template.context_processors.static"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.template.context_processors.static()</span></code></a> qui ajoute <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a> au contexte de chaque gabarit rendu avec <a class="reference internal" href="../templates/api.html#django.template.RequestContext" title="django.template.RequestContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RequestContext</span></code></a>.</li>
+<li>La balise de gabarit <a class="reference internal" href="../templates/builtins.html#std:templatetag-static"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">static</span></code></a> de base qui prend un chemin et le combine avec le préfixe statique <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a>. Si <code class="docutils literal notranslate"><span class="pre">django.contrib.staticfiles</span></code> est installée, la balise utilise plutôt la méthode <code class="docutils literal notranslate"><span class="pre">url()</span></code> de <a class="reference internal" href="../settings.html#std:setting-STATICFILES_STORAGE"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_STORAGE</span></code></a>.</li>
+<li>La balise de gabarit <a class="reference internal" href="../templates/builtins.html#std:templatetag-get_static_prefix"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">get_static_prefix</span></code></a> qui renseigne une variable de gabarit avec le préfixe statique <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a> pour utilisation immédiate ou stockée dans une variable.</li>
+<li>La balise de gabarit similaire <a class="reference internal" href="../templates/builtins.html#std:templatetag-get_media_prefix"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">get_media_prefix</span></code></a> qui fonctionne comme <a class="reference internal" href="../templates/builtins.html#std:templatetag-get_static_prefix"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">get_static_prefix</span></code></a> mais utilise <a class="reference internal" href="../settings.html#std:setting-MEDIA_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MEDIA_URL</span></code></a>.</li>
+</ul>
+<div class="section" id="s-static-file-development-view">
+<span id="s-staticfiles-development-view"></span><span id="static-file-development-view"></span><span id="staticfiles-development-view"></span><h3>Vue pour l’utilisation des fichiers statiques en développement<a class="headerlink" href="#static-file-development-view" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les outils concernant les fichiers statiques sont principalement conçus pour aider à déployer correctement les fichiers statiques en production. Cela implique généralement de dédier un serveur distinct pour les fichiers statiques, ce qui induit de trop nombreuses actions supplémentaires lorsque l’on développe en local sur un environnement de développement. Ainsi, l’application <code class="docutils literal notranslate"><span class="pre">staticfiles</span></code> est fournie avec une <strong>vue à la va-vite</strong> que vous pouvez utiliser pour s’occuper du service des fichiers lors du développement local.</p>
+<dl class="function">
+<dt id="django.contrib.staticfiles.views.serve">
+<code class="descclassname">views.</code><code class="descname">serve</code>(<em>request</em>, <em>path</em>)<a class="headerlink" href="#django.contrib.staticfiles.views.serve" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette fonction de vue sert les fichiers statiques lors du développement.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Cette vue ne fonctionne que si le réglage <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p class="last">C’est parce que cette vue est <strong>totalement inefficace</strong> et probablement <strong>non sécurisée</strong>. Elle n’est destinée qu’au développement en local et ne devrait <strong>jamais être utilisée en production</strong>.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pour deviner les types de contenu des fichiers servis, cette vue exploite le module <a class="reference external" href="https://docs.python.org/3/library/mimetypes.html#module-mimetypes" title="(disponible dans Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mimetypes</span></code></a> de la bibliothèque Python standard, qui se base elle-même sur la correspondance des types de fichiers de la plate-forme sous-jacente. Si vous trouvez que cette vue ne renvoie pas les bons types de contenu pour certains fichiers, il est plus que probable que la correspondance des types de fichiers de la plate-forme est fausse ou doit être mise à jour. Ceci peut par exemple être réalisé par l’installation ou la mise à jour du paquet <code class="docutils literal notranslate"><span class="pre">mailcap</span></code> sur une distribution Red Hat, du paquet <code class="docutils literal notranslate"><span class="pre">mime-support</span></code> sur une distribution Debian ou en modifiant les clés sous <code class="docutils literal notranslate"><span class="pre">HKEY_CLASSES_ROOT</span></code> dans le registre Windows.</p>
+</div>
+<p>Cette vue est automatiquement activée par <a class="reference internal" href="../django-admin.html#django-admin-runserver"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">runserver</span></code></a> (avec le réglage <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> à <code class="docutils literal notranslate"><span class="pre">True</span></code>). Pour utiliser la vue avec un autre serveur de développement local, ajoutez le code suivant à la fin de la configuration d’URL principale&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="k">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.staticfiles</span> <span class="k">import</span> <span class="n">views</span>
+<span class="kn">from</span> <span class="nn">django.urls</span> <span class="k">import</span> <span class="n">re_path</span>
+
+<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+    <span class="n">urlpatterns</span> <span class="o">+=</span> <span class="p">[</span>
+        <span class="n">re_path</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^static/(?P&lt;path&gt;.*)$&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">serve</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Remarque&nbsp;: le début du motif (<code class="docutils literal notranslate"><span class="pre">r'^static/'</span></code>) devrait correspondre au réglage <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a>.</p>
+<p>Comme c’est un peu fastidieux, il existe aussi une fonction utilitaire qui fait cela pour vous&nbsp;:</p>
+<dl class="function">
+<dt id="django.contrib.staticfiles.urls.staticfiles_urlpatterns">
+<code class="descclassname">urls.</code><code class="descname">staticfiles_urlpatterns</code>()<a class="headerlink" href="#django.contrib.staticfiles.urls.staticfiles_urlpatterns" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cela renvoie le motif d’URL approprié pour servir les fichiers statiques et peut être ajouté à la liste de motifs d’URL déjà définie. Utilisez-la comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib.staticfiles.urls</span> <span class="k">import</span> <span class="n">staticfiles_urlpatterns</span>
+
+<span class="c1"># ... the rest of your URLconf here ...</span>
+
+<span class="n">urlpatterns</span> <span class="o">+=</span> <span class="n">staticfiles_urlpatterns</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Cette fonction examine le réglage <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a> et connecte la vue de service des fichiers statiques en conséquence. N’oubliez pas de définir le réglage <a class="reference internal" href="../settings.html#std:setting-STATICFILES_DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATICFILES_DIRS</span></code></a> approprié pour faire savoir à <code class="docutils literal notranslate"><span class="pre">django.contrib.staticfiles</span></code> où rechercher les fichiers en plus des fichiers dans les répertoires des applications.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Cette fonction utilitaire ne fonctionne que si <a class="reference internal" href="../settings.html#std:setting-DEBUG"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DEBUG</span></code></a> vaut <code class="docutils literal notranslate"><span class="pre">True</span></code> et que le réglage <a class="reference internal" href="../settings.html#std:setting-STATIC_URL"><code class="xref std std-setting docutils literal notranslate"><span class="pre">STATIC_URL</span></code></a> n’est ni vide ni une URL complète comme <code class="docutils literal notranslate"><span class="pre">http://static.example.com/</span></code>.</p>
+<p class="last">C’est parce que cette vue est <strong>totalement inefficace</strong> et probablement <strong>non sécurisée</strong>. Elle n’est destinée qu’au développement en local et ne devrait <strong>jamais être utilisée en production</strong>.</p>
+</div>
+</div>
+<div class="section" id="s-specialized-test-case-to-support-live-testing">
+<span id="specialized-test-case-to-support-live-testing"></span><h3>Cas de test particulier pour permettre le «&nbsp;test en live&nbsp;»<a class="headerlink" href="#specialized-test-case-to-support-live-testing" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="class">
+<dt id="django.contrib.staticfiles.testing.StaticLiveServerTestCase">
+<em class="property">class </em><code class="descclassname">testing.</code><code class="descname">StaticLiveServerTestCase</code><a class="headerlink" href="#django.contrib.staticfiles.testing.StaticLiveServerTestCase" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Cette sous-classe de test unitaire <code class="docutils literal notranslate"><span class="pre">TestCase</span></code> hérite de <a class="reference internal" href="../../topics/testing/tools.html#django.test.LiveServerTestCase" title="django.test.LiveServerTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">django.test.LiveServerTestCase</span></code></a>.</p>
+<p>Tout comme sa classe parente, vous pouvez l’utiliser pour écrire des tests qui impliquent le fonctionnement du code testé et de son exploitation par des outils de test à travers HTTP (par ex. Selenium, PhantomJS, etc.), et pour lesquels il est nécessaire que les fichiers statiques soient également disponibles.</p>
+<p>Mais étant donné qu’elle fait appel à la vue <a class="reference internal" href="#django.contrib.staticfiles.views.serve" title="django.contrib.staticfiles.views.serve"><code class="xref py py-func docutils literal notranslate"><span class="pre">django.contrib.staticfiles.views.serve()</span></code></a> présentée plus haut, elle peut servir de manière transparente au moment de l’exécution des tests les ressources statiques mises à disposition par le moteur de découverte de <code class="docutils literal notranslate"><span class="pre">staticfiles</span></code>. Cela signifie que vous n’avez pas besoin de lancer <a class="reference internal" href="#django-admin-collectstatic"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">collectstatic</span></code></a> préalablement ou dans le cadre de la configuration des tests.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">L’application de gestion des fichiers statiques (<code class="docutils literal notranslate"><span class="pre">staticfiles</span></code>)</a><ul>
+<li><a class="reference internal" href="#settings">Réglages</a></li>
+<li><a class="reference internal" href="#management-commands">Commandes d’administration</a><ul>
+<li><a class="reference internal" href="#collectstatic"><code class="docutils literal notranslate"><span class="pre">collectstatic</span></code></a><ul>
+<li><a class="reference internal" href="#customizing-the-ignored-pattern-list">Personnalisation de la liste des motifs ignorés</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#findstatic"><code class="docutils literal notranslate"><span class="pre">findstatic</span></code></a></li>
+<li><a class="reference internal" href="#runserver"><code class="docutils literal notranslate"><span class="pre">runserver</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#storages">Stockages</a><ul>
+<li><a class="reference internal" href="#staticfilesstorage"><code class="docutils literal notranslate"><span class="pre">StaticFilesStorage</span></code></a></li>
+<li><a class="reference internal" href="#manifeststaticfilesstorage"><code class="docutils literal notranslate"><span class="pre">ManifestStaticFilesStorage</span></code></a></li>
+<li><a class="reference internal" href="#manifestfilesmixin"><code class="docutils literal notranslate"><span class="pre">ManifestFilesMixin</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#finders-module">Le module <code class="docutils literal notranslate"><span class="pre">finders</span></code></a></li>
+<li><a class="reference internal" href="#other-helpers">Autres utilitaires</a><ul>
+<li><a class="reference internal" href="#static-file-development-view">Vue pour l’utilisation des fichiers statiques en développement</a></li>
+<li><a class="reference internal" href="#specialized-test-case-to-support-live-testing">Cas de test particulier pour permettre le «&nbsp;test en live&nbsp;»</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="sites.html"
+                        title="Chapitre précédent">L’infrastructure des «&nbsp;sites&nbsp;»</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="syndication.html"
+                        title="Chapitre suivant">L’infrastructure de syndication par flux</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/ref/contrib/staticfiles.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="sites.html" title="L’infrastructure des «&amp;nbsp;sites&amp;nbsp;»">previous</a>
+     |
+    <a href="../index.html" title="Référence de l’API" accesskey="U">up</a>
+   |
+    <a href="syndication.html" title="L’infrastructure de syndication par flux">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

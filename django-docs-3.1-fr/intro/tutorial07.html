@@ -1,0 +1,421 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écriture de votre première application Django, 7ème partie &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Tutoriel avancé : concevoir des applications réutilisables" href="reusable-apps.html" />
+    <link rel="prev" title="Écriture de votre première application Django, 6ème partie" href="tutorial06.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="tutorial06.html" title="Écriture de votre première application Django, 6ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="reusable-apps.html" title="Tutoriel avancé&amp;nbsp;: concevoir des applications réutilisables">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="intro-tutorial07">
+            
+  <div class="section" id="s-writing-your-first-django-app-part-7">
+<span id="writing-your-first-django-app-part-7"></span><h1>Écriture de votre première application Django, 7ème partie<a class="headerlink" href="#writing-your-first-django-app-part-7" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce tutoriel commence là où le <a class="reference internal" href="tutorial06.html"><span class="doc">tutoriel 6</span></a> s’achève. Nous continuons l’application de sondage Web et allons nous focaliser sur la personnalisation du site d’administration généré automatiquement par Django, que nous avons déjà exploré dans le <a class="reference internal" href="tutorial02.html"><span class="doc">tutoriel 2</span></a>.</p>
+<div class="admonition-where-to-get-help admonition">
+<p class="first admonition-title">Où obtenir de l’aide&nbsp;:</p>
+<p class="last">Si vous rencontrez des problèmes dans le parcours de ce tutoriel, rendez-vous dans la section <a class="reference internal" href="../faq/help.html"><span class="doc">Obtenir de l’aide</span></a> de la FAQ.</p>
+</div>
+<div class="section" id="s-customize-the-admin-form">
+<span id="customize-the-admin-form"></span><h2>Personnalisation du formulaire d’administration<a class="headerlink" href="#customize-the-admin-form" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Quand vous avez inscrit le modèle <code class="docutils literal notranslate"><span class="pre">Question</span></code> avec <code class="docutils literal notranslate"><span class="pre">admin.site.register(Question)</span></code>, Django a été capable de représenter l’objet dans un formulaire par défaut. Il sera cependant souvent souhaitable de personnaliser l’affichage et le comportement du formulaire. Cela se fait en indiquant certaines options à Django lors de l’inscription de l’objet.</p>
+<p>Voyons comment cela fonctionne, en réordonnant les champs sur le formulaire d’édition. Remplacez la ligne <code class="docutils literal notranslate"><span class="pre">admin.site.register(Question)</span></code> par&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id1" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+
+
+<span class="k">class</span> <span class="nc">QuestionAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">,</span> <span class="s1">&#39;question_text&#39;</span><span class="p">]</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Question</span><span class="p">,</span> <span class="n">QuestionAdmin</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Vous suivrez cette méthode – c’est-à-dire créer une classe d’administration de modèle, puis le transmettre en tant que deuxième paramètre de <code class="docutils literal notranslate"><span class="pre">admin.site.register()</span></code> – à chaque fois que vous aurez besoin de modifier les options d’administration pour un modèle.</p>
+<p>Cette modification fait que la «&nbsp;Date de publication&nbsp;» apparaît avant le champ «&nbsp;Question&nbsp;»&nbsp;:</p>
+<img alt="Fields have been reordered" src="../_images/admin07.png" />
+<p>Ce n’est pas spécialement impressionnant avec seulement deux champs, mais pour un formulaire d’administration avec des dizaines de champs, choisir un ordre intuitif est un détail d’utilisation important.</p>
+<p>Et en parlant de formulaires avec des dizaines de champs, il peut être utile de partager le formulaire en plusieurs sous-ensembles (fieldsets)&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id2" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+
+
+<span class="k">class</span> <span class="nc">QuestionAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span>               <span class="p">{</span><span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;question_text&#39;</span><span class="p">]}),</span>
+        <span class="p">(</span><span class="s1">&#39;Date information&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">]}),</span>
+    <span class="p">]</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Question</span><span class="p">,</span> <span class="n">QuestionAdmin</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Le premier élément de chaque tuple dans <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.fieldsets" title="django.contrib.admin.ModelAdmin.fieldsets"><code class="xref py py-attr docutils literal notranslate"><span class="pre">fieldsets</span></code></a> est le titre du groupe de champs. Voici ce à quoi notre formulaire ressemble à présent&nbsp;:</p>
+<img alt="Form has fieldsets now" src="../_images/admin08t.png" />
+</div>
+<div class="section" id="s-adding-related-objects">
+<span id="adding-related-objects"></span><h2>Ajout d’objets liés<a class="headerlink" href="#adding-related-objects" title="Lien permanent vers ce titre">¶</a></h2>
+<p>OK, nous avons notre page d’administration des questions. Mais une <code class="docutils literal notranslate"><span class="pre">Question</span></code> possède plusieurs choix <code class="docutils literal notranslate"><span class="pre">Choices</span></code>, et la page d’administration n’affiche aucun choix.</p>
+<p>Pour le moment.</p>
+<p>Il y a deux façons de résoudre ce problème. La première est d’inscrire <code class="docutils literal notranslate"><span class="pre">Choice</span></code> dans l’administration, comme nous l’avons fait pour <code class="docutils literal notranslate"><span class="pre">Question</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id3" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Choice</span><span class="p">,</span> <span class="n">Question</span>
+<span class="c1"># ...</span>
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Choice</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Maintenant les choix «&nbsp;Choices&nbsp;» sont une option disponible dans l’interface d’administration de Django. Le formulaire «&nbsp;Add choice&nbsp;» ressemble à ceci&nbsp;:</p>
+<img alt="Choice admin page" src="../_images/admin09.png" />
+<p>Dans ce formulaire, le champ «&nbsp;Question&nbsp;» est une boîte de sélection contenant toutes les questions de la base de données. Django sait qu’une <a class="reference internal" href="../ref/models/fields.html#django.db.models.ForeignKey" title="django.db.models.ForeignKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForeignKey</span></code></a> doit être représentée dans l’interface d’administration par une boîte <code class="docutils literal notranslate"><span class="pre">&lt;select&gt;</span></code>. Dans notre cas, seule une question existe à ce stade.</p>
+<p>Notez également le lien «&nbsp;Ajouter un autre&nbsp;» à côté de «&nbsp;Question&nbsp;». Chaque objet avec une relation <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> vers un autre reçoit automatiquement cet outil. Quand vous cliquez sur «&nbsp;Ajouter un autre&nbsp;», vous obtenez une fenêtre surgissante contenant le formulaire «&nbsp;Add Question&nbsp;». Si vous ajoutez une question dans cette fenêtre et que vous cliquez sur «&nbsp;Enregistrer&nbsp;», Django enregistre la question dans la base de données et l’ajoute dynamiquement comme choix sélectionné dans le formulaire «&nbsp;Add choice&nbsp;» que vous étiez en train de remplir.</p>
+<p>Mais franchement, c’est une manière inefficace d’ajouter des objets <code class="docutils literal notranslate"><span class="pre">Choice</span></code> dans le système. Il serait préférable d’ajouter un groupe de choix «&nbsp;Choices&nbsp;» directement lorsque vous créez l’objet <code class="docutils literal notranslate"><span class="pre">Question</span></code>. Essayons de cette façon.</p>
+<p>Enlevez l’appel <code class="docutils literal notranslate"><span class="pre">register()</span></code> pour le modèle <code class="docutils literal notranslate"><span class="pre">Choice</span></code>. Puis, modifiez le code d’inscription de <code class="docutils literal notranslate"><span class="pre">Question</span></code> comme ceci&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Choice</span><span class="p">,</span> <span class="n">Question</span>
+
+
+<span class="k">class</span> <span class="nc">ChoiceInline</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">StackedInline</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Choice</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="mi">3</span>
+
+
+<span class="k">class</span> <span class="nc">QuestionAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">fieldsets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span>               <span class="p">{</span><span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;question_text&#39;</span><span class="p">]}),</span>
+        <span class="p">(</span><span class="s1">&#39;Date information&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;fields&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">],</span> <span class="s1">&#39;classes&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;collapse&#39;</span><span class="p">]}),</span>
+    <span class="p">]</span>
+    <span class="n">inlines</span> <span class="o">=</span> <span class="p">[</span><span class="n">ChoiceInline</span><span class="p">]</span>
+
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">Question</span><span class="p">,</span> <span class="n">QuestionAdmin</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Cela indique à Django&nbsp;: «&nbsp;les objets <code class="docutils literal notranslate"><span class="pre">Choice</span></code> sont édités dans la page d’administration de <code class="docutils literal notranslate"><span class="pre">Question</span></code>. Par défaut, fournir assez de place pour 3 choix&nbsp;».</p>
+<p>Chargez la page «&nbsp;Ajout Question&nbsp;» pour voir à quoi ça ressemble&nbsp;:</p>
+<img alt="Add question page now has choices on it" src="../_images/admin10t.png" />
+<p>Ça marche comme ceci&nbsp;: il y a trois emplacements pour les choix «&nbsp;Choices&nbsp;» liés – comme indiqué par <code class="docutils literal notranslate"><span class="pre">extra</span></code> – et chaque fois que vous revenez sur la page de modification d’un objet déjà créé, vous obtenez trois emplacements supplémentaires.</p>
+<p>Au bas des trois emplacements actuels, vous pouvez trouver un lien «&nbsp;Add another Choice&nbsp;». Si vous cliquez dessus, un nouvel emplacement apparaît. Si vous souhaitez supprimer l’emplacement ajouté, vous pouvez cliquer sur le X en haut à droite de l’emplacement. Notez que vous ne pouvez pas enlever les trois emplacements de départ. Cette image montre l’emplacement ajouté&nbsp;:</p>
+<img alt="Additional slot added dynamically" src="../_images/admin14t.png" />
+<p>Un petit problème cependant. Cela prend beaucoup de place d’afficher tous les champs pour saisir les objets <code class="docutils literal notranslate"><span class="pre">Choice</span></code> liés. C’est pour cette raison que Django offre une alternative d’affichage en tableau des objets liés. Pour l’utiliser, modifiez la déclaration <code class="docutils literal notranslate"><span class="pre">ChoiceInline</span></code> comme ceci&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id5" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ChoiceInline</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">TabularInline</span><span class="p">):</span>
+    <span class="c1">#...</span>
+</pre></div>
+</div>
+</div>
+<p>Avec ce <code class="docutils literal notranslate"><span class="pre">TabularInline</span></code> (au lieu de <code class="docutils literal notranslate"><span class="pre">StackedInline</span></code>), les objets liés sont affichés dans un format plus compact, tel qu’un tableau&nbsp;:</p>
+<img alt="Add question page now has more compact choices" src="../_images/admin11t.png" />
+<p>Remarquez la colonne supplémentaire «&nbsp;Delete?&nbsp;» qui permet de supprimer des lignes ajoutées à l’aide du bouton «&nbsp;Add Another Choice&nbsp;» ainsi que les lignes déjà enregistrées.</p>
+</div>
+<div class="section" id="s-customize-the-admin-change-list">
+<span id="customize-the-admin-change-list"></span><h2>Personnalisation de la liste pour modification de l’interface d’administration<a class="headerlink" href="#customize-the-admin-change-list" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Maintenant que la page d’administration des <code class="docutils literal notranslate"><span class="pre">Questions</span></code> présente un peu mieux, améliorons la page «&nbsp;liste pour modification&nbsp;» – celle qui affiche toutes les questions du système.</p>
+<p>Voici à quoi ça ressemble pour l’instant&nbsp;:</p>
+<img alt="Polls change list page" src="../_images/admin04t.png" />
+<p>Par défaut, Django affiche le <code class="docutils literal notranslate"><span class="pre">str()</span></code> de chaque objet. Mais parfois, il serait plus utile d’afficher des champs particuliers. Dans ce but, utilisez l’option <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.list_display" title="django.contrib.admin.ModelAdmin.list_display"><code class="xref py py-attr docutils literal notranslate"><span class="pre">list_display</span></code></a>, qui est un tuple de noms de champs à afficher, en colonnes, sur la page liste pour modification de l’objet&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id6" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">QuestionAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;question_text&#39;</span><span class="p">,</span> <span class="s1">&#39;pub_date&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Pour la démonstration, incluons également la méthode <code class="docutils literal notranslate"><span class="pre">was_published_recently()</span></code> du <a class="reference internal" href="tutorial02.html"><span class="doc">tutoriel 2</span></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">polls/admin.py</span><a class="headerlink" href="#id7" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">QuestionAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;question_text&#39;</span><span class="p">,</span> <span class="s1">&#39;pub_date&#39;</span><span class="p">,</span> <span class="s1">&#39;was_published_recently&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>À présent, la page liste pour modification des questions ressemble à ceci&nbsp;:</p>
+<img alt="Polls change list page, updated" src="../_images/admin12t.png" />
+<p>Vous pouvez cliquer sur les en-têtes de colonne pour trier selon ces valeurs – sauf dans le cas de l’en-tête <code class="docutils literal notranslate"><span class="pre">was_published_recently</span></code>, parce que le tri selon le résultat d’une méthode arbitraire n’est pas pris en charge. Notez aussi que l’en-tête de la colonne pour <code class="docutils literal notranslate"><span class="pre">was_published_recently</span></code> est, par défaut, le nom de la méthode (avec les soulignements remplacés par des espaces) et que chaque ligne contient la représentation textuelle du résultat.</p>
+<p>Vous pouvez améliorer cela en donnant à cette méthode (dans <code class="file docutils literal notranslate"><span class="pre">polls/models.py</span></code>) quelques attributs, comme ceci&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">polls/models.py</span><a class="headerlink" href="#id8" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Question</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="c1"># ...</span>
+    <span class="k">def</span> <span class="nf">was_published_recently</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">now</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pub_date</span> <span class="o">&lt;=</span> <span class="n">now</span>
+    <span class="n">was_published_recently</span><span class="o">.</span><span class="n">admin_order_field</span> <span class="o">=</span> <span class="s1">&#39;pub_date&#39;</span>
+    <span class="n">was_published_recently</span><span class="o">.</span><span class="n">boolean</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">was_published_recently</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s1">&#39;Published recently?&#39;</span>
+</pre></div>
+</div>
+</div>
+<p>Pour plus d’informations sur ces propriétés de méthodes, voir <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.list_display" title="django.contrib.admin.ModelAdmin.list_display"><code class="xref py py-attr docutils literal notranslate"><span class="pre">list_display</span></code></a>.</p>
+<p>Modifiez encore une fois le fichier <code class="file docutils literal notranslate"><span class="pre">polls/admin.py</span></code> et améliorez la page de liste pour modification des <code class="docutils literal notranslate"><span class="pre">Questions</span></code>: ajout de filtrage à l’aide de l’attribut <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.list_filter" title="django.contrib.admin.ModelAdmin.list_filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">list_filter</span></code></a>. Ajoutez la ligne suivante à <code class="docutils literal notranslate"><span class="pre">QuestionAdmin</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">list_filter</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pub_date&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Cela ajoute une barre latérale «&nbsp;Filter&nbsp;» qui permet de filtrer la liste pour modification selon le champ <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> :</p>
+<img alt="Polls change list page, updated" src="../_images/admin13t.png" />
+<p>Le type de filtre affiché dépend du type de champ à filtrer. Comme <code class="docutils literal notranslate"><span class="pre">pub_date</span></code> est un champ <a class="reference internal" href="../ref/models/fields.html#django.db.models.DateTimeField" title="django.db.models.DateTimeField"><code class="xref py py-class docutils literal notranslate"><span class="pre">DateTimeField</span></code></a>, Django sait fournir des options de filtrage appropriées&nbsp;: «&nbsp;Toutes les dates&nbsp;», «&nbsp;Aujourd’hui&nbsp;», «&nbsp;Les 7 derniers jours&nbsp;», «&nbsp;Ce mois-ci&nbsp;», «&nbsp;Cette année&nbsp;».</p>
+<p>Ça a meilleure forme. Ajoutons une fonctionnalité de recherche&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">search_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;question_text&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Cela ajoute une boîte de recherche en haut de la liste pour modification. Quand quelqu’un saisit des termes de recherche, Django va rechercher dans le champ <code class="docutils literal notranslate"><span class="pre">question_text</span></code>. Vous pouvez indiquer autant de champs que vous le désirez – néanmoins, en raison de l’emploi d’une requête <code class="docutils literal notranslate"><span class="pre">LIKE</span></code> en arrière-plan, il s’agit de rester raisonnable quant au nombre de champs de recherche, sinon la base de données risque de tirer la langue&nbsp;!</p>
+<p>C’est maintenant le bon moment de noter que les listes pour modification vous laissent une grande liberté de mise en page. Par défaut, 100 éléments sont affichés par page. La <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.list_per_page" title="django.contrib.admin.ModelAdmin.list_per_page"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pagination</span></code></a> des listes pour modification, les <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.search_fields" title="django.contrib.admin.ModelAdmin.search_fields"><code class="xref py py-attr docutils literal notranslate"><span class="pre">boîtes</span> <span class="pre">de</span> <span class="pre">recherche</span></code></a>, les <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.list_filter" title="django.contrib.admin.ModelAdmin.list_filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filtres</span></code></a>, les <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.date_hierarchy" title="django.contrib.admin.ModelAdmin.date_hierarchy"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hiérarchies</span> <span class="pre">calendaires</span></code></a> et le <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.ModelAdmin.list_display" title="django.contrib.admin.ModelAdmin.list_display"><code class="xref py py-attr docutils literal notranslate"><span class="pre">tri</span> <span class="pre">selon</span> <span class="pre">l'en-tête</span> <span class="pre">de</span> <span class="pre">colonne</span></code></a>, tout fonctionne ensemble pour une utilisation optimale.</p>
+</div>
+<div class="section" id="s-customize-the-admin-look-and-feel">
+<span id="customize-the-admin-look-and-feel"></span><h2>Personnalisation de l’apparence de l’interface d’administration<a class="headerlink" href="#customize-the-admin-look-and-feel" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Clairement, avoir «&nbsp;Django administration&nbsp;» en haut de chaque page d’administration est ridicule. C’est juste du texte de substitution.</p>
+<p>Toutefois, vous pouvez le changer en utilisant le système de gabarits de Django. Le site d’administration de Django est écrit lui-même avec Django, et ses interfaces utilisent le système de gabarits propre à Django.</p>
+<div class="section" id="s-customizing-your-project-s-templates">
+<span id="s-ref-customizing-your-projects-templates"></span><span id="customizing-your-project-s-templates"></span><span id="ref-customizing-your-projects-templates"></span><h3>Personnalisation des gabarits de votre <em>projet</em><a class="headerlink" href="#customizing-your-project-s-templates" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Créez un répertoire s’appelant <code class="docutils literal notranslate"><span class="pre">templates</span></code> dans le répertoire de votre projet (celui qui contient <code class="docutils literal notranslate"><span class="pre">manage.py</span></code>). Les gabarits peuvent se trouver à n’importe quel endroit du système de fichiers, pourvu qu’ils soient accessibles par Django (Django utilise le même utilisateur que celui qui a démarré votre serveur). Cependant, par convention, il est recommandé de conserver les gabarits à l’intérieur du projet.</p>
+<p>Ouvrez votre fichier de configuration (<code class="file docutils literal notranslate"><span class="pre">mysite/settings.py</span></code>, souvenez-vous) et ajoutez une option <a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a> dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a>:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">monsite/settings.py</span><a class="headerlink" href="#id9" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TEMPLATES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;BACKEND&#39;</span><span class="p">:</span> <span class="s1">&#39;django.template.backends.django.DjangoTemplates&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DIRS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s1">&#39;templates&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;APP_DIRS&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;OPTIONS&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;context_processors&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s1">&#39;django.template.context_processors.debug&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.template.context_processors.request&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.contrib.auth.context_processors.auth&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;django.contrib.messages.context_processors.messages&#39;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p><a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a> est une liste de répertoires du système de fichiers que Django parcourt lorsqu’il doit charger les gabarits&nbsp;; il s’agit d’un chemin de recherche.</p>
+<div class="admonition-organizing-templates admonition">
+<p class="first admonition-title">Organisation des gabarits</p>
+<p class="last">Tout comme pour les fichiers statiques, nous <em>pourrions</em> placer tous nos gabarits à un seul endroit et tout fonctionnerait très bien. Cependant, les gabarits qui appartiennent à une application particulière devraient se trouver dans le répertoire des gabarits de l’application (par ex. <code class="docutils literal notranslate"><span class="pre">polls/templates</span></code>)  plutôt que dans celui du projet (<code class="docutils literal notranslate"><span class="pre">templates</span></code>). Nous aborderons plus en détails les raisons de ces choix dans le <a class="reference internal" href="reusable-apps.html"><span class="doc">tutoriel sur les applications réutilisables</span></a>.</p>
+</div>
+<p>Créez maintenant dans <code class="docutils literal notranslate"><span class="pre">templates</span></code> un répertoire nommé <code class="docutils literal notranslate"><span class="pre">admin</span></code> et copiez-y le gabarit  <code class="docutils literal notranslate"><span class="pre">admin/base_site.html</span></code> à partir du répertoire par défaut des gabarits d’administration dans le code source de Django (<code class="docutils literal notranslate"><span class="pre">django/contrib/admin/templates</span></code>).</p>
+<div class="admonition-where-are-the-django-source-files admonition">
+<p class="first admonition-title">Où se trouvent les fichiers sources de Django&nbsp;?</p>
+<p>Si vous ne savez pas où les fichiers source de Django se trouvent sur votre système, lancez la commande suivante&nbsp;:</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="last highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python -c <span class="s2">&quot;import django; print(django.__path__)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py -c <span class="s2">&quot;import django; print(django.__path__)&quot;</span>
+</pre></div>
+</section>
+</div>
+</div>
+<p>Ensuite, éditez le fichier et remplacez <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">site_header|default:_('Django</span> <span class="pre">administration')</span> <span class="pre">}}</span></code> (y compris les accolades) par le nom de votre propre site. Cela devrait donner quelque chose comme&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">block</span> <span class="nv">branding</span> <span class="cp">%}</span>
+<span class="p">&lt;</span><span class="nt">h1</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;site-name&quot;</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s1">&#39;admin:index&#39;</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span>Polls Administration<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endblock</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+<p>Nous utilisons cette approche pour vous apprendre comment surcharger des gabarits. Dans un projet réel, vous auriez probablement utilisé l’attribut <a class="reference internal" href="../ref/contrib/admin/index.html#django.contrib.admin.AdminSite.site_header" title="django.contrib.admin.AdminSite.site_header"><code class="xref py py-attr docutils literal notranslate"><span class="pre">django.contrib.admin.AdminSite.site_header</span></code></a> pour faire cette même modification de manière plus simple.</p>
+<p>Ce fichier gabarit contient beaucoup de texte comme <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">block</span> <span class="pre">branding</span> <span class="pre">%}</span></code> et <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">title</span> <span class="pre">}}</span></code>. Les balises <code class="docutils literal notranslate"><span class="pre">{%</span></code> et <code class="docutils literal notranslate"><span class="pre">{{</span></code> font partie du langage de gabarit de Django. Lorsque Django génère <code class="docutils literal notranslate"><span class="pre">admin/base_site.html</span></code>, le langage de gabarit est évalué afin de produire la page HTML finale, tout comme nous l’avons vu dans le <a class="reference internal" href="tutorial03.html"><span class="doc">3ème tutoriel</span></a>.</p>
+<p>Notez que tous les gabarits de l’interface d’administration par défaut de Django peuvent être remplacés. Pour remplacer un gabarit, faites la même chose qu’avec <code class="docutils literal notranslate"><span class="pre">base_site.html</span></code>, copiez-le depuis le répertoire par défaut dans votre répertoire personnalisé, et faites les modifications nécessaires.</p>
+</div>
+<div class="section" id="s-customizing-your-application-s-templates">
+<span id="customizing-your-application-s-templates"></span><h3>Personnalisation des gabarits de votre <em>application</em><a class="headerlink" href="#customizing-your-application-s-templates" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Les lecteurs avisés demanderont&nbsp;: mais si <a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES-DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">DIRS</span></code></a> était vide par défaut, comment Django trouvait-il les gabarits par défaut de l’interface d’administration&nbsp;? La réponse est que dans la mesure où <a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES-APP_DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">APP_DIRS</span></code></a> est défini à <code class="docutils literal notranslate"><span class="pre">True</span></code>, Django regarde automatiquement dans un éventuel sous-répertoire <code class="docutils literal notranslate"><span class="pre">templates/</span></code> à l’intérieur de chaque paquet d’application, pour l’utiliser en dernier recours (n’oubliez pas que <code class="docutils literal notranslate"><span class="pre">django.contrib.admin</span></code> est aussi une application).</p>
+<p>Notre application de sondage n’est pas très compliquée et ne nécessite pas de gabarits d’administration personnalisés. Mais si elle devenait plus sophistiquée et qu’il faille modifier les gabarits standards de l’administration de Django pour certaines fonctionnalités, il serait plus logique de modifier les gabarits de l”<em>application</em>, et non pas ceux du <em>projet</em>. De cette façon, vous pourriez inclure l’application «&nbsp;polls&nbsp;» dans tout nouveau projet en étant certain que Django trouve les gabarits personnalisés nécessaires.</p>
+<p>Lisez la <a class="reference internal" href="../topics/templates.html#template-loading"><span class="std std-ref">documentation sur le chargement de gabarits</span></a> pour des informations complètes sur la manière dont Django trouve ses gabarits.</p>
+</div>
+</div>
+<div class="section" id="s-customize-the-admin-index-page">
+<span id="customize-the-admin-index-page"></span><h2>Personnalisation de la page d’accueil de l’interface d’administration<a class="headerlink" href="#customize-the-admin-index-page" title="Lien permanent vers ce titre">¶</a></h2>
+<p>De la même manière, il peut être souhaitable de personnaliser l’apparence de la page d’index de l’interface d’administration de Django.</p>
+<p>Par défaut, il affiche toutes les applications de <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a> qui ont été inscrites dans l’application admin, par ordre alphabétique. Il est possible de faire des modifications significatives sur la mise en page. Après tout, la page d’index est probablement la page la plus importante du site d’administration, donc autant qu’elle soit facile à utiliser.</p>
+<p>Le gabarit à personnaliser est <code class="docutils literal notranslate"><span class="pre">admin/index.html</span></code> (faites la même chose qu’avec <code class="docutils literal notranslate"><span class="pre">admin/base_site.html</span></code> dans la précédente section – copiez-le depuis le répertoire par défaut vers votre répertoire de gabarits personnel). Éditez le fichier, et vous verrez qu’il utilise une variable de gabarit appelée <code class="docutils literal notranslate"><span class="pre">app_list</span></code>. Cette variable contient toutes les applications Django installées et inscrites. À la place, vous pouvez écrire en dur les liens vers les pages d’administration spécifiques aux objets de la manière qui vous convient.</p>
+</div>
+<div class="section" id="s-what-s-next">
+<span id="what-s-next"></span><h2>Et ensuite&nbsp;?<a class="headerlink" href="#what-s-next" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le tutoriel d’introduction se termine ici. Dans l’intervalle, vous pouvez toujours consulter quelques ressources sur la <a class="reference internal" href="whatsnext.html"><span class="doc">page des prochaines étapes</span></a>.</p>
+<p>Si vous êtes à l’aise avec la création de paquets Python et intéressé à apprendre comment faire de l’application de sondage une «&nbsp;application réutilisable&nbsp;», consultez le <a class="reference internal" href="reusable-apps.html"><span class="doc">Tutoriel avancé&nbsp;: comment écrire des applications réutilisables</span></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écriture de votre première application Django, 7ème partie</a><ul>
+<li><a class="reference internal" href="#customize-the-admin-form">Personnalisation du formulaire d’administration</a></li>
+<li><a class="reference internal" href="#adding-related-objects">Ajout d’objets liés</a></li>
+<li><a class="reference internal" href="#customize-the-admin-change-list">Personnalisation de la liste pour modification de l’interface d’administration</a></li>
+<li><a class="reference internal" href="#customize-the-admin-look-and-feel">Personnalisation de l’apparence de l’interface d’administration</a><ul>
+<li><a class="reference internal" href="#customizing-your-project-s-templates">Personnalisation des gabarits de votre <em>projet</em></a></li>
+<li><a class="reference internal" href="#customizing-your-application-s-templates">Personnalisation des gabarits de votre <em>application</em></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#customize-the-admin-index-page">Personnalisation de la page d’accueil de l’interface d’administration</a></li>
+<li><a class="reference internal" href="#what-s-next">Et ensuite&nbsp;?</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="tutorial06.html"
+                        title="Chapitre précédent">Écriture de votre première application Django, 6ème partie</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="reusable-apps.html"
+                        title="Chapitre suivant">Tutoriel avancé&nbsp;: concevoir des applications réutilisables</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/tutorial07.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="tutorial06.html" title="Écriture de votre première application Django, 6ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="reusable-apps.html" title="Tutoriel avancé&amp;nbsp;: concevoir des applications réutilisables">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

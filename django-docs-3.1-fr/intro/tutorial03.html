@@ -1,0 +1,461 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Écriture de votre première application Django, 3ème partie &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Écriture de votre première application Django, 4ème partie" href="tutorial04.html" />
+    <link rel="prev" title="Écriture de votre première application Django, 2ème partie" href="tutorial02.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="tutorial02.html" title="Écriture de votre première application Django, 2ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="tutorial04.html" title="Écriture de votre première application Django, 4ème partie">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="intro-tutorial03">
+            
+  <div class="section" id="s-writing-your-first-django-app-part-3">
+<span id="writing-your-first-django-app-part-3"></span><h1>Écriture de votre première application Django, 3ème partie<a class="headerlink" href="#writing-your-first-django-app-part-3" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Ce tutoriel commence là où le <a class="reference internal" href="tutorial02.html"><span class="doc">tutoriel 2</span></a> s’achève. Nous continuons l’application de sondage Web et allons nous focaliser sur la création de l’interface publique – les «&nbsp;vues&nbsp;».</p>
+<div class="admonition-where-to-get-help admonition">
+<p class="first admonition-title">Où obtenir de l’aide&nbsp;:</p>
+<p class="last">Si vous rencontrez des problèmes dans le parcours de ce tutoriel, rendez-vous dans la section <a class="reference internal" href="../faq/help.html"><span class="doc">Obtenir de l’aide</span></a> de la FAQ.</p>
+</div>
+<div class="section" id="s-overview">
+<span id="overview"></span><h2>Aperçu<a class="headerlink" href="#overview" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Une vue est un «&nbsp;type&nbsp;» de page Web dans votre application Django qui sert généralement à une fonction précise et possède un gabarit spécifique. Par exemple, dans une application de blog, vous pouvez avoir les vues suivantes&nbsp;:</p>
+<ul class="simple">
+<li>La page d’accueil du blog – affiche quelques-uns des derniers billets.</li>
+<li>La page de «&nbsp;détail&nbsp;» d’un billet – lien permanent vers un seul billet.</li>
+<li>La page d’archives pour une année – affiche tous les mois contenant des billets pour une année donnée.</li>
+<li>La page d’archives pour un mois – affiche tous les jours contenant des billets pour un mois donné.</li>
+<li>La page d’archives pour un jour – affiche tous les billets pour un jour donné.</li>
+<li>Action de commentaire – gère l’écriture de commentaires sur un billet donné.</li>
+</ul>
+<p>Dans notre application de sondage, nous aurons les quatre vues suivantes&nbsp;:</p>
+<ul class="simple">
+<li>La page de sommaire des questions – affiche quelques-unes des dernières questions.</li>
+<li>La page de détail d’une question – affiche le texte d’une question, sans les résultats mais avec un formulaire pour voter.</li>
+<li>La page des résultats d’une question – affiche les résultats d’une question particulière.</li>
+<li>Action de vote – gère le vote pour un choix particulier dans une question précise.</li>
+</ul>
+<p>Dans Django, les pages Web et les autres contenus sont générés par des vues. Chaque vue est représentée par une fonction Python (ou une méthode dans le cas des vues basées sur des classes). Django choisit une vue en examinant l’URL demandée (pour être précis, la partie de l’URL après le nom de domaine).</p>
+<p>Dans votre expérience sur le Web, vous avez certainement rencontré des perles comme par exemple <code class="docutils literal notranslate"><span class="pre">ME2/Sites/dirmod.htm?sid=&amp;type=gen&amp;mod=Core+Pages&amp;gid=A6CD4967199A42D9B65B1B</span></code>. Vous serez certainement rassuré en sachant que Django permet des styles d’URL bien plus élégants que cela.</p>
+<p>Un modèle d’URL est la forme générale d’une URL&nbsp;; par exemple&nbsp;: <code class="docutils literal notranslate"><span class="pre">/archive/&lt;année&gt;/&lt;mois&gt;/</span></code>.</p>
+<p>Pour passer de l’URL à la vue, Django utilise ce qu’on appelle des configurations d’URL (URLconf). Une configuration d’URL associe des motifs d’URL à des vues.</p>
+<p>Ce tutoriel fournit des instructions de base sur l’utilisation des configurations d’URL, et vous pouvez consultez <a class="reference internal" href="../topics/http/urls.html"><span class="doc">Distribution des URL</span></a> pour plus de détails.</p>
+</div>
+<div class="section" id="s-writing-more-views">
+<span id="writing-more-views"></span><h2>Écriture de vues supplémentaires<a class="headerlink" href="#writing-more-views" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Ajoutons maintenant quelques vues supplémentaires dans <code class="docutils literal notranslate"><span class="pre">polls/views.py</span></code>. Ces vues sont légèrement différentes, car elles acceptent un paramètre&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id2" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">question_id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;You&#39;re looking at question </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">question_id</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">question_id</span><span class="p">):</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="s2">&quot;You&#39;re looking at the results of question </span><span class="si">%s</span><span class="s2">.&quot;</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">response</span> <span class="o">%</span> <span class="n">question_id</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">vote</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">question_id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="s2">&quot;You&#39;re voting on question </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">question_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Liez ces nouvelles vues avec leurs URL dans le module <code class="docutils literal notranslate"><span class="pre">polls.urls</span></code> en ajoutant les appels <a class="reference internal" href="../ref/urls.html#django.urls.path" title="django.urls.path"><code class="xref py py-func docutils literal notranslate"><span class="pre">path()</span></code></a> suivants&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">polls/urls.py</span><a class="headerlink" href="#id3" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">path</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">views</span>
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ex: /polls/</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">),</span>
+    <span class="c1"># ex: /polls/5/</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
+    <span class="c1"># ex: /polls/5/results/</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/results/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;results&#39;</span><span class="p">),</span>
+    <span class="c1"># ex: /polls/5/vote/</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/vote/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">vote</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vote&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Ouvrez votre navigateur à l’adresse «&nbsp;/polls/34/&nbsp;». La méthode <code class="docutils literal notranslate"><span class="pre">detail()</span></code> sera exécutée et affichera l’ID fourni dans l’URL. Essayez aussi «&nbsp;/polls/34/results/&nbsp;» et «&nbsp;/polls/34/vote/&nbsp;», elles afficheront les pages modèles de résultats et de votes.</p>
+<p>Lorsque quelqu’un demande une page de votre site Web, par exemple «&nbsp;/polls/34/&nbsp;», Django charge le module Python <code class="docutils literal notranslate"><span class="pre">mysite.urls</span></code> parce qu’il est mentionné dans le réglage <a class="reference internal" href="../ref/settings.html#std:setting-ROOT_URLCONF"><code class="xref std std-setting docutils literal notranslate"><span class="pre">ROOT_URLCONF</span></code></a>. Il trouve la variable nommée <code class="docutils literal notranslate"><span class="pre">urlpatterns</span></code> et parcourt les motifs dans l’ordre. Après avoir trouvé la correspondance <code class="docutils literal notranslate"><span class="pre">'polls/'</span></code>, il retire le texte correspondant (<code class="docutils literal notranslate"><span class="pre">&quot;polls/&quot;</span></code>) et passe le texte restant – <code class="docutils literal notranslate"><span class="pre">&quot;34/&quot;</span></code> – à la configuration d’URL “polls.urls” pour la suite du traitement. Là, c’est <code class="docutils literal notranslate"><span class="pre">'&lt;int:question_id&gt;/'</span></code> qui correspond ce qui aboutit à un appel à la vue <code class="docutils literal notranslate"><span class="pre">detail()</span></code> comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">detail</span><span class="p">(</span><span class="n">request</span><span class="o">=&lt;</span><span class="n">HttpRequest</span> <span class="nb">object</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">question_id</span><span class="o">=</span><span class="mi">34</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>La partie <code class="docutils literal notranslate"><span class="pre">question_id=34</span></code> vient de <code class="docutils literal notranslate"><span class="pre">&lt;int:question_id&gt;</span></code>. En utilisant des chevrons, cela «&nbsp;capture&nbsp;» une partie de l’URL l’envoie en tant que paramètre nommé à la fonction de vue&nbsp;; la partie <code class="docutils literal notranslate"><span class="pre">:question_id&gt;</span></code> de la chaîne définit le nom qui va être utilisé pour identifier le motif trouvé, et la partie <code class="docutils literal notranslate"><span class="pre">&lt;int:</span></code> est un convertisseur qui détermine ce à quoi les motifs doivent correspondre dans cette partie du chemin d’URL.</p>
+</div>
+<div class="section" id="s-write-views-that-actually-do-something">
+<span id="write-views-that-actually-do-something"></span><h2>Écriture de vues qui font réellement des choses<a class="headerlink" href="#write-views-that-actually-do-something" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Chaque vue est responsable de faire une des deux choses suivantes&nbsp;: retourner un objet <a class="reference internal" href="../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> contenant le contenu de la page demandée, ou lever une exception, comme par exemple <a class="reference internal" href="../topics/http/views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-class docutils literal notranslate"><span class="pre">Http404</span></code></a>. Le reste, c’est votre travail.</p>
+<p>Votre vue peut lire des entrées depuis une base de données, ou pas. Elle peut utiliser un système de gabarits comme celui de Django – ou un système de gabarits tiers – ou pas. Elle peut générer un fichier PDF, produire de l’XML, créer un fichier ZIP à la volée, tout ce que vous voulez, en utilisant les bibliothèques Python que vous voulez.</p>
+<p>Voilà tout ce que veut Django&nbsp;: <a class="reference internal" href="../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> ou une exception.</p>
+<p>Parce que c’est pratique, nous allons utiliser l’API de base de données de Django, que nous avons vu dans le <a class="reference internal" href="tutorial02.html"><span class="doc">tutoriel 2</span></a>. Voici une ébauche d’une nouvelle vue <code class="docutils literal notranslate"><span class="pre">index()</span></code>, qui affiche les 5 derniers sondages, séparés par des virgules et classés par date de publication&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id4" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+
+
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">latest_question_list</span> <span class="o">=</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-pub_date&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">q</span><span class="o">.</span><span class="n">question_text</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">latest_question_list</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+
+<span class="c1"># Leave the rest of the views (detail, results, vote) unchanged</span>
+</pre></div>
+</div>
+</div>
+<p>Cependant, il y a un problème&nbsp;: l’allure de la page est codée en dur dans la vue. Si vous voulez changer le style de la page, vous devrez modifier votre code python. Nous allons donc utiliser le système de gabarits de Django pour séparer le style du code Python en créant un gabarit que la vue pourra utiliser.</p>
+<p>Tout d’abord, créez un répertoire nommé <code class="docutils literal notranslate"><span class="pre">templates</span></code> dans votre répertoire <code class="docutils literal notranslate"><span class="pre">polls</span></code>. C’est là que Django recherche les gabarits.</p>
+<p>Le paramètre <a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">TEMPLATES</span></code></a> de votre projet indique comment Django va charger et produire les gabarits. Le fichier de réglages par défaut configure un moteur <code class="docutils literal notranslate"><span class="pre">DjangoTemplates</span></code> dont l’option <a class="reference internal" href="../ref/settings.html#std:setting-TEMPLATES-APP_DIRS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">APP_DIRS</span></code></a> est définie à <code class="docutils literal notranslate"><span class="pre">True</span></code>. Par convention, <code class="docutils literal notranslate"><span class="pre">DjangoTemplates</span></code> recherche un sous-répertoire «&nbsp;templates&nbsp;» dans chaque application figurant dans <a class="reference internal" href="../ref/settings.html#std:setting-INSTALLED_APPS"><code class="xref std std-setting docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code></a>.</p>
+<p>Dans le répertoire <code class="docutils literal notranslate"><span class="pre">templates</span></code> que vous venez de créer, créez un autre répertoire nommé <code class="docutils literal notranslate"><span class="pre">polls</span></code> dans lequel vous placez un nouveau fichier <code class="docutils literal notranslate"><span class="pre">index.html</span></code>. Autrement dit, le chemin de votre gabarit doit être  <code class="docutils literal notranslate"><span class="pre">polls/templates/polls/index.html</span></code>. Conformément au fonctionnement du chargeur de gabarit <code class="docutils literal notranslate"><span class="pre">app_directories</span></code> (cf. explication ci-dessus), vous pouvez désigner ce gabarit dans Django par <code class="docutils literal notranslate"><span class="pre">polls/index.html</span></code>.</p>
+<div class="admonition-template-namespacing admonition">
+<p class="first admonition-title">Espace de noms des gabarits</p>
+<p class="last">Il serait aussi <em>possible</em> de placer directement nos gabarits dans <code class="docutils literal notranslate"><span class="pre">polls/templates</span></code> (plutôt que dans un sous-répertoire <code class="docutils literal notranslate"><span class="pre">polls</span></code>), mais ce serait une mauvaise idée. Django choisit le premier gabarit qu’il trouve pour un nom donné et dans le cas où vous avez un gabarit de même nom dans une <em>autre</em> application, Django ne fera pas la différence. Il faut pouvoir indiquer à Django le bon gabarit, et la meilleure manière de faire cela est d’utiliser des espaces de noms. C’est-à-dire que nous plaçons ces gabarits dans un <em>autre</em> répertoire portant le nom de l’application.</p>
+</div>
+<p>Insérez le code suivant dans ce gabarit&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">polls/templates/polls/index.html</span><a class="headerlink" href="#id5" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{%</span> <span class="k">if</span> <span class="nv">latest_question_list</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">for</span> <span class="nv">question</span> <span class="k">in</span> <span class="nv">latest_question_list</span> <span class="cp">%}</span>
+        <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/polls/</span><span class="cp">{{</span> <span class="nv">question.id</span> <span class="cp">}}</span><span class="s">/&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">question.question_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+    <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">else</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>No polls are available.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endif</span> <span class="cp">%}</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pour ne pas rallonger le tutoriel, tous les exemples de gabarit utilisent du HTML incomplet. Dans vos propres projets, vous devriez utiliser des <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Introduction_to_HTML/Getting_started#Anatomy_of_an_HTML_document">documents HTML complets</a>.</p>
+</div>
+<p>Mettons maintenant à jour notre vue <code class="docutils literal notranslate"><span class="pre">index</span></code> dans <code class="docutils literal notranslate"><span class="pre">polls/views.py</span></code> pour qu’elle utilise le template&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id6" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">HttpResponse</span>
+<span class="kn">from</span> <span class="nn">django.template</span> <span class="kn">import</span> <span class="n">loader</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+
+
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">latest_question_list</span> <span class="o">=</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-pub_date&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s1">&#39;polls/index.html&#39;</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;latest_question_list&#39;</span><span class="p">:</span> <span class="n">latest_question_list</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">HttpResponse</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<p>Ce code charge le gabarit appelé <code class="docutils literal notranslate"><span class="pre">polls/index.html</span></code> et lui fournit un contexte. Ce contexte est un dictionnaire qui fait correspondre des objets Python à des noms de variables de gabarit.</p>
+<p>Chargez la page en appelant l’URL «&nbsp;/polls/&nbsp;» dans votre navigateur et vous devriez voir une liste à puces contenant la question «&nbsp;What’s up&nbsp;» du <a class="reference internal" href="tutorial02.html"><span class="doc">tutoriel 2</span></a>. Le lien pointe vers la page de détail de la question.</p>
+<div class="section" id="s-a-shortcut-render">
+<span id="a-shortcut-render"></span><h3>Un raccourci&nbsp;: <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.render" title="django.shortcuts.render"><code class="xref py py-func docutils literal notranslate"><span class="pre">render()</span></code></a><a class="headerlink" href="#a-shortcut-render" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est très courant de charger un gabarit, remplir un contexte et renvoyer un objet <a class="reference internal" href="../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> avec le résultat du gabarit
+interprété. Django fournit un raccourci. Voici la vue <code class="docutils literal notranslate"><span class="pre">index()</span></code> complète, réécrite&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id7" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+
+
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">latest_question_list</span> <span class="o">=</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s1">&#39;-pub_date&#39;</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;latest_question_list&#39;</span><span class="p">:</span> <span class="n">latest_question_list</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;polls/index.html&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Notez qu’une fois que nous avons fait ceci dans toutes nos vues, nous n’avons plus à importer <a class="reference internal" href="../topics/templates.html#module-django.template.loader" title="django.template.loader"><code class="xref py py-mod docutils literal notranslate"><span class="pre">loader</span></code></a> et <a class="reference internal" href="../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> (il faut conserver <code class="docutils literal notranslate"><span class="pre">HttpResponse</span></code> tant que les méthodes initiales pour <code class="docutils literal notranslate"><span class="pre">detail</span></code>, <code class="docutils literal notranslate"><span class="pre">results</span></code> et <code class="docutils literal notranslate"><span class="pre">vote</span></code> sont présentes).</p>
+<p>La fonction <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.render" title="django.shortcuts.render"><code class="xref py py-func docutils literal notranslate"><span class="pre">render()</span></code></a> prend comme premier paramètre l’objet requête, un nom de gabarit comme deuxième paramètre et un dictionnaire comme troisième paramètre facultatif. Elle retourne un objet <a class="reference internal" href="../ref/request-response.html#django.http.HttpResponse" title="django.http.HttpResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">HttpResponse</span></code></a> composé par le gabarit interprété avec le contexte donné.</p>
+</div>
+</div>
+<div class="section" id="s-raising-a-404-error">
+<span id="raising-a-404-error"></span><h2>Les erreurs 404<a class="headerlink" href="#raising-a-404-error" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Attaquons-nous maintenant à la vue du détail d’une question – la page qui affiche le texte de la question pour un sondage donné. Voici la vue&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id8" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.http</span> <span class="kn">import</span> <span class="n">Http404</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">render</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+<span class="c1"># ...</span>
+<span class="k">def</span> <span class="nf">detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">question_id</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">question</span> <span class="o">=</span> <span class="n">Question</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pk</span><span class="o">=</span><span class="n">question_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">Question</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Http404</span><span class="p">(</span><span class="s2">&quot;Question does not exist&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;polls/detail.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;question&#39;</span><span class="p">:</span> <span class="n">question</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<p>Le nouveau concept ici&nbsp;: la vue lève une exception de type <a class="reference internal" href="../topics/http/views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Http404</span></code></a> si une question avec l’ID demandé n’existe pas.</p>
+<p>Nous parlerons un peu plus tard de ce que pourriez mettre dans le gabarit <code class="docutils literal notranslate"><span class="pre">polls/detail.html</span></code>, mais si vous voulez avoir rapidement un exemple qui fonctionne, écrivez simplement ceci&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">polls/templates/polls/detail.html</span><a class="headerlink" href="#id9" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="cp">{{</span> <span class="nv">question</span> <span class="cp">}}</span>
+</pre></div>
+</div>
+</div>
+<p>et vous obtiendrez un résultat élémentaire.</p>
+<div class="section" id="s-a-shortcut-get-object-or-404">
+<span id="a-shortcut-get-object-or-404"></span><h3>Un raccourci&nbsp;: <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.get_object_or_404" title="django.shortcuts.get_object_or_404"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object_or_404()</span></code></a><a class="headerlink" href="#a-shortcut-get-object-or-404" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il est très courant d’utiliser <a class="reference internal" href="../ref/models/querysets.html#django.db.models.query.QuerySet.get" title="django.db.models.query.QuerySet.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> et de lever une exception <a class="reference internal" href="../topics/http/views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Http404</span></code></a> si l’objet n’existe pas. Django fournit un raccourci. Voici la vue <code class="docutils literal notranslate"><span class="pre">detail()</span></code> réécrite&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">polls/views.py</span><a class="headerlink" href="#id10" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="kn">import</span> <span class="n">get_object_or_404</span><span class="p">,</span> <span class="n">render</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Question</span>
+<span class="c1"># ...</span>
+<span class="k">def</span> <span class="nf">detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">question_id</span><span class="p">):</span>
+    <span class="n">question</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Question</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="n">question_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;polls/detail.html&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;question&#39;</span><span class="p">:</span> <span class="n">question</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+<p>La fonction <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.get_object_or_404" title="django.shortcuts.get_object_or_404"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object_or_404()</span></code></a> prend un modèle Django comme premier paramètre et un nombre arbitraire de paramètres mots-clés, qu’il transmet à la méthode <a class="reference internal" href="../ref/models/querysets.html#django.db.models.query.QuerySet.get" title="django.db.models.query.QuerySet.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> du gestionnaire du modèle. Elle lève une exception <a class="reference internal" href="../topics/http/views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Http404</span></code></a> si l’objet n’existe pas.</p>
+<div class="admonition-philosophy admonition">
+<p class="first admonition-title">Philosophie</p>
+<p>Pourquoi utiliser une fonction auxiliaire <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.get_object_or_404" title="django.shortcuts.get_object_or_404"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object_or_404()</span></code></a> plutôt que d’intercepter automatiquement une exception <a class="reference internal" href="../ref/exceptions.html#django.core.exceptions.ObjectDoesNotExist" title="django.core.exceptions.ObjectDoesNotExist"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></a> à un plus haut niveau, ou laisser l’API modèle lever une exception <a class="reference internal" href="../topics/http/views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Http404</span></code></a> à la place de <a class="reference internal" href="../ref/exceptions.html#django.core.exceptions.ObjectDoesNotExist" title="django.core.exceptions.ObjectDoesNotExist"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ObjectDoesNotExist</span></code></a>&nbsp;?</p>
+<p class="last">Parce que cela couplerait la couche de gestion des modèles à la couche de vue. Un des buts principaux de la conception de Django et de garder un couplage le plus faible possible. Un peu de couplage contrôlé est introduit dans le module <a class="reference internal" href="../topics/http/shortcuts.html#module-django.shortcuts" title="django.shortcuts: Convenience shortcuts that span multiple levels of Django's MVC stack."><code class="xref py py-mod docutils literal notranslate"><span class="pre">django.shortcuts</span></code></a>.</p>
+</div>
+<p>Il y a aussi une fonction <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.get_list_or_404" title="django.shortcuts.get_list_or_404"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_list_or_404()</span></code></a>, qui fonctionne comme <a class="reference internal" href="../topics/http/shortcuts.html#django.shortcuts.get_object_or_404" title="django.shortcuts.get_object_or_404"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_object_or_404()</span></code></a>, sauf qu’elle utilise <a class="reference internal" href="../ref/models/querysets.html#django.db.models.query.QuerySet.filter" title="django.db.models.query.QuerySet.filter"><code class="xref py py-meth docutils literal notranslate"><span class="pre">filter()</span></code></a> au lieu de la méthode <a class="reference internal" href="../ref/models/querysets.html#django.db.models.query.QuerySet.get" title="django.db.models.query.QuerySet.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>. Elle lève une exception <a class="reference internal" href="../topics/http/views.html#django.http.Http404" title="django.http.Http404"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Http404</span></code></a> si la liste est vide.</p>
+</div>
+</div>
+<div class="section" id="s-use-the-template-system">
+<span id="use-the-template-system"></span><h2>Utilisation du système de gabarits<a class="headerlink" href="#use-the-template-system" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Revenons à la vue <code class="docutils literal notranslate"><span class="pre">detail()</span></code> de notre application de sondage. Étant donné la variable de contexte <code class="docutils literal notranslate"><span class="pre">question</span></code>, voici à quoi le gabarit <code class="docutils literal notranslate"><span class="pre">polls/detail.html</span></code> pourrait ressembler&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">polls/templates/polls/detail.html</span><a class="headerlink" href="#id11" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">question.question_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">for</span> <span class="nv">choice</span> <span class="k">in</span> <span class="nv">question.choice_set.all</span> <span class="cp">%}</span>
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">choice.choice_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span>
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<p>Le système de gabarits utilise une syntaxe d’accès aux attributs de variables à l’aide de points. Dans cet exemple avec <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">question.question_text</span> <span class="pre">}}</span></code>, Django commence par rechercher un dictionnaire dans l’objet <code class="docutils literal notranslate"><span class="pre">question</span></code>. En cas d’échec, il cherche un attribut – qui fonctionne dans ce cas. Si la recherche d’attribut n’avait pas fonctionné, Django aurait essayé une recherche d’index sur une liste.</p>
+<p>L’appel de méthode a lieu dans la boucle <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-for"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">for</span> <span class="pre">%}</span></code></a>&nbsp;: <code class="docutils literal notranslate"><span class="pre">question.choice_set.all</span></code> est interprété comme le code Python <code class="docutils literal notranslate"><span class="pre">question.choice_set.all()</span></code>, qui renvoie un itérable d’objets <code class="docutils literal notranslate"><span class="pre">Choice</span></code> et qui convient pour l’utilisation de la balise <a class="reference internal" href="../ref/templates/builtins.html#std:templatetag-for"><code class="xref std std-ttag docutils literal notranslate"><span class="pre">{%</span> <span class="pre">for</span> <span class="pre">%}</span></code></a>.</p>
+<p>Voir le <a class="reference internal" href="../topics/templates.html"><span class="doc">guide des gabarits</span></a> pour plus d’informations sur les gabarits.</p>
+</div>
+<div class="section" id="s-removing-hardcoded-urls-in-templates">
+<span id="removing-hardcoded-urls-in-templates"></span><h2>Suppression des URL codés en dur dans les gabarits<a class="headerlink" href="#removing-hardcoded-urls-in-templates" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Rappelez-vous, lorsque nous avons ajouté le lien vers la question dans le gabarit <code class="docutils literal notranslate"><span class="pre">polls/index.html</span></code>, le lien a été partiellement codé en dur comme ceci&nbsp;:</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/polls/</span><span class="cp">{{</span> <span class="nv">question.id</span> <span class="cp">}}</span><span class="s">/&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">question.question_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Le problème de cette approche codée en dur et fortement couplée est qu’il devient fastidieux de modifier les URL dans des projets qui ont beaucoup de gabarits. Cependant, comme vous avez défini le paramètre «&nbsp;name&nbsp;» dans les fonctions <a class="reference internal" href="../ref/urls.html#django.urls.path" title="django.urls.path"><code class="xref py py-func docutils literal notranslate"><span class="pre">path()</span></code></a> du module <code class="docutils literal notranslate"><span class="pre">polls.urls</span></code>, vous pouvez supprimer la dépendance en chemins d’URL spécifiques définis dans les configurations d’URL en utilisant la balise de gabarit <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">url</span> <span class="pre">%}</span></code> :</p>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s1">&#39;detail&#39;</span> <span class="nv">question.id</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">question.question_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Le principe de ce fonctionnement est que l’URL est recherchée dans les définitions du module <code class="docutils literal notranslate"><span class="pre">polls.urls</span></code>. Ci-dessous, vous pouvez voir exactement où le nom d’URL de «&nbsp;detail&nbsp;» est défini&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="c1"># the &#39;name&#39; value as called by the {% url %} template tag</span>
+<span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>Si vous souhaitez modifier l’URL de détail des sondages, par exemple sur le modèle <code class="docutils literal notranslate"><span class="pre">polls/specifics/12/</span></code>, il suffit de faire la modification dans <code class="docutils literal notranslate"><span class="pre">polls/urls.py</span></code> au lieu de devoir toucher au contenu du ou des gabarits&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span>
+<span class="c1"># added the word &#39;specifics&#39;</span>
+<span class="n">path</span><span class="p">(</span><span class="s1">&#39;specifics/&lt;int:question_id&gt;/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-namespacing-url-names">
+<span id="namespacing-url-names"></span><h2>Espaces de noms et noms d’URL<a class="headerlink" href="#namespacing-url-names" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Le projet du tutoriel ne contient qu’une seule application, <code class="docutils literal notranslate"><span class="pre">polls</span></code>. Dans des projets Django réels, il peut y avoir cinq, dix, vingt applications ou plus. Comment Django arrive-t-il à différencier les noms d’URL entre elles&nbsp;? Par exemple, l’application <code class="docutils literal notranslate"><span class="pre">polls</span></code> possède une vue <code class="docutils literal notranslate"><span class="pre">detail</span></code> et il se peut tout à fait qu’une autre application du même projet en possède aussi une. Comment peut-on indiquer à Django quelle vue d’application il doit appeler pour une URL lors de l’utilisation de la balise de gabarit <code class="docutils literal notranslate"><span class="pre">{%</span> <span class="pre">url</span> <span class="pre">%}</span></code> ?</p>
+<p>La réponse est donnée par l’ajout d’espaces de noms à votre configuration d’URL. Dans le fichier <code class="docutils literal notranslate"><span class="pre">polls/urls.py</span></code>, ajoutez une variable <code class="docutils literal notranslate"><span class="pre">app_name</span></code> pour définir l’espace de nom de l’application&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">polls/urls.py</span><a class="headerlink" href="#id12" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.urls</span> <span class="kn">import</span> <span class="n">path</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">views</span>
+
+<span class="n">app_name</span> <span class="o">=</span> <span class="s1">&#39;polls&#39;</span>
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">),</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;detail&#39;</span><span class="p">),</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/results/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;results&#39;</span><span class="p">),</span>
+    <span class="n">path</span><span class="p">(</span><span class="s1">&#39;&lt;int:question_id&gt;/vote/&#39;</span><span class="p">,</span> <span class="n">views</span><span class="o">.</span><span class="n">vote</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vote&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>Modifiez maintenant la partie suivante du gabarit <code class="docutils literal notranslate"><span class="pre">polls/index.html</span></code>&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">polls/templates/polls/index.html</span><a class="headerlink" href="#id13" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s1">&#39;detail&#39;</span> <span class="nv">question.id</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">question.question_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<p>pour qu’elle pointe vers la vue «&nbsp;detail&nbsp;» à l’espace de nom correspondant&nbsp;:</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">polls/templates/polls/index.html</span><a class="headerlink" href="#id14" title="Lien permanent vers ce code">¶</a></div>
+<div class="highlight-html+django notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;</span><span class="cp">{%</span> <span class="k">url</span> <span class="s1">&#39;polls:detail&#39;</span> <span class="nv">question.id</span> <span class="cp">%}</span><span class="s">&quot;</span><span class="p">&gt;</span><span class="cp">{{</span> <span class="nv">question.question_text</span> <span class="cp">}}</span><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<p>Lorsque vous êtes à l’aise avec l’écriture des vues, lisez la <a class="reference internal" href="tutorial04.html"><span class="doc">partie 4 de ce tutoriel</span></a> pour apprendre les bases de la gestion de formulaires et des vues génériques.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Écriture de votre première application Django, 3ème partie</a><ul>
+<li><a class="reference internal" href="#overview">Aperçu</a></li>
+<li><a class="reference internal" href="#writing-more-views">Écriture de vues supplémentaires</a></li>
+<li><a class="reference internal" href="#write-views-that-actually-do-something">Écriture de vues qui font réellement des choses</a><ul>
+<li><a class="reference internal" href="#a-shortcut-render">Un raccourci&nbsp;: <code class="docutils literal notranslate"><span class="pre">render()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#raising-a-404-error">Les erreurs 404</a><ul>
+<li><a class="reference internal" href="#a-shortcut-get-object-or-404">Un raccourci&nbsp;: <code class="docutils literal notranslate"><span class="pre">get_object_or_404()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#use-the-template-system">Utilisation du système de gabarits</a></li>
+<li><a class="reference internal" href="#removing-hardcoded-urls-in-templates">Suppression des URL codés en dur dans les gabarits</a></li>
+<li><a class="reference internal" href="#namespacing-url-names">Espaces de noms et noms d’URL</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="tutorial02.html"
+                        title="Chapitre précédent">Écriture de votre première application Django, 2ème partie</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="tutorial04.html"
+                        title="Chapitre suivant">Écriture de votre première application Django, 4ème partie</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/intro/tutorial03.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="tutorial02.html" title="Écriture de votre première application Django, 2ème partie">previous</a>
+     |
+    <a href="index.html" title="Premiers pas" accesskey="U">up</a>
+   |
+    <a href="tutorial04.html" title="Écriture de votre première application Django, 4ème partie">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

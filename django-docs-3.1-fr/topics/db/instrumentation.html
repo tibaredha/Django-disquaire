@@ -1,0 +1,232 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Instrumentation de base de données &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script type="text/javascript" src="../../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="Exemples d’utilisation de l’API de relations entre modèles" href="examples/index.html" />
+    <link rel="prev" title="Optimisation de l’accès à la base de données" href="optimization.html" />
+
+
+
+ 
+<script src="../../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);</script>
+
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../../index.html">Home</a>  |
+        <a title="Table of contents" href="../../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../../genindex.html">Index</a>  |
+        <a title="Module index" href="../../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="optimization.html" title="Optimisation de l’accès à la base de données">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="examples/index.html" title="Exemples d’utilisation de l’API de relations entre modèles">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-db-instrumentation">
+            
+  <div class="section" id="s-database-instrumentation">
+<span id="database-instrumentation"></span><h1>Instrumentation de base de données<a class="headerlink" href="#database-instrumentation" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Pour vous aider à comprendre et à contrôler les requêtes produites par votre code, Django fournit un point d’accès pour installer des fonctions enveloppantes autour de l’exécution des requêtes de base de données. Par exemple, ces fonctions peuvent compter les requêtes, mesurer leur durée, les journaliser ou même empêcher leur exécution (par ex. pour s’assurer qu’aucune requête ne soit exécutée lors du rendu d’un gabarit avec des données préchargées.</p>
+<p>Les fonctions enveloppantes sont structurées comme pour les <a class="reference internal" href="../http/middleware.html"><span class="doc">intergiciels</span></a> – il s’agit d’objets exécutables qui acceptent un autre exécutable dans l’un de leurs paramètres. Elles appellent ce dernier pour invoquer la requête de base de données (potentiellement enveloppée), et elles peuvent faire ce qu’elles veulent autour de cet appel. Elles sont cependant créées et installées par le code utilisateur, ce qui fait qu’elles n’ont pas besoin d’une fabrique distincte comme pour les intergiciels.</p>
+<p>L’installation d’une fonction enveloppante se fait dans un gestionnaire de contexte, ce qui rend ces fonctions temporaires et spécifiques à un certain flux de votre code.</p>
+<p>Comme mentionné ci-dessus, un exemple de fonction enveloppante est un bloqueur d’exécution de requête. Voici à quoi cela pourrait ressembler</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">blocker</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No database access allowed here.&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Et cela serait utilisé dans une vue pour bloquer les requêtes provenant d’un gabarit, comme ceci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">connection</span>
+<span class="kn">from</span> <span class="nn">django.shortcuts</span> <span class="k">import</span> <span class="n">render</span>
+
+<span class="k">def</span> <span class="nf">my_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="o">...</span><span class="p">}</span>  <span class="c1"># Code to generate context with all data.</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="o">...</span>
+    <span class="k">with</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute_wrapper</span><span class="p">(</span><span class="n">blocker</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">template_name</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Les paramètres envoyés à la fonction enveloppante sont :</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">execute</span></code> – un objet exécutable, qui devrait être appelé avec le reste des paramètres afin d’exécuter la requête.</li>
+<li><code class="docutils literal notranslate"><span class="pre">sql</span></code> – une chaîne <code class="docutils literal notranslate"><span class="pre">str</span></code>, la requête SQL qui sera envoyée à la base de données.</li>
+<li><code class="docutils literal notranslate"><span class="pre">params</span></code> – une liste (ou tuple) de paramètres à destination de la commande SQL, ou une liste de listes si l’appel enveloppé est <code class="docutils literal notranslate"><span class="pre">executemany()</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">many</span></code> – une valeur booléenne indiquant si l’appel invoqué en définitive sera <code class="docutils literal notranslate"><span class="pre">execute()</span></code> ou <code class="docutils literal notranslate"><span class="pre">executemany()</span></code> (et si <code class="docutils literal notranslate"><span class="pre">params</span></code> doit être une liste de valeurs ou une liste de listes de valeurs).</li>
+<li><code class="docutils literal notranslate"><span class="pre">context</span></code> – un dictionnaire avec des données supplémentaires sur le contexte de l’invocation. Cela inclut les éléments <code class="docutils literal notranslate"><span class="pre">connection</span></code> et <code class="docutils literal notranslate"><span class="pre">cursor</span></code>.</li>
+</ul>
+<p>En utilisant les paramètres, une version à peine plus complexe du bloqueur pourrait inclure le nom de la connexion dans le message d’erreur</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">blocker</span><span class="p">(</span><span class="n">execute</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">many</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;connection&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">alias</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Access to database &#39;</span><span class="si">{}</span><span class="s2">&#39; blocked here&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alias</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Pour un exemple plus complet, un journaliseur de requête pourrait ressembler à ceci</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="k">class</span> <span class="nc">QueryLogger</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">execute</span><span class="p">,</span> <span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">many</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">current_query</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="n">sql</span><span class="p">,</span> <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="n">params</span><span class="p">,</span> <span class="s1">&#39;many&#39;</span><span class="p">:</span> <span class="n">many</span><span class="p">}</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">execute</span><span class="p">(</span><span class="n">sql</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">many</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">current_query</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;error&#39;</span>
+            <span class="n">current_query</span><span class="p">[</span><span class="s1">&#39;exception&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_query</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ok&#39;</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="n">current_query</span><span class="p">[</span><span class="s1">&#39;duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">duration</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_query</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Pour utiliser cela, il faut créer un objet de journalisation et l’installer comme enveloppeur</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">connection</span>
+
+<span class="n">ql</span> <span class="o">=</span> <span class="n">QueryLogger</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute_wrapper</span><span class="p">(</span><span class="n">ql</span><span class="p">):</span>
+    <span class="n">do_queries</span><span class="p">()</span>
+<span class="c1"># Now we can print the log.</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ql</span><span class="o">.</span><span class="n">queries</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="s-connection-execute-wrapper">
+<span id="connection-execute-wrapper"></span><h2><code class="docutils literal notranslate"><span class="pre">connection.execute_wrapper()</span></code><a class="headerlink" href="#connection-execute-wrapper" title="Lien permanent vers ce titre">¶</a></h2>
+<dl class="method">
+<dt id="django.db.backends.base.DatabaseWrapper.execute_wrapper">
+<code class="descname">execute_wrapper</code>(<em>wrapper</em>)<a class="headerlink" href="#django.db.backends.base.DatabaseWrapper.execute_wrapper" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Renvoie un gestionnaire de contexte qui, en entrée, installe la fonction d’enveloppement autour des exécutions de requêtes de base de données, et en sortie enlève cette fonction. La fonction d’enveloppement est installée sur l’objet connexion du fil d’exécution local.</p>
+<p><code class="docutils literal notranslate"><span class="pre">wrapper</span></code> est un objet exécutable acceptant cinq paramètres. Il est appelé lors de chaque exécution de requête dans la portée du gestionnaire de contexte, avec les arguments <code class="docutils literal notranslate"><span class="pre">execute</span></code>, <code class="docutils literal notranslate"><span class="pre">sql</span></code>, <code class="docutils literal notranslate"><span class="pre">params</span></code>, <code class="docutils literal notranslate"><span class="pre">many</span></code> et <code class="docutils literal notranslate"><span class="pre">context</span></code>, tels que décrits ci-dessus. Cet exécutable est censé appeler <code class="docutils literal notranslate"><span class="pre">execute(sql,</span> <span class="pre">params,</span> <span class="pre">many,</span> <span class="pre">context)</span></code> et renvoyer la valeur de renvoi de cet appel.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Instrumentation de base de données</a><ul>
+<li><a class="reference internal" href="#connection-execute-wrapper"><code class="docutils literal notranslate"><span class="pre">connection.execute_wrapper()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="optimization.html"
+                        title="Chapitre précédent">Optimisation de l’accès à la base de données</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="examples/index.html"
+                        title="Chapitre suivant">Exemples d’utilisation de l’API de relations entre modèles</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/topics/db/instrumentation.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="optimization.html" title="Optimisation de l’accès à la base de données">previous</a>
+     |
+    <a href="../index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="examples/index.html" title="Exemples d’utilisation de l’API de relations entre modèles">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

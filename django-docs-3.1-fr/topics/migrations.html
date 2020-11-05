@@ -1,0 +1,715 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Migrations &#8212; Documentation Django 3.1.3.dev</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script type="text/javascript" src="../_static/translations.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Gestion des fichiers" href="files.html" />
+    <link rel="prev" title="Utilisation de mixins avec les vues fondées sur les classes" href="class-based-views/mixins.html" />
+
+
+
+ 
+<script src="../templatebuiltins.js"></script>
+<script>
+(function($) {
+    if (!django_template_builtins) {
+       // templatebuiltins.js missing, do nothing.
+       return;
+    }
+    $(document).ready(function() {
+        // Hyperlink Django template tags and filters
+        var base = "../ref/templates/builtins.html";
+        if (base == "#") {
+            // Special case for builtins.html itself
+            base = "";
+        }
+        // Tags are keywords, class '.k'
+        $("div.highlight\\-html\\+django span.k").each(function(i, elem) {
+             var tagname = $(elem).text();
+             if ($.inArray(tagname, django_template_builtins.ttags) != -1) {
+                 var fragment = tagname.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + tagname + "</a>");
+             }
+        });
+        // Filters are functions, class '.nf'
+        $("div.highlight\\-html\\+django span.nf").each(function(i, elem) {
+             var filtername = $(elem).text();
+             if ($.inArray(filtername, django_template_builtins.tfilters) != -1) {
+                 var fragment = filtername.replace(/_/, '-');
+                 $(elem).html("<a href='" + base + "#" + fragment + "'>" + filtername + "</a>");
+             }
+        });
+    });
+})(jQuery);(function($) {
+    $(document).ready(function() {
+        $(".c-tab-unix").on("click", function() {
+            $("section.c-content-unix").show();
+            $("section.c-content-win").hide();
+            $(".c-tab-unix").prop("checked", true);
+        });
+        $(".c-tab-win").on("click", function() {
+            $("section.c-content-win").show();
+            $("section.c-content-unix").hide();
+            $(".c-tab-win").prop("checked", true);
+        });
+    });
+})(jQuery);</script>
+<link rel="stylesheet" href="../_static/console-tabs.css" type="text/css" />
+  </head><body>
+
+    <div class="document">
+  <div id="custom-doc" class="yui-t6">
+    <div id="hd">
+      <h1><a href="../index.html">Documentation Django 3.1.3.dev</a></h1>
+      <div id="global-nav">
+        <a title="Home page" href="../index.html">Home</a>  |
+        <a title="Table of contents" href="../contents.html">Table of contents</a>  |
+        <a title="Global index" href="../genindex.html">Index</a>  |
+        <a title="Module index" href="../py-modindex.html">Modules</a>
+      </div>
+      <div class="nav">
+    &laquo; <a href="class-based-views/mixins.html" title="Utilisation de mixins avec les vues fondées sur les classes">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="files.html" title="Gestion des fichiers">next</a> &raquo;</div>
+    </div>
+
+    <div id="bd">
+      <div id="yui-main">
+        <div class="yui-b">
+          <div class="yui-g" id="topics-migrations">
+            
+  <div class="section" id="s-module-django.db.migrations">
+<span id="s-migrations"></span><span id="module-django.db.migrations"></span><span id="migrations"></span><h1>Migrations<a class="headerlink" href="#module-django.db.migrations" title="Lien permanent vers ce titre">¶</a></h1>
+<p>Les migrations sont la manière par laquelle Django propage des modifications que vous apportez à des modèles (ajout d’un champ, suppression d’un modèle, etc.) dans un schéma de base de données. Elles sont conçues pour être quasiment automatiques, mais vous aurez besoin de savoir quand créer les migrations, quand les exécuter, et les problèmes courants que vous pourriez rencontrer.</p>
+<div class="section" id="s-the-commands">
+<span id="the-commands"></span><h2>Les commandes<a class="headerlink" href="#the-commands" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il y a plusieurs commandes utiles pour interagir avec les migrations et manipuler le schéma de base de données avec Django&nbsp;:</p>
+<ul class="simple">
+<li><a class="reference internal" href="../ref/django-admin.html#django-admin-migrate"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">migrate</span></code></a>, qui est responsable de l’exécution et de l’annulation des migrations.</li>
+<li><a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a>, qui est responsable de la création de nouvelles migrations en fonction des modifications que vous avez apportées aux modèles.</li>
+<li><a class="reference internal" href="../ref/django-admin.html#django-admin-sqlmigrate"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">sqlmigrate</span></code></a>, qui affiche les instructions SQL correspondant à une migration.</li>
+<li><a class="reference internal" href="../ref/django-admin.html#django-admin-showmigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">showmigrations</span></code></a>, qui affiche la liste des migrations d’un projet ainsi que leur état.</li>
+</ul>
+<p>Vous devez imaginer les migrations comme un système de contrôle de versions pour un schéma de base de données. <code class="docutils literal notranslate"><span class="pre">makemigrations</span></code> se charge de regrouper vos changements de modèle dans des fichiers de migration individuels - comme des commits - et <code class="docutils literal notranslate"><span class="pre">migrate</span></code> est chargé d’appliquer les changements à la base de données.</p>
+<p>Les fichiers de migration pour chaque application sont stockés dans un répertoire «&nbsp;migrations&nbsp;» à l’intérieur de l’application, et sont conçus pour faire partie du code source et de la distribution de cette application. Les migrations sont créées une fois sur votre machine de développement, puis exécutées telles quelles sur les machines de vos collègues, les machines de tests, et finalement sur les machines de production.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pour chaque application, il est possible de redéfinir le nom du paquet qui contient les migrations en utilisant le réglage <a class="reference internal" href="../ref/settings.html#std:setting-MIGRATION_MODULES"><code class="xref std std-setting docutils literal notranslate"><span class="pre">MIGRATION_MODULES</span></code></a>.</p>
+</div>
+<p>Les migrations se déroulent toujours de la même manière lorsqu’elles sont appliquées sur un même ensemble de données et leurs résultats sont constants et répétables, ce qui signifie que ce que vous voyez dans le développement et les machines de test correspondra exactement à ce qui va se passer en production si les conditions d’exécution sont identiques.</p>
+<p>Django crée des migrations pour tout changement dans les modèles ou les champs, même pour des options qui n’affectent pas la base de données, car pour lui la seule manière de reconstruire un champ correctement est d’avoir accès à l’historique de toutes les modifications&nbsp;; vous pourriez avoir besoin de ces options lors de migrations de données ultérieures (par exemple, si vous avez défini des règles de validation particulières).</p>
+</div>
+<div class="section" id="s-backend-support">
+<span id="backend-support"></span><h2>Bases de données prises en charge<a class="headerlink" href="#backend-support" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les migrations sont prises en charge sur tous les moteurs de bases de données livrées avec Django, ainsi que les bases de données tierces si elles prennent en charge les modifications de schéma (effectuées par l’intermédiaire de la classe <a class="reference internal" href="../ref/schema-editor.html"><span class="doc">SchemaEditor</span></a>).</p>
+<p>Toutefois, certaines bases de données ont plus de fonctionnalités que d’autres quand il s’agit de migrations de schéma&nbsp;; un certain nombre de mises en garde sont rapportées ci-dessous.</p>
+<div class="section" id="s-postgresql">
+<span id="postgresql"></span><h3>PostgreSQL<a class="headerlink" href="#postgresql" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Parmi ces bases de données, PostgreSQL est celle disposant du plus de capacités en terme de prise en charge de schéma.</p>
+<p>La seule restriction est qu’avant PostgreSQL 11, l’ajout de colonnes avec des valeurs par défaut provoque une réécriture complète de la table, dans un temps proportionnel à sa taille. Pour cette raison, il est recommandé de toujours créer de nouvelles colonnes avec <code class="docutils literal notranslate"><span class="pre">null=True</span></code>, car de cette façon elles seront ajoutées immédiatement.</p>
+</div>
+<div class="section" id="s-mysql">
+<span id="mysql"></span><h3>MySQL<a class="headerlink" href="#mysql" title="Lien permanent vers ce titre">¶</a></h3>
+<p>MySQL ne crée pas de transactions pour les opérations de modification de schéma, ce qui signifie que si une migration ne parvient pas à s’appliquer, vous devrez défaire manuellement les modifications pour essayer de nouveau (il est impossible de revenir à un point de sauvegarde antérieur).</p>
+<p>En outre, MySQL réécrit entièrement les tables pour presque toutes les opérations de schéma et a généralement besoin d’un temps d’exécution proportionnel au nombre de lignes des tables pour ajouter ou supprimer des colonnes. Sur une machine un peu lente, cela peut prendre plus d’une minute par million de lignes&nbsp;; l’ajout de quelques colonnes à une table de quelques millions d’entrées pourrait bloquer votre site pendant plus de dix minutes.</p>
+<p>Enfin, MySQL a des tailles limites relativement petites pour la longueur des noms de colonnes, tables et index, ainsi qu’une limite sur la taille combinée de toutes les colonnes qu’un index recouvre. Cela signifie que des index qui sont possibles sur d’autres bases de données ne pourront pas toujours être créés avec MySQL.</p>
+</div>
+<div class="section" id="s-sqlite">
+<span id="sqlite"></span><h3>SQLite<a class="headerlink" href="#sqlite" title="Lien permanent vers ce titre">¶</a></h3>
+<p>SQLite ne gère nativement que très peu d’opérations de modifications de schéma, Django tente donc de les émuler par&nbsp;:</p>
+<ul class="simple">
+<li>La création d’une nouvelle table pour le nouveau schéma</li>
+<li>La copie des données de l’une à l’autre</li>
+<li>La suppression de l’ancienne table</li>
+<li>Le renommage de la nouvelle table avec le nom de l’ancienne table</li>
+</ul>
+<p>Ce processus fonctionne généralement bien, mais il peut être lent et comporter des anomalies. Il n’est pas recommandé d’utiliser et de faire migrer SQLite dans un environnement de production, sauf si vous êtes pleinement conscient des risques et des limites&nbsp;; la prise en charge de Django de cette fonctionnalité est conçue pour permettre aux développeurs d’utiliser SQLite sur leurs machines en local pour développer des projets Django moins complexes sans avoir besoin d’une base de données complète.</p>
+</div>
+</div>
+<div class="section" id="s-workflow">
+<span id="workflow"></span><h2>Procédures<a class="headerlink" href="#workflow" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Django peut créer les migrations à votre place. Modifiez vos modèles - par exemple en ajoutant un champ ou en supprimant un modèle - puis exécutez <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python manage.py makemigrations
+Migrations for &#39;books&#39;:
+  books/migrations/0003_auto.py:
+    - Alter field author on book
+</pre></div>
+</div>
+<p>Les modèles sont analysés et comparés aux versions actuellement contenues dans les fichiers de migration. Puis, un nouveau jeu de migrations est rédigé. Il est chaudement conseillé de lire le résultat produit pour voir ce que <code class="docutils literal notranslate"><span class="pre">makemigrations</span></code> a détecté comme changements. Cette commande n’est pas parfaite, et pour des changements complexes, il se peut qu’elle n’ait pas détecté ce que vous attendiez.</p>
+<p>Lorsque les nouveaux fichiers de migration sont créés, on peut les appliquer à la base de données pour s’assurer qu’ils fonctionnent correctement&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python manage.py migrate
+Operations to perform:
+  Apply all migrations: books
+Running migrations:
+  Rendering model states... DONE
+  Applying books.0003_auto... OK
+</pre></div>
+</div>
+<p>Quand la migration a été appliquée, ajoutez la migration et les modifications des modèles dans votre système de gestion de versions par un seul «&nbsp;commit&nbsp;»&nbsp;; de cette façon, lorsque d’autres développeurs (ou votre serveur de production) obtiennent le nouveau code, ils reçoivent en même temps les modifications des modèles et la migration qui leur correspond.</p>
+<p>Si vous souhaitez attribuer un nom éloquent à une migration au lieu d’un nom généré automatiquement, vous pouvez utilisez l’option <a class="reference internal" href="../ref/django-admin.html#cmdoption-makemigrations-name"><code class="xref std std-option docutils literal notranslate"><span class="pre">makemigrations</span> <span class="pre">--name</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python manage.py makemigrations --name changed_my_model your_app_label
+</pre></div>
+</div>
+<div class="section" id="s-version-control">
+<span id="version-control"></span><h3>Contrôle de versions<a class="headerlink" href="#version-control" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme les migrations sont stockées dans le système de gestion de versions, il peut arriver de temps à autre qu’un autre développeur enregistre une migration pour la même application en même temps que vous, ce qui aboutit à deux migrations préfixées du même numéro.</p>
+<p>Soyez sans crainte, les numéros servent uniquement comme référence pour les développeurs, Django exige seulement que chaque migration soit nommée différemment. Les migrations définissent dans leur fichier les autres migrations dont elles dépendent, y compris les migrations précédentes de la même application, il est donc possible de détecter lorsqu’il y a deux nouvelles migrations pour la même application sans préférence d’ordre.</p>
+<p>Lorsque ceci se produit, Django vous pose la question avec plusieurs options. S’il pense que c’est sans risque, il offre de fusionner automatiquement les deux migrations pour vous. Dans le cas contraire, il vous faudra modifier vous-même les migrations, mais ce n’est pas une opération difficile et elle est expliquée plus en détails dans <a class="reference internal" href="#migration-files"><span class="std std-ref">Fichiers de migrations</span></a> ci-dessous.</p>
+</div>
+</div>
+<div class="section" id="s-transactions">
+<span id="transactions"></span><h2>Transactions<a class="headerlink" href="#transactions" title="Lien permanent vers ce titre">¶</a></h2>
+<p>On databases that support DDL transactions (SQLite and PostgreSQL), all
+migration operations will run inside a single transaction by default. In
+contrast, if a database doesn’t support DDL transactions (e.g. MySQL, Oracle)
+then all operations will run without a transaction.</p>
+<p>You can prevent a migration from running in a transaction by setting the
+<code class="docutils literal notranslate"><span class="pre">atomic</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">False</span></code>. For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+    <span class="n">atomic</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>It’s also possible to execute parts of the migration inside a transaction using
+<a class="reference internal" href="db/transactions.html#django.db.transaction.atomic" title="django.db.transaction.atomic"><code class="xref py py-func docutils literal notranslate"><span class="pre">atomic()</span></code></a> or by passing <code class="docutils literal notranslate"><span class="pre">atomic=True</span></code> to
+<a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a>. See
+<a class="reference internal" href="../howto/writing-migrations.html#non-atomic-migrations"><span class="std std-ref">Migrations non atomiques</span></a> for more details.</p>
+</div>
+<div class="section" id="s-dependencies">
+<span id="dependencies"></span><h2>Dépendances<a class="headerlink" href="#dependencies" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Bien que les migrations sont spécifiques à chaque application, les tables et les relations déterminées par les modèles sont trop complexes pour être créées pour une application à la fois. Lorsque vous créez une migration qui nécessite qu’une autre opération soit exécutée, par exemple l’ajout d’une clé <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> de l’application <code class="docutils literal notranslate"><span class="pre">livres</span></code> vers l’application <code class="docutils literal notranslate"><span class="pre">auteurs</span></code>, la migration résultante contiendra une dépendance sur une migration dans <code class="docutils literal notranslate"><span class="pre">auteurs</span></code>.</p>
+<p>Cela signifie que quand vous exécutez les migrations, la migration de <code class="docutils literal notranslate"><span class="pre">auteurs</span></code> s’exécute en premier et crée la table référencée par la clé étrangère, puis la migration qui crée la colonne <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> peut s’exécuter et créer la contrainte. Si cela ne se faisait pas ainsi, la migration essaierait de créer une colonne <code class="docutils literal notranslate"><span class="pre">ForeignKey</span></code> sans que la table référencée n’existe et la base de données signalerait une erreur.</p>
+<p>Ce comportement de dépendances affecte la majorité des opérations de migration qui sont limitées à une seule application. La restriction à une seule application (que ce soit pour <code class="docutils literal notranslate"><span class="pre">makemigrations</span></code> ou pour <code class="docutils literal notranslate"><span class="pre">migrate</span></code>) est respectée dans la mesure du possible, mais ce n’est pas une garantie&nbsp;; toute autre application concernée dans l’optique de la gestion des dépendances sera également impliquée dans l’opération.</p>
+<p>Les applications sans migrations ne doivent pas posséder de relations (ForeignKey`, <code class="docutils literal notranslate"><span class="pre">ManyToManyField</span></code>, etc.) vers de applications avec migrations. Cela peut parfois marcher, mais Django ne le garantit aucunement.</p>
+</div>
+<div class="section" id="s-migration-files">
+<span id="s-id1"></span><span id="migration-files"></span><span id="id1"></span><h2>Fichiers de migrations<a class="headerlink" href="#migration-files" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les migrations sont stockées sous forme de fichiers sur disque nommés «&nbsp;fichiers de migrations&nbsp;». Ces fichiers sont en réalité des fichiers Python normaux avec une structure d’objets convenue, rédigés dans un style déclaratif.</p>
+<p>Un fichier de migration simple ressemble à ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span><span class="p">,</span> <span class="n">models</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;migrations&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">)]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">DeleteModel</span><span class="p">(</span><span class="s1">&#39;Tribble&#39;</span><span class="p">),</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">AddField</span><span class="p">(</span><span class="s1">&#39;Author&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Lorsque Django charge un fichier de migration (sous forme de module Python), Django recherche une sous-classe de <code class="docutils literal notranslate"><span class="pre">django.db.migrations.Migration</span></code> nommée <code class="docutils literal notranslate"><span class="pre">Migration</span></code>. Il inspecte ensuite cet objet en cherchant quatre attributs, parmi lesquels deux sont utilisés la plupart du temps&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">dependencies</span></code>, une liste de migrations dont celle-ci dépend.</li>
+<li><code class="docutils literal notranslate"><span class="pre">operations</span></code>, une liste de classes <code class="docutils literal notranslate"><span class="pre">Operation</span></code> définissant ce que fait cette migration.</li>
+</ul>
+<p>L’élément central, c’est les opérations&nbsp;; il s’agit d’un ensemble d’instructions déclaratives indiquant à Django quelles sont les modifications de schéma qu’il doit effectuer. Django les analyse et construit une représentation en mémoire de tous ces changements de schéma pour toutes les applications, puis utilise cela pour générer le code SQL qui procédera aux modifications de schéma.</p>
+<p>Cette structure en mémoire est également utilisée pour calculer les différences entre les modèles et l’état actuel des migrations&nbsp;; Django parcourt toutes les modifications dans l’ordre en les appliquant à un ensemble de modèles en mémoire afin d’aboutir à l’état des modèles à l’instant de la dernière exécution de <code class="docutils literal notranslate"><span class="pre">makemigrations</span></code>. Il utilise ensuite ces modèles pour les comparer à ceux qui se trouvent dans les fichiers <code class="docutils literal notranslate"><span class="pre">models.py</span></code> afin de déterminer ce qui a changé.</p>
+<p>Il est rarement nécessaire de devoir modifier des fichiers de migration à la main, mais il est tout à fait possible de les écrire manuellement en cas de besoin. Certaines des opérations les plus complexes ne sont pas détectables automatiquement et ne sont donc disponibles que si on les écrit manuellement&nbsp;; il ne faut donc pas avoir peur de modifier les migrations en cas de nécessité.</p>
+<div class="section" id="s-custom-fields">
+<span id="custom-fields"></span><h3>Champs personnalisés<a class="headerlink" href="#custom-fields" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Il n’est pas possible de modifier le nombre de paramètres positionnels dans un champ personnalisé déjà migré sans générer une exception <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>. L’ancienne migration appellera la méthode <code class="docutils literal notranslate"><span class="pre">__init__</span></code> modifiée avec l’ancienne signature. Si donc vous avez besoin d’un nouveau paramètre, créez plutôt un paramètre nommé et ajoutez quelque chose comme  <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">'nom_du_paramètre'</span> <span class="pre">in</span> <span class="pre">kwargs</span></code> dans le constructeur.</p>
+</div>
+<div class="section" id="s-model-managers">
+<span id="s-using-managers-in-migrations"></span><span id="model-managers"></span><span id="using-managers-in-migrations"></span><h3>Gestionnaires de modèles<a class="headerlink" href="#model-managers" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous le souhaitez, il est possible de sérialiser les gestionnaires d’objets dans les migrations pour qu’ils soient disponibles lors des opérations <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a>. Cela peut se faire en définissant un attribut <code class="docutils literal notranslate"><span class="pre">use_in_migrations</span></code> sur la classe du gestionnaire&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyManager</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Manager</span><span class="p">):</span>
+    <span class="n">use_in_migrations</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">MyManager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Si vous utilisez la fonction <a class="reference internal" href="db/managers.html#django.db.models.from_queryset" title="django.db.models.from_queryset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_queryset()</span></code></a> pour générer dynamiquement une classe de gestionnaire, il est nécessaire d’hériter de la classe générée pour la rendre importable&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyManager</span><span class="p">(</span><span class="n">MyBaseManager</span><span class="o">.</span><span class="n">from_queryset</span><span class="p">(</span><span class="n">CustomQuerySet</span><span class="p">)):</span>
+    <span class="n">use_in_migrations</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">MyManager</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Veuillez vous référer aux notes sur les <a class="reference internal" href="#historical-models"><span class="std std-ref">Modèles historiques</span></a> dans les migrations pour connaître les implications que cela génère.</p>
+</div>
+<div class="section" id="s-initial-migrations">
+<span id="initial-migrations"></span><h3>Migrations initiales<a class="headerlink" href="#initial-migrations" title="Lien permanent vers ce titre">¶</a></h3>
+<dl class="attribute">
+<dt id="django.db.migrations.Migration.initial">
+<code class="descclassname">Migration.</code><code class="descname">initial</code><a class="headerlink" href="#django.db.migrations.Migration.initial" title="Lien permanent vers cette définition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Les «&nbsp;migrations initiales&nbsp;» d’une application sont celles qui créent la première version des tables de l’application. Une application possède normalement une seule migration initiale, mais dans certains cas présentant des interdépendances de modèles complexes, elle peut en avoir deux ou même plus.</p>
+<p>Les migrations initiales sont marquées avec un attribut <code class="docutils literal notranslate"><span class="pre">initial</span> <span class="pre">=</span> <span class="pre">True</span></code> sur la classe de migration. Si cet attribut est absent, une migration est tout de même considérée comme «&nbsp;initiale&nbsp;» s’il s’agit de la première migration de l’application (c’est-à-dire qu’elle ne présente aucune dépendance sur d’autres migrations de la même application).</p>
+<p>Lorsque l’option <a class="reference internal" href="../ref/django-admin.html#cmdoption-migrate-fake-initial"><code class="xref std std-option docutils literal notranslate"><span class="pre">migrate</span> <span class="pre">--fake-initial</span></code></a> est utilisée, ces migrations initiales sont traitées spécialement. Pour une migration initiale qui crée une ou plusieurs tables (opérations <code class="docutils literal notranslate"><span class="pre">CreateModel</span></code>), Django vérifie que toutes ces tables existent déjà dans la base de données et considère alors la migration comme appliquée. De même, pour une migration qui ajoute un ou plusieurs champs (opérations <code class="docutils literal notranslate"><span class="pre">AddField</span></code>), Django vérifie que toutes les colonnes concernées existent déjà dans la base de données et considère la migration comme appliquée le cas échéant. Sans <code class="docutils literal notranslate"><span class="pre">--fake-initial</span></code>, les migrations initiales sont traitées exactement comme toutes les autres migrations.</p>
+</div>
+<div class="section" id="s-history-consistency">
+<span id="s-migration-history-consistency"></span><span id="history-consistency"></span><span id="migration-history-consistency"></span><h3>Cohérence de l’historique<a class="headerlink" href="#history-consistency" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Comme discuté précédemment, il peut être nécessaire de réconcilier manuellement des migrations lorsque deux branches de développement sont fusionnées. Lors de l’édition des dépendances de migration, il arrive qu’on crée involontairement un état historique incohérent où une migration a été appliquée mais pas certaines de ses dépendances. C’est une indication claire que les dépendances ne sont pas correctes, Django va donc refuser d’exécuter les migrations en d’en créer de nouvelles tant que ce n’est pas corrigé. Lors de l’utilisation de plusieurs bases de données, il est possible de faire appel à la méthode <a class="reference internal" href="db/multi-db.html#allow_migrate" title="allow_migrate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">allow_migrate()</span></code></a> des <a class="reference internal" href="db/multi-db.html#topics-db-multi-db-routing"><span class="std std-ref">routeurs de base de données</span></a> pour indiquer pour quelles bases de données <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a> va contrôler l’historique.</p>
+</div>
+</div>
+<div class="section" id="s-adding-migrations-to-apps">
+<span id="adding-migrations-to-apps"></span><h2>Ajout de migrations aux applications<a class="headerlink" href="#adding-migrations-to-apps" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les nouvelles applications sont préconfigurées pour accepter les migrations, il est possible d’ajouter des migrations en exécutant <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a> après avoir effectué un certain nombre de modifications.</p>
+<p>Si l’application possède déjà des modèles et des tables de base de données et qu’elle n’a pas encore de migrations (par exemple parce que vous l’avez créée avec une version précédente de Django), vous allez devoir la convertir en vue de l’utilisation des migrations en exécutant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python manage.py makemigrations your_app_label
+</pre></div>
+</div>
+<p>Cela va créer une nouvelle migration initiale pour l’application. Ensuite, lancez <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">migrate</span> <span class="pre">--fake-initial</span></code>, et Django détectera qu’une migration initiale est présente <em>et</em> que les tables qu’il doit créer existent déjà&nbsp;; il va alors marquer la migration comme déjà appliquée (sans l’option <a class="reference internal" href="../ref/django-admin.html#cmdoption-migrate-fake-initial"><code class="xref std std-option docutils literal notranslate"><span class="pre">migrate</span> <span class="pre">--fake-initial</span></code></a>, la commande produirait une erreur car les tables qu’elle essayerait de créer existent déjà).</p>
+<p>Notez que cela ne fonctionne qu’à deux conditions&nbsp;:</p>
+<ul class="simple">
+<li>Les modèles n’ont pas été modifiés depuis la création des tables correspondantes. Pour que les migrations fonctionnent, vous devez <em>d’abord</em> créer la migration initiale, puis faire les modifications, car Django compare les modifications aux fichiers de migration, pas à la base de données.</li>
+<li>La base de données n’a pas été modifiée manuellement. Django n’est pas capable de détecter que la base de données ne correspond pas aux modèles, et au moment où les migrations essaieront de modifier ces tables, vous obtiendrez des erreurs.</li>
+</ul>
+</div>
+<div class="section" id="s-reversing-migrations">
+<span id="s-id2"></span><span id="reversing-migrations"></span><span id="id2"></span><h2>Inversion des migrations<a class="headerlink" href="#reversing-migrations" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les migrations peuvent être inversées avec <a class="reference internal" href="../ref/django-admin.html#django-admin-migrate"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">migrate</span></code></a> en passant le numéro de la migration précédente. Par exemple, pour inverser la migration <code class="docutils literal notranslate"><span class="pre">books.0003</span></code>:</p>
+<div class="console-block" id="console-block-0">
+<input class="c-tab-unix" id="c-tab-0-unix" type="radio" name="console-0" checked>
+<label for="c-tab-0-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-0-win" type="radio" name="console-0">
+<label for="c-tab-0-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-0-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py migrate books <span class="m">0002</span>
+<span class="go">Operations to perform:</span>
+<span class="go">  Target specific migration: 0002_auto, from books</span>
+<span class="go">Running migrations:</span>
+<span class="go">  Rendering model states... DONE</span>
+<span class="go">  Unapplying books.0003_auto... OK</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-0-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py migrate books 0002
+<span class="go">Operations to perform:</span>
+<span class="go">  Target specific migration: 0002_auto, from books</span>
+<span class="go">Running migrations:</span>
+<span class="go">  Rendering model states... DONE</span>
+<span class="go">  Unapplying books.0003_auto... OK</span>
+</pre></div>
+</section>
+</div>
+<p>Si vous souhaitez défaire toutes les migrations appliquées d’une application, utilisez le terme <code class="docutils literal notranslate"><span class="pre">zero</span></code>:</p>
+<div class="console-block" id="console-block-1">
+<input class="c-tab-unix" id="c-tab-1-unix" type="radio" name="console-1" checked>
+<label for="c-tab-1-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-1-win" type="radio" name="console-1">
+<label for="c-tab-1-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-1-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py migrate books zero
+<span class="go">Operations to perform:</span>
+<span class="go">  Unapply all migrations: books</span>
+<span class="go">Running migrations:</span>
+<span class="go">  Rendering model states... DONE</span>
+<span class="go">  Unapplying books.0002_auto... OK</span>
+<span class="go">  Unapplying books.0001_initial... OK</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-1-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py migrate books zero
+<span class="go">Operations to perform:</span>
+<span class="go">  Unapply all migrations: books</span>
+<span class="go">Running migrations:</span>
+<span class="go">  Rendering model states... DONE</span>
+<span class="go">  Unapplying books.0002_auto... OK</span>
+<span class="go">  Unapplying books.0001_initial... OK</span>
+</pre></div>
+</section>
+</div>
+<p>Une migration est irréversible si elle contient au moins une opération irréversible. Si on tente d’inverser une telle migration, une exception <code class="docutils literal notranslate"><span class="pre">IrreversibleError</span></code> sera générée :</p>
+<div class="console-block" id="console-block-2">
+<input class="c-tab-unix" id="c-tab-2-unix" type="radio" name="console-2" checked>
+<label for="c-tab-2-unix" title="Linux/macOS">&#xf17c/&#xf179</label>
+<input class="c-tab-win" id="c-tab-2-win" type="radio" name="console-2">
+<label for="c-tab-2-win" title="Windows">&#xf17a</label>
+<section class="c-content-unix" id="c-content-2-unix">
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python manage.py migrate books <span class="m">0002</span>
+<span class="go">Operations to perform:</span>
+<span class="go">  Target specific migration: 0002_auto, from books</span>
+<span class="go">Running migrations:</span>
+<span class="go">  Rendering model states... DONE</span>
+<span class="go">  Unapplying books.0003_auto...Traceback (most recent call last):</span>
+<span class="go">django.db.migrations.exceptions.IrreversibleError: Operation &lt;RunSQL  sql=&#39;DROP TABLE demo_books&#39;&gt; in books.0003_auto is not reversible</span>
+</pre></div>
+</div>
+</section>
+<section class="c-content-win" id="c-content-2-win">
+<div class="highlight"><pre><span></span><span class="gp">...\&gt;</span> py manage.py migrate books 0002
+<span class="go">Operations to perform:</span>
+<span class="go">  Target specific migration: 0002_auto, from books</span>
+<span class="go">Running migrations:</span>
+<span class="go">  Rendering model states... DONE</span>
+<span class="go">  Unapplying books.0003_auto...Traceback (most recent call last):</span>
+<span class="gp">django.db.migrations.exceptions.IrreversibleError: Operation &lt;RunSQL  sql=&#39;DROP TABLE demo_books&#39;&gt;</span> in books.0003_auto is not reversible
+</pre></div>
+</section>
+</div>
+</div>
+<div class="section" id="s-historical-models">
+<span id="s-id3"></span><span id="historical-models"></span><span id="id3"></span><h2>Modèles historiques<a class="headerlink" href="#historical-models" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Lorsque vous exécutez des migrations, Django se base sur des versions historiques des modèles stockées dans les fichiers de migration. Si vous rédigez du code Python en utilisant l’opération <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> ou si vous avez des méthodes <code class="docutils literal notranslate"><span class="pre">allow_migrate</span></code> sur vos routeurs de base de données, vous <strong>devez utiliser</strong> ces versions historisées de modèles et non pas les importer directement.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p>Si vous importez des modèles directement plutôt que d’utiliser les modèles historisés, vos migrations <em>peuvent fonctionner initialement</em>, mais échoueront dans le futur lorsque vous essaierez de relancer des anciennes migrations (ce qui arrive habituellement lors d’une nouvelle installation qui rejoue toutes les migrations pour créer la base de données).</p>
+<p class="last">Cela signifie que les problèmes de modèles historisés peuvent ne pas apparaître immédiatement. Si vous rencontrez ce genre de problème, il est correct de modifier la migration pour utiliser les modèles historisés au lieu des importations directes et de valider ces modifications.</p>
+</div>
+<p>Comme il n’est pas possible de sérialiser du code Python arbitraire, ces modèles historiques ne posséderont pas de méthodes personnalisées que vous auriez pu définir. Ils auront cependant les mêmes champs, relations, gestionnaires (pour ceux qui possèdent l’attribut <code class="docutils literal notranslate"><span class="pre">use_in_migrations</span> <span class="pre">=</span> <span class="pre">True</span></code>) et options <code class="docutils literal notranslate"><span class="pre">Meta</span></code> (également historiques, pouvant donc être différents des éléments actuels).</p>
+<div class="admonition warning">
+<p class="first admonition-title">Avertissement</p>
+<p class="last">Cela signifie que des méthodes <code class="docutils literal notranslate"><span class="pre">save()</span></code> personnalisées ne seront PAS appelées pour les objets manipulés dans les migrations, de la même manière que des constructeurs ou des méthodes d’instance personnalisées ne sont PAS accessibles. Planifiez avec précaution&nbsp;!</p>
+</div>
+<p>Les références à des fonctions dans les options de champ telles que <code class="docutils literal notranslate"><span class="pre">upload_to</span></code>, <code class="docutils literal notranslate"><span class="pre">limit_choices_to</span></code> et les déclarations de gestionnaire de modèle ayant l’attribut <code class="docutils literal notranslate"><span class="pre">use_in_migrations</span> <span class="pre">=</span> <span class="pre">True</span></code> sont sérialisées dans les migrations, ce qui fait que ces fonctions et classes doivent être conservées quelque part dans le code aussi longtemps que des migrations les référencent. Il s’agit également de conserver les <a class="reference internal" href="../howto/custom-model-fields.html"><span class="doc">champs de modèle personnalisés</span></a>, car ils sont importés directement par les migrations.</p>
+<p>De plus, les classes de base concrètes des modèles sont stockées sous forme de pointeurs, il faut donc toujours conserver ces classes de base quelque part aussi longtemps qu’une migration contient une référence vers elles. Le côté positif est que les méthodes et gestionnaires de ces classes de base héritent de façon normale, ce qui fait que si vous avez absolument besoin d’y avoir accès, une possibilité est de les déplacer dans une classe parente.</p>
+<p>Pour supprimer d’anciennes références, vous pouvez <a class="reference internal" href="#migration-squashing"><span class="std std-ref">fusionner les migrations</span></a> ou, s’il n’y a pas trop de références, les copier dans les fichiers de migration.</p>
+</div>
+<div class="section" id="s-considerations-when-removing-model-fields">
+<span id="s-migrations-removing-model-fields"></span><span id="considerations-when-removing-model-fields"></span><span id="migrations-removing-model-fields"></span><h2>Considérations lors de la suppression de champs de modèles<a class="headerlink" href="#considerations-when-removing-model-fields" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Dans le même ordre d’idée que les considérations sur les «&nbsp;références aux fonctions historiques&nbsp;» dans la section précédente, la suppression de champs de modèles personnalisés d’un projet ou d’une application tierce posera un problème si ces champs sont référencés dans d’anciennes migrations.</p>
+<p>Pour vous assister dans cette situation, Django fournit quelques attributs de champs de modèle qui peuvent aider à rendre obsolètes des champs de modèle à l’aide de l” <a class="reference internal" href="checks.html"><span class="doc">infrastructure des contrôles systèmes</span></a>.</p>
+<p>Ajoutez l’attribut <code class="docutils literal notranslate"><span class="pre">system_check_deprecated_details</span></code> au champ de modèle concerné de cette manière&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">IPAddressField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="n">system_check_deprecated_details</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;msg&#39;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s1">&#39;IPAddressField has been deprecated. Support for it (except &#39;</span>
+            <span class="s1">&#39;in historical migrations) will be removed in Django 1.9.&#39;</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;hint&#39;</span><span class="p">:</span> <span class="s1">&#39;Use GenericIPAddressField instead.&#39;</span><span class="p">,</span>  <span class="c1"># optional</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;fields.W900&#39;</span><span class="p">,</span>  <span class="c1"># pick a unique ID for your field.</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Après une période d’obsolescence de votre choix (deux ou trois versions principales pour les champs propres à Django), modifiez l’attribut <code class="docutils literal notranslate"><span class="pre">system_check_deprecated_details</span></code> en <code class="docutils literal notranslate"><span class="pre">system_check_removed_details</span></code> et mettez à jour le dictionnaire selon le modèle suivant&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">IPAddressField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="n">system_check_removed_details</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;msg&#39;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s1">&#39;IPAddressField has been removed except for support in &#39;</span>
+            <span class="s1">&#39;historical migrations.&#39;</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;hint&#39;</span><span class="p">:</span> <span class="s1">&#39;Use GenericIPAddressField instead.&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;fields.E900&#39;</span><span class="p">,</span>  <span class="c1"># pick a unique ID for your field.</span>
+    <span class="p">}</span>
+</pre></div>
+</div>
+<p>Il faut toujours conserver les méthodes de champ qui lui sont nécessaires pour fonctionner dans le contexte de migrations de base de données, telles que <code class="docutils literal notranslate"><span class="pre">__init__()</span></code>, <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code> et <code class="docutils literal notranslate"><span class="pre">get_internal_type()</span></code>. Conservez ce champ historisé aussi longtemps que des migrations le référençant existent encore. Par exemple, après avoir fusionné des migrations et effacé les anciennes, il est alors possible de supprimer complètement cet ancien champ.</p>
+</div>
+<div class="section" id="s-data-migrations">
+<span id="s-id4"></span><span id="data-migrations"></span><span id="id4"></span><h2>Migrations de données<a class="headerlink" href="#data-migrations" title="Lien permanent vers ce titre">¶</a></h2>
+<p>En plus de modifier le schéma de base de données, les migrations peuvent aussi être utilisées pour modifier les données mêmes de la base de données, conjointement avec le schéma, si vous le souhaitez.</p>
+<p>Les migrations qui modifient des données sont généralement appelées des «&nbsp;migrations de données&nbsp;»&nbsp;; il est préférable d’en faire des migrations séparées, en parallèle des migrations de schéma.</p>
+<p>Django ne sait pas générer automatiquement des migrations de données à votre place, comme il le fait pour les migrations de schéma, mais il n’est pas très compliqué de les écrire. Les fichiers de migration dans Django sont composés d”<a class="reference internal" href="../ref/migration-operations.html"><span class="doc">Operations</span></a>, et la principale opération utilisée pour les migrations de données est <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a>.</p>
+<p>Pour commencer, créez un fichier de migration vide qui constituera votre point de départ (Django place le fichier au bon endroit, suggère un nom et ajoute les dépendances pour vous)&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">manage</span><span class="o">.</span><span class="n">py</span> <span class="n">makemigrations</span> <span class="o">--</span><span class="n">empty</span> <span class="n">yourappname</span>
+</pre></div>
+</div>
+<p>Puis, ouvrez le fichier&nbsp;; il devrait ressembler à quelque chose comme ceci&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generated by Django A.B on YYYY-MM-DD HH:MM</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;yourappname&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Tout ce qu’il vous reste à faire est de créer une nouvelle fonction et de demander à <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> de l’appeler. <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> s’attend à un objet exécutable en paramètre qui accepte lui-même deux paramètres&nbsp;: le premier est un <a class="reference internal" href="../ref/applications.html"><span class="doc">registre d’applications</span></a> contenant les versions historisées de tous les modèles qui y sont chargés afin de correspondre à l’endroit où se situe la migration dans l’historique, et le second est une classe <a class="reference internal" href="../ref/schema-editor.html"><span class="doc">SchemaEditor</span></a> permettant d’effectuer manuellement des modifications de schéma de la base de données (mais prenez garde, de telles modifications pourraient embrouiller l’auto-détecteur de migrations&nbsp;!).</p>
+<p>Écrivons une migration qui remplit notre nouveau champ <code class="docutils literal notranslate"><span class="pre">name</span></code> avec les valeurs combinées de <code class="docutils literal notranslate"><span class="pre">first_name</span></code> et <code class="docutils literal notranslate"><span class="pre">last_name</span></code> (nous sommes retombés sur nos pieds et avons réalisé que tout le monde n’a pas forcément un nom et un prénom). Tout ce que nous avons à faire est d’utiliser le modèle historique et de parcourir chaque ligne&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="n">migrations</span>
+
+<span class="k">def</span> <span class="nf">combine_names</span><span class="p">(</span><span class="n">apps</span><span class="p">,</span> <span class="n">schema_editor</span><span class="p">):</span>
+    <span class="c1"># We can&#39;t import the Person model directly as it may be a newer</span>
+    <span class="c1"># version than this migration expects. We use the historical version.</span>
+    <span class="n">Person</span> <span class="o">=</span> <span class="n">apps</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="s1">&#39;yourappname&#39;</span><span class="p">,</span> <span class="s1">&#39;Person&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">Person</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">person</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">person</span><span class="o">.</span><span class="n">first_name</span><span class="p">,</span> <span class="n">person</span><span class="o">.</span><span class="n">last_name</span><span class="p">)</span>
+        <span class="n">person</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;yourappname&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">combine_names</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+<p>Une fois que c’est fait, nous pouvons lancer normalement <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">manage.py</span> <span class="pre">migrate</span></code> et la migration de données sera exécutée comme toute autre migration.</p>
+<p>Il est possible de passer un second objet exécutable à <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> pour exécuter toute logique adéquate dans le cas d’une migration inverse. Si cet objet est omis, la migration inverse générera une exception, le cas échéant.</p>
+<div class="section" id="s-accessing-models-from-other-apps">
+<span id="accessing-models-from-other-apps"></span><h3>Accèder aux modèles d’autres applications<a class="headerlink" href="#accessing-models-from-other-apps" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Lorsque vous écrivez une fonction appelée par <code class="docutils literal notranslate"><span class="pre">RunPython</span></code> et qui utilise des modèles issus d’applications autres que celle dans laquelle la migration est située, l’attribut <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> de la migration doit inclure la dernière migration de chaque application qui est en cause, sinon vous pouvez obtenir une erreur semblable à : <code class="docutils literal notranslate"><span class="pre">LookupError:</span> <span class="pre">Aucune</span> <span class="pre">application</span> <span class="pre">installée</span> <span class="pre">pour</span> <span class="pre">'myappname'</span></code> lorsque vous utilisez <code class="docutils literal notranslate"><span class="pre">apps.get_model()</span></code> pour essayer de récupérer le modèle dans la fonction appelée par <code class="docutils literal notranslate"><span class="pre">RunPython</span></code>.</p>
+<p>Dans l’exemple suivant, nous avons une migration dans <code class="docutils literal notranslate"><span class="pre">app1</span></code> qui a besoin d’utiliser des modèles dans <code class="docutils literal notranslate"><span class="pre">app2</span></code>. Nous ne sommes pas préoccupés par les détails de <code class="docutils literal notranslate"><span class="pre">move_m1</span></code> mis à part que cette fonction aura besoin d’accéder à des modèles des deux applications. Par conséquent, nous avons ajouté une dépendance qui spécifie la dernière migration de <code class="docutils literal notranslate"><span class="pre">app2</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Migration</span><span class="p">(</span><span class="n">migrations</span><span class="o">.</span><span class="n">Migration</span><span class="p">):</span>
+
+    <span class="n">dependencies</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;app1&#39;</span><span class="p">,</span> <span class="s1">&#39;0001_initial&#39;</span><span class="p">),</span>
+        <span class="c1"># added dependency to enable using models from app2 in move_m1</span>
+        <span class="p">(</span><span class="s1">&#39;app2&#39;</span><span class="p">,</span> <span class="s1">&#39;0004_foobar&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">migrations</span><span class="o">.</span><span class="n">RunPython</span><span class="p">(</span><span class="n">move_m1</span><span class="p">),</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="s-more-advanced-migrations">
+<span id="more-advanced-migrations"></span><h3>Migrations avancées<a class="headerlink" href="#more-advanced-migrations" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Si vous êtes intéressé aux opérations de migration plus avancées ou que vous voulez pouvoir écrire votre propre opération, consultez la <a class="reference internal" href="../ref/migration-operations.html"><span class="doc">référence des opérations de migration</span></a> et le guide pratique sur l”<a class="reference internal" href="../howto/writing-migrations.html"><span class="doc">écriture de migrations</span></a>.</p>
+</div>
+</div>
+<div class="section" id="s-squashing-migrations">
+<span id="s-migration-squashing"></span><span id="squashing-migrations"></span><span id="migration-squashing"></span><h2>Fusion de migrations<a class="headerlink" href="#squashing-migrations" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Il ne faut pas craindre de créer autant de migrations que nécessaire, ce n’est pas un problème. Le code de migration est optimisé pour traiter des centaines de migrations à la fois sans trop de lenteurs. Cependant, il peut arriver un moment où l’on souhaite réduire un grand nombre de migrations à juste quelques-unes, et c’est là que la fusion des migrations intervient.</p>
+<p>La fusion est l’acte de réduire un ensemble existant de nombreuses migrations à une seule (ou parfois quelques-unes) qui représente toujours les mêmes changements.</p>
+<p>Django opère cela en prenant toutes les migrations existantes, extrayant leurs opérations en les plaçant toutes à la suite, puis exécutant un optimiseur pour essayer de réduire au maximum cette liste d’opérations. Par exemple, il sait que <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.CreateModel" title="django.db.migrations.operations.CreateModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateModel</span></code></a> et <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.DeleteModel" title="django.db.migrations.operations.DeleteModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeleteModel</span></code></a> s’annulent l’une l’autre et que <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.AddField" title="django.db.migrations.operations.AddField"><code class="xref py py-class docutils literal notranslate"><span class="pre">AddField</span></code></a> peut être intégrée dans <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.CreateModel" title="django.db.migrations.operations.CreateModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateModel</span></code></a>.</p>
+<p>Une fois que la suite d’opérations a été réduite au minimum, Django écrit le résultat dans une nouvel ensemble de fichiers de migration. Ce nombre minimum dépend de la quantité de dépendances relatives entre les modèles et de la présence d’opérations <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunSQL" title="django.db.migrations.operations.RunSQL"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSQL</span></code></a> ou <a class="reference internal" href="../ref/migration-operations.html#django.db.migrations.operations.RunPython" title="django.db.migrations.operations.RunPython"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunPython</span></code></a> (qui ne peuvent pas subir d’optimisation, sauf si elles sont marquées comme <code class="docutils literal notranslate"><span class="pre">elidable</span></code>).</p>
+<p>Dans ces fichiers, il est indiqué qu’ils remplacent les migrations fusionnées précédentes, ce qui signifie qu’ils peuvent coexister avec les anciens fichiers de migration&nbsp;; Django choisit intelligemment les fichiers à prendre en compte en fonction de la position actuelle dans l’historique de migration. Si un projet n’a pas encore complètement appliqué un ensemble de migrations qui a été fusionné, Django continue d’utiliser ces anciennes migrations jusqu’au moment de la fusion, après quoi il se rattache à l’historique fusionné, tandis que de nouvelles installations du projet vont utiliser la nouvelle migration fusionnée et laisser de côté les anciennes.</p>
+<p>Cela permet de fusionner des migrations sans perturber des systèmes actuellement en production qui ne sont pas encore totalement à jour. Le processus recommandé est de fusionner, de conserver les anciens fichiers, de valider et publier le résultat, d’attendre jusqu’à ce que tous les systèmes soient mis à jour avec la nouvelle version (ou dans le cas d’une application réutilisable, s’assurer que les utilisateurs mettent à jour en suivant les versions sans en sauter), puis de supprimer les anciens fichiers, de valider et de publier une seconde version.</p>
+<p>La commande qui se charge de tout ceci est <a class="reference internal" href="../ref/django-admin.html#django-admin-squashmigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">squashmigrations</span></code></a>. Transmettez-lui l’étiquette d’application et le nom de la migration jusqu’à laquelle vous souhaitez fusionner, et elle se mettra au travail&nbsp;:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./manage.py squashmigrations myapp 0004
+Will squash the following migrations:
+ - 0001_initial
+ - 0002_some_change
+ - 0003_another_change
+ - 0004_undo_something
+Do you wish to proceed? [yN] y
+Optimizing...
+  Optimized from 12 operations to 7 operations.
+Created new squashed migration /home/andrew/Programs/DjangoTest/test/migrations/0001_squashed_0004_undo_somthing.py
+  You should commit this migration but leave the old ones in place;
+  the new migration will be used for new installs. Once you are sure
+  all instances of the codebase have applied the migrations you squashed,
+  you can delete them.
+</pre></div>
+</div>
+<p>Utilisez l’option <a class="reference internal" href="../ref/django-admin.html#cmdoption-squashmigrations-squashed-name"><code class="xref std std-option docutils literal notranslate"><span class="pre">squashmigrations</span> <span class="pre">--squashed-name</span></code></a> si vous souhaitez définir le nom de la migration fusionnée plutôt que d’utiliser le nom généré automatiquement.</p>
+<p>Sachez que les interdépendances de modèles Django peuvent devenir vraiment complexes et la fusion peut aboutir à des migrations qui ne peuvent pas être exécutées&nbsp;; il peut soit y avoir un problème d’optimisation (auquel cas vous pouvez essayer une nouvelle fois avec l’option <code class="docutils literal notranslate"><span class="pre">--no-optimize</span></code>, mais il serait aussi judicieux de signaler le problème), soit un problème d’erreur <code class="docutils literal notranslate"><span class="pre">CircularDependencyError</span></code>, et dans ce cas, vous pouvez le résoudre manuellement.</p>
+<p>Pour résoudre manuellement une erreur <code class="docutils literal notranslate"><span class="pre">CircularDependencyError</span></code>, séparez l’une des clés étrangères de la boucle de dépendances circulaires dans une migration distincte, puis déplacez la dépendance sur l’autre application qui la contient. Si vous hésitez, examinez comment <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a> s’occupe de ce problème lorsqu’on lui demande de créer de toutes nouvelles migrations à partir de vos modèles. Dans une version future de Django, <a class="reference internal" href="../ref/django-admin.html#django-admin-squashmigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">squashmigrations</span></code></a> sera mise à jour pour qu’elle puisse résoudre ces erreurs par elle-même.</p>
+<p>Après avoir fusionné les migrations, ajoutez la migration résultante en parallèle à celles qu’elle remplace et distribuez cette modification à toutes les instances en production de votre projet, en prenant soin d’exécuter chaque fois <code class="docutils literal notranslate"><span class="pre">migrate</span></code> pour enregistrer la modification dans la base de données.</p>
+<p>Vous devez alors faire passer la migration fusionnée vers une migration normale en&nbsp;:</p>
+<ul class="simple">
+<li>supprimant tous les fichiers de migration qu’elle remplace&nbsp;;</li>
+<li>mettant à jour toutes les migrations qui dépendent des migrations supprimées pour les faire dépendre de la migration fusionnée&nbsp;;</li>
+<li>enlevant l’attribut <code class="docutils literal notranslate"><span class="pre">replaces</span></code> dans la classe <code class="docutils literal notranslate"><span class="pre">Migration</span></code> de la migration fusionnée (c’est ce qui permet à Django de savoir qu’il s’agit d’une migration fusionnée).</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Après avoir créé une migration fusionnée, vous ne pouvez pas refusionner celle-ci avant d’avoir effectué la transition complète vers une migration normale.</p>
+</div>
+</div>
+<div class="section" id="s-serializing-values">
+<span id="s-migration-serializing"></span><span id="serializing-values"></span><span id="migration-serializing"></span><h2>Sérialisation de valeurs<a class="headerlink" href="#serializing-values" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Les migrations sont des fichiers Python contenant les anciennes définitions de vos modèles. Pour pouvoir les écrire, Django doit donc prendre l’état actuel des modèles et les sérialiser dans un fichier.</p>
+<p>Bien que Django puisse sérialiser la plupart des objets, il y en a certains qui ne peuvent simplement pas être sérialisés en une représentation Python valide. Il n’existe pas de standard Python permettant à une valeur d’être retransformée en code (<code class="docutils literal notranslate"><span class="pre">repr()</span></code> ne fonctionne qu’avec des valeurs basiques et ne définit pas de chemins d’importation).</p>
+<p>Django est capable de sérialiser ce qui suit&nbsp;:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">NoneType</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">list</span></code>, <code class="docutils literal notranslate"><span class="pre">set</span></code>, <code class="docutils literal notranslate"><span class="pre">tuple</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, <code class="docutils literal notranslate"><span class="pre">range</span></code>.</li>
+<li>Instances <code class="docutils literal notranslate"><span class="pre">datetime.date</span></code>, <code class="docutils literal notranslate"><span class="pre">datetime.time</span></code> et <code class="docutils literal notranslate"><span class="pre">datetime.datetime</span></code> (y compris celles qui contiennent un fuseau horaire)</li>
+<li>Instances <code class="docutils literal notranslate"><span class="pre">decimal.Decimal</span></code></li>
+<li>Instances <code class="docutils literal notranslate"><span class="pre">enum.Enum</span></code></li>
+<li>Instances <code class="docutils literal notranslate"><span class="pre">uuid.UUID</span></code></li>
+<li>instances de <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(disponible dans Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.partial()</span></code></a> et de <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partialmethod" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">functools.partialmethod</span></code></a> qui possèdent des valeurs sérialisables de <code class="docutils literal notranslate"><span class="pre">func</span></code>, <code class="docutils literal notranslate"><span class="pre">args</span></code> et <code class="docutils literal notranslate"><span class="pre">keywords</span></code>.</li>
+<li>instances <code class="docutils literal notranslate"><span class="pre">LazyObject</span></code> qui décorent une valeur sérialisable.</li>
+<li>Instances de types énumératifs (ex. <code class="docutils literal notranslate"><span class="pre">TextChoices</span></code> ou <code class="docutils literal notranslate"><span class="pre">IntegerChoices</span></code>).</li>
+<li>Tous les champs Django</li>
+<li>Toute référence de fonction ou de méthode (par ex. <code class="docutils literal notranslate"><span class="pre">datetime.datetime.today</span></code>) (doit être définie au niveau principal du module)</li>
+<li>Méthodes non liées utilisées depuis l’intérieur du corps de la classe</li>
+<li>Toute référence de classe (doit être définie au niveau principal du module)</li>
+<li>Tout objet comportant une méthode <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code> (voir <a class="reference internal" href="#custom-deconstruct-method"><span class="std std-ref">ci-dessous</span></a>)</li>
+</ul>
+<p>Django ne peut pas sérialiser&nbsp;:</p>
+<ul class="simple">
+<li>Les classes imbriquées</li>
+<li>Des instances de classe arbitraires (par ex. <code class="docutils literal notranslate"><span class="pre">MaClasse(4.3,</span> <span class="pre">5.7)</span></code>)</li>
+<li>Les fonctions lambdas</li>
+</ul>
+<div class="section" id="s-custom-serializers">
+<span id="s-custom-migration-serializers"></span><span id="custom-serializers"></span><span id="custom-migration-serializers"></span><h3>Sérialiseurs personnalisés<a class="headerlink" href="#custom-serializers" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez sérialiser d’autres types en écrivant un sérialiseur personnalisé. Par exempl, si Django ne savait pas sérialiser <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(disponible dans Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> par défaut, vous auriez pu écrire</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">decimal</span> <span class="k">import</span> <span class="n">Decimal</span>
+
+<span class="kn">from</span> <span class="nn">django.db.migrations.serializer</span> <span class="k">import</span> <span class="n">BaseSerializer</span>
+<span class="kn">from</span> <span class="nn">django.db.migrations.writer</span> <span class="k">import</span> <span class="n">MigrationWriter</span>
+
+<span class="k">class</span> <span class="nc">DecimalSerializer</span><span class="p">(</span><span class="n">BaseSerializer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="p">{</span><span class="s1">&#39;from decimal import Decimal&#39;</span><span class="p">}</span>
+
+<span class="n">MigrationWriter</span><span class="o">.</span><span class="n">register_serializer</span><span class="p">(</span><span class="n">Decimal</span><span class="p">,</span> <span class="n">DecimalSerializer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Le premier paramètre de <code class="docutils literal notranslate"><span class="pre">MigrationWriter.register_serializer()</span></code> est un type ou un itérable de types qui doivent utiliser ce sérialiseur.</p>
+<p>La méthode <code class="docutils literal notranslate"><span class="pre">serialize()</span></code> de votre sérialiseur doit renvoyer une chaîne contenant la représentation de la valeur dans les migrations et un ensemble de toute importation nécessaire dans la migration.</p>
+</div>
+<div class="section" id="s-adding-a-deconstruct-method">
+<span id="s-custom-deconstruct-method"></span><span id="adding-a-deconstruct-method"></span><span id="custom-deconstruct-method"></span><h3>Ajout d’une méthode <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code><a class="headerlink" href="#adding-a-deconstruct-method" title="Lien permanent vers ce titre">¶</a></h3>
+<p>Vous pouvez permettre à Django de sérialiser vos propres instances de classe personnalisées en définissant une méthode <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code> pour la classe. Elle n’accepte pas de paramètres et doit renvoyer un tuple de trois éléments <code class="docutils literal notranslate"><span class="pre">(path,</span> <span class="pre">args,</span> <span class="pre">kwargs)</span></code>:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">path</span></code> doit contenir le chemin Python vers la classe, avec le nom de la classe inclus en dernier (par exemple, <code class="docutils literal notranslate"><span class="pre">monapp.quelque_chose.MaClasse</span></code>). Si la classe n’est pas définie au premier niveau du module, elle ne peut pas être sérialisée.</li>
+<li><code class="docutils literal notranslate"><span class="pre">args</span></code> doit être une liste de paramètres positionnels à passer à la méthode <code class="docutils literal notranslate"><span class="pre">__init__</span></code> de la classe. Tous les éléments de cette liste doivent être eux-mêmes sérialisables.</li>
+<li><code class="docutils literal notranslate"><span class="pre">kwargs</span></code> doit être un dictionnaire de paramètres nommés à passer à la méthode <code class="docutils literal notranslate"><span class="pre">__init__</span></code> de la classe. Toutes ses valeurs doivent être elles-mêmes sérialisables.</li>
+</ul>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Cette valeur de renvoi est différente de la méthode <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code> des <a class="reference internal" href="../howto/custom-model-fields.html#custom-field-deconstruct-method"><span class="std std-ref">champs personnalisés</span></a> qui renvoie un tuple de quatre éléments.</p>
+</div>
+<p>Django écrit la valeur sous forme d’instanciation de la classe avec les paramètres donnés, de la même façon qu’il écrit les références aux champs Django.</p>
+<p>Pour éviter qu’une nouvelle migration soit créée lors de chaque exécution de <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a>, vous devriez aussi ajouter une méthode <code class="docutils literal notranslate"><span class="pre">__eq__()</span></code> à la classe décorée. Cette fonction sera appelée par le système des migrations de Django pour détecter d’éventuels changements d’état.</p>
+<p>Pour autant que tous les paramètres passés au constructeur de la classe sont eux-même sérialisables, vous pouvez utiliser le décorateur de classe <code class="docutils literal notranslate"><span class="pre">&#64;deconstructible</span></code> se trouvant dans <code class="docutils literal notranslate"><span class="pre">django.utils.deconstruct</span></code> pour ajouter la méthode <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.utils.deconstruct</span> <span class="k">import</span> <span class="n">deconstructible</span>
+
+<span class="nd">@deconstructible</span>
+<span class="k">class</span> <span class="nc">MyCustomClass</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">foo</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="n">foo</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">foo</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">foo</span>
+</pre></div>
+</div>
+<p>Ce décorateur ajoute la logique nécessaire pour capturer et préserver les paramètres lors de leur transmission au constructeur, puis renvoie ces mêmes paramètres lorsque <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code> est appelée.</p>
+</div>
+</div>
+<div class="section" id="s-supporting-multiple-django-versions">
+<span id="supporting-multiple-django-versions"></span><h2>Prendre en charge plusieurs versions de Django<a class="headerlink" href="#supporting-multiple-django-versions" title="Lien permanent vers ce titre">¶</a></h2>
+<p>Si vous êtes responsable d’une application tierce qui contient des modèles, vous devrez peut-être fournir des migrations qui prennent en charge plusieurs versions de Django. Dans ce cas, vous devez toujours exécuter <a class="reference internal" href="../ref/django-admin.html#django-admin-makemigrations"><code class="xref std std-djadmin docutils literal notranslate"><span class="pre">makemigrations</span></code></a> <strong>avec le plus bas niveau de version de Django vous souhaitez prendre en charge</strong>.</p>
+<p>Le système de migrations maintiendra la compatibilité ascendante selon la même politique que le reste de Django, afin que les fichiers de migration générées sur Django X.Y devraient fonctionner sans modification sur Django X.Y+1. Cependant, le système des migrations ne promet pas de compatibilité descendante. De nouvelles fonctionnalités peuvent être ajoutées, et les fichiers de migration générés avec les nouvelles versions de Django pourront ne pas fonctionner sur les anciennes versions.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">Voir aussi</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="../ref/migration-operations.html"><span class="doc">La référence des opérations de migration</span></a></dt>
+<dd>Documente l’API des opérations de schéma, les opérations spéciales ainsi que l’écriture de ses propres opérations.</dd>
+<dt><a class="reference internal" href="../howto/writing-migrations.html"><span class="doc">Le guide pratique sur l’écriture de migrations</span></a></dt>
+<dd>Présente la façon de structurer et d’écrire des migrations de base de données pour différents scénarios auxquels vous pourriez être confrontés.</dd>
+</dl>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      
+        
+          <div class="yui-b" id="sidebar">
+            
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../contents.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Migrations</a><ul>
+<li><a class="reference internal" href="#the-commands">Les commandes</a></li>
+<li><a class="reference internal" href="#backend-support">Bases de données prises en charge</a><ul>
+<li><a class="reference internal" href="#postgresql">PostgreSQL</a></li>
+<li><a class="reference internal" href="#mysql">MySQL</a></li>
+<li><a class="reference internal" href="#sqlite">SQLite</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#workflow">Procédures</a><ul>
+<li><a class="reference internal" href="#version-control">Contrôle de versions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transactions">Transactions</a></li>
+<li><a class="reference internal" href="#dependencies">Dépendances</a></li>
+<li><a class="reference internal" href="#migration-files">Fichiers de migrations</a><ul>
+<li><a class="reference internal" href="#custom-fields">Champs personnalisés</a></li>
+<li><a class="reference internal" href="#model-managers">Gestionnaires de modèles</a></li>
+<li><a class="reference internal" href="#initial-migrations">Migrations initiales</a></li>
+<li><a class="reference internal" href="#history-consistency">Cohérence de l’historique</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-migrations-to-apps">Ajout de migrations aux applications</a></li>
+<li><a class="reference internal" href="#reversing-migrations">Inversion des migrations</a></li>
+<li><a class="reference internal" href="#historical-models">Modèles historiques</a></li>
+<li><a class="reference internal" href="#considerations-when-removing-model-fields">Considérations lors de la suppression de champs de modèles</a></li>
+<li><a class="reference internal" href="#data-migrations">Migrations de données</a><ul>
+<li><a class="reference internal" href="#accessing-models-from-other-apps">Accèder aux modèles d’autres applications</a></li>
+<li><a class="reference internal" href="#more-advanced-migrations">Migrations avancées</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#squashing-migrations">Fusion de migrations</a></li>
+<li><a class="reference internal" href="#serializing-values">Sérialisation de valeurs</a><ul>
+<li><a class="reference internal" href="#custom-serializers">Sérialiseurs personnalisés</a></li>
+<li><a class="reference internal" href="#adding-a-deconstruct-method">Ajout d’une méthode <code class="docutils literal notranslate"><span class="pre">deconstruct()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supporting-multiple-django-versions">Prendre en charge plusieurs versions de Django</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Sujet précédent</h4>
+  <p class="topless"><a href="class-based-views/mixins.html"
+                        title="Chapitre précédent">Utilisation de mixins avec les vues fondées sur les classes</a></p>
+  <h4>Sujet suivant</h4>
+  <p class="topless"><a href="files.html"
+                        title="Chapitre suivant">Gestion des fichiers</a></p>
+  <div role="note" aria-label="source link">
+    <h3>Cette page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/topics/migrations.txt"
+            rel="nofollow">Montrer le code source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Recherche rapide</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+              <h3>Last update:</h3>
+              <p class="topless">oct. 29, 2020</p>
+          </div>
+        
+      
+    </div>
+
+    <div id="ft">
+      <div class="nav">
+    &laquo; <a href="class-based-views/mixins.html" title="Utilisation de mixins avec les vues fondées sur les classes">previous</a>
+     |
+    <a href="index.html" title="Utilisation de Django" accesskey="U">up</a>
+   |
+    <a href="files.html" title="Gestion des fichiers">next</a> &raquo;</div>
+    </div>
+  </div>
+
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
